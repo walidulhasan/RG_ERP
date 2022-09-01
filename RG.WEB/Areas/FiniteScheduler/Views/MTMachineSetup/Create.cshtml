@@ -1,0 +1,299 @@
+﻿@model RG.Application.ViewModel.FiniteScheduler.Setup.MTMachineSetup.MT_Machine_SetupVM
+
+@{
+    ViewData[PageInfo.PageTitle] = "Create";
+    ViewData[PageInfo.PageHeader] = "Machine Create";    
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<form asp-action="Create" asp-area="FiniteScheduler" asp-controller="MTMachineSetup" method="post" id="FrmMachineSetup">
+    <div class="row">
+        <div class="col-md-3">
+            <div class="form-group">
+                <input type="hidden" asp-for="MachineID" />
+                <label asp-for="CompanyID" class="required"></label>
+                <select asp-for="CompanyID" class="form-control form-control-sm" asp-items="Model.DDLCompany"></select>
+                <span asp-validation-for="CompanyID" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="form-group">
+                <label asp-for="LocationID" class="required"></label>
+                <select asp-for="LocationID" class="form-control form-control-sm" asp-items="Model.DDLLocation"></select>
+                <span asp-validation-for="LocationID" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="form-group">
+                <label asp-for="MachineGroupID" class="label-ajt-sm"></label>
+                <select asp-for="MachineGroupID" class="form-control form-control-sm" asp-items="Model.DDLMachineGroup"></select>
+                <span asp-validation-for="MachineGroupID" class="text-danger"></span>
+            </div>
+        </div>
+
+
+    </div>
+
+    <div class="row">
+        @*<div class="col-md-3">
+                <div class="form-group">
+                    <label asp-for="CheckedDate" class="label-ajt-sm"></label>
+                    <input type="text" name="CheckedDate" asp-for="CheckedDate" readonly class="form-control form-control-sm dateField" />
+                    <span asp-validation-for="CheckedDate" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label asp-for="NextCheckDate" class="label-ajt-sm"></label>
+                    <input type="text" name="NextCheckDate" asp-for="NextCheckDate" readonly class="form-control form-control-sm dateField" />
+                    <span asp-validation-for="NextCheckDate" class="text-danger"></span>
+                </div>
+            </div>*@
+        <div class="col-md-3">
+            <div class="form-group">
+                <label asp-for="MachineName" class="required"></label>
+                <input asp-for="MachineName" class="form-control form-control-sm" autocomplete="off" placeholder="Enter Machine Name" />
+                <span asp-validation-for="MachineName" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="form-group">
+                <label asp-for="MachineCode" class="required"></label>
+                <input asp-for="MachineCode" class="form-control form-control-sm" autocomplete="off" placeholder="Enter Machine Code" />
+                <span asp-validation-for="MachineCode" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="form-group">
+                <label asp-for="MinMaintainceDurationDays" class=""></label>
+                <select asp-for="MinMaintainceDurationDays" class="form-control form-control-sm" asp-items="Model.DDLMinMaintainceDurationDays"></select>
+                <span asp-validation-for="MinMaintainceDurationDays" class="text-danger"></span>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-3">
+            <div class="form-group">
+                <button type="button" class="btn btn-sm btn-success" id="btnSave">Save</button>
+            </div>
+        </div>
+    </div>
+</form>
+<div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <div id="grid">
+        </div>
+    </div>
+</div>
+@section Scripts{
+    <script type="text/javascript">
+        $(function () {
+            // GetMachineList();
+
+            $("#CompanyID").change(function () {
+                let companyID = $("#CompanyID").val();
+                if (companyID != "") {
+                    HttpRequest.DropDown("GET", "/FiniteScheduler/CommonDropDown/GetDDLCompanyWiseLocation", { "companyID": companyID }, "LocationID", "");
+                }
+                GetMachineList();
+            });
+            $("#LocationID,#MachineGroupID").change(function () {
+                GetMachineList();
+            });
+            $("#CompanyID").trigger("change");
+
+
+            $("#btnSave").click(function () {
+                debugger
+                let machineID = $("#MachineID").val();
+                if ($("#FrmMachineSetup").valid()) {
+                    let locationID = $("#LocationID").val();
+                    let machineName = $("#MachineName").val();
+                    let machineCode = $("#MachineCode").val();
+                    let machineGroupID = $("#MachineGroupID").val();
+                    //let checkedDate = $("#CheckedDate").val();
+                    //let nextCheckDate = $("#NextCheckDate").val();
+                    let minMaintainceDurationDays = $("#MinMaintainceDurationDays").val();
+
+                    var machineObj = {
+                        MachineID: machineID,
+                        LocationID: locationID,
+                        MachineName: machineName,
+                        MachineCode: machineCode,
+                        MachineGroupID: machineGroupID,
+                        //CheckedDate: checkedDate,
+                        //NextCheckDate: nextCheckDate,
+                        MinMaintainceDurationDays: minMaintainceDurationDays
+                    }
+                    if (machineObj.MachineID > 0) {
+                        HttpRequest.Ajax("PUT", '/FiniteScheduler/MTMachineSetup/Update', { "dtm": machineObj }, saveSuccess, true);
+                    } else {
+                        HttpRequest.Ajax("POST", '/FiniteScheduler/MTMachineSetup/Create', { "dtm": machineObj }, saveSuccess, true);
+                    }
+                }
+            });
+
+
+        })
+        function saveSuccess(data) {
+
+            if (data.result == 1) {
+                $.alert.open({
+                    type: 'Success',
+                    content: data.message,
+                    callback: function () {
+                       Clear();
+                       GetMachineList();
+                    }
+                });
+            }
+            else {
+                $.alert.open("error", data.message);
+
+            }
+        }
+
+        function Clear() {
+            $("#MachineID").val("");
+            $("#LocationID").val("");
+            $("#MachineName").val("");
+            $("#MachineCode").val("");
+            $("#CheckedDate").val("");
+            $("#NextCheckDate").val("");
+            $("#MinMaintainceDurationDays").val("");
+            $("#CompanyID").val("");
+        }
+
+
+
+        function GetMachineList() {
+            let companyID = $("#CompanyID").val();
+            let locationID = $("#LocationID").val();
+            let machineGroupID = $("#MachineGroupID").val();
+
+            var dataGrid = $("#grid").dxDataGrid({
+                height: 450,
+                remoteOperations: { paging: true, filtering: true, sorting: true, grouping: true, summary: true, groupPaging: true },
+                dataSource: DevExpress.data.AspNet.createStore({
+                    key: "MachineID",
+                    loadUrl: "/FiniteScheduler/MTMachineSetup/GetMachineList",
+                    loadParams: {
+                        companyID: companyID,
+                        locationID: locationID,
+                        machineGroupID: machineGroupID
+                    }
+                }),
+                hoverStateEnabled: true,
+
+                showBorders: true,
+                columnAutoWidth: true,
+                filterRow: { visible: true },
+                pager: { visible: true, showInfo: true, allowedPageSizes: [10, 20, 50, 100, 500], showPageSizeSelector: true, },
+                paging: { pageSize: 10 },
+                selection: { mode: 'single' },
+                export: {
+                    //   enabled: true
+                },
+                columns: [
+                    {
+                        width: "auto",
+                        caption: "SL #",
+                        alignment: 'center',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        },
+                        cellTemplate: function (container, e) {
+                            var index = dataGrid.pageIndex() * dataGrid.pageSize() + e.rowIndex + 1;
+                            container.text(index);
+                        }
+
+                    },
+                    {
+                        dataField: "MachineID",
+                        visible: false,
+
+                    },
+
+                    {
+                        dataField: "LocationName",
+                        alignment: 'center',
+                        caption: 'Location',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+
+                    },
+                    {
+                        dataField: "MachineGroup",
+                        alignment: 'center',
+                        caption: 'Machine Group',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                    }
+
+                    },
+                    {
+                        dataField: "MachineName",
+                        alignment: 'center',
+                        caption: 'Machine',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+
+                    },
+                    {
+                        dataField: "MachineCode",
+                        alignment: 'center',
+                        caption: 'MachineCode',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+
+                    },
+
+                    {
+                        caption: 'Action',
+                        alignment: 'center',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        },
+                        cellTemplate: function (container, options) {
+
+                            var returnText = '<button class="btn btn-xs btn-warning"><i class="fa fa-edit"></i> Edit</button>';
+                            //$(returnText).appendTo(container);
+                            $(returnText).on('dxclick', function () {
+                                EditMachine(options.data);
+                            }).appendTo(container);
+
+                            var returnText = '<span>&nbsp</span><button class="btn btn-xs btn-danger"><i class="fa fa-trash"></i> Delete</button>';
+                            returnText = returnText + '</div>';
+                            $(returnText).on('dxclick', function () {
+                                DeleteRow(options.data.MachineID);
+                            }).appendTo(container);
+                        }
+                    }
+                ]
+
+            }).dxDataGrid("instance");
+        }
+        function DeleteRow(machineID) {
+            $.alert.open('confirm', 'Are you sure to delete this record?', function (button) {
+                if (button == 'yes')
+                    HttpRequest.Ajax("PUT", '/FiniteScheduler/MTMachineSetup/Remove', { "machineID": machineID }, saveSuccess, true);
+            });
+        }
+        function EditMachine(data) {
+            debugger
+            $("#CompanyID").val(data.CompanyID).trigger("change");
+            $("#MachineID").val(data.MachineID);
+            $("#LocationID").val(data.LocationID);
+            $("#MachineName").val(data.MachineName);
+            $("#MachineCode").val(data.MachineCode);
+            $("#MachineGroupID").val(data.MachineGroupID);
+            $("#MinMaintainceDurationDays").val(data.MinMaintainceDurationDays);
+        }
+    </script>
+
+}
+
+

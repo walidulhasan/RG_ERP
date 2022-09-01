@@ -1,0 +1,309 @@
+﻿@model RG.Application.ViewModel.AlgoHR.Business.EmployeeAttendance.MyAttendanceInfoVM
+@{
+    ViewData[PageInfo.PageTitle] = "Employee Attendance";
+    ViewData[PageInfo.PageHeader] = "Employee Attendance";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="row">
+    <div class="col-6 col-sm-3 col-xs-6">
+        <div class="form-group mb-2">
+            <label asp-for="EmployeeCode" class=""></label>
+            <input type="text" asp-for="EmployeeCode" id="EmpCode" class="form-control form-control-sm" readonly />
+            <input type="hidden" asp-for="EmployeeID" />
+        </div>
+    </div>
+    <div class="col-6 col-sm-3 col-xs-6">
+        <div class="form-group mb-2">
+            <label asp-for="EmployeeName" class=""></label>
+            <input type="text" asp-for="EmployeeName" class="form-control form-control-sm" readonly />
+        </div>
+    </div>
+    <div class="col-6 col-sm-3 col-xs-6">
+        <div class="form-group mb-2">
+            <label asp-for="CompanyName" class=""></label>
+            <input type="text" asp-for="CompanyName" class="form-control form-control-sm" readonly />
+        </div>
+    </div>
+    <div class="col-6 col-sm-3 col-xs-6">
+        <div class="form-group mb-2">
+            <label asp-for="DivisionName" class=""></label>
+            <input type="text" asp-for="DivisionName" class="form-control form-control-sm" readonly />
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-6 col-sm-3 col-xs-6">
+        <div class="form-group mb-2">
+            <label asp-for="DepartmentName" class=""></label>
+            <input type="text" asp-for="DepartmentName" class="form-control form-control-sm" readonly />
+        </div>
+    </div>
+    <div class="col-6 col-sm-3 col-xs-6">
+        <div class="form-group mb-2">
+            <label asp-for="SectionName" class=""></label>
+            <input type="text" asp-for="SectionName" class="form-control form-control-sm" readonly />
+        </div>
+    </div>
+    <div class="col-6 col-sm-3 col-xs-6">
+        <div class="form-group mb-2">
+            <label asp-for="Designation" class=""></label>
+            <input type="text" asp-for="Designation" class="form-control form-control-sm" readonly />
+        </div>
+    </div>
+    <div class="col-6 col-sm-3 col-xs-6">
+        <div class="form-group mb-2">
+            <label asp-for="AppointmentDate" class=""></label>
+            <input type="text" asp-for="AppointmentDate" class="form-control form-control-sm" readonly />
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-4 col-sm-3 col-md-3 col-xs-4">
+        <div class="form-group">
+            <label asp-for="AttendanceStatus"></label>
+            <select class="form-control form-control-sm" asp-for="AttendanceStatus" multiple asp-items="Model.DDLAttendanceStatus">
+            </select>
+            <span asp-validation-for="AttendanceStatus" class="text-danger"></span>
+        </div>
+    </div>
+    <div class="col-8 col-sm-3 col-md-4 col-xs-8">
+        <div class="form-group">
+            <label class="">Date Duration</label>
+            <div class="input-group">
+                <input type="text" class="form-control form-control-sm dateField text-center readonlyNormal" readonly asp-for="DateFrom">
+                <div class="input-group-addon">&nbsp;&nbsp; To &nbsp;&nbsp;</div>
+                <input type="text" class="form-control form-control-sm dateField text-center readonlyNormal" readonly asp-for="DateTo">
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row pt-1 justify-content-center">
+    <button type="button" class="btn btn-sm btn-primary" onclick="ShowMyEmployeeAttendance()">Search</button>
+    &nbsp;&nbsp;&nbsp;&nbsp;
+    @*<button type="button" id="btnPDF" class="btn btn-sm btn-danger">PDF</button>*@
+</div>
+
+<div class="row mt-1">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <div class="table-responsive-sm" id="grid">
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script type="text/javascript">
+        function getSelect2MultipleSelection(htmlControlId) {
+            let returnValue = new Array();
+            let selectedValue = $(`#${htmlControlId}`).val();
+            $.each(selectedValue, function (i, v) {
+                let values = v.split(',');
+                if (values == null) return returnValue;
+                $.each(values, function (j, k) {
+                    if (k != "") {
+                        returnValue.push(k);
+                    }
+                    
+                });
+            });
+            return returnValue;
+        }
+
+        function GetEmployeeShortInfo() {
+            let employeeCode = '@Model.EmployeeCode';
+
+            if (employeeCode != "") {
+                let empInfo = HttpRequest.AjaxData('GET', '/AlgoHR/EmployeeLeave/GetEmployeeShortInfo', { employeeCode: employeeCode });
+                if (empInfo != null) {
+                    $("#EmployeeID").val(empInfo.EmployeeID);
+                    $("#EmpCode").val(empInfo.EmployeeCode);
+                    $("#EmployeeName").val(empInfo.EmployeeName);
+                    $("#CompanyName").val(empInfo.CompanyName);
+                    $("#DivisionName").val(empInfo.DivisionName);
+
+                    $("#DepartmentName").val(empInfo.DepartmentName);
+                    $("#SectionName").val(empInfo.SectionName);
+                    $("#Designation").val(empInfo.DesignationName);
+                    $("#AppointmentDate").val(empInfo.Emp_Appointment);
+
+                    HttpRequest.DropDownCustom('GET', '/AlgoHR/EmployeeLeave/GetDDLCustomEmpLeaves', { employeeID: empInfo.EmployeeID, employeeCode: employeeCode }, 'LeaveID');
+                }
+            }
+        }
+
+        function ShowMyEmployeeAttendance() {
+            
+            let EmployeeCode = $("#EmployeeCode").val();
+            const _AttendanceStatus = getSelect2MultipleSelection("AttendanceStatus"); // $("#AttendanceStatus").val();
+            const AttendanceStatus = _AttendanceStatus.length == 0 || _AttendanceStatus == null ? "" : _AttendanceStatus.toString();
+            let DateFrom = $("#DateFrom").val();
+            let DateTo = $("#DateTo").val();
+
+            const parmObject = {
+                AttendanceStatus: AttendanceStatus,
+                DateFrom: DateFrom,
+                DateTo: DateTo
+            };
+
+            var attendanceGrid = $("#grid").dxDataGrid({
+                height: 930,
+                dataSource: DevExpress.data.AspNet.createStore({
+                    key: ["Serial"],
+                    loadUrl: "/AlgoHR/EmployeeAttendance/GetMyAttendanceData",
+                    loadParams: parmObject
+                }),
+                remoteOperations: {
+                    paging: true,
+                    sorting: true,
+                    filtering: true,
+                },
+                showBorders: true,
+                paging: {
+                    enabled: true,
+                    pageSize: 31
+                },
+                pager: {
+                    showPageSizeSelector: true,
+                    allowedPageSizes: [31, 62, 100,"All"],
+                    showInfo: true
+                },
+        
+                columns: [
+                    {
+                        width: "50",
+                        caption: "SL#",
+                        alignment: 'center',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        },
+                        cellTemplate: function (container, e) {
+                            
+                            var index = e.rowIndex + 1;
+                            container.text(index);
+                        }
+                    },
+                    {
+                        dataField: "EmployeeCode",
+                        caption: "Code",
+                        width: "85",
+                        alignment: "center",
+                        hidingPriority: 0,
+                        
+                    },
+                    {
+                        dataField: "EmployeeName",
+                        caption: "Name",
+                        alignment: "center",
+                        hidingPriority: 1,
+                
+                    }, {
+                        dataField: "Status",
+                        caption: "Status",
+                        alignment: "center",
+                        width: "140",
+                    },
+                    {
+                        dataField: "DaysName",
+                        caption: "Day",
+                        alignment: "center",
+                        width: "50",
+               
+                    },
+                    {
+                        dataField: "AttendanceDateST",
+                        caption: "Att. Date",
+                        alignment: "center",
+                        width: "85",
+                    },
+                    {
+                        dataField: "ShiftName",
+                        caption: "Shift", 
+                        alignment: "center",
+                        hidingPriority: 2
+
+                    },
+                    {
+                        dataField: "ShiftInTime",
+                        caption: "Shift In",
+                        alignment: "center",
+                        width: "70",
+                    },
+                    {
+                        dataField: "AttendanceInTime",
+                        caption: "In Time",
+                        alignment: "center",
+                        width: "70",
+                    },
+                    {
+                        dataField: "AttendanceOutTime",
+                        caption: "Out Time",
+                        alignment: "center",
+                        width: "70",
+                        hidingPriority: 3,
+                    },
+                    {
+                        dataField: "Late",
+                        caption: "Late Minutes",
+                        alignment: "center",
+                        width: "70",
+                        
+                    }
+                ],
+                onRowPrepared: function (e) {
+
+                    if (e.rowType !== "data")
+                        return;
+                    if (e.data.Status =="Half Day") {
+                        e.rowElement.find("td").css('background', '#A9A9A9');
+                        //e.rowElement.css("background-color", "green");
+                        e.rowElement.css("color", "#111");
+                    }
+                    else if (e.data.Status == "Absent") {
+                        e.rowElement.find("td").css('background', '#A52A2A');
+                        //e.rowElement.css("background-color", "green");
+                        e.rowElement.css("color", "#fff");
+                    }
+                    else if (e.data.Status == "Weekday" || e.data.Status == "Holiday") {
+                        e.rowElement.find("td").css('background', '#2E8B57');
+                        //e.rowElement.css("background-color", "green");
+                        e.rowElement.css("color", "#ffa");
+                    }
+                    else if (e.data.Status!=null && e.data.Status.includes("Leave")) {
+                        e.rowElement.find("td").css('background', '#9370DB');
+                        //e.rowElement.css("background-color", "green");
+                        e.rowElement.css("color", "#fff");
+                    }
+                    
+                    
+                },
+                onCellPrepared: function (e) {
+                    if (e.rowType === "data" && e.column.dataField === "Late") {
+                     
+                        var lateMin = e.data.Late;
+                        if (lateMin != null && parseFloat(lateMin) < 0) {
+                           // e.cellElement.css("background-color","Tomato"); 
+                            e.cellElement.addClass('bg-danger bg-gradient');
+                        }
+                      //  e.cellElement.css("background-color", e.data.Color.color);
+                    }
+                },
+                groupPanel: { visible: false },
+                filterRow: { visible: false },
+                headerFilter: { visible: false },
+           }).dxDataGrid('instance');
+
+        }
+
+        $(function () {
+            GetEmployeeShortInfo();
+            $("#AttendanceStatus").select2({ theme: 'bootstrap4' });
+            //$("#").click(function () {
+            //    ShowMyEmployeeAttendance();
+            //})
+        });
+
+    </script>
+
+
+}

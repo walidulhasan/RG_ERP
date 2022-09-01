@@ -1,0 +1,768 @@
+﻿@using RG.Application.Common.CommonInterfaces;
+
+@inject IAntiforgery antiForgeryToken
+@inject ICurrentUserService _currentUserService
+
+@model RG.Application.ViewModel.MaterialsManagement.Business.GatePass.LocalSalesVCVM
+@{
+    var token = antiForgeryToken.GetAndStoreTokens(Context);
+    string isSelfVehicle = Model.isSelfVehicle == true ? "checked" : "";
+    int sessionCompanyID = _currentUserService.CompanyID;
+
+}
+<style type="text/css">
+    .myFont {
+        font-size: 4px;
+    }
+</style>
+<div class="row m-0">
+    <input type="hidden" id="hdnGatePassID" asp-for="GatePassID" />
+    <div class="col-sm-3 col-md-3 col-lg-3">
+        <div class="form-group">
+            <label class="col-form-label-sm m-0 required" asp-for="DepartmentID"></label>
+            <select asp-for="DepartmentID" asp-items="Model.DepartmentList" class="form-control form-control-sm"></select>
+            <span asp-validation-for="DepartmentID" class="span-form-validation"></span>
+        </div>
+    </div>
+    <div class="col-sm-5 col-md-5 col-lg-5">
+        <div class="form-group">
+            <label class="col-form-label-sm m-0 required" asp-for="CustomerID"></label>
+            <select asp-for="CustomerID" asp-items="Model.CustomerList" class="form-control form-control-sm"></select>
+            <span asp-validation-for="CustomerID" class="span-form-validation"></span>
+        </div>
+    </div>
+    <div class="col-sm-2 col-md-2 col-lg-2">
+        <div class="form-group">
+            <label class="col-form-label-sm m-0" asp-for="VehicleNo"></label>
+            <input type="text" class="form-control form-control-sm" asp-for="VehicleNo" placeholder="Vehicle No" autocomplete="off">
+            <span asp-validation-for="VehicleNo" class="span-form-validation"></span>
+        </div>
+    </div>
+    <div class="col-sm-2 col-md-2 col-lg-2">
+        <label class="col-form-label-sm m-0">&nbsp;</label>
+        <div class="form-group">
+            <input type="checkbox" id="IsOwnVehicle" @isSelfVehicle /><span style="font-size:12px; font-weight:bold;"> Is customer's own vehicle</span>
+        </div>
+    </div>
+</div>
+<div class="row m-0">
+    <div class="col-sm-12 col-md-12 col-lg-12 text-right">
+        <div class="form-group">
+            <input type="button" class="btn btn-xs btn-success" id="AddNewItem" value="Add New Item" data-toggle="modal" data-target="#itemModal" />
+        </div>
+    </div>
+</div>
+
+
+
+<div class="row m-0">
+    <div class="col-sm-12 col-md-12 col-lg-12">
+        <table class="table table-sm table-bordered table-striped text-center text-xs" id="tblItem">
+            <thead class="bg-dark">
+                <tr>
+                    <td>SL#</td>
+                    <td>Process</td>
+                    <td>Order No</td>
+                    <td>Work Order #</td>
+                    <td>Item</td>
+                    <td>Process Code</td>
+                    <td>Color/ Finish Code</td>
+                    <td>Qty</td>
+                    <td>UOM</td>
+                    <td>Rate</td>
+                    <td>Net Weight</td>
+                    <td>Gross Weight</td>
+                    <td>Roll Count</td>
+                    <td>Remarks</td>
+                    <td style="width:60px;">Action</td>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.GatePassID > 0)
+                {
+                    var sl = 1;
+                    foreach (var item in Model.LocalSalesItems)
+                    {
+                        <tr data-id="@item.ID">
+                            <td class='trSerial'>@(sl++)</td>
+                            <td><input type="hidden" class="hdnProcessId" value="@item.ProcessId" />@item.ProcessName</td>
+                            <td><input type="hidden" class="hdnOrderID" value="@item.OrderID" /><input type="hidden" class="hdnOrderName" value="@item.OrderName" /> @item.OrderName</td>
+                            <td><input type="hidden" class="hdnWorkOrderNo" value="@item.WorkOrderNo" /><input type="hidden" class="hdnPaymentMode" value="@item.PaymentMode" />@item.WorkOrderNo</td>
+                            <td><input type="hidden" class="hdnReceivedChallanNo" value="${@item.RefNo}" /><input type="hidden" class="hdnItemType" value="@item.ItemDetail" />@item.ItemDetail</td>
+                            <td><input type="hidden" class="hdnGreigeWidth" value="${@item.GreigeWidth}" /><input type="hidden" class="hdnProcessCode" value="@item.ProcessCode" />@item.ProcessCode</td>
+                            <td><input type="hidden" class="hdnFinishedWidth" value="${@item.FinishedWidth}" /><input type="hidden" class="hdnColorFinishCode" value="@item.FinishCode" />@item.FinishCode</td>
+                            <td><input type="hidden" class="hdnQuantity" value="@item.Quantity" />@item.Quantity</td>
+                            <td><input type="hidden" class="hdnUnitOfMeasurement" value="@item.UnitID" />@item.UnitOfMeasurement</td>
+                            <td><input type="hidden" class="hdnRate" value="@item.Rate" />@item.Rate</td>
+                            <td><input type="hidden" class="hdnNetWeight" value="@item.NetWeight" />@item.NetWeight</td>
+                            <td><input type="hidden" class="hdnGrossWeight" value="@item.GrossWeight" />@item.GrossWeight</td>
+                            <td><input type="hidden" class="hdnRollNo" value="@item.RollCount" />@item.RollCount</td>
+                            <td><input type="hidden" class="hdnRemarks" value="@item.Remarks" />@item.Remarks</td>
+                            <td>
+                                <button type="button" class="btn btn-xs btn-warning" onclick="FillupPopupData('@Model.CustomerID', '@item.ID')" data-toggle="modal" data-target="#itemModal"><i class="fas fa-external-link-alt"></i></button>
+                                <button type="button" class="btn btn-xs btn-danger" onclick="RemoveRow(this,'@item.ID')"><i class="fa fa-trash" aria-hidden="true"></i></button>
+                            </td>
+                        </tr>
+                    }
+                }
+
+            </tbody>
+            <tfoot>
+                <tr><td colspan="14" class="text-center"><input type="button" class="btn btn-sm btn-success" id="btnLocalSales" value="Save" /></td></tr>
+            </tfoot>
+        </table>
+    </div>
+</div>
+<div class="modal fade" id="itemModal" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-header p-2">
+                <h5 class="modal-title" id="exampleModalLabel">Local Sales Item</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="hdnGatePassDetailID" value="0" />
+                <input type="hidden" id="hdnPM" value="0" />
+
+                <div class="row m-0">
+                    <div class="col-sm-3 col-md-3 col-lg-3">
+                        <div class="form-group">
+                            <label class="col-form-label-sm m-0 required" asp-for="Process"></label>
+                            <select asp-for="Process" asp-items="Model.ProcessList" class="form-control form-control-sm"></select>
+                            <span asp-validation-for="Process" class="span-form-validation"></span>
+                        </div>
+                    </div>
+                    <div class="col-sm-3 col-md-3 col-lg-3 d-none divOrder">
+                        <div class="form-group">
+                            <label class="col-form-label-sm m-0 required" asp-for="OrderID"></label>
+                            <br /><select asp-for="OrderID" asp-items="Model.OrderList" class="form-control form-control-sm" style="width: 100%"></select>
+                            <span asp-validation-for="OrderID" class="span-form-validation"></span>
+                        </div>
+                    </div>
+                    <div class="col-sm-3 col-md-3 col-lg-3 divIssuance">
+                        <div class="form-group">
+                            <label class="col-form-label-sm m-0 required" asp-for="IssuanceNo"></label>
+                            <br /><select asp-for="IssuanceNo" asp-items="Model.IssuanceList" class="form-control form-control-sm" style="width: 100%"></select>
+                            <span asp-validation-for="IssuanceNo" class="span-form-validation"></span>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-md-6 col-lg-6 divIssuanceDetail">
+                        <div class="form-group">
+                            <label class="col-form-label-sm m-0 required" asp-for="IssuanceDetailID"></label>
+                            <br /><select asp-for="IssuanceDetailID" asp-items="Model.IssuanceDetailList" class="form-control form-control-sm"></select>
+                            <span asp-validation-for="IssuanceDetailID" class="span-form-validation"></span>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="row m-0">
+                    <div class="col-sm-3 col-md-3 col-lg-3">
+                        <div class="form-group">
+                            <label class="col-form-label-sm m-0" asp-for="WorkOrderNo"></label>
+                            <input type="text" class="form-control form-control-sm txtSewingSubContract" asp-for="WorkOrderNo" placeholder="Work Order No" readonly>
+                            <span asp-validation-for="WorkOrderNo" class="span-form-validation"></span>
+                            <input type="hidden" asp-for="PaymentMode" />
+                        </div>
+                    </div>
+                    <div class="col-sm-5 col-md-5 col-lg-5">
+                        <div class="form-group">
+                            <label class="col-form-label-sm m-0" asp-for="ItemName"></label>
+                            <input type="text" class="form-control form-control-sm txtSewingSubContract" asp-for="ItemName" placeholder="Item Name" readonly>
+                            <span asp-validation-for="ItemName" class="span-form-validation"></span>
+                        </div>
+                    </div>
+                    <div class="col-sm-2 col-md-2 col-lg-2">
+                        <div class="form-group">
+                            <label class="col-form-label-sm m-0" asp-for="ReceivedChallanNo"></label>
+                            <input type="text" class="form-control form-control-sm txtReceivedChallanNo" asp-for="ReceivedChallanNo" readonly>
+                            <span asp-validation-for="ReceivedChallanNo" class="span-form-validation"></span>
+                        </div>
+                    </div>
+                    <div class="col-sm-2 col-md-2 col-lg-2 d-none divDDLPaymentMode">
+                        <div class="form-group">
+                            <label class="col-form-label-sm m-0" asp-for="PMDescription"></label>
+                            <select id="PaymentModeID" asp-items="Model.DDLPaymentMode" class="form-control form-control-sm ddlSewingSubContract" disabled></select>
+
+                        </div>
+                    </div>
+                    <div class="col-sm-2 col-md-2 col-lg-2 divTxtPaymentMode">
+                        <div class="form-group">
+                            <label class="col-form-label-sm m-0" asp-for="PMDescription"></label>
+                            <input type="text" class="form-control form-control-sm" asp-for="PMDescription" placeholder="Payment Mode" readonly>
+                            <span asp-validation-for="PMDescription" class="span-form-validation"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row m-0">
+                    <div class="col-sm-3 col-md-3 col-lg-3 notForSubContract">
+                        <div class="form-group">
+                            <label class="col-form-label-sm m-0" asp-for="ProcessCode"></label>
+                            <input type="text" class="form-control form-control-sm txtSewingSubContract" asp-for="ProcessCode" placeholder="Process Code" readonly>
+                            <span asp-validation-for="ProcessCode" class="span-form-validation"></span>
+                        </div>
+                    </div>
+                    <div class="col-sm-3 col-md-3 col-lg-3 notForSubContract">
+                        <div class="form-group">
+                            <label class="col-form-label-sm m-0" asp-for="FinishCode"></label>
+                            <input type="text" class="form-control form-control-sm txtSewingSubContract" asp-for="FinishCode" placeholder="Finish Code" readonly>
+                            <span asp-validation-for="FinishCode" class="span-form-validation"></span>
+                        </div>
+                    </div>
+                    <div class="col-sm-3 col-md-3 col-lg-3">
+                        <div class="form-group">
+                            <label class="col-form-label-sm m-0" asp-for="UnitOfMeasurementID"></label>
+                            <select asp-for="UnitOfMeasurementID" asp-items="Model.UnitOfMeasurementList" class="form-control form-control-sm"></select>
+                            <span asp-validation-for="UnitOfMeasurementID" class="span-form-validation"></span>
+                        </div>
+                    </div>
+                    <div class="col-sm-3 col-md-3 col-lg-3">
+                        <div class="form-group">
+                            <label class="col-form-label-sm m-0" asp-for="Quantity"></label>
+                            <input type="text" class="form-control form-control-sm txtSewingSubContract" asp-for="Quantity" onkeypress="return checkNumeric(event)" placeholder="Quantity" readonly>
+                            <span asp-validation-for="Quantity" class="span-form-validation"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row m-0">
+                    <div class="col-sm-3 col-md-3 col-lg-3 notForSubContract">
+                        <div class="input-group">
+                            <div class="col-sm-6 col-md-6 col-lg-6">
+                                <div class="form-group">
+                                    <label class="col-form-label-sm m-0" asp-for="GrossWeight"></label>
+                                    <input type="text" class="form-control form-control-sm txtSewingSubContract" asp-for="GrossWeight" onkeypress="return checkNumeric(event)" placeholder="Gross Weight" readonly>
+                                    <span asp-validation-for="GrossWeight" class="span-form-validation"></span>
+                                </div>
+                            </div>
+                            <div class="col-sm-6 col-md-6 col-lg-6">
+                                <div class="form-group">
+                                    <label class="col-form-label-sm m-0" asp-for="NetWeight"></label>
+                                    <input type="text" class="form-control form-control-sm txtSewingSubContract" asp-for="NetWeight" onkeypress="return checkNumeric(event)" placeholder="Net Weight" readonly>
+                                    <span asp-validation-for="NetWeight" class="span-form-validation"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3 col-md-3 col-lg-3">
+                        <div class="input-group">
+                            <div class="col-sm-6 col-md-6 col-lg-6">
+                                <div class="form-group">
+                                    <label class="col-form-label-sm m-0" asp-for="Rate"></label>
+                                    <input type="text" class="form-control form-control-sm txtSewingSubContract" asp-for="Rate" onkeypress="return checkNumeric(event)" placeholder="Rate" readonly>
+                                    <span asp-validation-for="Rate" class="span-form-validation"></span>
+                                </div>
+                            </div>
+                            <div class="col-sm-6 col-md-6 col-lg-6 notForSubContract">
+                                <div class="form-group">
+                                    <label class="col-form-label-sm m-0" asp-for="Roll"></label>
+                                    <input type="text" class="form-control form-control-sm txtSewingSubContract" asp-for="Roll" onkeypress="return checkNumeric(event)" placeholder="Roll" readonly>
+                                    <span asp-validation-for="Roll" class="span-form-validation"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3 col-md-3 col-lg-3 notForSubContract">
+                        <div class="input-group">
+                            <div class="col-sm-6 col-md-6 col-lg-6">
+                                <div class="form-group">
+                                    <label class="col-form-label-sm m-0" asp-for="GreigeWidth"></label>
+                                    <input type="text" class="form-control form-control-sm txtSewingSubContract" asp-for="GreigeWidth" readonly>
+                                    <span asp-validation-for="GreigeWidth" class="span-form-validation"></span>
+                                </div>
+                            </div>
+                            <div class="col-sm-6 col-md-6 col-lg-6">
+                                <div class="form-group">
+                                    <label class="col-form-label-sm m-0" asp-for="FinishedWidth"></label>
+                                    <input type="text" class="form-control form-control-sm txtSewingSubContract" asp-for="FinishedWidth" readonly>
+                                    <span asp-validation-for="FinishedWidth" class="span-form-validation"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3 col-md-3 col-lg-3">
+                        <div class="form-group">
+                            <label class="col-form-label-sm m-0" asp-for="Remarks"></label>
+                            <input type="text" class="form-control form-control-sm" asp-for="Remarks" placeholder="Remarks">
+                            <span asp-validation-for="Remarks" class="span-form-validation"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer p-2">
+                <button type="button" class="btn btn-xs btn-danger" id="btnAddToListClose">Add To List & Close</button>
+                <button type="button" class="btn btn-xs btn-primary" id="btnAddToList">Add To List</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+<script src="~/AdminLTE-3.1.0/plugins/select2/js/select2.min.js"></script>
+<script type="text/javascript">
+
+    function saveSuccess(data) {
+        debugger
+        if (data.result == 1) {
+            $.alert.open({
+                type: 'Success',
+                content: data.message,
+                callback: function () {
+                    $("#DepartmentID").val($("#DepartmentID option:first").val());
+                    $("#CustomerID").val($("#CustomerID option:first").val());
+                    $("#VehicleNo").val('');
+                    $("#IsOwnVehicle").prop('checked', false);
+                    $("#tblItem tbody").html('');
+                    SendNotification();
+                }
+            });
+        }
+        else {
+            $.alert.open("error", data.message);
+        }
+    }
+    function updateSuccess(data) {
+        debugger
+        if (data.result == 1) {
+            $.alert.open({
+                type: 'Success',
+                content: data.message,
+                callback: function () {
+                }
+            });
+        } else if (data.result == 2) {
+            location.replace('/MaterialsManagement/GatePass/Index');
+        }
+        else {
+            $.alert.open("error", data.message);
+        }
+    }
+    function ClearPopupModal() {
+        $("#WorkOrderNo").val("");
+        $("#PMDescription").val('');
+        $("#PaymentMode").val('');
+        $('#ItemName').val("");
+        $('#ProcessCode').val("");
+        $('#FinishCode').val("");
+        $('#Quantity').val(0);
+        $('#GrossWeight').val(0);
+        $('#NetWeight').val(0);
+        $('#Roll').val("");
+        $('#Rate').val(0);
+        $('#Remarks').val("");
+        $('#FinishedWidth').val("");
+        $('#GreigeWidth').val("");
+        $('#ReceivedChallanNo').val('');
+        $("#hdnPM").val('0');
+
+    }
+    function AddItemToList() {
+        let issuanceDetailID = $("#IssuanceDetailID").val();
+        let isDuplicate = false;
+        let paymentMode = '';
+        let process = $("#Process").val();
+        let orderID = $("#OrderID").val();
+        let customerID = $("#CustomerID").val();
+
+        if (process == 6) {
+            paymentMode = $("#PaymentModeID").val();
+        }
+        else {
+            paymentMode = $("#hdnPM").val();
+        }
+        let isDifferentPaymentMode = false;
+        let isDifferentProcess = false;
+        $("#tblItem tbody tr").each(function (i, v) {
+            let that = $(this);
+            let hdnIssuanceDetailID = that.find('.hdnIssuanceDetailID').val();
+            let gatePassDetailID = $("#hdnGatePassDetailID").val();
+            let dataID = that.data('id');
+            let orderID = $("#OrderID").val();
+            let hdnOrderID = that.find('.hdnOrderID').val();
+
+            if (gatePassDetailID != dataID && !isDuplicate ) {
+                if (process == 6 && orderID == hdnOrderID) {
+                    isDuplicate = true;
+                } else {
+                    if (issuanceDetailID == hdnIssuanceDetailID) {
+                        isDuplicate = true;
+                    } else { isDuplicate = false; }
+
+                }
+
+            }
+        });
+        $("#tblItem tbody tr").each(function (i, v) {
+            let that = $(this);
+            let hdnPaymentMode = that.find('.hdnPaymentMode').val();
+            let hdnProcessId = that.find('.hdnProcessId').val();
+            let gatePassDetailID = $("#hdnGatePassDetailID").val();
+            let dataID = that.data('id');
+            debugger;
+
+            if (gatePassDetailID != dataID && !isDifferentPaymentMode && paymentMode != hdnPaymentMode) {
+                isDifferentPaymentMode = true;
+            }
+            if (!isDifferentProcess && hdnProcessId != process) {
+                isDifferentProcess = true;
+            }
+        });
+
+        if (!isDuplicate) {
+            if (!isDifferentProcess) {
+            if (!isDifferentPaymentMode) {
+                let gatePassDetailID = $("#hdnGatePassDetailID").val();
+                let process = $("#Process").val();
+                let processName = $("#Process option:selected").text();
+                let issuanceNo = $("#IssuanceNo").val();
+                let workOrderNo = $("#WorkOrderNo").val();
+                let itemName = $("#ItemName").val();
+                let processCode = $("#ProcessCode").val();
+                let finishCode = $("#FinishCode").val();
+                let unitOfMeasurementID = $("#UnitOfMeasurementID").val();
+                let unitOfMeasurement = $("#UnitOfMeasurementID option:selected").text();
+                let quantity = $("#Quantity").val();
+                let grossWeight = $("#GrossWeight").val();
+                let netWeight = $("#NetWeight").val();
+                let rate = $("#Rate").val();
+                let rollNo = $("#Roll").val();
+                let remarks = $("#Remarks").val();
+                let receivedChallanNo = $("#ReceivedChallanNo").val();
+                let finishedWidth=$('#FinishedWidth').val();
+                let greigeWidth=$('#GreigeWidth').val();
+                if (process == 6) {
+                    grossWeight = quantity;
+                    netWeight = quantity;
+                }
+                let orderID = 0;
+                let orderName = '';
+                if (process == 6) {
+                    orderID = $("#OrderID").val();
+                    orderName = $("#OrderID option:Selected").text();
+                }
+                debugger;
+                if ((process != 6 && issuanceNo != '' && issuanceDetailID > 0) || (process == 6 && orderID != '' && orderID > 0)) {
+                    let currentRowSerial = ($("#tblItem tbody tr").length) + 1;
+                    if (gatePassDetailID > 0) {
+                        let row = $('tr[data-id="' + gatePassDetailID + '"]');
+                        currentRowSerial = row.find('.trSerial').text();
+                    }
+                    let popupBtn = '';
+                    if (gatePassDetailID > 0) {
+                        popupBtn = `<button type="button" class="btn btn-xs btn-warning" onclick="FillupPopupData(${customerID},${gatePassDetailID})" data-toggle="modal" data-target="#itemModal"><i class="fas fa-external-link-alt"></i></button>&nbsp;`
+                    }
+                    let trTds = `<td class='trSerial'>${currentRowSerial}</td><td><input type="hidden" class="hdnProcessId" value="${process}" /> ${processName}</td>
+                    <td><input type="hidden" class="hdnOrderID" value="${orderID}" /><input type="hidden" class="hdnOrderName" value="${orderName}" /> ${orderName}</td>
+                    <td><input type="hidden" class="hdnWorkOrderNo" value="${workOrderNo}" /><input type="hidden" class="hdnPaymentMode" value="${paymentMode}" />  ${workOrderNo}</td>
+
+
+                    <td><input type="hidden" class="hdnReceivedChallanNo" value="${receivedChallanNo}" /><input type="hidden" class="hdnItemType" value="${itemName}" /> ${itemName}</td>
+
+                    <td><input type="hidden" class="hdnGreigeWidth" value="${greigeWidth}" /><input type="hidden" class="hdnProcessCode" value="${processCode}" /> ${processCode}</td>
+                    <td><input type="hidden" class="hdnFinishedWidth" value="${finishedWidth}" /><input type="hidden" class="hdnColorFinishCode" value="${finishCode}" /> ${finishCode}</td>
+
+                    <td><input type="hidden" class="hdnQuantity" value="${quantity}" /> ${quantity}</td>
+                    <td><input type="hidden" class="hdnUnitOfMeasurement" value=${unitOfMeasurementID} /> ${unitOfMeasurement}</td>
+                    <td><input type="hidden" class="hdnRate" value="${rate}" /> ${rate}</td>
+                    <td><input type="hidden" class="hdnNetWeight" value="${netWeight}" /> ${netWeight}</td>
+                    <td><input type="hidden" class="hdnGrossWeight" value="${grossWeight}" /> ${grossWeight}</td>
+                    <td><input type="hidden" class="hdnRollNo" value="${rollNo}" />${rollNo}</td>
+                    <td><input type="hidden" class="hdnIssuanceDetailID" value="${issuanceDetailID}" /> <input type="hidden" class="hdnRemarks" value="${remarks}" />${remarks}</td>
+                    <td>${popupBtn}<button type="button" class="btn btn-xs btn-danger" onclick="RemoveRow(this,0)"><i class="fa fa-trash" aria-hidden="true"></i></button></td>`
+                    if (gatePassDetailID > 0) {
+                        let row = $('tr[data-id="' + gatePassDetailID + '"]');
+                        row.addClass('valueChanged')
+                        row.html(trTds);
+                    } else {
+                        $("#tblItem tbody").append(
+                            `<tr class='valueChanged' data-id="0">${trTds}</tr>`
+                        );
+                    }
+
+                } else {
+                    if (process == 6) {
+                        alert('Order No is required');
+                    } else {
+                        alert('Issuance No & Detail is required');
+                    }
+
+                }
+            } else {
+                alert('Payment mode mismatched with previous data, Please choose same mode');
+                }
+            } else {
+                alert('Process type Mismatched with previous item(s)');
+            }
+        } else {
+            if (process == 6) {
+                alert('Order already selected');
+            } else {
+                alert('Item already selected');
+            }
+
+        }
+    }
+
+    function getDDLCustomerList() {
+        let accCategoryID = [];
+        if ('@sessionCompanyID' == '183') {
+            accCategoryID = ["2", '3', '4'];
+        } else {
+            accCategoryID = ["20002", '20003', '20004'];
+        }
+        
+
+
+        HttpRequest.DropDownSelect2Group("Post", '/Embro/SupplierSetup/DDLSupplier', { CompanyID: 0, AccCategoryID: accCategoryID}, 'CustomerID', false);
+    }
+    function getDDLIssuanceNo(supplierID,gatePassDetailID) {
+        debugger;
+        HttpRequest.DropDownSelect2("GET", '/MaterialsManagement/GatePass/GetDDLIssuance_Master', { supplierID: supplierID, gatePassDetailID: gatePassDetailID }, 'IssuanceNo', false);
+    }
+    function ClearItemModal() {
+        $("#hdnGatePassDetailID").val(0);
+        $("#IssuanceNo").val('').trigger('change');
+        $("#Process").val($("#Process option:first").val()).trigger('change');
+        ClearPopupModal();
+    }
+    $(function () {
+        $('#CustomerID').select2();
+        $('#DepartmentID').select2();
+        $('#IssuanceNo').select2();
+        $('#OrderID').select2();
+
+        getDDLCustomerList();
+        HttpRequest.DropDownSelect2('GET', '/Maxco/Order/GetOrder', {  }, 'OrderID', false);
+        $("#Process").change(function () {
+            debugger;
+            let process = $("#Process").val();
+            if (process != "" && process==6) {
+                $(".divIssuance,.divIssuanceDetail,.divTxtPaymentMode,.notForSubContract").addClass('d-none');
+                $(".divOrder,.divDDLPaymentMode").removeClass('d-none');
+                $('.txtSewingSubContract').attr('readonly', false);
+                $('.txtReceivedChallanNo').removeAttr('readonly');
+                $('.ddlSewingSubContract').attr('disabled', false);
+            } else {
+                $(".divOrder,.divDDLPaymentMode").addClass('d-none');
+                $(".divIssuance,.divIssuanceDetail,.divTxtPaymentMode,.notForSubContract").removeClass('d-none');
+
+                $('.txtSewingSubContract,.txtReceivedChallanNo').attr('readonly', true);
+                $('.ddlSewingSubContract').attr('disabled', true);
+
+            }
+        });
+
+
+
+        $("#IssuanceNo").change(function () {
+            debugger;
+            let gatePassDetailID = parseInt($('#hdnGatePassDetailID').val());
+            if (gatePassDetailID==0) {
+                ClearPopupModal();
+            }
+            let issuanceNo = $("#IssuanceNo").val();
+            if (issuanceNo != "") {
+                HttpRequest.DropDown("GET", "/MaterialsManagement/GatePass/GetDDLIssuance_DetailByMaster", { masterID: issuanceNo, gatePassDetailID:gatePassDetailID}, "IssuanceDetailID", false);
+            } else {
+                HttpRequest.DropDownDefault("IssuanceDetailID");
+            }
+        });
+        $("#IssuanceDetailID").change(function () {
+            let issuanceNo = $("#IssuanceNo").val();
+            let issuanceDetailID = $("#IssuanceDetailID").val();
+            if (issuanceNo != "" && issuanceDetailID != "") {
+                let data = HttpRequest.AjaxData("GET", "/MaterialsManagement/GatePass/GetIssuanceDetailInfo", { issue_ID: issuanceNo, issue_DetailsID: issuanceDetailID });
+                if (data != null) {
+                    debugger;
+                    $("#WorkOrderNo").val(data.challan_id);
+                    $("#PaymentMode").val(data.payment_mode);
+                    $("#hdnPM").val(data.payment_mode);
+                    $("#PMDescription").val(data.PMDescription);
+                    $("#ItemName").val(data.ItemName);
+                    $("#ProcessCode").val(data.print_type);
+                    $("#FinishCode").val(data.Color);
+                    $("#Quantity").val(data.IssueQty);
+                    $("#GrossWeight").val(data.ReceivedQty);
+                    $("#NetWeight").val(data.IssueQty);
+                    $("#Roll").val(data.roll_qty);
+                    $("#Rate").val(data.unit_price);
+                    $('#FinishedWidth').val(data.FinishedWidth);
+                    $('#GreigeWidth').val(data.GreigeWidth);
+                    $('#UnitOfMeasurementID').val(data.UnitID);
+                    $("#ReceivedChallanNo").val(data.ReceivedChallanNo);
+
+                }
+            } else {
+                ClearPopupModal();
+            }
+        });
+        $('#itemModal').on('show.bs.modal', function () {
+            let gatePassDetailID = parseInt($('#hdnGatePassDetailID').val());
+            let customerID = $("#CustomerID").val();
+            if (gatePassDetailID == 0) {
+                getDDLIssuanceNo(customerID);
+            }
+
+        });
+        $('#itemModal').on('hidden.bs.modal', function () {
+            ClearItemModal();
+        });
+        $("#btnAddToList").click(function () {
+            AddItemToList();
+            ClearItemModal();
+        });
+        $("#btnAddToListClose").click(function () {
+            AddItemToList();
+            $('#itemModal').modal('toggle');
+        });
+
+        $("#btnLocalSales").click(function () {
+            debugger;
+
+            let gatePassID = $("#hdnGatePassID").val();
+            let categoryID = $("#CategoryID").val();
+            let departmentID = $("#DepartmentID").val();
+            let customerID = $("#CustomerID").val();
+            let vehicleNo = $("#VehicleNo").val();
+            let isOwnVehicle = $('#IsOwnVehicle').is(':checked');
+            let _paymentMode = 0;
+            let processId = 0;
+            let localSalesGatePassDetailDTM = new Array();
+            $("#tblItem tbody tr").each(function () {
+                debugger;
+                let that = $(this);
+                let isUpdated = false;
+                if (that.hasClass('valueChanged')) {
+                    isUpdated = true;
+                }
+                let gatePassDetailId = that.data("id");
+                let workOrderNo = that.find(".hdnWorkOrderNo").val();
+                let paymentMode = that.find(".hdnPaymentMode").val();
+                _paymentMode = paymentMode;
+                let processCodeID = that.find(".hdnProcessCode").val();
+                let colorFinishCode = that.find(".hdnColorFinishCode").val();
+                let quantity = that.find(".hdnQuantity").val();
+                let unitID = that.find(".hdnUnitOfMeasurement").val();
+                let grossWeight = that.find(".hdnGrossWeight").val();
+                let netWeight = that.find(".hdnNetWeight").val();
+                let remarks = that.find(".hdnRemarks").val();
+                let issuanceDetailID = that.find(".hdnIssuanceDetailID").val();
+                processId = that.find(".hdnProcessId").val();
+                let itemType = that.find(".hdnItemType").val();
+                let rollNo = that.find(".hdnRollNo").val();
+                let issuanceNo = that.find(".hdnIssuanceNo").val();
+                let rate = that.find(".hdnRate").val();
+                let orderID = that.find(".hdnOrderID").val();
+                let orderName = that.find(".hdnOrderName").val();
+                let receivedChallanNo = that.find(".hdnReceivedChallanNo").val();
+                let greigeWidth = that.find(".hdnGreigeWidth").val();
+                let finishedWidth = that.find(".hdnFinishedWidth").val();
+
+
+                let detailDtm = {
+                    ID: gatePassDetailId,
+                    OrderNo: workOrderNo,
+                    PaymentMode: paymentMode,
+                    ProcessCodeID: processCodeID,
+                    ColorFinishCode: colorFinishCode,
+                    Quantity: quantity,
+                    UnitID: unitID,
+                    Rate: rate,
+                    GrossWeight: grossWeight,
+                    NetWeight: netWeight,
+                    Remarks: remarks,
+                    //InputWeight,
+                    ProcessID: processId,
+                    ItemType: itemType,
+                    Roll: rollNo,
+                    IssuanceDetailID: issuanceDetailID,
+                    OrderID: orderID,
+                    OrderName: orderName,
+                    RefNo: receivedChallanNo,
+                    GreigeWidth: greigeWidth,
+                    FinishedWidth: finishedWidth
+                }
+                localSalesGatePassDetailDTM.push(detailDtm);
+            });
+
+            let localSalesGatePassMasterDTM = {
+                GatePassID: gatePassID,
+                CustomerID: customerID,
+                ProcessID: processId,
+                isSelfVehicle: isOwnVehicle,
+                DepartmentID: departmentID,
+                PaymentMode: _paymentMode,
+                IC_LocalSalesGatePassDetail: localSalesGatePassDetailDTM
+            }
+            //if (LocalSalesGatePassDetailDTM.length > 0) {
+            let localSalesDTM = {
+                ID: gatePassID,
+                VehicleNo: vehicleNo,
+                CategoryID: categoryID,
+                IC_LocalSalesGatePassMaster: localSalesGatePassMasterDTM
+            }
+            if (gatePassID == 0 && localSalesGatePassDetailDTM.length > 0) {
+                HttpRequest.Ajax("POST", "/MaterialsManagement/GatePass/SaveLocalSalesGatePass", { localSalesDTM: localSalesDTM ,'@token.HeaderName': '@token.RequestToken'}, saveSuccess)
+            } else {
+                HttpRequest.Ajax("POST", "/MaterialsManagement/GatePass/UpdateLocalSalesGatePass", { localSalesDTM: localSalesDTM ,'@token.HeaderName': '@token.RequestToken'}, updateSuccess)
+            }
+
+        //}
+        });
+
+        if(RtnNumber('@Model.GatePassID') > 0) {
+            var newOption = new Option('@Model.CustomerName', @Model.CustomerID, false, false);
+            $('#CustomerID').append(newOption).trigger('change');
+
+            var newOptionDepartment = new Option('@Model.DepartmentName', @Model.DepartmentID, false, false);
+            $('#DepartmentID').append(newOptionDepartment).trigger('change');
+        }
+    });
+    function FillupPopupData(supplierID,gatePassDetailId) {
+        debugger;
+        @*let itemList = @Html.Raw(Json.Serialize(Model.LocalSalesItems));*@
+        const itemList = HttpRequest.AjaxData("Get", "/MaterialsManagement/GatePass/GetLocalSalesGatePassItems", { GatePassID:'@Model.GatePassID'},false);
+        let itemDetail = itemList.filter(x => x.ID == gatePassDetailId);
+         if (itemDetail.length > 0) {
+
+             getDDLIssuanceNo(supplierID,gatePassDetailId);
+
+             let item = itemDetail[0];
+             $("#hdnGatePassDetailID").val(item.ID);
+             //getDDLIssuanceNo(gatePassDetailId);
+
+             $("#Process").val(item.ProcessId).trigger('change');
+
+
+             $("#hdnPM").val(item.PaymentMode);
+             if (item.ProcessId == 6) {
+                 let newOption = new Option(item.OrderName, item.OrderID , false, false);
+                 $('#OrderID').append(newOption).trigger('change');
+                 $("#PaymentModeID").val(item.PaymentMode);
+             } else {
+                 debugger;
+                 let newOption1 = new Option(String(item.IssuanceMasterID), item.IssuanceMasterID, false, false);
+                 $('#IssuanceNo').append(newOption1).trigger('change');
+
+             }
+
+
+            $("#IssuanceDetailID").val(item.IssuanceDetailID);
+            $("#WorkOrderNo").val(item.WorkOrderNo);
+            $('#ItemName').val(item.ItemDetail);
+            $('#ProcessCode').val(item.ProcessCode);
+             $('#PMDescription').val(item.PMDescription);
+
+             $('#FinishCode').val(item.FinishCode);
+            $('#Quantity').val(item.Quantity);
+            $('#GrossWeight').val(item.GrossWeight);
+            $('#NetWeight').val(item.NetWeight);
+            $('#Roll').val(item.RollCount);
+            $('#Rate').val(item.Rate);
+             $('#Remarks').val(item.Remarks);
+             $('#UnitOfMeasurementID').val(item.UnitID);
+             $('#ReceivedChallanNo').val(item.RefNo);
+             $('#GreigeWidth').val(item.GreigeWidth);
+             $('#FinishedWidth').val(item.FinishedWidth);
+        }
+    }
+</script>

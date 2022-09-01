@@ -1,0 +1,820 @@
+﻿@using RG.Application.Contracts.Embro.Business.LoanMasters.Queries.RequestResponseModel;
+
+@model RG.Application.Contracts.Embro.Business.LoanMasters.Queries.RequestResponseModel.BankLoanPositionRM;
+
+@inject RG.Application.Common.CommonInterfaces.ICurrentUserService _currentuserService;
+@{
+    ViewData[PageInfo.PageTitle] = "Bank Loan Group Detail";
+    ViewData[PageInfo.PageHeader] = "Bank Loan Group Detail";
+    Layout = null;
+
+    var compBankLoneTypeSum = Model.BankLoanPositionData.GroupBy(x => new { x.CompanyID, x.CompanyName, x.BankId, x.BankName, x.LoanTypeID, x.LoanTypeName, x.IsForeignLoan })
+        .Select(g => new BankLoanPositionData
+        {
+            CompanyID = g.Key.CompanyID,
+            CompanyName = g.Key.CompanyName,
+            BankId = g.Key.BankId,
+            BankName = g.Key.BankName,
+            LoanTypeID = g.Key.LoanTypeID,
+            LoanTypeName = g.Key.LoanTypeName,
+            IsForeignLoan = g.Key.IsForeignLoan,
+            OpeningLoanAmount = g.Sum(x => x.OpeningLoanAmount),
+            OpeningLoanAmountUSD = g.Sum(x => x.OpeningLoanAmountUSD),
+            ClosingBalance = g.Sum(x => x.ClosingBalance),
+            ClosingBalanceUSD = g.Sum(x => x.ClosingBalanceUSD),
+            CurrentRepaymentAmount = g.Sum(x => x.CurrentRepaymentAmount),
+            CurrentRepaymentAmountUSD = g.Sum(x => x.CurrentRepaymentAmountUSD)
+
+        });
+    var compBankSum = Model.BankLoanPositionData.GroupBy(x => new { x.CompanyID, x.CompanyName, x.BankId, x.BankName, x.IsForeignLoan })
+        .Select(g => new BankLoanPositionData
+        {
+            CompanyID = g.Key.CompanyID,
+            CompanyName = g.Key.CompanyName,
+            BankId = g.Key.BankId,
+            BankName = g.Key.BankName,
+            IsForeignLoan = g.Key.IsForeignLoan,
+            OpeningLoanAmount = g.Sum(x => x.OpeningLoanAmount),
+            OpeningLoanAmountUSD = g.Sum(x => x.OpeningLoanAmountUSD),
+            ClosingBalance = g.Sum(x => x.ClosingBalance),
+            CurrentRepaymentAmount = g.Sum(x => x.CurrentRepaymentAmount),
+            ClosingBalanceUSD = g.Sum(x => x.ClosingBalanceUSD),
+            CurrentRepaymentAmountUSD = g.Sum(x => x.CurrentRepaymentAmountUSD)
+        });
+    var bankLoneTypeSum = Model.BankLoanPositionData.GroupBy(x => new { x.BankName, x.LoanTypeID, x.LoanTypeName, x.IsForeignLoan })
+        .Select(g => new BankLoanPositionData
+        {
+            BankName = g.Key.BankName,
+            LoanTypeID = g.Key.LoanTypeID,
+            LoanTypeName = g.Key.LoanTypeName,
+            IsForeignLoan = g.Key.IsForeignLoan,
+            OpeningLoanAmount = g.Sum(x => x.OpeningLoanAmount),
+            OpeningLoanAmountUSD = g.Sum(x => x.OpeningLoanAmountUSD),
+            ClosingBalance = g.Sum(x => x.ClosingBalance),
+            CurrentRepaymentAmount = g.Sum(x => x.CurrentRepaymentAmount),
+            ClosingBalanceUSD = g.Sum(x => x.ClosingBalanceUSD),
+            CurrentRepaymentAmountUSD = g.Sum(x => x.CurrentRepaymentAmountUSD)
+        });
+    var bankLoneSum = Model.BankLoanPositionData.GroupBy(x => new { x.BankName, x.IsForeignLoan })
+       .Select(g => new BankLoanPositionData
+       {
+           BankName = g.Key.BankName,
+           IsForeignLoan = g.Key.IsForeignLoan,
+           OpeningLoanAmount = g.Sum(x => x.OpeningLoanAmount),
+           OpeningLoanAmountUSD = g.Sum(x => x.OpeningLoanAmountUSD),
+           ClosingBalance = g.Sum(x => x.ClosingBalance),
+           CurrentRepaymentAmount = g.Sum(x => x.CurrentRepaymentAmount),
+           ClosingBalanceUSD = g.Sum(x => x.ClosingBalanceUSD),
+           CurrentRepaymentAmountUSD = g.Sum(x => x.CurrentRepaymentAmountUSD)
+       });
+    var compLoanTypeSum = Model.BankLoanPositionData.GroupBy(x => new { x.CompanyID, x.CompanyName, x.LoanTypeID, x.LoanTypeName, x.IsForeignLoan })
+        .Select(g => new BankLoanPositionData
+        {
+            CompanyID = g.Key.CompanyID,
+            CompanyName = g.Key.CompanyName,
+            LoanTypeID = g.Key.LoanTypeID,
+            LoanTypeName = g.Key.LoanTypeName,
+            IsForeignLoan = g.Key.IsForeignLoan,
+            OpeningLoanAmount = g.Sum(x => x.OpeningLoanAmount),
+            OpeningLoanAmountUSD = g.Sum(x => x.OpeningLoanAmountUSD),
+            ClosingBalance = g.Sum(x => x.ClosingBalance),
+            CurrentRepaymentAmount = g.Sum(x => x.CurrentRepaymentAmount),
+            ClosingBalanceUSD = g.Sum(x => x.ClosingBalanceUSD),
+            CurrentRepaymentAmountUSD = g.Sum(x => x.CurrentRepaymentAmountUSD)
+        });
+    var loneTypeSum = Model.BankLoanPositionData.GroupBy(x => new { x.LoanTypeID, x.LoanTypeName, x.IsForeignLoan })
+        .Select(g => new BankLoanPositionData
+        {
+            LoanTypeID = g.Key.LoanTypeID,
+            LoanTypeName = g.Key.LoanTypeName,
+            IsForeignLoan = g.Key.IsForeignLoan,
+            OpeningLoanAmount = g.Sum(x => x.OpeningLoanAmount),
+            OpeningLoanAmountUSD = g.Sum(x => x.OpeningLoanAmountUSD),
+            ClosingBalance = g.Sum(x => x.ClosingBalance),
+            CurrentRepaymentAmount = g.Sum(x => x.CurrentRepaymentAmount),
+            ClosingBalanceUSD = g.Sum(x => x.ClosingBalanceUSD),
+            CurrentRepaymentAmountUSD = g.Sum(x => x.CurrentRepaymentAmountUSD)
+        });
+
+
+    var allCompanies = Model.BankLoanPositionData.GroupBy(x => new { x.CompanyID, x.CompanyName, x.IsForeignLoan })
+.Select(g => new { CompanyName = g.Key.CompanyName, CompanyID = g.Key.CompanyID, IsForeignLoan = g.Key.IsForeignLoan }).ToList();
+    
+    
+    var companies = allCompanies.Where(x => x.IsForeignLoan == false).OrderBy(x=>x.CompanyID).ToList();
+    var foreignCompanies = allCompanies.Where(x => x.IsForeignLoan == true).ToList();
+
+
+    var allLoanTypes = Model.BankLoanPositionData.GroupBy(x => new { x.LoanTypeID, x.LoanTypeName, x.IsForeignLoan })
+.Select(g => new { LoanTypeName = g.Key.LoanTypeName, LoanTypeID = g.Key.LoanTypeID, IsForeignLoan = g.Key.IsForeignLoan }).ToList();
+
+    var loanTypes = allLoanTypes.Where(x => x.IsForeignLoan == false).ToList();
+
+    var foreignLoanTypes = allLoanTypes.Where(x => x.IsForeignLoan == true).ToList();
+
+    var allBanks = Model.BankLoanPositionData.GroupBy(x => new { x.BankName, x.IsForeignLoan })
+.Select(g => new { BankName = g.Key.BankName, IsForeignLoan = g.Key.IsForeignLoan }).ToList();
+    var banks = allBanks.Where(x => x.IsForeignLoan == false).ToList();
+    var froeignBanks = allBanks.Where(x => x.IsForeignLoan == true).ToList();
+    var banksWithID = Model.BankLoanPositionData.GroupBy(x => new { x.BankName, x.BankId, x.CompanyID })
+.Select(g => new { BankName = g.Key.BankName, BankId = g.Key.BankId, CompanyID = g.Key.CompanyID }).ToList();
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Bank Loan Group Detail</title>
+    <link href="~/AdminLTE-3.1.0/plugins/jquery-ui/jquery-ui.min.css" rel="stylesheet" />
+    <link href="~/lib/bootstrap-5.0.2/css/bootstrap.min.css" rel="stylesheet" />
+    <script src="~/AdminLTE-3.1.0/plugins/jquery/jquery.min.js"></script>
+    <script src="~/AdminLTE-3.1.0/plugins/jquery-ui/jquery-ui.min.js"></script>
+    <script src="~/lib/bootstrap-5.0.2/js/bootstrap.bundle.min.js"></script>
+
+
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.12/css/jquery.dataTables.min.css" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/1.2.2/css/buttons.dataTables.min.css" />
+    <script type="text/javascript" src="https://code.jquery.com/jquery-1.12.3.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.2.2/js/dataTables.buttons.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/2.5.0/jszip.min.js"></script>
+    <script type="text/javascript" src="https://cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/pdfmake.min.js"></script>
+    <script type="text/javascript" src="https://cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/vfs_fonts.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.2.2/js/buttons.html5.min.js"></script>
+
+    <style>
+        .header {
+            position: sticky;
+            top: 0;
+        }
+    </style>
+
+</head>
+
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12 text-center">
+                <h5 class="mb-0">Robintex Group Bangladesh</h5>
+                <h6 class="mb-0">Bank Liability Position</h6>
+                <h6>Up To Period @Model.DateTo</h6>
+            </div>
+        </div>
+        <div id="tblBankLoanSummary">
+            @if (Model.BankLoanPositionData.Where(x => x.IsForeignLoan == false).ToList().Count > 0)
+            {
+
+                <div class="row">
+                    <div class="col-12 text-center">
+
+                        <h6>Domestic Loan in BDT.</h6>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <table class="table table-sm table-bordered" id="tblBankLoanSummary">
+                            <thead class="table-dark header" style="vertical-align:middle">
+                                <tr class="text-center" style="font-size:11px;">
+                                    <th rowspan="3">Company</th>
+                                    <th rowspan="3">Loan Type</th>
+                                    @foreach (var itemBank in banks.OrderBy(x => x.BankName).ToList())
+                                    {
+                                        <th colspan="3">@Model.BankLoanPositionData[0].DateToSTR</th>
+
+                                    }
+                                    <th colspan="3">@Model.BankLoanPositionData[0].DateToSTR</th>
+                                </tr>
+                                <tr>
+                                    @foreach (var itemBank in banks.OrderBy(x => x.BankName).ToList())
+                                    {
+                                        <th class="text-center" colspan="3" style="font-size: 11px;">@itemBank.BankName</th>
+                                    }
+                                    <th class="text-center" colspan="3" style="font-size: 11px;">Total</th>
+                                </tr>
+                                <tr>
+                                    @foreach (var itemBank in banks.OrderBy(x => x.BankName).ToList())
+                                    {
+                                    <th class="text-center" style="font-size: 11px;" title="Last Month Position">L M Position</th>
+                                        <th class="text-center" style="font-size: 11px;">Repayment</th>
+                                        <th class="text-center" style="font-size: 11px;">Position</th>
+                                    }
+                                <th class="text-center" style="font-size: 11px;" title="Last Month Position">L M Position</th>
+                                    <th class="text-center" style="font-size: 11px;">Repayment</th>
+                                    <th class="text-center" style="font-size: 11px;">Position</th>
+                                </tr>
+
+                            </thead>
+                            <tbody style="font-size:11px;">
+                                @{ var prevCompanyID = 0;
+                                    var prevCompany = "";
+                                    var lastCompany = companies.Last();
+                                    foreach (var itemComp in companies.OrderBy(x=>x.CompanyID).ToList())
+                                    {
+
+                                        if (prevCompany != "" && prevCompany != itemComp.CompanyName)
+                                        {
+                                            <tr>
+                                                <td colspan="2" class="fw-bold bg-info" style="text-align:right">@prevCompany Sub-Total</td>
+                                                @foreach (var itemBank in banks.OrderBy(x => x.BankName).ToList())
+                                                {
+                                                    var companyID = Convert.ToInt32(prevCompanyID);
+                                                    var bankName = itemBank.BankName.Trim();
+
+                                                    var amount = compBankSum.Where(x => x.CompanyID == companyID && x.BankName.Trim() == bankName && x.IsForeignLoan == false).FirstOrDefault();
+                                                    if (amount != null)
+                                                    {
+                                                        <td class="fw-bold bg-info" style="text-align:right">@String.Format("{0:n0}", amount.OpeningLoanAmount)</td>
+                                                        <td class="fw-bold bg-info" style="text-align:right">@String.Format("{0:n0}", amount.CurrentRepaymentAmount)</td>
+                                                        <td class="fw-bold bg-info" style="text-align:right">@String.Format("{0:n0}", amount.ClosingBalance)</td>
+                                                    }
+                                                    else
+                                                    {
+                                                        <td class="fw-bold bg-info" style="text-align:right">@String.Format("{0:n0}", 0)</td>
+                                                        <td class="fw-bold bg-info" style="text-align:right">@String.Format("{0:n0}", 0)</td>
+                                                        <td class="fw-bold bg-info" style="text-align:right">0</td>
+                                                    }
+                                                }
+                                                <td class="fw-bold bg-info" style="text-align:right">@String.Format("{0:n0}", compBankSum.Where(x => x.CompanyID == Convert.ToInt32(prevCompanyID) && x.IsForeignLoan == false).Sum(x => x.OpeningLoanAmount))</td>
+                                                <td class="fw-bold bg-info" style="text-align:right">@String.Format("{0:n0}", compBankSum.Where(x => x.CompanyID == Convert.ToInt32(prevCompanyID) && x.IsForeignLoan == false).Sum(x => x.CurrentRepaymentAmount))</td>
+                                                <td class="fw-bold bg-info" style="text-align:right">@String.Format("{0:n0}", compBankSum.Where(x => x.CompanyID == Convert.ToInt32(prevCompanyID) && x.IsForeignLoan == false).Sum(x => x.ClosingBalance))</td>
+                                            </tr>
+                                            <tr>
+                                                <td colspan="@(banks.Count()*3+3)" class="fw-bold bg-info" style="text-align:center">@prevCompany Sub-Total Without Packing Credit</td>
+                                                <td class="fw-bold bg-info" style="text-align:right">@String.Format("{0:n0}", compLoanTypeSum.Where(x => x.CompanyID == Convert.ToInt32(prevCompanyID) && x.IsForeignLoan == false && x.LoanTypeID != 3).Sum(x => x.CurrentRepaymentAmount))</td>
+                                                <td class="fw-bold bg-info"></td>
+                                            </tr>
+                                            //
+                                        }
+
+
+                                        foreach (var itemLoanType in loanTypes.OrderBy(x=>x.LoanTypeID).ToList())
+                                        {
+                                            var compLoanSum = compLoanTypeSum.Where(x => x.CompanyID == itemComp.CompanyID && x.LoanTypeID == itemLoanType.LoanTypeID && x.IsForeignLoan == false).FirstOrDefault();
+                                            <tr>
+                                                @if (prevCompany != itemComp.CompanyName)
+                                                {
+                                                    <td class="fw-bold" style="vertical-align:middle;" rowspan="@loanTypes.Count">@itemComp.CompanyName</td>
+                                                }
+                                                <td class="fw-bold">@itemLoanType.LoanTypeName</td>
+                                                @foreach (var itemBank in banks.OrderBy(x => x.BankName).ToList())
+                                                {
+                                                    var bankID = 0;
+                                                    var companyID = Convert.ToInt32(itemComp.CompanyID);
+
+                                                    var loanTypeID = itemLoanType.LoanTypeID;
+                                                    var bankName = itemBank.BankName.Trim();
+                                                    var bank = banksWithID.Where(x => x.CompanyID == companyID && x.BankName == bankName).FirstOrDefault();
+
+                                                    if (bank != null)
+                                                    {
+                                                        bankID = bank.BankId;
+                                                    }
+                                                    var amount = compBankLoneTypeSum.Where(x => x.CompanyID == companyID && x.BankName.Trim() == bankName && x.LoanTypeID == loanTypeID).FirstOrDefault();
+
+                                                    var loanDataList = Model.BankLoanPositionData.Where(x => x.CompanyID == companyID && x.BankName.Trim() == bankName && x.LoanTypeID == loanTypeID).ToList();
+                                                    bool isOk = true;
+                                                    var title = "";
+                                                    foreach (var itemLoan in loanDataList)
+                                                    {
+                                                        if (((itemLoan.EndDate.Value.Date < DateTime.Now.Date) && itemLoan.ClosingBalance > 0) || (itemLoan.LoanLimitAmount < itemLoan.ClosingBalance && itemLoan.LoanTypeID == 2))
+                                                        {
+                                                            isOk = false;
+                                                            title = "Loan Maturity Date or Limit Issue Inside";
+                                                            break;
+                                                        }
+                                                    }
+                                                    var bgColor = "";
+                                                    if (!isOk) { bgColor = "text-danger"; }
+
+
+
+                                                    if (amount != null)
+                                                    {
+                                                        <td class="fw-bold" style="text-align:right">@String.Format("{0:n0}", amount.OpeningLoanAmount)</td>
+                                                        <td class="fw-bold" style="text-align:right">@String.Format("{0:n0}", amount.CurrentRepaymentAmount)</td>
+                                                        <td class="fw-bold" style="text-align:right"><a href="javascript:void();" title="@title" onclick="showDetail('@Model.DateFrom','@Model.DateTo',@companyID,@bankID,@loanTypeID)"><span class="@bgColor">@String.Format("{0:n0}", amount.ClosingBalance)</span></a></td>
+                                                    }
+                                                    else
+                                                    {
+                                                        <td class="fw-bold" style="text-align:right">@String.Format("{0:n0}", 0)</td>
+                                                        <td class="fw-bold" style="text-align:right">0</td>
+                                                        <td class="fw-bold" style="text-align:right">0</td>
+                                                    }
+                                                }
+                                                @if (compLoanSum != null)
+                                                {
+                                                    <td class="fw-bold" style="text-align:right">@String.Format("{0:n0}", compLoanSum.OpeningLoanAmount)</td>
+                                                    <td class="fw-bold" style="text-align:right">@String.Format("{0:n0}", compLoanSum.CurrentRepaymentAmount)</td>
+                                                    <td class="fw-bold" style="text-align:right"> @String.Format("{0:n0}", compLoanSum.ClosingBalance)</td>
+                                                }
+                                                else
+                                                {
+                                                    <td class="fw-bold" style="text-align:right">@String.Format("{0:n0}", 0)</td>
+                                                    <td class="fw-bold" style="text-align:right">0</td>
+                                                    <td class="fw-bold" style="text-align:right">0</td>
+                                                }
+
+
+                                            </tr>
+                                            prevCompany = itemComp.CompanyName;
+                                            prevCompanyID = itemComp.CompanyID;
+                                        }
+                                        if (itemComp.Equals(lastCompany))
+                                        {
+                                            <tr>
+                                                <td colspan="2" class="fw-bold bg-info" style="text-align:right">@itemComp.CompanyName Sub-Total</td>
+                                                @foreach (var itemBank in banks.OrderBy(x => x.BankName).ToList())
+                                                {
+                                                    var companyID =itemComp.CompanyID;
+                                                    var bankName = itemBank.BankName.Trim();
+
+
+                                                    var amount = compBankSum.Where(x => x.CompanyID == companyID && x.BankName.Trim() == bankName && x.IsForeignLoan == false).FirstOrDefault();
+                                                    if (amount != null)
+                                                    {
+                                                        <td class="fw-bold bg-info" style="text-align:right">@String.Format("{0:n0}", amount.OpeningLoanAmount)</td>
+                                                        <td class="fw-bold bg-info" style="text-align:right">@String.Format("{0:n0}", amount.CurrentRepaymentAmount)</td>
+                                                        <td class="fw-bold bg-info" style="text-align:right">@String.Format("{0:n0}", amount.ClosingBalance)</td>
+                                                    }
+                                                    else
+                                                    {
+                                                        <td class="fw-bold bg-info" style="text-align:right">@String.Format("{0:n0}", 0)</td>
+                                                        <td class="fw-bold bg-info" style="text-align:right">0</td>
+                                                        <td class="fw-bold bg-info" style="text-align:right">0</td>
+                                                    }
+                                                }
+                                                <td class="fw-bold bg-info" style="text-align:right">@String.Format("{0:n0}", compBankSum.Where(x => x.CompanyID == itemComp.CompanyID && x.IsForeignLoan == false).Sum(x => x.OpeningLoanAmount))</td>
+                                                <td class="fw-bold bg-info" style="text-align:right">@String.Format("{0:n0}", compBankSum.Where(x => x.CompanyID == itemComp.CompanyID && x.IsForeignLoan == false).Sum(x => x.CurrentRepaymentAmount))</td>
+                                                <td class="fw-bold bg-info" style="text-align:right">@String.Format("{0:n0}", compBankSum.Where(x => x.CompanyID == itemComp.CompanyID && x.IsForeignLoan == false).Sum(x => x.ClosingBalance))</td>
+                                            </tr>
+                                            <tr>
+                                                <td colspan="@(banks.Count()*3+3)" class="fw-bold bg-info" style="text-align:center">@prevCompany Sub-Total Without Packing Credit</td>
+                                                <td class="fw-bold bg-info" style="text-align:right">@String.Format("{0:n0}", compLoanTypeSum.Where(x => x.CompanyID == itemComp.CompanyID && x.IsForeignLoan == false && x.LoanTypeID != 3).Sum(x => x.CurrentRepaymentAmount))</td>
+                                                <td class="fw-bold bg-info"></td>
+                                            </tr>
+                                            <tr>
+                                                <td colspan="2" class="fw-bold bg-success text-white" style="text-align:right">Total</td>
+                                                @foreach (var itemBank in banks.OrderBy(x => x.BankName).ToList())
+                                                {
+                                                    var bankName = itemBank.BankName.Trim();
+
+                                                    var amount = bankLoneSum.Where(x => x.BankName.Trim() == bankName).FirstOrDefault();
+                                                    if (amount != null)
+                                                    {
+                                                        <td class="fw-bold text-white bg-success" style="text-align:right">@String.Format("{0:n0}", amount.OpeningLoanAmount)</td>
+                                                        <td class="fw-bold text-white bg-success" style="text-align:right">@String.Format("{0:n0}", amount.CurrentRepaymentAmount)</td>
+                                                        <td class="fw-bold text-white bg-success" style="text-align:right">@String.Format("{0:n0}", amount.ClosingBalance)</td>
+                                                    }
+                                                    else
+                                                    {
+                                                        <td class="fw-bold text-white bg-success" style="text-align:right">@String.Format("{0:n0}", 0)</td>
+                                                        <td class="fw-bold text-white bg-success" style="text-align:right">0</td>
+                                                        <td class="fw-bold text-white bg-success" style="text-align:right">0</td>
+                                                    }
+                                                }
+                                                <td class="fw-bold text-white bg-success" style="text-align:right">@String.Format("{0:n0}", compBankSum.Where(x => x.IsForeignLoan == false).Sum(x => x.OpeningLoanAmount))</td>
+                                                <td class="fw-bold text-white bg-success" style="text-align:right">@String.Format("{0:n0}", compBankSum.Where(x => x.IsForeignLoan == false).Sum(x => x.CurrentRepaymentAmount))</td>
+                                                <td class="fw-bold text-white bg-success" style="text-align:right">@String.Format("{0:n0}", compBankSum.Where(x => x.IsForeignLoan == false).Sum(x => x.ClosingBalance))</td>
+                                            </tr>
+                                            <tr>
+                                                <td colspan="@(banks.Count()*3+3)" class="fw-bold text-white bg-success" style="text-align:center">Total Without Packing Credit</td>
+                                                <td class="fw-bold text-white bg-success" style="text-align:right">@String.Format("{0:n0}", compLoanTypeSum.Where(x => x.IsForeignLoan == false && x.LoanTypeID != 3).Sum(x => x.CurrentRepaymentAmount))</td>
+                                                <td class="fw-bold text-white bg-success"></td>
+                                            </tr>
+
+
+                                            <tr><td colspan="@(banks.Count*3 + 5)">&nbsp;</td></tr>
+
+                                            var firstLoanType = loanTypes.First();
+                                            foreach (var itemLoanType in loanTypes)
+                                            {
+                                                var loanSum = loneTypeSum.Where(x => x.LoanTypeID == itemLoanType.LoanTypeID).FirstOrDefault();
+                                                <tr>
+                                                    @if (itemLoanType.Equals(firstLoanType))
+                                                    {
+                                                        <td class="fw-bold" style="vertical-align:middle;" rowspan="@loanTypes.Count">Bank and Loan Type Wise Total</td>
+                                                    }
+
+
+                                                    <td class="fw-bold">@itemLoanType.LoanTypeName</td>
+                                                    @foreach (var itemBank in banks.OrderBy(x => x.BankName).ToList())
+                                                    {
+                                                        var bankName = itemBank.BankName.Trim();
+                                                        var loanTypeID = itemLoanType.LoanTypeID;
+                                                        var amount = bankLoneTypeSum.Where(x => x.BankName.Trim() == bankName && x.LoanTypeID == loanTypeID).FirstOrDefault();
+                                                        if (amount != null)
+                                                        {
+                                                            <td class="fw-bold" style="text-align:right">@String.Format("{0:n0}", amount.OpeningLoanAmount)</td>
+                                                            <td class="fw-bold" style="text-align:right">@String.Format("{0:n0}", amount.CurrentRepaymentAmount)</td>
+                                                            <td class="fw-bold" style="text-align:right">@String.Format("{0:n0}", amount.ClosingBalance)</td>
+                                                        }
+                                                        else
+                                                        {
+                                                            <td class="fw-bold" style="text-align:right">@String.Format("{0:n0}", 0)</td>
+                                                            <td class="fw-bold" style="text-align:right">0</td>
+                                                            <td class="fw-bold" style="text-align:right">0</td>
+                                                        }
+                                                    }
+                                                    @if (loanSum != null)
+                                                    {
+                                                        <td class="fw-bold" style="text-align:right">@String.Format("{0:n0}", loanSum.OpeningLoanAmount)</td>
+                                                        <td class="fw-bold" style="text-align:right">@String.Format("{0:n0}", loanSum.CurrentRepaymentAmount)</td>
+                                                        <td class="fw-bold" style="text-align:right"> @String.Format("{0:n0}", loanSum.ClosingBalance)</td>
+                                                    }
+                                                    else
+                                                    {
+                                                        <td class="fw-bold" style="text-align:right">@String.Format("{0:n0}", 0)</td>
+                                                        <td class="fw-bold bg-info" style="text-align:right">0</td>
+                                                        <td class="fw-bold" style="text-align:right">0</td>
+                                                    }
+                                                </tr>
+
+                                            }
+
+
+                                            <tr>
+
+                                                <td class="fw-bold bg-success text-white" style="text-align:right;" colspan="2">Total</td>
+                                                @foreach (var itemBank in banks.OrderBy(x => x.BankName).ToList())
+                                                {
+                                                    var bankName = itemBank.BankName.Trim();
+                                                    var amount = bankLoneSum.Where(x => x.BankName.Trim() == bankName).FirstOrDefault();
+                                                    if (amount != null)
+                                                    {
+                                                        <td class="fw-bold bg-success text-white" style="text-align:right">@String.Format("{0:n0}", amount.OpeningLoanAmount)</td>
+                                                        <td class="fw-bold bg-success text-white" style="text-align:right">@String.Format("{0:n0}", amount.CurrentRepaymentAmount)</td>
+                                                        <td class="fw-bold bg-success text-white" style="text-align:right">@String.Format("{0:n0}", amount.ClosingBalance)</td>
+                                                    }
+                                                    else
+                                                    {
+                                                        <td class="fw-bold bg-success text-white" style="text-align:right">@String.Format("{0:n0}", 0)</td>
+                                                        <td class="fw-bold bg-success text-white" style="text-align:right">@String.Format("{0:n0}", 0)</td>
+                                                        <td class="fw-bold bg-success text-white" style="text-align:right">0</td>
+                                                    }
+                                                }
+                                                <td class="fw-bold bg-success text-white" style="text-align:right">@String.Format("{0:n0}", compBankSum.Where(x => x.IsForeignLoan == false).Sum(x => x.OpeningLoanAmount))</td>
+                                                <td class="fw-bold bg-success text-white" style="text-align:right">@String.Format("{0:n0}", compBankSum.Where(x => x.IsForeignLoan == false).Sum(x => x.CurrentRepaymentAmount))</td>
+                                                <td class="fw-bold bg-success text-white" style="text-align:right">@String.Format("{0:n0}", compBankSum.Where(x => x.IsForeignLoan == false).Sum(x => x.ClosingBalance))</td>
+                                            </tr>
+                                            <tr>
+                                                <td colspan="@(banks.Count()*3+3)" class="fw-bold text-white bg-success" style="text-align:center">Total Without Packing Credit</td>
+                                                <td class="fw-bold text-white bg-success" style="text-align:right">@String.Format("{0:n0}", compLoanTypeSum.Where(x => x.IsForeignLoan == false && x.LoanTypeID != 3).Sum(x => x.CurrentRepaymentAmount))</td>
+                                                <td class="fw-bold text-white bg-success"></td>
+                                            </tr>
+                                        }
+
+                                    }
+
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            }
+
+            @if (Model.BankLoanPositionData.Where(x => x.IsForeignLoan == true).ToList().Count > 0)
+            {
+                <div class="row">
+                    <div class="col-12 text-center">
+
+                        <h6>Foreign Loan in USD.</h6>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <table class="table table-sm table-bordered">
+                            <thead class="table-dark header" style="vertical-align:middle">
+                                <tr class="text-center" style="font-size:11px;">
+                                    <th rowspan="3">Company</th>
+                                    <th rowspan="3">Loan Type</th>
+                                    @foreach (var itemBank in froeignBanks.OrderBy(x => x.BankName).ToList())
+                                    {
+                                        <th colspan="3">@Model.BankLoanPositionData[0].DateToSTR</th>
+
+                                    }
+                                    <th colspan="3">@Model.BankLoanPositionData[0].DateToSTR</th>
+                                </tr>
+                                <tr>
+                                    @foreach (var itemBank in froeignBanks.OrderBy(x => x.BankName).ToList())
+                                    {
+                                        <th class="text-center" colspan="3" style="font-size: 11px;">@itemBank.BankName</th>
+                                    }
+                                    <th class="text-center" colspan="3" style="font-size: 11px;">Total</th>
+                                </tr>
+                                <tr>
+                                    @foreach (var itemBank in froeignBanks.OrderBy(x => x.BankName).ToList())
+                                    {
+                                    <th class="text-center" style="font-size: 11px;" title="Last Month Position">L M Position</th>
+                                        <th class="text-center" style="font-size: 11px;">Repayment</th>
+                                        <th class="text-center" style="font-size: 11px;">Position</th>
+                                    }
+                                <th class="text-center" style="font-size: 11px;" title="Last Month Position">L M Position</th>
+                                    <th class="text-center" style="font-size: 11px;">Repayment</th>
+                                    <th class="text-center" style="font-size: 11px;">Position</th>
+                                </tr>
+
+                            </thead>
+                            <tbody style="font-size:11px;">
+                                @{ var foreignPrevCompanyID = 0;
+                                    var foreignPrevCompany = "";
+                                    var foreignLastCompany = foreignCompanies.Last();
+                                    foreach (var itemComp in foreignCompanies)
+                                    {
+
+                                        if (foreignPrevCompany != "" && foreignPrevCompany != itemComp.CompanyName)
+                                        {
+                                            <tr>
+                                                <td colspan="2" class="fw-bold bg-info" style="text-align:right">@foreignPrevCompany Sub-Total</td>
+                                                @foreach (var itemBank in froeignBanks.OrderBy(x => x.BankName).ToList())
+                                                {
+
+                                                    var companyID = Convert.ToInt32(foreignPrevCompanyID);
+                                                    var bankName = itemBank.BankName.Trim();
+
+                                                    var amount = compBankSum.Where(x => x.CompanyID == companyID && x.BankName.Trim() == bankName && x.IsForeignLoan == true).FirstOrDefault();
+                                                    if (amount != null)
+                                                    {
+                                                        var loanTypeID = amount.LoanTypeID;
+                                                        <td class="fw-bold bg-info" style="text-align:right">@String.Format("{0:n0}", amount.OpeningLoanAmountUSD)</td>
+                                                        <td class="fw-bold bg-info" style="text-align:right">@String.Format("{0:n0}", amount.CurrentRepaymentAmountUSD)</td>
+                                                        <td class="fw-bold bg-info" style="text-align:right">@String.Format("{0:n0}", amount.ClosingBalanceUSD)</td>
+                                                    }
+                                                    else
+                                                    {
+                                                        <td class="fw-bold bg-info" style="text-align:right">@String.Format("{0:n0}", 0)</td>
+                                                        <td class="fw-bold bg-info" style="text-align:right">@String.Format("{0:n0}", 0)</td>
+                                                        <td class="fw-bold bg-info" style="text-align:right">0</td>
+                                                    }
+                                                }
+                                                <td class="fw-bold bg-info" style="text-align:right">@String.Format("{0:n0}", compBankSum.Where(x => x.CompanyID == Convert.ToInt32(foreignPrevCompanyID) && x.IsForeignLoan == true).Sum(x => x.OpeningLoanAmountUSD))</td>
+                                                <td class="fw-bold bg-info" style="text-align:right">@String.Format("{0:n0}", compBankSum.Where(x => x.CompanyID == Convert.ToInt32(foreignPrevCompanyID) && x.IsForeignLoan == true).Sum(x => x.CurrentRepaymentAmountUSD))</td>
+                                                <td class="fw-bold bg-info" style="text-align:right">@String.Format("{0:n0}", compBankSum.Where(x => x.CompanyID == Convert.ToInt32(foreignPrevCompanyID) && x.IsForeignLoan == true).Sum(x => x.ClosingBalanceUSD))</td>
+                                            </tr>
+
+                                        }
+
+
+                                        foreach (var itemLoanType in foreignLoanTypes)
+                                        {
+                                            var compLoanSum = compLoanTypeSum.Where(x => x.CompanyID == itemComp.CompanyID && x.LoanTypeID == itemLoanType.LoanTypeID && x.IsForeignLoan == true).FirstOrDefault();
+                            <tr>
+                                @if (foreignPrevCompany != itemComp.CompanyName)
+                                {
+                                    <td class="fw-bold" style="vertical-align:middle;" rowspan="@foreignLoanTypes.Count">@itemComp.CompanyName</td>
+                                }
+                                <td class="fw-bold">@itemLoanType.LoanTypeName</td>
+                                @foreach (var itemBank in froeignBanks.OrderBy(x => x.BankName).ToList())
+                                {
+                                    var bankID = 0;
+                                    var companyID = itemComp.CompanyID;
+
+                                    var loanTypeID = itemLoanType.LoanTypeID;
+                                    var bankName = itemBank.BankName.Trim();
+                                    var bank = banksWithID.Where(x => x.CompanyID == companyID && x.BankName == bankName).FirstOrDefault();
+                                    if (bank != null)
+                                    {
+                                        bankID = bank.BankId;
+                                    }
+                                    var loanDataList = Model.BankLoanPositionData.Where(x => x.CompanyID == companyID && x.BankName.Trim() == bankName && x.LoanTypeID == loanTypeID).ToList();
+                                    bool isOk = true;
+                                    var title = "";
+                                    foreach (var itemLoan in loanDataList)
+                                    {
+                                        if (((itemLoan.EndDate.Value.Date < DateTime.Now.Date) && itemLoan.ClosingBalance > 0) || (itemLoan.LoanLimitAmount < itemLoan.ClosingBalance && itemLoan.LoanTypeID == 2))
+                                        {
+                                            isOk = false;
+                                            title = "Loan Maturity Date or Limit Issue Inside";
+                                            break;
+                                        }
+                                    }
+                                    var bgColor = "";
+                                    if (!isOk) { bgColor = "text-danger"; }
+
+                                    var amount = compBankLoneTypeSum.Where(x => x.CompanyID == companyID && x.BankName.Trim() == bankName && x.LoanTypeID == loanTypeID).FirstOrDefault();
+                                    if (amount != null)
+                                    {
+                                        <td class="fw-bold" style="text-align:right">@String.Format("{0:n0}", amount.OpeningLoanAmountUSD)</td>
+                                        <td class="fw-bold" style="text-align:right">@String.Format("{0:n0}", amount.CurrentRepaymentAmountUSD)</td>                                        
+                                        <td class="fw-bold @bgColor" style="text-align:right"><a title="@title" href="javascript:void();" onclick="showDetail('@Model.DateFrom','@Model.DateTo',@companyID,@bankID,@loanTypeID)">@String.Format("{0:n0}", amount.ClosingBalanceUSD)</a></td>
+                                    }
+                                    else
+                                    {
+                                        <td class="fw-bold" style="text-align:right">@String.Format("{0:n0}", 0)</td>
+                                        <td class="fw-bold" style="text-align:right">0</td>
+                                        <td class="fw-bold" style="text-align:right">0</td>
+                                    }
+                                }
+                                @if (compLoanSum != null)
+                                {
+                                    <td class="fw-bold" style="text-align:right">@String.Format("{0:n0}", compLoanSum.OpeningLoanAmountUSD)</td>
+                                    <td class="fw-bold" style="text-align:right">@String.Format("{0:n0}", compLoanSum.CurrentRepaymentAmountUSD)</td>
+                                    <td class="fw-bold" style="text-align:right"> @String.Format("{0:n0}", compLoanSum.ClosingBalanceUSD)</td>
+                                }
+                                else
+                                {
+                                    <td class="fw-bold" style="text-align:right">@String.Format("{0:n0}", 0)</td>
+                                    <td class="fw-bold" style="text-align:right">0</td>
+                                    <td class="fw-bold" style="text-align:right">0</td>
+                                }
+
+
+                            </tr>
+                                            foreignPrevCompany = itemComp.CompanyName;
+                                            foreignPrevCompanyID = itemComp.CompanyID;
+                                        }
+                                        if (itemComp.Equals(foreignLastCompany))
+                                        {
+                                            <tr>
+                                                <td colspan="2" class="fw-bold bg-info" style="text-align:right">@itemComp.CompanyName Sub-Total</td>
+                                                @foreach (var itemBank in froeignBanks.OrderBy(x => x.BankName).ToList())
+                                                {
+                                                    var companyID = itemComp.CompanyID;
+                                                    var bankName = itemBank.BankName.Trim();
+
+
+                                                    var amount = compBankSum.Where(x => x.CompanyID == companyID && x.BankName.Trim() == bankName && x.IsForeignLoan == true).FirstOrDefault();
+                                                    if (amount != null)
+                                                    {
+                                                        <td class="fw-bold bg-info" style="text-align:right">@String.Format("{0:n0}", amount.OpeningLoanAmountUSD)</td>
+                                                        <td class="fw-bold bg-info" style="text-align:right">@String.Format("{0:n0}", amount.CurrentRepaymentAmountUSD)</td>
+                                                        <td class="fw-bold bg-info" style="text-align:right">@String.Format("{0:n0}", amount.ClosingBalanceUSD)</td>
+                                                    }
+                                                    else
+                                                    {
+                                                        <td class="fw-bold bg-info" style="text-align:right">0</td>
+                                                        <td class="fw-bold bg-info" style="text-align:right">0</td>
+                                                        <td class="fw-bold bg-info" style="text-align:right">0</td>
+                                                    }
+                                                }
+                                                <td class="fw-bold bg-info" style="text-align:right">@String.Format("{0:n0}", compBankSum.Where(x => x.CompanyID == itemComp.CompanyID && x.IsForeignLoan == true).Sum(x => x.OpeningLoanAmountUSD))</td>
+                                                <td class="fw-bold bg-info" style="text-align:right">@String.Format("{0:n0}", compBankSum.Where(x => x.CompanyID == itemComp.CompanyID && x.IsForeignLoan == true).Sum(x => x.CurrentRepaymentAmountUSD))</td>
+                                                <td class="fw-bold bg-info" style="text-align:right">@String.Format("{0:n0}", compBankSum.Where(x => x.CompanyID == itemComp.CompanyID && x.IsForeignLoan == true).Sum(x => x.ClosingBalanceUSD))</td>
+                                            </tr>
+                                            <tr>
+                                                <td colspan="2" class="fw-bold bg-success text-white" style="text-align:right">Total</td>
+                                                @foreach (var itemBank in froeignBanks.OrderBy(x => x.BankName).ToList())
+                                                {
+                                                    var bankName = itemBank.BankName.Trim();
+
+                                                    var amount = bankLoneSum.Where(x => x.BankName.Trim() == bankName && x.IsForeignLoan == true).FirstOrDefault();
+                                                    if (amount != null)
+                                                    {
+                                                        <td class="fw-bold text-white bg-success" style="text-align:right">@String.Format("{0:n0}", amount.OpeningLoanAmountUSD)</td>
+                                                        <td class="fw-bold text-white bg-success" style="text-align:right">@String.Format("{0:n0}", amount.CurrentRepaymentAmountUSD)</td>
+                                                        <td class="fw-bold text-white bg-success" style="text-align:right">@String.Format("{0:n0}", amount.ClosingBalanceUSD)</td>
+                                                    }
+                                                    else
+                                                    {
+                                                        <td class="fw-bold text-white bg-success" style="text-align:right">0</td>
+                                                        <td class="fw-bold text-white bg-success" style="text-align:right">0</td>
+                                                        <td class="fw-bold text-white bg-success" style="text-align:right">0</td>
+                                                    }
+                                                }
+                                                <td class="fw-bold text-white bg-success" style="text-align:right">@String.Format("{0:n0}", compBankSum.Where(x => x.IsForeignLoan == true).Sum(x => x.OpeningLoanAmountUSD))</td>
+                                                <td class="fw-bold text-white bg-success" style="text-align:right">@String.Format("{0:n0}", compBankSum.Where(x => x.IsForeignLoan == true).Sum(x => x.CurrentRepaymentAmountUSD))</td>
+                                                <td class="fw-bold text-white bg-success" style="text-align:right">@String.Format("{0:n0}", compBankSum.Where(c => c.IsForeignLoan == true).Sum(x => x.ClosingBalanceUSD))</td>
+                                            </tr>
+
+                                            <tr><td colspan="@(froeignBanks.Count*3 +4)">&nbsp;</td></tr>
+
+                                            var firstLoanType = foreignLoanTypes.First();
+                                            foreach (var itemLoanType in foreignLoanTypes)
+                                            {
+                                                var loanSum = loneTypeSum.Where(x => x.LoanTypeID ==itemLoanType.LoanTypeID && x.IsForeignLoan == true).FirstOrDefault();
+                                                
+                                                <tr>
+                                                    @if (itemLoanType.Equals(firstLoanType))
+                                                    {
+                                                        <td class="fw-bold" style="vertical-align:middle;" rowspan="@foreignLoanTypes.Count">Bank and Loan Type Wise Total</td>
+                                                    }
+
+
+                                                    <td class="fw-bold">@itemLoanType.LoanTypeName</td>
+                                                    @foreach (var itemBank in froeignBanks.OrderBy(x => x.BankName).ToList())
+                                                    {
+                                                        var bankName = itemBank.BankName.Trim();
+                                                        var loanTypeID = itemLoanType.LoanTypeID;
+                                                        var amount = bankLoneTypeSum.Where(x => x.BankName.Trim() == bankName && x.LoanTypeID == loanTypeID && x.IsForeignLoan == true).FirstOrDefault();
+                                                        if (amount != null)
+                                                        {
+                                                            <td class="fw-bold" style="text-align:right">@String.Format("{0:n0}", amount.OpeningLoanAmountUSD)</td>
+                                                            <td class="fw-bold" style="text-align:right">@String.Format("{0:n0}", amount.CurrentRepaymentAmountUSD)</td>
+                                                            <td class="fw-bold" style="text-align:right">@String.Format("{0:n0}", amount.ClosingBalanceUSD)</td>
+                                                        }
+                                                        else
+                                                        {
+                                                            <td class="fw-bold" style="text-align:right">0</td>
+                                                            <td class="fw-bold" style="text-align:right">0</td>
+                                                            <td class="fw-bold" style="text-align:right">0</td>
+                                                        }
+                                                    }
+                                                    @if (loanSum != null)
+                                                    {
+                                                        <td class="fw-bold" style="text-align:right">@String.Format("{0:n0}", loanSum.OpeningLoanAmountUSD)</td>
+                                                        <td class="fw-bold" style="text-align:right">@String.Format("{0:n0}", loanSum.CurrentRepaymentAmountUSD)</td>
+                                                        <td class="fw-bold" style="text-align:right"> @String.Format("{0:n0}", loanSum.ClosingBalanceUSD)</td>
+                                                    }
+                                                    else
+                                                    {
+                                                        <td class="fw-bold" style="text-align:right">0</td>
+                                                        <td class="fw-bold bg-info" style="text-align:right">0</td>
+                                                        <td class="fw-bold" style="text-align:right">0</td>
+                                                    }
+                                                </tr>
+
+                                            }
+
+
+                                            <tr>
+
+                                                <td class="fw-bold bg-success text-white" style="text-align:right;" colspan="2">Total</td>
+                                                @foreach (var itemBank in froeignBanks.OrderBy(x=>x.BankName).ToList())
+                                                {
+                                                    var bankName = itemBank.BankName.Trim();
+                                                    var amount = bankLoneSum.Where(x => x.BankName.Trim() == bankName && x.IsForeignLoan == true).FirstOrDefault();
+                                                    if (amount != null)
+                                                    {
+                                                        <td class="fw-bold bg-success text-white" style="text-align:right">@String.Format("{0:n0}", amount.OpeningLoanAmountUSD)</td>
+                                                        <td class="fw-bold bg-success text-white" style="text-align:right">@String.Format("{0:n0}", amount.CurrentRepaymentAmountUSD)</td>
+                                                        <td class="fw-bold bg-success text-white" style="text-align:right">@String.Format("{0:n0}", amount.ClosingBalanceUSD)</td>
+                                                    }
+                                                    else
+                                                    {
+                                                        <td class="fw-bold bg-success text-white" style="text-align:right">@String.Format("{0:n0}", 0)</td>
+                                                        <td class="fw-bold bg-success text-white" style="text-align:right">@String.Format("{0:n0}", 0)</td>
+                                                        <td class="fw-bold bg-success text-white" style="text-align:right">0</td>
+                                                    }
+                                                }
+                                                <td class="fw-bold bg-success text-white" style="text-align:right">@String.Format("{0:n0}", compBankSum.Where(x => x.IsForeignLoan == true).Sum(x => x.OpeningLoanAmountUSD))</td>
+                                                <td class="fw-bold bg-success text-white" style="text-align:right">@String.Format("{0:n0}", compBankSum.Where(x => x.IsForeignLoan == true).Sum(x => x.CurrentRepaymentAmountUSD))</td>
+                                                <td class="fw-bold bg-success text-white" style="text-align:right">@String.Format("{0:n0}", compBankSum.Where(x => x.IsForeignLoan == true).Sum(x => x.ClosingBalanceUSD))</td>
+                                            </tr>
+                                        }
+
+                                    }
+
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+
+
+            }
+            else
+            {
+                <p class="text-danger justify-content-center">No Foreign Data Found.</p>
+            }
+
+        </div>
+        <div class="text-center">
+            <input type="button" class="btn btn-sm btn-success" value="Excel" id="btnPdf" onclick="exportToExcel()" />
+        </div>
+    </div>
+</body>
+
+
+
+</html>
+
+
+<script type="text/javascript">
+    function showDetail(dateFrom, dateTo, companyID, bankID, loanTypeID) {
+        debugger;
+        let url = `/Embro/Loan/BankLoanGroupDetail?DateFrom=${dateFrom}&DateTo=${dateTo}&CompanyID=${companyID}&BankID=${bankID}&LoanTypeID=${loanTypeID}`;
+        let title = 'Bank Loan Position Bank Group';
+        const h = screen.height - screen.height / 5;
+        const w = screen.width - screen.width / 20;
+        var y = window.outerHeight / 2 + window.screenY - (h / 2)
+        var x = window.outerWidth / 2 + window.screenX - (w / 2)
+        return window.open(url, title, 'toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=yes, resizable=yes, copyhistory=no, width=' + w + ', height=' + h + ', top=' + y + ', left=' + x);
+
+
+    }
+    function exportToExcel() {
+        var htmls = "";
+        var uri = 'data:application/vnd.ms-excel;base64,';
+        var template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>';
+        var base64 = function (s) {
+            return window.btoa(unescape(encodeURIComponent(s)))
+        };
+
+        var format = function (s, c) {
+            return s.replace(/{(\w+)}/g, function (m, p) {
+                return c[p];
+            })
+        };
+
+        htmls = document.getElementById("tblBankLoanSummary").innerHTML;
+
+        var ctx = {
+            worksheet: 'Worksheet',
+            table: htmls
+        }
+        var link = document.createElement("a");
+        link.download = "BankLiabilitySummary.xls";
+        link.href = uri + base64(format(template, ctx));
+        link.click();
+    }
+
+</script>

@@ -1,0 +1,223 @@
+﻿@model RG.Application.ViewModel.FiniteScheduler.Business.MachineMaintenance.MonthlyMachineMaintainceVM
+@{
+    ViewData[PageInfo.PageTitle] = "Preventative Maintaince";
+    ViewData[PageInfo.PageHeader] = "Monthly Schedule Maintenance"; 
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+
+}
+
+<form id="AspNetRolesCreate" method="post">
+    <div class="row">
+        <div class="col-md-3">
+            <div class="form-group">
+                <label asp-for="CompanyID" class="label-ajt-sm required"></label>
+                <select asp-for="CompanyID" asp-items="Model.DDLCompany" class="form-control form-control-sm"></select>
+                <span asp-validation-for="CompanyID" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="form-group">
+                <label asp-for="LocationID" class="label-ajt-sm required"></label>
+                <select asp-for="LocationID" asp-items="Model.DDLLocation" class="form-control form-control-sm"></select>
+                <span asp-validation-for="LocationID" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="form-group">
+                <label asp-for="MonthID" class="label-ajt-sm required"></label>
+                <select asp-for="MonthID" asp-items="Model.DDLMonth" class="form-control form-control-sm"></select>
+                <span asp-validation-for="MonthID" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="form-group">
+                <label asp-for="YearID" class="label-ajt-sm required"></label>
+                <select asp-for="YearID" asp-items="Model.DDLYear" class="form-control form-control-sm"></select>
+                <span asp-validation-for="YearID" class="text-danger"></span>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-4">
+
+            <div class="form-group">
+                <button type="button" class="btn btn-sm btn-success" id="btnShow">Show</button>
+                <button type="button" class="btn btn-sm btn-danger" id="btnPDF">PDF</button>
+                <button type="button" class="btn btn-sm btn-warning" id="btnExcel">Excel</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-sm-12 col-md-12">
+
+            <table class="table table-sm table-bordered table-striped" id="">
+
+                <tbody id="MachineMaintaincePreventativeCheckListStatus">
+                </tbody>
+
+            </table>
+
+        </div>
+    </div>
+
+</form>
+@section scripts{
+    <script type="text/javascript">
+        $(function () {
+
+            $("#CompanyID").change(function () {
+                let companyID = $("#CompanyID").val();
+                if (companyID != "") {
+                    HttpRequest.DropDown("Get", "/FiniteScheduler/CommonDropDown/GetDDLCompanyWiseLocation", { "companyID": companyID }, "LocationID", "");
+                }
+
+            });
+
+        });
+        $("#btnShow").click(function () {
+            let locationId = RtnNumber($("#LocationID").val());
+            let monthID = RtnNumber($("#MonthID").val());
+            let year = RtnNumber($("#YearID").val());
+            if (locationId > 0 && monthID > 0 && year > 0) {
+                GetMonthlyScheduleMaintenanceOfAOPforMonth();
+            }
+        });
+
+        function GetMonthlyScheduleMaintenanceOfAOPforMonth() {
+            let locationId = RtnNumber($("#LocationID").val());
+            let month = RtnNumber($("#MonthID").val());
+            let year = RtnNumber($("#YearID").val());
+
+            var data = HttpRequest.AjaxData("GET", "/FiniteScheduler/MachineMaintenance/GetMonthlyMachineMaintainceReport", { "locationID": locationId, 'month': month, 'year': year });
+            if (data.length > 0) {
+                // let allItem = '';
+                let dateTR = '';
+                let daysTR = '';
+                let checkListStatus = '';
+                let machineName = '';
+                let tableTbodyTR = '';
+                let sl = 1;
+                $("#MachineMaintaincePreventativeCheckListStatus").html("");
+                let headerRow = 0;
+
+                    for (var rowIndex = 0; rowIndex < data.length; rowIndex) {
+
+                        if (headerRow == rowIndex) {
+                            machineName = data[rowIndex].MachineName;
+                            dateTR += '<tr><td></td>'
+                            daysTR += '<tr><td>Name Of Machine</td>'
+                            checkListStatus += '<tr><td>' + machineName + '</td>'
+                            for (var columnIndex = 0; columnIndex < data.length; columnIndex++) {
+
+                                if (machineName == data[columnIndex].MachineName) {
+                                    dateTR += '<td>' + data[columnIndex].DaysSerial + '</td>'
+                                    daysTR += '<td>' + data[columnIndex].DaysName + '</td>'
+
+                                    if (data[columnIndex].ScheduleDayDifference != null) {
+                                        let scheduleDayDiff = parseInt(data[columnIndex].ScheduleDayDifference);
+                                        if (scheduleDayDiff >= 0) {
+                                            checkListStatus += '<td class="bg-success text-white"></td>'
+                                        } else {
+                                            checkListStatus += '<td class="bg-warning text-dark"></td>'
+                                        }
+
+                                    } else {
+
+                                        if (data[columnIndex].NextDayDifference != null) {
+                                            debugger
+                                            let nextDaydiff = parseInt(data[columnIndex].NextDayDifference);
+                                            if (nextDaydiff <= 0) {
+                                                checkListStatus += '<td class="bg-danger text-white"></td>'
+                                            } else {
+                                                checkListStatus += '<td class="bg-dark text-white"></td>'
+                                            }
+
+                                        }
+
+                                        else {
+                                            checkListStatus += '<td></td>'
+                                        }
+
+                                    }
+
+                                    rowIndex++;
+                                }
+                            }
+
+                             dateTR += '</tr>'
+                             daysTR + '</tr>'
+                             checkListStatus += '</tr>'
+
+                        } else {
+
+                            machineName = data[rowIndex].MachineName;
+                            checkListStatus += '<tr><td>' + machineName + '</td>'
+                            for (var columnIndex = 0; columnIndex < data.length; columnIndex++) {
+
+                                if (machineName == data[columnIndex].MachineName) {
+
+                                    if (data[columnIndex].ScheduleDayDifference != null) {
+                                        let scheduleDayDiff = parseInt(data[columnIndex].ScheduleDayDifference);
+                                        if (scheduleDayDiff >= 0) {
+                                            checkListStatus += '<td class="bg-success text-white"></td>'
+                                        } else {
+                                            checkListStatus += '<td class="bg-warning text-dark"></td>'
+                                        }
+
+                                    } else {
+
+                                        if (data[columnIndex].NextDayDifference != null) {
+                                            debugger
+                                            let nextDaydiff = parseInt(data[columnIndex].NextDayDifference);
+                                            if (nextDaydiff <= 0) {
+                                                checkListStatus += '<td class="bg-danger text-white"></td>'
+                                            } else {
+                                                checkListStatus += '<td class="bg-dark text-white"></td>'
+                                            }
+
+                                        }
+
+                                        else {
+                                            checkListStatus += '<td></td>'
+                                        }
+
+                                    }
+
+                                    rowIndex++;
+                                }
+                            }
+
+                             checkListStatus += '</tr>'
+                        }
+                    }
+                tableTbodyTR = dateTR + daysTR + checkListStatus;
+                $("#MachineMaintaincePreventativeCheckListStatus").html(tableTbodyTR);
+
+            }
+        }
+
+        function LocationMonthlyScheduleMaintenceReport(reportFormat){
+            debugger;
+            let LocationID = $("#LocationID").val();
+            let MonthID = $("#MonthID").val();
+            let YearID = $("#YearID").val();
+            if (MonthID.length > 0) {
+                window.open("/FiniteScheduler/MachineMaintenance/MonthlyMachineMaintainceReport?LocationID=" + LocationID + "&Month=" + MonthID + "&Year=" + YearID + "&ReportFormat=" + reportFormat, "Location wise Monthly Schedule Maintence Report", "status=1,toolbar=0");
+            }
+            return false;
+        }
+
+        $("#btnPDF").click(function () {
+               LocationMonthlyScheduleMaintenceReport("@ReportExportFormat.PdfFormat");
+
+           });
+
+        $("#btnExcel").click(function () {
+                   LocationMonthlyScheduleMaintenceReport("@ReportExportFormat.ExcelFormat");
+
+            });
+    </script>
+
+}

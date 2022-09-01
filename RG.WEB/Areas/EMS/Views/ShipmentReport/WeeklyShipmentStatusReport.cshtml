@@ -1,0 +1,203 @@
+﻿@model List<RG.Application.Contracts.EMS.Business.ExportDocuments.Queries.RequestResponseModel.WeeklyShipmentStatusRM>
+@{
+    Layout = null;
+
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Shipment Status Report</title>
+    <link href="~/AdminLTE-3.1.0/plugins/jquery-ui/jquery-ui.min.css" rel="stylesheet" />
+    <link href="~/lib/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <script src="~/AdminLTE-3.1.0/plugins/jquery/jquery.min.js"></script>
+    <script src="~/AdminLTE-3.1.0/plugins/jquery-ui/jquery-ui.min.js"></script>
+    <script src="~/AdminLTE-3.1.0/plugins/bootstrap/js/bootstrap.bundle.js"></script>
+
+
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.12/css/jquery.dataTables.min.css" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/1.2.2/css/buttons.dataTables.min.css" />
+    <script type="text/javascript" src="https://code.jquery.com/jquery-1.12.3.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.2.2/js/dataTables.buttons.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/2.5.0/jszip.min.js"></script>
+    <script type="text/javascript" src="https://cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/pdfmake.min.js"></script>
+    <script type="text/javascript" src="https://cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/vfs_fonts.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.2.2/js/buttons.html5.min.js"></script>
+
+    <style>
+        .header {
+            position: sticky;
+            top: 0;
+        }
+       /* .shipmentNotFulfilled {
+            background-color: #6236e4 !important;
+            color: white;
+        }*/
+
+        /*.nonGbcColor {
+            background-color: #8c69f2 !important;
+            color: white;
+        }*/
+    </style>
+
+</head>
+
+<body>
+
+    <div class="container-fluid">
+        @if (Model.Count > 0)
+        {
+            <div class="row">
+                <div class="col-12 text-center">
+                    <h5 class="mb-0">Robintex Group</h5>
+                    <h6 class="mb-0">Shipment Status Report</h6>
+                    @*<h6 class="mb-0">Week- @Model.First().WeekNo</h6>*@
+                    @*<h6 class="mb-0">Shipment Mode - SEA</h6>*@
+                </div>
+            </div>
+
+
+            <table class="table table-sm table-bordered table-striped text-sm text-center display nowrap" id="tblShipmentStatus" style="font-size:11px;">
+                <thead class="bg-dark text-white header">
+                    <tr>
+                        <th>SL#</th>
+                        <th>Week</th>
+                        <th>Month</th>
+                        <th>No Of Order</th>
+                        <th>No Of Invoice</th>
+                        <th>Scheduled Shipment Qty</th>
+                        <th>Invoice Qty</th>
+                        <th>Invoice Amt</th>
+                        <th>Negotiate Amt</th>
+                        <th>Received Amt</th>
+                        <th>Outstanding Amt</th>
+                        
+
+                    </tr>
+
+                </thead>
+                <tbody>
+                    @{
+                        var sl = 1;
+
+
+
+
+                        foreach (var item in Model)
+                        {
+
+                            var invoiceBgClass = "";
+                            var invoiceTitle = "";
+                            if (item.ScheduleShipment> item.InvoiceQty)
+                            {
+                                invoiceBgClass = "bg-warning";
+                                invoiceTitle = "Scheduled shipment not fulfilled";
+                            }
+
+                                        <tr class="" title="">
+                                            <th>@(sl++)</th>
+                                            <th>
+                                                <a title="@item.WeekPeriodMsg" style="color:blue !important; cursor:pointer;" onclick="window.open(`/EMS/ShipmentReport/WeeklyExportDetailsReport?exFactoryDateFrom=${'@item.Period_Start.ToString("dd-MMM-yyyy")'}&exFactoryDateTo=${'@item.Period_End.ToString("dd-MMM-yyyy")'}`, '_blank', 'location=yes,height=570,width=1000,scrollbars=yes,status=yes');">
+                                                    @item.Period_Name
+                                                </a>
+                                            </th>
+                                            
+                                            <th>@item.ExportMonth</th>
+                                            <th>@item.NoOfOrder</th>
+                                            <th>@item.NoOfInvoice</th>
+                                            <th class="@invoiceBgClass" title="@invoiceTitle">
+                                                <a style="cursor:pointer;"
+                                                   onclick="window.open(`/Maxco/OrderReports/OrderShipmentBalanceReport?buyerID=${0}&orderID=${0}&dateFrom=${'@item.Period_Start.ToString("dd-MMM-yyyy")'}&dateTo=${'@item.Period_End.ToString("dd-MMM-yyyy")'}`, '_blank', 'location=yes,height=570,width=1000,scrollbars=yes,status=yes');">
+                                                    @String.Format("{0:n0}", item.ScheduleShipment)
+                                                </a>
+                                            </th>
+                                            <th>@String.Format("{0:n0}", item.InvoiceQty)</th>
+
+
+
+                                            <th>@String.Format("{0:n2}", item.InvoiceAmt)</th>
+                                            <th>@String.Format("{0:n2}", item.NegotiateAmt)</th>
+                                            <th>@String.Format("{0:n2}", item.ReceivedAmt)</th>
+                                            <th>@String.Format("{0:n2}", item.OutstandingAmt )</th>
+                                        </tr>
+
+
+                        }
+                    }
+                </tbody>
+            </table>
+            <div class="text-center">
+                <input type="button" class="btn btn-sm btn-success" value="Excel" id="btnPdf" onclick="exportToExcel()" />
+            </div>
+        }
+        else
+        {
+            <div class="row">
+                <div class="col-sm-12 text-center">
+                    <label class="text-danger">No Data Found</label>
+                </div>
+            </div>
+        }
+    </div>
+
+</body>
+
+</html>
+
+<script type="text/javascript">
+
+    function newWindow(url, title) {
+        const h = screen.height - screen.height / 5;
+        const w = screen.width - screen.width / 20;
+        var y = window.outerHeight / 2 + window.screenY - (h / 2)
+        var x = window.outerWidth / 2 + window.screenX - (w / 2)
+        var a = window.open()
+        return window.open(url, title, 'toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=yes, resizable=yes, copyhistory=no, width=' + w + ', height=' + h + ', top=' + y + ', left=' + x);
+    }
+
+    const GetDetails = (Period_Start, Period_End) => {
+        debugger
+        let exFactoryDateFrom = Period_Start;
+        let exFactoryDateTo = Period_End;
+
+        if (exFactoryDateFrom != "" && exFactoryDateTo != "") {
+            //let a = `/EMS/ShipmentReport/WeeklyExportDetailsReport?exFactoryDateFrom=${encodeURIComponent(exFactoryDateFrom)}&exFactoryDateTo=${encodeURIComponent(exFactoryDateTo)}`
+            var urlParm = `exFactoryDateFrom=${encodeURIComponent(exFactoryDateFrom)}&exFactoryDateTo=${encodeURIComponent(exFactoryDateTo)}`;
+            const fullUrl = `/EMS/ShipmentReport/WeeklyExportDetailsReport?${urlParm}`;
+
+            newWindow(fullUrl, "Shipment Status");
+        } else {
+            $.alert.open("Please provide dates");
+        }
+    }
+    function exportToExcel() {
+        var htmls = "";
+        var uri = 'data:application/vnd.ms-excel;base64,';
+        var template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>';
+        var base64 = function (s) {
+            return window.btoa(unescape(encodeURIComponent(s)))
+        };
+
+        var format = function (s, c) {
+            return s.replace(/{(\w+)}/g, function (m, p) {
+                return c[p];
+            })
+        };
+
+        htmls = document.getElementById("tblShipmentStatus").innerHTML;
+
+        var ctx = {
+            worksheet: 'Worksheet',
+            table: htmls
+        }
+        var link = document.createElement("a");
+        link.download = "ShipmentStatusReport.xls";
+        link.href = uri + base64(format(template, ctx));
+        link.click();
+    }
+    $(function () {
+
+    });
+</script>
+
+

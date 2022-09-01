@@ -1,0 +1,421 @@
+﻿@model RG.Application.ViewModel.AlgoHR.Business.OutsideDuty.ApplicationSearchVM
+@{
+    ViewData[PageInfo.PageTitle] = "My Applications";
+    ViewData[PageInfo.PageHeader] = "My Applications";
+    ViewData[PageInfo.btnText1] = "Create New";
+    ViewData[PageInfo.PageLink1] = "/AlgoHR/OutsideDuty/Application";
+    if (Model.ShowApplicationForAll)
+    {
+        ViewData[PageInfo.PageLink1] = "/AlgoHR/OutsideDuty/ApplicationForOther";
+    }
+    ViewData[PageInfo.btnClass1] = "btn-success";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<form class="">
+    <div class="card card-default">
+        <div class="card-body p-2">
+            @if (Model.ShowApplicationForAll)
+            {
+                <div class="row pt-0">
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label asp-for="CompanyID"></label>
+                            <select class="form-control form-control-sm" multiple="multiple" asp-for="CompanyID" asp-items="Model.DDLCompany">
+                            </select>
+                            <span asp-validation-for="CompanyID" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label asp-for="DivisionID"></label>
+                            <select class="form-control form-control-sm" multiple="multiple" asp-for="DivisionID" asp-items="Model.DDLDivision">
+                            </select>
+                            <span asp-validation-for="DivisionID" class="text-danger"></span>
+                        </div>
+                    </div>
+                    @*<div class="col-sm-3">
+                        <div class="form-group">
+                            <label asp-for="DepartmentID"></label>
+                            <select class="form-control form-control-sm" multiple="multiple" asp-for="DepartmentID" asp-items="Model.DDLDepartment">
+                            </select>
+                            <span asp-validation-for="DepartmentID" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="form-group">
+                            <label asp-for="SectionID"></label>
+                            <select class="form-control form-control-sm" multiple="multiple" asp-for="SectionID" asp-items="Model.DDLSection">
+                            </select>
+                            <span asp-validation-for="SectionID" class="text-danger"></span>
+                        </div>
+                    </div>*@
+                </div>
+                <div class="row pt-0">
+                    @*<div class="col-sm-4">
+                        <div class="form-group">
+                            <label asp-for="CompanyID"></label>
+                            <select class="form-control form-control-sm" multiple="multiple" asp-for="CompanyID" asp-items="Model.DDLCompany">
+                            </select>
+                            <span asp-validation-for="CompanyID" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-sm-2">
+                        <div class="form-group">
+                            <label asp-for="DivisionID"></label>
+                            <select class="form-control form-control-sm" multiple="multiple" asp-for="DivisionID" asp-items="Model.DDLDivision">
+                            </select>
+                            <span asp-validation-for="DivisionID" class="text-danger"></span>
+                        </div>
+                    </div>*@
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label asp-for="DepartmentID"></label>
+                            <select class="form-control form-control-sm" multiple="multiple" asp-for="DepartmentID" asp-items="Model.DDLDepartment">
+                            </select>
+                            <span asp-validation-for="DepartmentID" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label asp-for="SectionID"></label>
+                            <select class="form-control form-control-sm" multiple="multiple" asp-for="SectionID" asp-items="Model.DDLSection">
+                            </select>
+                            <span asp-validation-for="SectionID" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+            }
+            <div class="row">
+                @if (Model.ShowApplicationForAll)
+                {
+                    <div class="col-12 col-sm-6 col-md-6">
+                        <div class="form-group">
+                            <label asp-for="EmployeeID"></label>
+                            <select class="form-control form-control-sm" multiple="multiple" asp-for="EmployeeID" asp-items="Model.DDLEmployee">
+                            </select>
+                            <span asp-validation-for="EmployeeID" class="text-danger"></span>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="col-12 col-sm-6 col-md-6">
+                        <input type="hidden" asp-for="EmployeeID" />
+                        <div class="form-group mb-2">
+                            <label asp-for="EmployeeName" class=""></label>
+                            <input type="text" asp-for="EmployeeName" id="EmpCode" class="form-control form-control-sm" readonly />
+                        </div>
+                    </div>
+                }
+                <div class="col-12 col-sm-4 col-md-4 col-lg-4">
+                    <div class="input-group">
+                        <div class="col-6 col-sm-6 col-md-6 col-lg-6 pl-0">
+                            <div class="form-group">
+                                <label asp-for="TaskDateFrom" class=""></label>
+                                <div class="input-group">
+                                    <input type="text" asp-for="TaskDateFrom" class="form-control form-control-sm dateField readonlyNormal" readonly />
+                                    <div class="input-group-append">
+                                        <span class="input-group-text"><i class="fa fa-calendar" aria-hidden="true"></i></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-sm-6 col-md-6 col-lg-6 pl-0">
+                            <div class="form-group">
+                                <label asp-for="TaskDateTo" class=""></label>
+                                <div class="input-group">
+                                    <input type="text" asp-for="TaskDateTo" class="form-control form-control-sm dateField readonlyNormal" readonly />
+                                    <div class="input-group-append">
+                                        <span class="input-group-text"><i class="fa fa-calendar" aria-hidden="true"></i></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-2">
+                    <div class="form-group">
+                        <label asp-for="ApplicationStatus"></label>
+                        <select class="form-control form-control-sm" asp-for="ApplicationStatus" asp-items="Model.DDLApplicationStatus">
+                        </select>
+                        <span asp-validation-for="ApplicationStatus" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row pt-1 justify-content-center">
+                <input type="button" class="btn btn-sm btn-warning" id="btnSearch" value="Search" />
+            </div>
+            <div class="row mt-1">
+                <div class="col-md-12 col-sm-12 col-xs-12">
+                    <div class="table-responsive-sm" id="grid">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+
+@section scripts{
+    <script type="text/javascript">
+        function getSelect2MultipleSelection(htmlControlId) {
+            let returnValue = new Array();
+            let selectedValue = $(`#${htmlControlId}`).val();
+            $.each(selectedValue, function (i, v) {
+                let values = v.split(',');
+                $.each(values, function (j, k) {
+                    returnValue.push(k);
+                });
+            });
+            return returnValue;
+        }
+
+        function companyWiseDivision() {
+
+            let companyID = getSelect2MultipleSelection("CompanyID");
+            HttpRequest.DropDownSelect2("POST", "/AlgoHR/UserDepartmentAccess/GetDDLUserDivision", { Companys: companyID }, 'DivisionID', true);
+            $("#DivisionID").trigger('change');
+        }
+        function DivisionWiseDepartment() {
+
+            let division = getSelect2MultipleSelection("DivisionID");
+            HttpRequest.DropDownSelect2("POST", "/AlgoHR/UserDepartmentAccess/GetDDLUserDepartment", { Divisions: division }, 'DepartmentID', true);
+            $("#DepartmentID").trigger('change');
+        }
+        function DepartmentWiseSection() {
+
+            let department = getSelect2MultipleSelection("DepartmentID");
+            HttpRequest.DropDownSelect2("POST", "/AlgoHR/UserDepartmentAccess/GetDDLUserSection", { Departments: department }, 'SectionID', true);
+            $("#SectionID").trigger('change');
+        }
+
+        function GetEmployeeList() {
+            const companys = getSelect2MultipleSelection("CompanyID");
+            const officeDivisions = getSelect2MultipleSelection("DivisionID");
+            const departments = getSelect2MultipleSelection("DepartmentID");
+            const sections = getSelect2MultipleSelection("SectionID");
+            const designations = getSelect2MultipleSelection("DesignationID");
+            const locations = getSelect2MultipleSelection("LocationID");
+            const employeeTypes = $("#EmployeeTypeID").val();
+            const gender = $("#Gender").val();
+            const activeStatus = $("#EmployeeStatusID").val();
+
+            const filter = {
+                Companys: companys,
+                Divisions: officeDivisions,
+                Departments: departments,
+                Sections: sections,
+                Designations: designations,
+                Locations: locations,
+                EmployeeTypes: [{ employeeTypes }],
+                Gender: gender,
+                ActiveStatus: activeStatus
+            };
+            HttpRequest.DropDownSelect2Group("POST", "/AlgoHR/UserDepartmentAccess/GetDDLUserSectionEmployee", filter, 'EmployeeID', true);
+        }
+
+         function getDataParam()
+         {
+             debugger;
+             let dataParm = "";
+             const _dateFrom = $("#TaskDateFrom").val();
+             const _dateTo = $("#TaskDateTo").val();
+
+            const DateFrom = _dateFrom == null ? "@DateTime.Now.Date": _dateFrom;
+             const DateTo = _dateTo == null ? "@DateTime.Now.Date" : _dateTo;
+             const Status = $("#ApplicationStatus").val();
+
+             dataParm += `DateFrom=${DateFrom}&DateTo=${DateTo}&Status=${Status}`;
+
+             if (!RtnBoolToLower('@Model.ShowApplicationForAll')) {
+                 let employeeID = $("#EmployeeID").val();
+                 employeeID = employeeID == null ? "" : employeeID;
+                 dataParm += `&EmployeeIDs=${employeeID}`;
+             }
+             else {
+                 const _companys = getSelect2MultipleSelection("CompanyID");
+                 const _officeDivisions = getSelect2MultipleSelection("DivisionID");
+                 const _departments = getSelect2MultipleSelection("DepartmentID");
+                 const _sections = getSelect2MultipleSelection("SectionID");
+                 const _employeeID = getSelect2MultipleSelection("EmployeeID");
+
+                 const Companies = _companys != null ? _companys.toString() : "";
+                 const Divisions = _officeDivisions != null ? _officeDivisions.toString() : "";
+                 const Departments = _departments != null ? _departments.toString() : "";
+                 const Sections = _sections != null ? _sections.toString() : "";
+                 const EmployeeID = _employeeID != null ? _employeeID.toString() : "";
+
+                 dataParm += `&EmployeeIDs=${EmployeeID}&Companies=${Companies}&Divisions=${Divisions}&Departments=${Departments}&Sections=${Sections}`;
+             }
+
+
+
+        return dataParm;
+        }
+
+        function ShowMyOutsideDutyApplications() {
+            debugger
+            const parmObject = getDataParam();            
+            var attendanceGrid = $("#grid").dxDataGrid({
+                height: 550,
+                width:'100%',
+                dataSource: DevExpress.data.AspNet.createStore({
+                    key: ["OutSideTaskID"],
+                    loadUrl: `/AlgoHR/OutsideDuty/GetEmpOutsideTaskApplications?${parmObject}`,
+                    //loadParams: parmObject
+                }),
+                remoteOperations: {
+                    paging: true,
+                    sorting: true,
+                    filtering: true,
+                },
+                showBorders: true,
+                paging: {
+                    enabled: true,
+                    pageSize: 31
+                },
+                pager: {
+                    showPageSizeSelector: true,
+                    allowedPageSizes: [31, 62, 100, "All"],
+                    showInfo: true
+                },
+
+                columns: [
+                    {
+                        width: "50",
+                        caption: "SL#",
+                        alignment: 'center',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        },
+                        cellTemplate: function (container, e) {
+
+                            var index = e.rowIndex + 1;
+                            container.text(index);
+                        }
+                    },
+                    {
+                        dataField: "EmployeeCode",
+                        caption: "Code",
+                        width: "85",
+                        alignment: "center",
+                       
+                    },
+                    //{
+                    //    dataField: "ApplicantName",
+                    //    caption: "Name",
+                    //    alignment: "center",
+                    //    width: "200",
+                       
+
+                    //},
+                    {
+                        dataField: "Division",
+                        caption: "Division",
+                        alignment: "center",
+                        width: "100",
+                        hidingPriority: 0,
+                       
+                    },
+                    {
+                        dataField: "Department",
+                        caption: "Department",
+                        alignment: "center",
+                        width: "100",
+                        hidingPriority: 1
+                       
+
+                    },
+                    {
+                        dataField: "Section",
+                        caption: "Section",
+                        alignment: "center",
+                        width: "100",
+                        hidingPriority: 2
+                    },
+                    {
+                        dataField: "Designation",
+                        caption: "Designation",
+                        alignment: "center",
+                        width: "100",
+                        hidingPriority: 3
+                    },
+                    {
+                        dataField: "OutsideTaskDateMsg",
+                        caption: "Date",
+                        alignment: "center",
+                        width: "100",
+                    },
+                    {
+                        dataField: "TimeFrom",
+                        caption: "From",
+                        alignment: "center",
+                        width: "80",
+                    },
+                    {
+                        dataField: "TimeTo",
+                        caption: "To",
+                        alignment: "center",
+                        width: "80",
+                    },
+                    {
+                        dataField: "ViewStatus",
+                        caption: "Status",
+                        alignment: "center",
+                        width: "10%"
+                    },
+                    {
+                        dataField: "WaitingForApproval",
+                        caption: "Waiting For Approval",
+                        alignment: "center",
+                        width: "10%"
+                    }
+                    
+                ],
+                groupPanel: { visible: false },
+                filterRow: { visible: false },
+                headerFilter: { visible: false },
+            }).dxDataGrid('instance');
+
+        }
+        $(function () {
+            @*if ('@Model.EmployeeID' == 0) {
+                $("#EmployeeID").select2();
+            }*@
+
+            if (RtnBoolToLower('@Model.ShowApplicationForAll')) {
+                $("#CompanyID").select2({ theme: 'bootstrap4' });
+                $("#DivisionID").select2({ theme: 'bootstrap4' });
+                $("#DepartmentID").select2({ theme: 'bootstrap4' });
+                $("#SectionID").select2({ theme: 'bootstrap4' });
+                $("#EmployeeID").select2({ theme: 'bootstrap4' });
+
+                $("#CompanyID").change(function () {
+                    companyWiseDivision();
+                });
+                $("#DivisionID").change(function () {
+                    DivisionWiseDepartment();
+                    GetEmployeeList()
+                })
+                $("#DepartmentID").change(function () {
+                    DepartmentWiseSection();
+                    GetEmployeeList()
+                })
+                $("#SectionID").change(function () {
+                   GetEmployeeList()
+                })
+
+            }
+
+
+            $("#btnSearch").click(function () {
+                ShowMyOutsideDutyApplications();
+            });
+        });
+
+
+    </script>
+}

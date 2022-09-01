@@ -1,0 +1,201 @@
+﻿@model List<RG.Application.Contracts.Maxco.Buisness.OrderPlanReports.Queries.RequestResponseModel.DailyBatchRM>
+@{
+
+    var lotTypeWiseSum = Model.GroupBy(x => new { x.ProcessDateMsg, x.LotType })
+        .Select(g => new
+        {
+            ProcessDateMsg = g.Key.ProcessDateMsg,
+            LotType = g.Key.LotType,
+            Total = g.Sum(x => x.BatchQty)
+        }).ToList();
+    var dateWiseSum = Model.GroupBy(x => x.ProcessDateMsg)
+        .Select(g => new
+        {
+            ProcessDateMsg = g.Key,
+            Total = g.Sum(x => x.BatchQty)
+        }).ToList();
+    var grandTotal = Model.Sum(x => x.BatchQty);
+    Layout = null;
+}
+
+<html>
+<head>
+    <title>Daily Batch Report</title>
+    <link href="~/AdminLTE-3.1.0/plugins/jquery-ui/jquery-ui.min.css" rel="stylesheet" />
+    <link href="~/lib/bootstrap-5.0.2/css/bootstrap.min.css" rel="stylesheet" />
+    <script src="~/AdminLTE-3.1.0/plugins/jquery/jquery.min.js"></script>
+    <script src="~/AdminLTE-3.1.0/plugins/jquery-ui/jquery-ui.min.js"></script>
+    <script src="~/lib/bootstrap-5.0.2/js/bootstrap.bundle.min.js"></script>
+
+
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.12/css/jquery.dataTables.min.css" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/1.2.2/css/buttons.dataTables.min.css" />
+    <script type="text/javascript" src="https://code.jquery.com/jquery-1.12.3.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.2.2/js/dataTables.buttons.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/2.5.0/jszip.min.js"></script>
+    <script type="text/javascript" src="https://cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/pdfmake.min.js"></script>
+    <script type="text/javascript" src="https://cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/vfs_fonts.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.2.2/js/buttons.html5.min.js"></script>
+
+    <style>
+        .header {
+            position: sticky;
+            top: 0;
+        }
+    </style>
+
+</head>
+
+<body>
+    <div class="container-fluid">
+        <div class="row" style="height:50px;">
+            <div class="col-12 text-center">
+                <h5 class="mb-0">Robintex Group Bangladesh</h5>
+                <h6>Daily Batch Report</h6>
+
+            </div>
+        </div>
+        <table class="table table-sm table-bordered table-striped text-sm text-center display nowrap" id="tblDailyBatch" style="font-size:11px;">
+            <thead class="bg-dark text-white header">
+                <tr>
+                    <th style="vertical-align:middle">SL#</th>
+                    <th style="vertical-align:middle">Batch Date</th>
+                    <th style="vertical-align:middle">Buyer</th>
+                    <th style="vertical-align:middle">Order No</th>
+                    <th style="vertical-align:middle">Color</th>
+                    <th style="vertical-align:middle">Fabric Type/ G.S.M</th>
+                    <th style="vertical-align:middle">Batch No</th>
+                    <th style="vertical-align:middle">Grey Qty</th>
+                    <th style="vertical-align:middle">Dyeing</th>
+                    <th style="vertical-align:middle">Remarks</th>
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    var sl = 0;
+                    var previousDate = "";
+                    var previousLotType = "";
+                    var lastObject = Model.Last();
+                    foreach (var item in Model)
+                    {
+                        var sameDateCount = Model.Where(x => x.ProcessDateMsg == item.ProcessDateMsg).ToList().Count();
+                        var lotTypeCount = Model.Select(x => x.LotType).Distinct().Count();
+
+                        if (previousLotType != "" && (previousDate != item.ProcessDateMsg || previousLotType != item.LotType))
+                        {
+                            sl = 0;
+                            var total = lotTypeWiseSum.Where(x => x.ProcessDateMsg == previousDate && x.LotType == previousLotType).First().Total;
+                            @*<td></td>*@
+                            <tr>
+                                <td colspan="7" style="text-align:right"><b>@previousLotType Total=</b></td>
+                                <td><b>@total</b></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                        }
+                        if (previousDate != "" && previousDate != item.ProcessDateMsg)
+                        {
+                            var dateWisetotal = dateWiseSum.Where(x => x.ProcessDateMsg == previousDate).First().Total;
+                            <tr>
+                                <td colspan="7" style="text-align:right"><b>@previousDate Total=</b></td>
+                                <td><b>@dateWisetotal</b></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                        }
+                        <tr>
+                            <td>@(++sl)</td>
+
+                            @if (previousDate != item.ProcessDateMsg)
+                            {
+                                <td rowspan="@(sameDateCount + lotTypeCount)" style="vertical-align:middle"><b>@item.ProcessDateMsg</b></td>
+                            }
+
+                            <td>@item.BuyerName</td>
+                            <td>@item.OrderNo</td>
+                            <td>@item.PantoneNo</td>
+                            <td>@item.FabricQuality</td>
+                            <td>@item.LotNo</td>
+                            <td>@item.BatchQty</td>
+                            <td></td>
+                            <td></td>
+
+                        </tr>
+                        if (lastObject.Equals(item))
+                        {
+                            var total = lotTypeWiseSum.Where(x => x.ProcessDateMsg == item.ProcessDateMsg && x.LotType == item.LotType).First().Total;
+                            var dateWisetotal = dateWiseSum.Where(x => x.ProcessDateMsg == item.ProcessDateMsg).First().Total;
+                            @*<td></td>*@
+                            <tr>
+                                <td colspan="7" style="text-align:right"><b>@item.LotType Total=</b></td>
+                                <td><b>@total</b></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td colspan="7" style="text-align:right"><b>@item.ProcessDateMsg Total=</b></td>
+                                <td><b>@dateWisetotal</b></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td colspan="7" style="text-align:right"><b>Grand Total=</b></td>
+                                <td><b>@grandTotal</b></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                        }
+
+                        previousDate = item.ProcessDateMsg;
+                        previousLotType = item.LotType;
+                    }
+                }
+            </tbody>
+        </table>
+        <div class="text-center">
+            <input type="button" class="btn btn-sm btn-success" value="Excel" id="btnPdf" onclick="exportToExcel()" />
+        </div>
+        <br />
+    </div>
+    <script type="text/javascript">
+        function bodyOnload() {
+            //   $("body").removeClass("loading");
+
+        }
+
+        function exportToExcel() {
+            var htmls = "";
+            var uri = 'data:application/vnd.ms-excel;base64,';
+            var template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>';
+            var base64 = function (s) {
+                return window.btoa(unescape(encodeURIComponent(s)))
+            };
+
+            var format = function (s, c) {
+                return s.replace(/{(\w+)}/g, function (m, p) {
+                    return c[p];
+                })
+            };
+
+            htmls = document.getElementById("tblDailyBatch").innerHTML;
+
+            var ctx = {
+                worksheet: 'Worksheet',
+                table: htmls
+            }
+            var link = document.createElement("a");
+            link.download = "DailyBatchReport.xls";
+            link.href = uri + base64(format(template, ctx));
+            link.click();
+        }
+        $(function () {
+            $(document).ready(function () {
+                // $("body").addClass("loading");
+
+            });
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,53 @@
+﻿@model RG.Application.ViewModel.MDSir.ExportDocument.LCMaturityRealizationVM
+@{
+    ViewData[PageInfo.PageTitle] = "LC Maturity Realization";
+    ViewData[PageInfo.PageHeader] = "LC Maturity Realization";
+    Layout = "~/Views/Shared/_LayoutMDSir.cshtml";
+}
+<form id="AspNetRolesCreate" method="post">
+    <div class="row">
+        <div class="col-sm-4">
+            <div class="form-group">
+                <label asp-for="CompanyID" class="label-ajt-sm"></label>
+                <select asp-for="CompanyID" asp-items="Model.DDLCompany" class="form-control form-control-sm"></select>
+                <span asp-validation-for="CompanyID" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="form-group">
+                <label asp-for="FundTypeID" class="label-ajt-sm"></label>
+                <select asp-for="FundTypeID" asp-items="Model.DDLFundType" class="form-control form-control-sm"></select>
+                <span asp-validation-for="FundTypeID" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="form-group">
+                <label asp-for="Year" class="label-ajt-sm required"></label>
+                <select asp-for="Year" asp-items="Model.DDLYear" class="form-control form-control-sm"></select>
+                <span asp-validation-for="Year" class="text-danger"></span>
+            </div>
+        </div>
+    </div>    
+    <div class="row">
+        <div class="col-md-4">
+            <div class="form-group">
+                <button type="button" class="btn btn-sm btn-success" id="btnShow">Show</button>
+            </div>
+        </div>
+    </div>
+</form>
+@section scripts{
+    <script type="text/javascript">
+        $(function () {
+        
+            $('#btnShow').click(function () {
+                let companyID = $('#CompanyID').val();
+                let fundTypeID = $('#FundTypeID').val();               
+                let year = $('#Year').val();
+
+                let action = `/MDSir/ExportDocument/OutstandingLCRealizationReport?Year=${year}&CompanyId=${companyID}&FundTypeID=${fundTypeID}`;
+                newWindow(action, "Export Document Realization Detail");
+            });
+        })
+    </script>
+}

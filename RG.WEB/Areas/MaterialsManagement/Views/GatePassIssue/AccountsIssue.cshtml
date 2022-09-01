@@ -1,0 +1,277 @@
+﻿@using Microsoft.AspNetCore.Antiforgery
+@inject IAntiforgery antiForgeryToken
+@inject Wangkanai.Detection.Services.IDetectionService DetectionService
+@model RG.Application.ViewModel.MaterialsManagement.Business.GatePassIssue.GatePassAccountIssueVM
+@{
+    var token = antiForgeryToken.GetAndStoreTokens(Context);
+    ViewData[PageInfo.PageHeader] = "Gate Pass Approve";
+    ViewData[PageInfo.PageTitle] = "Gate Pass Approve";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var deviceType = DetectionService.Device.Type.ToString();
+
+}
+<div class="card card-primary">
+    <div class="row m-0">
+        <div class="col-6 col-sm-3 col-md-3 col-lg-3">
+            <div class="form-group">
+                <label class="col-form-label-sm m-0 required" asp-for="CategoryID"></label>
+                <select asp-for="CategoryID" asp-items="Model.CategoryList" class="form-control form-control-sm"></select>
+                <span asp-validation-for="CategoryID" class="span-form-validation"></span>
+            </div>
+        </div>
+        <div class="col-6 col-sm-3 col-md-3 col-lg-3">
+            <div class="form-group">
+                <label class="col-form-label-sm m-0 required" asp-for="ApprovalType"></label>
+                <select asp-for="ApprovalType" asp-items="Model.ApprovalTypeList" class="form-control form-control-sm"></select>
+                <span asp-validation-for="ApprovalType" class="span-form-validation"></span>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-3 col-md-3 col-lg-3">
+            <div class="input-group">
+                <div class="col-6 col-sm-6 col-md-6 col-lg-6 p-0">
+                    <div class="form-group">
+                        <label class="col-form-label-sm m-0 required" asp-for="DateFrom"></label>
+                        <input type="text" class="form-control form-control-sm dateField" asp-for="DateFrom" placeholder="Date From" readonly>
+                        <span asp-validation-for="DateFrom" class="span-form-validation"></span>
+                    </div>
+                </div>
+                <div class="col-6 col-sm-6 col-md-6 col-lg-6 p-0 pl-2">
+                    <div class="form-group">
+                        <label class="col-form-label-sm m-0 required" asp-for="DateTo"></label>
+                        <input type="text" class="form-control form-control-sm dateField" asp-for="DateTo" placeholder="Date From" readonly>
+                        <span asp-validation-for="DateTo" class="span-form-validation"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-3 col-md-3 col-lg-3">
+            @if (deviceType != "Mobile")
+            {
+                <label class="col-form-label-sm m-0">&nbsp;</label>
+            }
+            <div class="form-group">
+                <input type="button" class="btn btn-sm btn-warning" value="Search" id="btnSearch" />
+            </div>
+        </div>
+    </div>
+    <div class="row m-0">
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            <div class="table-responsive-sm" id="grid">
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section scripts{
+    <script type="text/javascript">
+        $(function () {
+            GatePassAccountIssueList();
+            $("#btnSearch").click(function () {
+                GatePassAccountIssueList();
+            })
+        });
+        function saveSuccess(data) {
+            
+            if (data.result == 1) {
+                $.alert.open({
+                    type: 'Success',
+                    content: data.message,
+                    callback: function () {
+                        GatePassAccountIssueList();
+                    }
+                });
+            }
+            else {
+                $.alert.open("error", data.message);
+            }
+        }
+        function ApproveGatePass(gatePassId) {
+            if (gatePassId > 0) {
+                $.alert.open('confirm', 'Are you sure to approve this record', function (button) {
+                    if (button == 'yes')
+                        HttpRequest.Ajax("Get", "/MaterialsManagement/GatePassIssue/AccountsApprove", { gatePassID: gatePassId }, saveSuccess);
+                });
+            }
+        }
+        function RejectGatePass(gatePassId) {
+            if (gatePassId > 0) {
+                $.alert.open('confirm', 'Are you sure to remove this record', function (button) {
+                    if (button == 'yes')
+                        HttpRequest.Ajax("Get", "/MaterialsManagement/GatePassIssue/AccountsReject", { gatePassID: gatePassId }, saveSuccess);
+                });
+            }
+        }
+        function GatePassAccountIssueList() {
+           
+            var url = "/MaterialsManagement/GatePassIssue/GetGatePassAccountIssueList";
+            let categoryID = RtnNumber($("#CategoryID").val());
+            let category = $("#CategoryID option:selected").text();
+            let approvalType = $("#ApprovalType").val();
+            let dateFrom = $("#DateFrom").val();
+            let dateTo = $("#DateTo").val();
+
+            var reqModel = {
+                CategoryID: categoryID,
+                Category: category,
+                ApprovalType: approvalType,
+                DateFrom: dateFrom,
+                DateTo: dateTo
+            }
+            var dataGrid = $("#grid").dxDataGrid({
+
+                dataSource: DevExpress.data.AspNet.createStore({
+                    key: "GatePassID",
+                    loadUrl: url,
+                    loadParams: reqModel
+                }),
+
+                remoteOperations: {
+                    paging: true,
+                    sorting: true,
+                    filtering: true,
+                },
+                showColumnLines: true,
+                showRowLines: true,
+                showBorders: true,
+                paging: {
+                    pageSize: 20
+                },                
+                pager: {
+                    showInfo: true,
+                    allowedPageSizes: [10, 20, 40, 100, 500],
+                    showPageSizeSelector: true,
+                },
+                loadingIndicator: {
+                    enabled: true
+                },
+                /* paging: { pageSize: 10 },*/
+                selection: { mode: 'single' },
+                wordWrapEnabled: true,
+                columns: [
+                    {
+                        width: "5%",
+                        caption: "SL #",
+                        alignment: 'center',
+                        cellTemplate: function (container, e) {
+
+                            var index = e.rowIndex + 1;
+                            container.text(index);
+                        }
+
+                    },
+                    {
+                        dataField: "GatePassID",
+                        visible: false,
+                    },                    
+
+                    {
+                        width: "10%",
+                        caption: "Category",
+                        alignment: 'center',                        
+                        dataField: "CategoryName",
+                        cellTemplate: function (cellElement, options) {                            
+                            var url = `<a style="padding:0px;margin:0px;" title="Gate Pass" target="_blank" class="dx-link" href="/MaterialsManagement/GatePass/GatePassChallan?gatePassID=${options.data.GatePassID}&categoryID=${options.data.CategoryID}&reportType=1">${options.data.CategoryName}</a>`;
+                            cellElement.append(url);
+                        }
+
+                    },
+
+                    {
+                        width: "15%",                       
+                        caption: 'Serial No',
+                        alignment: 'center',
+                        
+                        dataField: "SerialNo",
+                        cellTemplate: function (container, options) {                            
+                            var url = `<a style="padding:0px;margin:0px;" title="Challan"  target="_blank" class="dx-link" href="/MaterialsManagement/GatePass/GatePassChallan?gatePassID=${options.data.GatePassID}&categoryID=${options.data.CategoryID}&reportType=2">${options.data.SerialNo}</a>`;
+                            container.append(url);
+                        }
+                    },
+
+                    {
+                        width: "10%",
+                        dataField: "CreatedDate",
+                        alignment: 'center',
+                        caption: 'Created Date',
+                        allowFiltering: true
+
+
+                    },
+                    {
+                        width: "5%",
+                        dataField: "CreatedTime",
+                        alignment: 'center',
+                        caption: 'Time',
+                        hidingPriority: 0,
+
+                    },
+                    {
+                        width: "10%",
+                        dataField: "Department",
+                        alignment: 'center',
+                        caption: 'Department',
+                        hidingPriority: 1,
+                        allowFiltering: true
+
+                    }, {
+                        width: "15%",
+                        caption: "Issed By",
+                        alignment: 'center',
+                        allowFiltering: false,
+                        dataField: "CreatedEmployee",
+
+                    },
+                    {
+                        width: "15%",
+                        caption: "Department",
+                        alignment: 'center',                       
+                        dataField: "CreatedEmployeeDept",
+                        //hidingPriority: 2,
+                        allowFiltering: true
+                    },
+                    {
+                        width: "10%",
+                        caption: "Designation",
+                        alignment: 'center',
+                        allowFiltering: true,
+                        dataField: "CreatedEmployeeDesig",
+                        //hidingPriority: 3,
+                    },
+                    {
+                        width: "5%",
+                        dataField: "Status",
+                        alignment: 'center',
+                        caption: 'Status',
+                        allowFiltering: false,
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+                    },
+
+
+                ],
+                // headerFilter: { visible: false, allowSearch: true },
+                filterRow: { visible: true, applyFilter: 'auto' },
+
+                // headerFilter: { visible: true },
+
+                //scrolling: {
+                //    mode: "virtual"
+                //},
+                groupPanel: { visible: false },
+                // width:1000,
+                height: 520,
+                //showBorders: true,
+            }).dxDataGrid("instance");
+        }
+
+
+
+
+
+
+
+    </script>
+}

@@ -1,0 +1,291 @@
+﻿@model List<RG.Application.ViewModel.Maxco.Business.OrderReports.OrderShipmentBalanceReportVM>
+@{
+    Layout = null;
+    var totalShippedOrder = Model.Select(x => x.OrderID).Distinct().Count();
+    totalShippedOrder = totalShippedOrder == 0 ? 1 : totalShippedOrder;
+    var commitmentFulfilledOrder = Model.Where(x => x.BalanceQty <= 0).ToList().Count();
+    var commitmentNtFulfilledOrder = Model.Where(x => x.BalanceQty > 0).ToList().Count();
+    var commitmentFulfilledRatio = Convert.ToDecimal(commitmentFulfilledOrder * 100) / totalShippedOrder;
+    var dateFrom = Model.Count > 0 ? Model.First().DateFrom : "";
+    var dateTo = Model.Count > 0 ? Model.First().DateTo : "";
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Order Shipment Balance</title>
+    <link href="~/AdminLTE-3.1.0/plugins/jquery-ui/jquery-ui.min.css" rel="stylesheet" />
+    <link href="~/lib/bootstrap-5.0.2/css/bootstrap.min.css" rel="stylesheet" />
+    <script src="~/AdminLTE-3.1.0/plugins/jquery/jquery.min.js"></script>
+    <script src="~/AdminLTE-3.1.0/plugins/jquery-ui/jquery-ui.min.js"></script>
+    <script src="~/lib/bootstrap-5.0.2/js/bootstrap.bundle.min.js"></script>
+
+    <script src="~/js/customScripts/GenericHTTPRequest.js"></script>
+
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.12/css/jquery.dataTables.min.css" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/1.2.2/css/buttons.dataTables.min.css" />
+    <script type="text/javascript" src="https://code.jquery.com/jquery-1.12.3.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.2.2/js/dataTables.buttons.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/2.5.0/jszip.min.js"></script>
+    <script type="text/javascript" src="https://cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/pdfmake.min.js"></script>
+    <script type="text/javascript" src="https://cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/vfs_fonts.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.2.2/js/buttons.html5.min.js"></script>
+
+    <style>
+        .header {
+            position: sticky;
+            top: 0;
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <div class="container-fluid">
+        <div class="row" style="height:80px;">
+            <div class="col-12 text-center">
+                <h5 class="mb-0">Robintex Group Bangladesh</h5>
+                <h6>Order Shipment Balance Reports</h6>
+                <h6>Schedule From @dateFrom to @dateTo</h6>
+            </div>
+        </div>
+        @if (Model.Count > 0)
+        {
+            <div class="row" style="font-weight:100;">
+                <div class="col-sm-3 bg-info text-center">
+
+                    <label>Total Shipped Order: @totalShippedOrder</label>
+                </div>
+                <div class="col-sm-3 bg-success text-white text-center">
+                    <label class="font-weight-bold">Commitment Fulfilled Order: <span class="">@commitmentFulfilledOrder</span> </label>
+                </div>
+                <div class="col-sm-3 bg-danger text-center text-white">
+                    <label>Commitment Not Fulfilled Order: <span class="">@commitmentNtFulfilledOrder</span></label>
+                </div>
+                <div class="col-sm-3 bg-warning text-center">
+                    <label>Commitment Fulfilled Ratio: <span class="">@String.Format("{0:n2}", commitmentFulfilledRatio)</span> %</label>
+
+                </div>
+            </div>
+            <table class="table table-sm table-bordered table-striped text-sm text-center display nowrap" id="tblOrderStatus" style="font-size:11px;">
+                <thead class="bg-dark text-white header">
+                    <tr>
+                        <th rowspan="2">SL#</th>
+                        <th colspan="4">Order info</th>
+                        <th colspan="3">TOD Info</th>
+                        <th colspan="3">Shipment Info</th>
+                        <th colspan="3">Shipment Balance</th>
+                    </tr>
+                    <tr>
+                        <th>Order No</th>
+                        <th>Order Qty</th>
+                        <th>Unit Price</th>
+                        <th>Costing CM</th>
+
+                        <th>Quantity</th>
+                        <th>Value</th>
+                        <th>CM Value</th>
+
+                        <th>Quantity</th>
+                        <th>Value</th>
+                        <th>CM Value</th>
+
+                        <th>Quantity</th>
+                        <th>Value</th>
+                        <th>CM Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        var sl = 1;
+                        foreach (var item in Model.OrderBy(x => x.BuyerID).ThenBy(x => x.OrderID))
+                        {
+                            var bgClass = "";
+                            var rowTitle = "";
+                            if (item.BalanceQty > 0)
+                            {
+                                bgClass = "text-danger";
+                                rowTitle = "Shipment commitment not fulfilled";
+                            }
+                            <tr class="@bgClass" title="@rowTitle">
+                                <th>@(sl++)</th>
+
+                                <th><a href="Javascript:void(0)" onclick="GetOrderDetail(@item.OrderID,@item.OrderQty)">@item.OrderNo</a></th>
+
+                                <th>@String.Format("{0:n0}", item.OrderQty)</th>
+                                <th>@String.Format("{0:n2}", item.CostingPrice)</th>
+                                <th>@String.Format("{0:n2}", item.CostingCM)</th>
+
+                                <th>@String.Format("{0:n0}", item.TODQuantity)</th>
+                                <th>@String.Format("{0:n2}", item.TODValue)</th>
+                                <th>@String.Format("{0:n2}", item.TODCMValue)</th>
+
+                                <th>@String.Format("{0:n0}", item.ShipmentQty)</th>
+                                <th>@String.Format("{0:n2}", item.ShipmentValue)</th>
+                                <th>@String.Format("{0:n2}", item.ShipmentCMValue)</th>
+
+                                <th>@String.Format("{0:n0}", item.BalanceQty)</th>
+                                <th>@String.Format("{0:n2}", item.BalanceValue)</th>
+                                <th>@String.Format("{0:n2}", item.BalanceCMValue)</th>
+                            </tr>
+                        }
+                        <tr class="bg-success text-white">
+
+                            <th colspan="2">Total</th>
+                            <th>@String.Format("{0:n0}", Model.Sum(x => x.OrderQty))</th>
+                            <th colspan="2"></th>
+
+                            <th>@String.Format("{0:n0}", Model.Sum(x => x.TODQuantity))</th>
+                            <th>@String.Format("{0:n2}", Model.Sum(x => x.TODValue))</th>
+                            <th>@String.Format("{0:n2}", Model.Sum(x => x.TODCMValue))</th>
+
+                            <th>@String.Format("{0:n0}", Model.Sum(x => x.ShipmentQty))</th>
+                            <th>@String.Format("{0:n2}", Model.Sum(x => x.ShipmentValue))</th>
+                            <th>@String.Format("{0:n2}", Model.Sum(x => x.ShipmentCMValue))</th>
+
+                            <th colspan="3"></th>
+                        </tr>
+
+
+                    }
+                </tbody>
+            </table>
+            <div class="text-center">
+                <input type="button" class="btn btn-sm btn-success" value="Excel" id="btnPdf" onclick="exportToExcel()" />
+            </div>
+        }
+        else
+        {
+            <div class="row">
+                <div class="col-sm-12 text-center">
+                    <label class="text-danger">No Data Found</label>
+                </div>
+            </div>
+        }
+    </div>
+    <!-- The Modal -->
+    <div class="modal" id="myModal">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+
+                <!-- Modal Header -->
+                <div class="modal-header p-1">
+                    <h5 class="modal-title">
+                        <span class="buyer-name ps-2"> </span>
+                        <span class="order-no ps-4"> </span>
+                        <span class="order-qty ps-5"> </span>
+
+                    </h5>
+        
+                    <button type="button" class="btn-close btn-sm pt-2 pr-2" data-bs-dismiss="modal"></button>
+                </div>
+
+                <!-- Modal body -->
+                <div class="modal-body p-2" id="myModalBody">
+                    <table class="table table-sm table-bordered table-striped">
+                        <thead class="table-primary header">
+                            <tr class="text-center">
+                                <th>SL</th>
+                                <th>Invoice</th>
+                                <th>Exfactory Date</th>
+                                <th>Country</th>
+                                <th>Export Qty</th>
+                                <th>Rate</th>
+                                <th>Value</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyExportData">
+
+                        </tbody>
+                       
+                    </table>
+                </div>
+
+                <!-- Modal footer -->
+                <div class="modal-footer p-0 pr-2">
+                    @*<input type="button" class="btn btn-sm btn-success" value="Excel" id="btnDetailPdf" onclick="exportDetailToExcel()" />*@
+                    <button type="button" class="btn btn-sm btn-danger" data-bs-dismiss="modal">Close</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
+
+<script type="text/javascript">
+
+    function GetOrderDetail(OrderID, OrderQty) {
+        if (OrderID > 0) {
+            var data = HttpRequest.AjaxData('GET', '/Maxco/OrderReports/ShipmentOrderInfo', { OrderID: OrderID });
+            $("#tbodyExportData").html("");
+            if (data.length>0) {
+                //write code here
+                let tr = ``;
+                let totalExportQty = 0;
+                let totalValue = 0;
+                //EPIM_ID	BuyerName	OrderID	OrderNo	InvoiceNo	ExfactoryDate	CountryName	OrderQty	NoOfCartons	ExportQty	Rate	TotalValue
+                $.each(data, function (i, v) {
+                    if (i == 0) {
+                        $(".buyer-name").html(`Buyer: ${v.BuyerName}`);
+                        $(".order-no").html(`Order : ${v.OrderNo}`);
+                        $(".order-qty").html(`Order Qty : ${v.OrderQty.toLocaleString()}`);
+                    }
+                    tr += `<tr><td class='text-center'>${++i}</td>
+                                <td class="text-center">${v.InvoiceNo}</td>
+                                <td class="text-center">${v.ExfactoryDateMsg}</td>
+                                <td class="text-center">${v.CountryName}</td>
+                                <td class="text-end">${v.ExportQty.toLocaleString()}</td>
+                                <td class="text-end">${v.Rate}</td>
+                                <td class="text-end">${v.TotalValue.toLocaleString(2)}</td>
+                            </tr>`;
+                    totalExportQty = totalExportQty + v.ExportQty;
+                    totalValue = totalValue + v.TotalValue;
+                
+                });
+                tr += `<tr class="fw-bold table-primary"><td class='text-end' colspan="4">Total</td>
+                                <td class="text-end">${totalExportQty.toLocaleString()}</td>
+                                <td class="text-end"></td>
+                                <td class="text-end">${totalValue.toLocaleString(2)}</td>
+                            </tr>`;
+
+                $("#tbodyExportData").html(tr);
+                $('#myModal').modal('toggle');
+            }
+        }
+    }
+
+
+    function exportToExcel() {
+        var htmls = "";
+        var uri = 'data:application/vnd.ms-excel;base64,';
+        var template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>';
+        var base64 = function (s) {
+            return window.btoa(unescape(encodeURIComponent(s)))
+        };
+
+        var format = function (s, c) {
+            return s.replace(/{(\w+)}/g, function (m, p) {
+                return c[p];
+            })
+        };
+
+        htmls = document.getElementById("tblOrderStatus").innerHTML;
+
+        var ctx = {
+            worksheet: 'Worksheet',
+            table: htmls
+        }
+        var link = document.createElement("a");
+        link.download = "OrderShipmentBalanceReport.xls";
+        link.href = uri + base64(format(template, ctx));
+        link.click();
+    }
+    $(function () {
+
+    });
+</script>
+
+

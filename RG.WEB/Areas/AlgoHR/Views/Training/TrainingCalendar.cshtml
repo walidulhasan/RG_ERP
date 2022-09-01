@@ -1,0 +1,460 @@
+﻿@model RG.Application.ViewModel.AlgoHR.Business.Training.TrainingCalendarVM
+@{
+    ViewData[PageInfo.PageTitle] = "Training List";
+
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var claims = User.Claims.ToList();
+    var permissionCreateTrainingEvent = claims?.FirstOrDefault(x => x.Type.Equals(UserClaimsCC.PermissionCreateTrainingEvent, StringComparison.OrdinalIgnoreCase))?.Value;
+}
+<div class="card card-primary">
+    <div class="row m-0">
+        <div class="col-6 col-sm-3 col-md-3 col-lg-3">
+            <div class="form-group m-0">
+                <label class="col-form-label-sm m-0 required" asp-for="TrainingYear"></label>
+                <select asp-for="TrainingYear" asp-items="Model.YearList" class="form-control form-control-sm"></select>
+                <span asp-validation-for="TrainingYear" class="span-form-validation"></span>
+            </div>
+        </div>
+        <div class="col-6 col-sm-2 col-md-2 col-lg-2">
+            <label>&nbsp;</label>
+            <div class="form-group text-left">
+                <input type="button" class="btn btn-sm btn-success" id="btnSearch" value="Search" />
+            </div>
+        </div>
+    </div>
+    <div id="divTrainingCalendar">
+    </div>
+</div>
+<div id="modalForTrainingSchedule" class="modal fade" role="dialog">
+    <input hidden asp-for="DetailsID" />
+    <input hidden asp-for="MasterID" />
+    <div class="modal-dialog modal-lg">
+        <!-- Modal content-->
+        <div class="modal-content">
+
+            <div class="modal-header p-2 bg-dark">
+                <h6 class="modal-title modTitle">Create Training <span id="trainingDate"></span></h6>
+                <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body p-0">
+                <div class="row">
+                    <div class="col-sm-12 col-md-12 divfrmTrainingCalendar">
+                        <div class="card card-dark">
+                            <form id="frmTrainingCalendar">
+                                <div class="card-body p-2">
+                                    <div class="row">
+                                        <div class="col-6 col-sm-3">
+                                            <div class="form-group">
+                                                <label asp-for="Title" class="label-ajt-sm required"></label>
+                                                <input placeholder="Training Title" type="text" asp-for="Title" class="form-control form-control-sm" />
+                                                <span asp-validation-for="Title" class="text-danger"></span>
+                                            </div>
+
+                                        </div>
+                                        <div class="col-6 col-sm-3">
+                                            <div class="form-group">
+                                                <label asp-for="Venue" class="label-ajt-sm venue required"></label>
+                                                <input placeholder="Training Venue" type="text" asp-for="Venue" class="form-control form-control-sm" />
+                                                <span asp-validation-for="Venue" class="text-danger"></span>
+                                            </div>
+
+                                        </div>
+                                        <div class="col-6 col-sm-3">
+                                            <div class="form-group">
+                                                <label asp-for="Stakeholder" class="label-ajt-sm  required"></label>
+                                                <input placeholder="Stakeholder" type="text" asp-for="Stakeholder" class="form-control form-control-sm" />
+                                                <span asp-validation-for="Stakeholder" class="text-danger"></span>
+                                            </div>
+
+                                        </div>
+                                        <div class="form-group col-6 col-sm-3">
+                                            <label asp-for="TrainingCategory" class="label-ajt-sm  required"></label>
+                                            <select class="form-control form-control-sm" asp-for="TrainingCategory" asp-items="Model.DDLTrainingCategory"></select>
+                                            <span asp-validation-for="TrainingCategory" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-6 col-sm-2">
+                                            <div class="form-group mb-2">
+                                                <div class="form-group">
+                                                    <label asp-for="Date" class="required"></label>
+                                                    <div class="input-group date" id="TimeToPicker" data-target-input="nearest">
+                                                        <input type="text" asp-for="Date" class="form-control form-control-sm datetimepicker-input" data-target="#TimeToPicker" data-toggle="datetimepicker" />
+                                                        <div class="input-group-append" data-target="#TimeToPicker" data-toggle="datetimepicker">
+                                                            <span class="input-group-text"><i class="fa fa-clock" aria-hidden="true"></i></span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-6 col-sm-4">
+                                            <div class="form-group">
+                                                <label asp-for="Trainer" class="label-ajt-sm required"></label>
+                                                <input placeholder="Training Title" type="text" asp-for="Trainer" class="form-control form-control-sm" />
+                                                <span asp-validation-for="Trainer" class="text-danger"></span>
+                                            </div>
+
+                                        </div>
+
+                                        <div class="col-6 col-sm-3">
+                                            <div class="form-group">
+                                                <label asp-for="TrainingType" class="label-ajt-sm required"></label>
+                                                <select asp-for="TrainingType" asp-items="Model.DDLTrainingTypes" class="form-control form-control-sm "></select>
+                                                <span asp-validation-for="TrainingType" class="text-danger"></span>
+                                            </div>
+
+                                        </div>
+                                        <div class="col-6 col-sm-3">
+                                            <div class="form-group">
+                                                <label asp-for="Duration" class="label-ajt-sm required"></label>
+                                                @*<input min="0" value="" max="24" asp-for="Duration" type="number" class="form-control form-control-sm " />*@
+                                                <select asp-for="Duration" asp-items="Model.DDLDurations" class="form-control form-control-sm "></select>
+                                                <span asp-validation-for="Duration" class="text-danger"></span>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="modal-footer p-1 justify-content-center">
+                            <input type="button" class="btn btn-danger btn-sm d-none" onclick="Clear()" id="btnClear" value="Clear">
+                            <input type="button" class="btn btn-warning btn-sm" id="btnSave" value="Create">
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+            <div class="table-wrapper">
+                <div class="md-card-content col-12" style="overflow: scroll;">
+
+                    <table id="tblDepriciationHistoryDetail" class="col-md-12 col-sm-12 col-12 col-lg-12 table table-sm table-striped table-bordered text-center text-xs  mt-1">
+
+                        <thead class="bg-dark">
+                            <tr>
+                                <th>SL#</th>
+                                <th>Title</th>
+                                <th>Venue</th>
+                                <th>Stakeholder</th>
+                                <th>Date Time</th>
+                                <th>Trainer</th>
+                                <th>Duration</th>
+                                <th title="Training Type">T.Type</th>
+                                <th class="thAction">Action</th>
+                                <th >Feedback</th>
+                                <th title="Feedback list">F.List</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+<div id="modalFeedback" class="modal fade" role="dialog">
+    <input id="ID" hidden />
+    <div class="modal-dialog modal-sm">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header p-2">
+                <h6 class="modal-title modTitle">Feedback</h6>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body px-2 py-0">
+                <div class="form-group">
+                    <label asp-for="Traineefeedback" class="label-ajt-sm required"></label>
+                    <select asp-for="Traineefeedback" asp-items="Model.DDLTraineefeedback" class="form-control form-control-sm "></select>
+                </div>
+                <div class="divTraineefeedback d-none mb-1">
+                    <label class="label-ajt-sm required">Your Comment</label>
+                    <input id="YourComment" type="text" autocomplete="off" placeholder="Your Feedback Please" class="form-control form-control-sm" />
+                </div>
+            </div>
+            <div class="modal-footer p-1 d-flex justify-content-center">
+                <button id="btnSend" class="btn btn-primary btn-xs">Send</button>
+            </div>
+        </div>
+
+    </div>
+</div>
+<!-- Modal for Assign Asset-->
+<div id="modalForTraineeFeedbackShow" class="modal fade" role="dialog">
+    <div class="modal-dialog modal-lg">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header p-2" style="background-color: #003300;" >
+                <h6 class="modal-title modTitle " style="color:white">Trainee Feedback</h6>
+                <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body px-2 py-0">
+                <div class="row">
+                    <table id="tblTraineeFeedback" class="table table-sm table-striped table-bordered text-center text-xs  mt-1">
+
+                        <thead style="background-color:#001a00;">
+                            <tr style="color:white">
+                                <th>SL#</th>
+                                <th>Comment</th>
+                                @*<th>Action</th>*@
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyTraineeFeedback">
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+            @*<div class="modal-footer p-1  justify-content-center btnRemoveForDepriciation">
+                    <input type="button" class="btn btn-warning btn-sm" id="btnAssetAssign" value="Asset Assign to Employee" />
+                </div>*@
+        </div>
+    </div>
+</div>
+@section scripts{
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script type="text/javascript">
+
+        function saveSuccess(data) {
+            if (data.result == 1) {
+                $.alert.open({
+                    type: 'Success',
+                    content: data.message,
+                    callback: function () {
+                        Clear();
+                        if (data.statusCode > 0) {
+                            $("#MasterID").val(data.statusCode);
+                        }
+                        GetListCalenderEventDetails($("#trainingDate").text());
+                        $("#btnClear").addClass('d-none');
+                        checkUseAdmin();
+                        $("#modalFeedback").modal('hide');
+                    }
+                });
+            }
+            else {
+                $.alert.open("error", data.message);
+            }
+        }
+        function TrainingSchedule(trainingDate) {
+            $("#trainingDate").html(`${trainingDate}`);
+            GetListCalenderEventDetails(trainingDate);
+            $('#modalForTrainingSchedule').modal('toggle');
+            checkUseAdmin();
+        };
+        const checkUseAdmin = () => {
+            if ('@permissionCreateTrainingEvent'== "1") {
+                $(".divfrmTrainingCalendar").removeClass("d-none");
+
+            } else {
+                $(".thAction").addClass("d-none");
+                $(".tdbtn").addClass('d-none');
+                $(".divfrmTrainingCalendar").addClass("d-none")
+            }
+        }
+        const GetListCalenderEventDetails = (trainingDate) => {
+           
+            var data = HttpRequest.AjaxData('POST', '/AlgoHR/Training/GetListCalenderEventDetails', { date: trainingDate });
+            let row = '';
+            let venueCheck = ``;
+            $.each(data, function (i, e) {
+                $("#MasterID").val(e.MasterID);
+                if (e.EventVenue.indexOf('https') >= 0 || e.EventVenue.indexOf('http') >= 0) {
+                    venueCheck = ` <a target="_blank" href="${e.EventVenue}" ><i title='${e.EventVenue}' class="fas fa-link"></i></a>`
+                } else {
+                    venueCheck = e.EventVenue
+                }
+                row += `<tr>
+                                <td  class="hdnID d-none">${e.ID}</td>
+                                <td  class="hdnMasterID d-none">${e.MasterID}</td>
+                                <td class="tdtime d-none">${e.Time}</td>
+                                <td class="tdTrainingCategoryId d-none">${e.TrainingCategoryID}</td>
+                                <td style="width:2%">${++i}</td>
+                                <td style="width: 30%;" class="tdtitle">${e.EventTitle}</td>
+                                <td>${venueCheck}</td>
+                                <td class="tdvenue d-none">${e.EventVenue}</td>
+                                <td class="tdStakeholder">${e.Stakeholder}</td>
+                                <td style="width:16%;" class="tddateTime">${e.EventDateTime}</td>
+                                <td style="width:15%;" class="tdtrainer">${e.EventTrainer}</td>
+                                <td class="tdduration">${e.EventDuration}</td>
+                                <td style="width:5%;" class="tdtype">${e.TrainingType}</td>
+                                <td style="width:12%" class="tdbtn"> <a target="_blank" onClick="btnEdit(this)" title="Edit Depriciation" class="btn btn-primary btn-xs"> <i class="fas fa-edit fa-sm"></i></a>
+                                <span> </span>
+                                     <a onClick="btnDelete(${e.ID})" title="Delete Depriciation" class="btn btn-danger btn-xs"><i class="fas fa-trash fa-sm"></i></a>
+                                </td >
+                                 <td class="btnfeedback"><button onClick="modfeedback(${e.ID})" class="btn btn-success btn-xs"><i class="fas fa-comments fa-xs"></i></button></td>
+                                 <td class="btnfeedbacklist"><button onClick="traineeFeedbackShow(${e.ID})" class="btn btn-primary btn-xs"><i class="fa fa-eye fa-sm"></i></button></td>
+                            </tr>`
+            });
+            $("#tbody").html(row);
+        }
+        const Clear = () => {
+            $("#Title").val("");
+            $("#Venue").val("");
+            $("#Trainer").val("");
+            $("#Duration").val($("#Duration option:first").val());
+            $("#TrainingType").val("");
+            $("#DetailsID").val("");
+            $("#MasterID").val("");
+            $("#Stakeholder").val("");
+            $("#TrainingCategory").val("");
+            $("#Date").val("@DateTime.Now.ToString("HH:mm")");
+            $("#btnSave").val('Create');
+            $("#btnClear").addClass('d-none');
+            checkUseAdmin();
+        }
+        const modfeedback = (e) => {
+            $("#ID").val(e)
+            $("#modalFeedback").modal("toggle");
+        }
+
+        $(function () {
+            
+            flatpickr("#Date",
+                config = {
+                    enableTime: true,
+                    noCalendar: true,
+                    dateFormat: "H:i",
+                }
+            );
+            $("#modalFeedback").on("hidden.bs.modal", function () {
+                $("#ID").val("");
+                $("#YourComment").val("");
+
+            });
+            $("#modalForTrainingSchedule").on("hidden.bs.modal", function () {
+                Clear();
+            });
+
+            $("#btnSearch").click(function () {
+
+                let year = $("#TrainingYear").val();
+                $("#divTrainingCalendar").load("/AlgoHR/Training/GetTrainingCalendarViewComponents", { year: year });
+            });
+
+            $("#btnSearch").trigger('click');
+
+            $("#TrainingType").change(function () {
+               
+                let ttv = $(this).val();
+                if (ttv == 'Online') {
+                    $(".venue").text('Online Venue URL')
+                } else {
+                    $(".venue").text('Venue')
+                }
+            })
+
+            $("#Traineefeedback").change(function () {
+
+                let option = $(this).val();
+                if (option === "Other") {
+                    $(".divTraineefeedback").removeClass('d-none');
+                } else {
+                    $(".divTraineefeedback").addClass('d-none');
+                }
+            })
+            $("#btnSend").click(function () {
+                let option = $('#Traineefeedback').val();
+                let comment = $('#YourComment').val();
+                let evetnDetailID = $("#ID").val();
+                let obj = {
+                    EventDetailsID: evetnDetailID,
+                    Comments: option,
+                }
+
+                let ObjWithCom = {
+                    EventDetailsID: evetnDetailID,
+                    Comments: comment,
+                }
+                if (option === "Good" || option === "Understand") {
+                    HttpRequest.Ajax("POST", '/AlgoHR/Training/CalenderEventFeedbackCreate', { "dtModel": obj }, saveSuccess, true);
+                } else if (comment != "") {
+                    HttpRequest.Ajax("POST", '/AlgoHR/Training/CalenderEventFeedbackCreate', { "dtModel": ObjWithCom }, saveSuccess, true);
+
+                } else {
+                    $.alert.open("error", "Somthing is Error!");
+                }
+            })
+
+            $("#btnSave").click(function () {
+              
+                if ($("#frmTrainingCalendar").valid()) {
+                    let trainingDate = $("#trainingDate").text();
+                    let title = $("#Title").val();
+                    let venue = $("#Venue").val();
+                    let date = `${$("#trainingDate").text()} ${$("#Date").val()} `;
+                    let trainer = $("#Trainer").val();
+                    let duration = $("#Duration").val();
+                    let trainingType = $("#TrainingType").val();
+                    let detailsID = $("#DetailsID").val();
+                    let masterID = $("#MasterID").val();
+                    let stakeholder = $("#Stakeholder").val();
+                    let TrainingCategoryId = $("#TrainingCategory").val();
+                    let CalenderEventDetails = new Array()
+
+                    let CalenderEventDetail = {
+                        ID: detailsID,
+                        EventID: masterID,
+                        EventDateTime: date,
+                        EventTitle: title,
+                        EventVenue: venue,
+                        EventDuration: duration,
+                        Stakeholder: stakeholder,
+                        EventTrainer: trainer,
+                        TrainingType: trainingType,
+                        TrainingCategoryID: TrainingCategoryId
+                    }
+                    CalenderEventDetails.push(CalenderEventDetail)
+
+                    let CalenderEventMaster = {
+                        ID: masterID,
+                        ScheduleDate: trainingDate,
+                        CalenderEventDetail: CalenderEventDetails,
+                    }
+                    let CalenderEventDetailEdit = {
+                        ID: masterID,
+                        CalenderEventDetail: CalenderEventDetails,
+                    }
+
+                    if (detailsID == 0 && masterID == 0) {
+                        HttpRequest.Ajax("POST", '/AlgoHR/Training/TrainingCreate', { "trainingCreate": CalenderEventMaster }, saveSuccess, true);
+                    } else if (detailsID > 0) {
+                        HttpRequest.Ajax("POST", '/AlgoHR/Training/TrainingCreate', { "trainingCreate": CalenderEventDetailEdit }, saveSuccess, true);
+                    } else if (masterID > 0) {
+                        HttpRequest.Ajax("POST", '/AlgoHR/Training/TrainingCreate', { "trainingCreate": CalenderEventMaster }, saveSuccess, true);
+                    }
+                } else {
+                    return false;
+                }
+
+            })
+        });
+        const traineeFeedbackShow = (id) => {
+           TraineeWiseGetFeedbackList(id)
+            $('#modalForTraineeFeedbackShow').modal('toggle');
+        }
+
+        const TraineeWiseGetFeedbackList = (id) => {
+            var data = HttpRequest.AjaxData('POST', '/AlgoHR/Training/GetListTraineeFeedbackByEventDetailsid', { id: id });
+            let rowTraineeFeedback = '';
+            $.each(data, function (d, e) {
+                rowTraineeFeedback += `<tr>
+
+                                <td>${++d}</td>
+                                <td  class="hdnEventDetailsID d-none">${e.EventDetailsID}</td>
+                                <td>${e.Comments}</td>
+
+                                `
+                //< td ><a onClick="btnEditDepriciation(this)" title="Edit Depriciation" class="btn btn-primary btn-xs"> <i class="fas fa-edit fa-sm"></i></a><span> </span><a onClick="btnDeleteDepriciation(${AssetId},${e.ID})" title="Delete Depriciation" class="btn btn-danger btn-xs"><i class="fas fa-trash fa-sm"></i></a></td >
+                //        </tr >
+            });
+            $("#tbodyTraineeFeedback").html(rowTraineeFeedback);
+
+        }
+    </script>
+}

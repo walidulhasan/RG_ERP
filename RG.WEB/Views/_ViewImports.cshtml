@@ -1,0 +1,14 @@
+﻿@using RG.WEB
+@using RG.WEB.Models
+@using RG.Application.IdentityEntities
+@using Microsoft.AspNetCore.Identity
+@using System.Security.Claims;
+@using RG.Application.Constants;
+@using RG.Application.Common.Utilities
+@using Microsoft.AspNetCore.Antiforgery
+@using Microsoft.AspNetCore.Http
+@inject Wangkanai.Detection.Services.IDetectionService DetectionService
+
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@addTagHelper *,RG.WEB
+@addTagHelper *, Wangkanai.Detection

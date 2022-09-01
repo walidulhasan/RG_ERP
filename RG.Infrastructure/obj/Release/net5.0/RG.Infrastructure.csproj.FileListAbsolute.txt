@@ -1,0 +1,17 @@
+E:\TFS Project\RG_ERP\RG.Infrastructure\bin\Release\net5.0\RG.Infrastructure.deps.json
+E:\TFS Project\RG_ERP\RG.Infrastructure\bin\Release\net5.0\RG.Infrastructure.dll
+E:\TFS Project\RG_ERP\RG.Infrastructure\bin\Release\net5.0\ref\RG.Infrastructure.dll
+E:\TFS Project\RG_ERP\RG.Infrastructure\bin\Release\net5.0\RG.Infrastructure.pdb
+E:\TFS Project\RG_ERP\RG.Infrastructure\bin\Release\net5.0\RG.Application.dll
+E:\TFS Project\RG_ERP\RG.Infrastructure\bin\Release\net5.0\RG.DBEntities.dll
+E:\TFS Project\RG_ERP\RG.Infrastructure\bin\Release\net5.0\RG.Application.pdb
+E:\TFS Project\RG_ERP\RG.Infrastructure\bin\Release\net5.0\RG.DBEntities.pdb
+E:\TFS Project\RG_ERP\RG.Infrastructure\obj\Release\net5.0\RG.Infrastructure.csproj.AssemblyReference.cache
+E:\TFS Project\RG_ERP\RG.Infrastructure\obj\Release\net5.0\RG.Infrastructure.GeneratedMSBuildEditorConfig.editorconfig
+E:\TFS Project\RG_ERP\RG.Infrastructure\obj\Release\net5.0\RG.Infrastructure.AssemblyInfoInputs.cache
+E:\TFS Project\RG_ERP\RG.Infrastructure\obj\Release\net5.0\RG.Infrastructure.AssemblyInfo.cs
+E:\TFS Project\RG_ERP\RG.Infrastructure\obj\Release\net5.0\RG.Infrastructure.csproj.CoreCompileInputs.cache
+E:\TFS Project\RG_ERP\RG.Infrastructure\obj\Release\net5.0\RG.Infrastructure.csproj.CopyComplete
+E:\TFS Project\RG_ERP\RG.Infrastructure\obj\Release\net5.0\RG.Infrastructure.dll
+E:\TFS Project\RG_ERP\RG.Infrastructure\obj\Release\net5.0\ref\RG.Infrastructure.dll
+E:\TFS Project\RG_ERP\RG.Infrastructure\obj\Release\net5.0\RG.Infrastructure.pdb

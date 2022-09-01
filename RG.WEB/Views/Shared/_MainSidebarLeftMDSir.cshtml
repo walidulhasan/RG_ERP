@@ -1,0 +1,126 @@
+﻿
+
+<aside class="main-sidebar sidebar-dark-primary elevation-4">
+    <!-- Brand Logo -->
+    <a href="http://www.robintexbd.com/" class="brand-link" target="_blank">
+        <img src="~/CustomSiteImages/robintexGroupLogo.png" alt="Robintex-Group Bangladesh Logo" title="Robintex-Group Bangladesh" class="brand-image img-circle elevation-3"
+             style="opacity: .8">
+
+        <span class="brand-text font-weight-light text-xs text-warning">
+            Robintex-Group Bangladesh
+        </span>
+    </a>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <!-- Sidebar user panel (optional) -->
+        @*<div class="user-panel mt-0 pb-0 mb-0 d-flex">
+                <div class="info">
+                    <a href="#" class="d-block">@User.FindFirstValue(SessionKey.EMPLOYEE_NAME)</a>
+                </div>
+            </div>*@
+        <!-- Sidebar Menu -->
+        <nav class="mt-2">
+            <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false" id="mdMenu">
+                <li class="nav-item">
+                    <a asp-area="MDSir" asp-controller="AccountsInfo" asp-action="LoanDetails" class="nav-link">
+                        <i class="fas fa-university"></i>
+                        <p>Loan Position</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a asp-area="MDSir" asp-controller="OrderReports" asp-action="OrderShipmentBalance" class="nav-link">
+                        <i class="fas fa-ship text-warning"></i>
+                        <p>Shipment Balance</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a asp-area="MDSir" asp-controller="ExportDocument" asp-action="ExportDocumentRealization" class="nav-link">
+                        <i class="fa-solid fa-file-export text-danger"></i>
+                        <p>Export Document Realization</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a asp-area="MDSir" asp-controller="ExportDocument" asp-action="LCMaturityRealization" class="nav-link">
+                        <i class="fa-solid fa-circle-dollar-to-slot text-info"></i>
+                        <p>LC Maturity Realization</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a asp-area="MDSir" asp-controller="ExportDocument" asp-action="OutstandingLCRealization" class="nav-link">
+                        <i class="fa-solid fa-circle-dollar-to-slot text-warning"></i>
+                        <p>Outstanding LC Realization</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a asp-area="MDSir" asp-controller="ExportDocument" asp-action="WeeklyShipmentStatus" class="nav-link">
+                        <i class="fa-solid fa-chart-line text-success"></i>
+                        <p>Weekly Shipment Status</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a asp-area="AlgoHR" asp-controller="PaySlip" asp-action="CompanyMonthlySalary" class="nav-link ">
+                        <i class="fa-solid fa-wallet text-primary "></i>
+                        <p>Monthly Salary</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a asp-area="MDSir" asp-controller="Salary" asp-action="SalaryAnalysis" class="nav-link ">
+                        <i class="fa-solid fa-magnifying-glass-dollar"></i>
+                        <p> Salary Analysis</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a asp-area="EMS" asp-controller="ShipmentReport" asp-action="DocumentPurchasePercent" class="nav-link ">
+                        <i class="fa fa-credit-card text-warning"></i>
+                        <p>5% of Doc. Purchase</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a asp-area="MDSir" asp-controller="CMBLPurchaseOrder" asp-action="POSearch" class="nav-link ">
+                        <i class="fab fa-searchengin text-danger"></i>
+                        <p>PO Search</p>
+                    </a>
+                </li>
+                @*<li class="nav-item">
+            <a href="#" class="nav-link">
+                <i class="nav-icon fas fa-tachometer-alt"></i>
+                <p>
+                    Salary
+                    <i class="right fas fa-angle-left"></i>
+                </p>
+            </a>
+            <ul class="nav nav-treeview">
+                <li class="nav-item">
+                    <a asp-area="AlgoHR" asp-controller="PaySlip" asp-action="CompanyMonthlySalary" class="nav-link ">
+                        <i class="fa-solid fa-wallet text-primary "></i>
+                        <p>Monthly Salary</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a asp-area="MdSir" asp-controller="Salary" asp-action="SalaryAnalysis" class="nav-link ">
+                        <i class="fa-solid fa-magnifying-glass-dollar"></i>
+                        <p> Salary Analysis</p>
+                    </a>
+                </li>
+            </ul>
+        </li>*@
+            </ul>
+        </nav>
+        <!-- /.sidebar-menu -->
+    </div>
+    <!-- /.sidebar -->
+</aside>
+<script type="text/javascript">
+    $(function () {
+        $(".dateField").datepicker(
+            {
+                dateFormat: "dd-M-yy",
+                showAnim: "scale",
+                changeMonth: true,
+                yearRange: "2000:2050",
+                changeYear: true
+            });
+    });
+</script>
+
+

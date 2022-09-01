@@ -1,0 +1,326 @@
+﻿@model List<RG.Application.Contracts.Maxco.Buisness.OrderPlanReports.Queries.RequestResponseModel.FinishFabricDeliveryRM>
+@{
+    Layout = null;
+    var dateFactoryBuyerOrderWiseSum = Model.GroupBy(x => new { x.ProcessDateMsg, x.Factory, x.BuyerName, x.OrderNo })
+.Select(g => new
+{
+    ProcessDateMsg = g.Key.ProcessDateMsg,
+    Factory = g.Key.Factory,
+    BuyerName = g.Key.BuyerName,
+    OrderNo = g.Key.OrderNo,
+    BatchQty = g.Sum(x => x.BatchQty),
+    FinishMainQty = g.Sum(x => x.FinishMainQty),
+    FinishRibQty = g.Sum(x => x.FinishRibQty),
+    DyedReceived = g.Sum(x => x.DyedReceived)
+}).ToList();
+
+    var dateFactoryBuyerWiseSum = dateFactoryBuyerOrderWiseSum.GroupBy(x => new { x.ProcessDateMsg, x.Factory, x.BuyerName })
+        .Select(g => new
+        {
+            ProcessDateMsg = g.Key.ProcessDateMsg,
+            Factory = g.Key.Factory,
+            BuyerName = g.Key.BuyerName,
+            BatchQty = g.Sum(x => x.BatchQty),
+            FinishMainQty = g.Sum(x => x.FinishMainQty),
+            FinishRibQty = g.Sum(x => x.FinishRibQty),
+            DyedReceived = g.Sum(x => x.DyedReceived)
+        }).ToList();
+
+    var dateFactoryWiseSum = dateFactoryBuyerWiseSum.GroupBy(x => new { x.ProcessDateMsg, x.Factory })
+        .Select(g => new
+        {
+            ProcessDateMsg = g.Key.ProcessDateMsg,
+            Factory = g.Key.Factory,
+            BatchQty = g.Sum(x => x.BatchQty),
+            FinishMainQty = g.Sum(x => x.FinishMainQty),
+            FinishRibQty = g.Sum(x => x.FinishRibQty),
+            DyedReceived = g.Sum(x => x.DyedReceived)
+        }).ToList();
+
+    var dateWiseSum = dateFactoryWiseSum.GroupBy(x => new { x.ProcessDateMsg })
+        .Select(g => new
+        {
+            ProcessDateMsg = g.Key.ProcessDateMsg,
+            BatchQty = g.Sum(x => x.BatchQty),
+            FinishMainQty = g.Sum(x => x.FinishMainQty),
+            FinishRibQty = g.Sum(x => x.FinishRibQty),
+            DyedReceived = g.Sum(x => x.DyedReceived)
+        }).ToList();
+}
+
+<html>
+<head>
+    <title>Daily Finish Fabric Delivery</title>
+    <link href="~/AdminLTE-3.1.0/plugins/jquery-ui/jquery-ui.min.css" rel="stylesheet" />
+    <link href="~/lib/bootstrap-5.0.2/css/bootstrap.min.css" rel="stylesheet" />
+    <script src="~/AdminLTE-3.1.0/plugins/jquery/jquery.min.js"></script>
+    <script src="~/AdminLTE-3.1.0/plugins/jquery-ui/jquery-ui.min.js"></script>
+    <script src="~/lib/bootstrap-5.0.2/js/bootstrap.bundle.min.js"></script>
+
+
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.12/css/jquery.dataTables.min.css" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/1.2.2/css/buttons.dataTables.min.css" />
+    <script type="text/javascript" src="https://code.jquery.com/jquery-1.12.3.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.2.2/js/dataTables.buttons.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/2.5.0/jszip.min.js"></script>
+    <script type="text/javascript" src="https://cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/pdfmake.min.js"></script>
+    <script type="text/javascript" src="https://cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/vfs_fonts.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.2.2/js/buttons.html5.min.js"></script>
+
+    <style>
+        .header {
+            position: sticky;
+            top: 0;
+        }
+    </style>
+
+</head>
+
+<body>
+    <div class="container-fluid">
+        <div class="row" style="height:50px;">
+            <div class="col-12 text-center">
+                <h5 class="mb-0">Robintex Group Bangladesh</h5>
+                <h6>Daily Finish Fabric Delivery</h6>
+
+            </div>
+        </div>
+        <table class="table table-sm table-bordered table-striped text-sm text-center display nowrap" id="tblDailyBatch" style="font-size:11px;">
+            <thead class="bg-dark text-white header">
+                <tr>
+                    <th style="vertical-align:middle">SL#</th>
+                    <th style="vertical-align:middle">Date</th>
+                    <th style="vertical-align:middle">Factory</th>
+                    <th style="vertical-align:middle">Buyer</th>
+                    <th style="vertical-align:middle">Order</th>
+                    <th style="vertical-align:middle">Lot No</th>
+                    <th style="vertical-align:middle">Color</th>
+                    <th style="vertical-align:middle">Remarks</th>
+                    <th style="vertical-align:middle">Grey Qty</th>
+                    <th style="vertical-align:middle">Delivery Qty</th>
+                    <th style="vertical-align:middle">Rib/ S. Jersey</th>
+                    <th style="vertical-align:middle">Coller & Cuff / Twill Tape</th>
+                    <th style="vertical-align:middle">Total Delivery</th>
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    var sl = 0;
+
+                    var lastObject = Model.Last();
+                    var previousDate = "";
+                    var previousFactory = "";
+                    var previousBuyer = "";
+                    var previousOrder = "";
+
+                    foreach (var item in Model)
+                    {
+                        var currentDateCount = Model.Where(x => x.ProcessDateMsg == item.ProcessDateMsg).ToList().Count();
+                        var currentDateFactoryCount = Model.Where(x => x.ProcessDateMsg == item.ProcessDateMsg && x.Factory == item.Factory).ToList().Count();
+                        var currentDateFactoryBuyerCount = Model.Where(x => x.ProcessDateMsg == item.ProcessDateMsg && x.Factory == item.Factory && x.BuyerID == item.BuyerID).ToList().Count();
+                        var currentDateFactoryBuyerOrderCount = Model.Where(x => x.ProcessDateMsg == item.ProcessDateMsg && x.Factory == item.Factory
+                        && x.BuyerID == item.BuyerID && x.OrderID == item.OrderID).ToList().Count();
+
+
+
+                        var currentDateFactoryTotalCount = dateFactoryWiseSum.Where(x => x.ProcessDateMsg == item.ProcessDateMsg).Count();
+                        var currentDateBuyerTotalCount = dateFactoryBuyerWiseSum.Where(x => x.ProcessDateMsg == item.ProcessDateMsg).Count();
+                        var currentDateOrderTotalCount = dateFactoryBuyerOrderWiseSum.Where(x => x.ProcessDateMsg == item.ProcessDateMsg).Count();
+
+                        var currentDateFactoryBuyerTotalCount = dateFactoryBuyerWiseSum.Where(x => x.ProcessDateMsg == item.ProcessDateMsg && x.Factory == item.Factory).Count();
+                        var currentDateFactoryOrderTotalCount = dateFactoryBuyerOrderWiseSum.Where(x => x.ProcessDateMsg == item.ProcessDateMsg && x.Factory == item.Factory).Count();
+                        var currentDateFactoryBuyerOrderTotalCount = dateFactoryBuyerOrderWiseSum.Where(x => x.ProcessDateMsg == item.ProcessDateMsg && x.Factory == item.Factory && x.BuyerName == item.BuyerName).Count();
+
+                        @if (previousDate != "" && previousFactory != "" && previousBuyer != "" && previousOrder != "" &&
+                    (previousDate != item.ProcessDateMsg || previousFactory != item.Factory || previousBuyer != item.BuyerName
+                     || previousOrder != item.OrderNo))
+                        {
+                            var currentDateFactoryBuyerOrderSum = dateFactoryBuyerOrderWiseSum.Where(x => x.ProcessDateMsg == previousDate && x.Factory == previousFactory && x.BuyerName == previousBuyer && x.OrderNo == previousOrder).First();
+                            <tr class="bg-info" style="font-weight: bold;">
+                                <td></td>
+                                <td class="font-weight-bold" colspan="4">@previousOrder Total</td>
+                                <td class="font-weight-bold">@currentDateFactoryBuyerOrderSum.BatchQty</td>
+                                <td class="font-weight-bold">@currentDateFactoryBuyerOrderSum.FinishMainQty</td>
+                                <td class="font-weight-bold">@currentDateFactoryBuyerOrderSum.FinishRibQty</td>
+                                <td class="font-weight-bold">0</td>
+                                <td class="font-weight-bold">@currentDateFactoryBuyerOrderSum.DyedReceived</td>
+                            </tr>
+                        }
+
+                        @if (previousDate != "" && previousFactory != "" && previousBuyer != "" && (previousDate != item.ProcessDateMsg || previousFactory != item.Factory || previousBuyer != item.BuyerName))
+                        {
+                            var currentDateFactoryBuyerSum = dateFactoryBuyerWiseSum.Where(x => x.ProcessDateMsg == previousDate && x.Factory == previousFactory && x.BuyerName == previousBuyer).First();
+                            <tr class="bg-primary text-white" style="font-weight: bold;">
+                                <td></td>
+                                <td colspan="5">@previousBuyer Total</td>
+                                <td>@currentDateFactoryBuyerSum.BatchQty</td>
+                                <td>@currentDateFactoryBuyerSum.FinishMainQty</td>
+                                <td>@currentDateFactoryBuyerSum.FinishRibQty</td>
+                                <td>0</td>
+                                <td>@currentDateFactoryBuyerSum.DyedReceived</td>
+                            </tr>
+                        }
+                        @if (previousDate != "" && previousFactory != "" && (previousDate != item.ProcessDateMsg || previousFactory != item.Factory))
+                        {
+                            var currentDateFactorySum = dateFactoryWiseSum.Where(x => x.ProcessDateMsg == previousDate && x.Factory == previousFactory).First();
+                            <tr class="bg-warning" style="font-weight: bold;">
+                                <td></td>
+                                <td colspan="6">@previousFactory Total</td>
+                                <td>@currentDateFactorySum.BatchQty</td>
+                                <td>@currentDateFactorySum.FinishMainQty</td>
+                                <td>@currentDateFactorySum.FinishRibQty</td>
+                                <td>0</td>
+                                <td>@currentDateFactorySum.DyedReceived</td>
+                            </tr>
+                        }
+                        @if (previousDate != "" && previousDate != item.ProcessDateMsg)
+                        {
+                            var currentDateSum = dateWiseSum.Where(x => x.ProcessDateMsg == previousDate).First();
+                            <tr class="bg-success text-white" style="font-weight: bold;">
+                                <td></td>
+                                <td colspan="7">@previousDate Total</td>
+                                <td>@currentDateSum.BatchQty</td>
+                                <td>@currentDateSum.FinishMainQty</td>
+                                <td>@currentDateSum.FinishRibQty</td>
+                                <td>0</td>
+                                <td>@currentDateSum.DyedReceived</td>
+                            </tr>
+                        }
+
+
+
+                        <tr>
+                            <td>@(++sl)</td>
+                            @if (previousDate != item.ProcessDateMsg)
+                            {
+                                <td style="vertical-align:middle;font-weight:bold;" rowspan="@(currentDateCount+currentDateFactoryTotalCount+currentDateBuyerTotalCount+currentDateOrderTotalCount)">@item.ProcessDateMsg</td>
+                            }
+                            @if (previousDate != item.ProcessDateMsg || previousFactory != item.Factory)
+                            {
+                                <td style="vertical-align: middle; font-weight: bold;" rowspan="@(currentDateFactoryCount+currentDateFactoryBuyerTotalCount+currentDateFactoryOrderTotalCount)">@item.Factory</td>
+                            }
+                            @if (previousDate != item.ProcessDateMsg || previousFactory != item.Factory || previousBuyer != item.BuyerName)
+                            {
+                                <td style="vertical-align: middle; font-weight: bold;" rowspan="@(currentDateFactoryBuyerCount+currentDateFactoryBuyerOrderTotalCount)">@item.BuyerName</td>
+                            }
+                            @if (previousDate != item.ProcessDateMsg || previousFactory != item.Factory || previousBuyer != item.BuyerName
+                              || previousOrder != item.OrderNo)
+                            {
+                                <td style="vertical-align: middle; font-weight: bold;" rowspan="@currentDateFactoryBuyerOrderCount">@item.OrderNo</td>
+                            }
+                            <td style="vertical-align:middle">@item.LotNo</td>
+                            <td style="vertical-align:middle">@item.PantoneNo</td>
+                            <td style="vertical-align:middle"></td>
+                            <td style="vertical-align:middle">@item.BatchQty</td>
+                            <td style="vertical-align:middle">@item.FinishMainQty</td>
+                            <td style="vertical-align:middle">@item.FinishRibQty</td>
+                            <td style="vertical-align:middle">0</td>
+                            <td style="vertical-align:middle">@item.DyedReceived</td>
+
+                        </tr>
+
+                        if (lastObject.Equals(item))
+                        {
+                            var currentDateFactoryBuyerOrderSum = dateFactoryBuyerOrderWiseSum.Where(x => x.ProcessDateMsg == item.ProcessDateMsg && x.Factory == item.Factory && x.BuyerName == item.BuyerName && x.OrderNo == item.OrderNo).First();
+                            var currentDateFactoryBuyerSum = dateFactoryBuyerWiseSum.Where(x => x.ProcessDateMsg == item.ProcessDateMsg && x.Factory == item.Factory && x.BuyerName == item.BuyerName).First();
+                            var currentDateFactorySum = dateFactoryWiseSum.Where(x => x.ProcessDateMsg == item.ProcessDateMsg && x.Factory == item.Factory).First();
+                            var currentDateSum = dateWiseSum.Where(x => x.ProcessDateMsg == item.ProcessDateMsg).First();
+                            <tr class="bg-info" style="font-weight: bold;">
+                                <td></td>
+                                <td colspan="4">@item.OrderNo Total</td>
+                                <td>@currentDateFactoryBuyerOrderSum.BatchQty</td>
+                                <td>@currentDateFactoryBuyerOrderSum.FinishMainQty</td>
+                                <td>@currentDateFactoryBuyerOrderSum.FinishRibQty</td>
+                                <td>0</td>
+                                <td>@currentDateFactoryBuyerOrderSum.DyedReceived</td>
+                            </tr>
+
+                            <tr class="bg-primary text-white" style="font-weight: bold;">
+                                <td></td>
+                                <td colspan="5">@item.BuyerName Total</td>
+                                <td>@currentDateFactoryBuyerSum.BatchQty</td>
+                                <td>@currentDateFactoryBuyerSum.FinishMainQty</td>
+                                <td>@currentDateFactoryBuyerSum.FinishRibQty</td>
+                                <td>0</td>
+                                <td>@currentDateFactoryBuyerSum.DyedReceived</td>
+                            </tr>
+
+                            <tr class="bg-warning" style="font-weight: bold;">
+                                <td></td>
+                                <td colspan="6">@item.Factory Total</td>
+                                <td>@currentDateFactorySum.BatchQty</td>
+                                <td>@currentDateFactorySum.FinishMainQty</td>
+                                <td>@currentDateFactorySum.FinishRibQty</td>
+                                <td>0</td>
+                                <td>@currentDateFactorySum.DyedReceived</td>
+                            </tr>
+
+                            <tr class="bg-success text-white" style="font-weight: bold;">
+                                <td></td>
+                                <td colspan="7">@item.ProcessDateMsg Total</td>
+                                <td>@currentDateSum.BatchQty</td>
+                                <td>@currentDateSum.FinishMainQty</td>
+                                <td>@currentDateSum.FinishRibQty</td>
+                                <td>0</td>
+                                <td>@currentDateSum.DyedReceived</td>
+                            </tr>
+                        }
+
+
+
+                        previousDate = item.ProcessDateMsg;
+                        previousFactory = item.Factory;
+                        previousBuyer = item.BuyerName;
+                        previousOrder = item.OrderNo;
+
+                    }
+                }
+            </tbody>
+        </table>
+        <div class="text-center">
+            <input type="button" class="btn btn-sm btn-success" value="Excel" id="btnPdf" onclick="exportToExcel()" />
+        </div>
+        <br />
+    </div>
+    <script type="text/javascript">
+        function bodyOnload() {
+            //   $("body").removeClass("loading");
+
+        }
+
+        function exportToExcel() {
+            var htmls = "";
+            var uri = 'data:application/vnd.ms-excel;base64,';
+            var template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>';
+            var base64 = function (s) {
+                return window.btoa(unescape(encodeURIComponent(s)))
+            };
+
+            var format = function (s, c) {
+                return s.replace(/{(\w+)}/g, function (m, p) {
+                    return c[p];
+                })
+            };
+
+            htmls = document.getElementById("tblDailyBatch").innerHTML;
+
+            var ctx = {
+                worksheet: 'Worksheet',
+                table: htmls
+            }
+            var link = document.createElement("a");
+            link.download = "DailyFinishFabricDelivery.xls";
+            link.href = uri + base64(format(template, ctx));
+            link.click();
+        }
+        $(function () {
+            $(document).ready(function () {
+                // $("body").addClass("loading");
+
+            });
+        });
+    </script>
+</body>
+
+</html>

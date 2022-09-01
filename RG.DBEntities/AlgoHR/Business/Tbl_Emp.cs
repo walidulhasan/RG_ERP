@@ -1,0 +1,127 @@
+﻿using System;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace RG.DBEntities.AlgoHR.Business
+{
+    public class Tbl_Emp
+    {
+        public long Emp_ID { get; set; }
+        public string Emp_Cd { get; set; }
+        public int? Emp_Company { get; set; }
+        public int? Emp_Dept { get; set; }
+        public int? Emp_Section { get; set; }
+        public int? Emp_Designation { get; set; }
+        public int? Emp_Shift { get; set; }
+        public DateTime? Emp_Appointment { get; set; }
+        public DateTime? Emp_Confirmation { get; set; }
+        public DateTime? Emp_lastincrement { get; set; }
+        public double? Emp_lastincamount { get; set; }
+        public string Emp_Salutation { get; set; }
+        public string Emp_Fname { get; set; }
+        public string Emp_Mname { get; set; }
+        public string Emp_Lname { get; set; }
+        public string Emp_Father { get; set; }
+        public string Emp_SSN { get; set; }
+        public string Emp_Citizen { get; set; }
+        public Int16? Emp_Marital { get; set; }
+        public string Emp_Gender { get; set; }
+        public DateTime? Emp_DOB { get; set; }
+        public string Emp_PlaceofBirth { get; set; }
+        public string Emp_Address1 { get; set; }
+        public string Emp_City1 { get; set; }
+        public string Emp_State1 { get; set; }
+        public string Emp_Zip1 { get; set; }
+        public Int16? Emp_Country1 { get; set; }
+        public string Emp_Address2 { get; set; }
+        public string Emp_City2 { get; set; }
+        public string Emp_State2 { get; set; }
+        public string Emp_Zip2 { get; set; }
+        public Int16? Emp_Country2 { get; set; }
+        public string Emp_Acode1 { get; set; }
+        public string Emp_Tel1 { get; set; }
+        public string Emp_Acode2 { get; set; }
+        public string Emp_Tel2 { get; set; }
+        public string Emp_Acode3 { get; set; }
+        public string Emp_Tel3 { get; set; }
+        public string Emp_Mobile { get; set; }
+        public string Emp_Email { get; set; }
+        public DateTime? Emp_Created { get; set; }
+        public bool? Emp_Active { get; set; }
+        public DateTime? Emp_BlockDate { get; set; }
+        public Int16? Emp_Religion { get; set; }
+        public string Emp_Sect { get; set; }
+        public string Emp_Race { get; set; }
+        public double? Emp_Gross { get; set; }
+        public double? Emp_Incentives { get; set; }
+        [NotMapped]
+        public double? Emp_Salary { get; set; }
+        public bool? Emp_Deleted { get; set; }
+        public string Dept_Cd { get; set; }
+        public string Sec_CD { get; set; }
+        public bool? Emp_OT { get; set; }
+        public int? AttendanceAllowance { get; set; }
+        public int? ConductAllowance { get; set; }
+        public int? HoliDayAllowance { get; set; }
+        public int? ExtraAllowance { get; set; }
+        public int? nighAllowance { get; set; }
+        public int? FestivalAllowance { get; set; }
+        public double? TaxDeduction { get; set; }
+        public int? Emp_Bank { get; set; }
+        public bool? Emp_AttAllow { get; set; }
+        public bool? Emp_TaxDed { get; set; }
+        public bool? Emp_Blocked { get; set; }
+        public bool? Emp_IncOT { get; set; }
+        public string Emp_Account { get; set; }
+        public int? Emp_BankID { get; set; }
+        public string Emp_Name { get; set; }
+        public string Emp_License { get; set; }
+        public int? Emp_LCountry { get; set; }
+        public DateTime? Emp_LIssue { get; set; }
+        public DateTime? Emp_LExpiry { get; set; }
+        public string Emp_Ext { get; set; }
+        public string Emp_CMail { get; set; }
+        public bool? Emp_Payroll { get; set; }
+        public int? emp_type { get; set; }
+        public string Emp_Interviewed { get; set; }
+        public string Emp_Approved { get; set; }
+        public string Emp_oldNo { get; set; }
+        public int? Emp_OldnoNumeric { get; set; }
+        public string Emp_User { get; set; }
+        public string Emp_SSN2 { get; set; }
+        public string Emp_SSN_Deduction { get; set; }
+        public string Emp_EOBI_Deduction { get; set; }
+        public string Emp_Proximity { get; set; }
+        public bool? Emp_CashPayroll { get; set; }
+        public long? Emp_Route { get; set; }
+        public DateTime? Emp_NICExp { get; set; }
+        public string Emp_AttType { get; set; }
+        public string emp_docType { get; set; }
+        public string Emp_RestDay { get; set; }
+        public bool? Emp_PermanentlyBlocked { get; set; }
+        public string Emp_BlockReason { get; set; }
+        public bool? Emp_halfdayallowed { get; set; }
+        public string Emp_LegacyCategory { get; set; }
+        public int? Emp_LegacyType { get; set; }
+        public string Emp_MotherName { get; set; }
+        public int? Emp_SalaryStructure { get; set; }
+        public string Emp_InterviewNo { get; set; }
+        public bool? Emp_PF { get; set; }
+        public long? Emp_FingerPrintCD { get; set; }
+        public string Emp_Bname { get; set; }
+        public string Emp_BFathername { get; set; }
+        public string Emp_BMothername { get; set; }
+        public string Emp_BpresentVill { get; set; }
+        public string Emp_BpresentPost { get; set; }
+        public string Emp_BpresentPS { get; set; }
+        public string Emp_BpresentDist { get; set; }
+        public string Emp_BPermanentVill { get; set; }
+        public string Emp_BPermanentPost { get; set; }
+        public string Emp_BPermanentPS { get; set; }
+        public string Emp_BPermanentDist { get; set; }
+        public string Emp_VoterID { get; set; }
+        public string Emp_MobileN { get; set; }
+        public double? emp_realSalary { get; set; }
+        public string Office_Email { get; set; }
+
+    }
+}

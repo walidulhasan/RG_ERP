@@ -1,0 +1,17 @@
+E:\TFS Project\RG_ERP\SSRSReport.Library\bin\Release\net5.0\SSRSReport.Library.deps.json
+E:\TFS Project\RG_ERP\SSRSReport.Library\bin\Release\net5.0\SSRSReport.Library.dll
+E:\TFS Project\RG_ERP\SSRSReport.Library\bin\Release\net5.0\ref\SSRSReport.Library.dll
+E:\TFS Project\RG_ERP\SSRSReport.Library\bin\Release\net5.0\SSRSReport.Library.pdb
+E:\TFS Project\RG_ERP\SSRSReport.Library\bin\Release\net5.0\RG.Application.dll
+E:\TFS Project\RG_ERP\SSRSReport.Library\bin\Release\net5.0\RG.DBEntities.dll
+E:\TFS Project\RG_ERP\SSRSReport.Library\bin\Release\net5.0\RG.Application.pdb
+E:\TFS Project\RG_ERP\SSRSReport.Library\bin\Release\net5.0\RG.DBEntities.pdb
+E:\TFS Project\RG_ERP\SSRSReport.Library\obj\Release\net5.0\SSRSReport.Library.csproj.AssemblyReference.cache
+E:\TFS Project\RG_ERP\SSRSReport.Library\obj\Release\net5.0\SSRSReport.Library.GeneratedMSBuildEditorConfig.editorconfig
+E:\TFS Project\RG_ERP\SSRSReport.Library\obj\Release\net5.0\SSRSReport.Library.AssemblyInfoInputs.cache
+E:\TFS Project\RG_ERP\SSRSReport.Library\obj\Release\net5.0\SSRSReport.Library.AssemblyInfo.cs
+E:\TFS Project\RG_ERP\SSRSReport.Library\obj\Release\net5.0\SSRSReport.Library.csproj.CoreCompileInputs.cache
+E:\TFS Project\RG_ERP\SSRSReport.Library\obj\Release\net5.0\SSRSReport.Library.csproj.CopyComplete
+E:\TFS Project\RG_ERP\SSRSReport.Library\obj\Release\net5.0\SSRSReport.Library.dll
+E:\TFS Project\RG_ERP\SSRSReport.Library\obj\Release\net5.0\ref\SSRSReport.Library.dll
+E:\TFS Project\RG_ERP\SSRSReport.Library\obj\Release\net5.0\SSRSReport.Library.pdb

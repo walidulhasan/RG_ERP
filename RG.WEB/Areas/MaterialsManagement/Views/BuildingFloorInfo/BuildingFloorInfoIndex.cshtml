@@ -1,0 +1,283 @@
+﻿@model RG.Application.ViewModel.MaterialsManagement.Setup.BuildingFloorInfoVM
+@{
+    ViewData[PageInfo.PageTitle] = "Building Floor Info";
+    ViewData[PageInfo.PageHeader] = "Building Floor Info";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<form id="FrmValid">
+    <div class="row">
+        <div class="col-md-4 col-6 col-sm-6 col-xs-6 ">
+            <div class="form-group">
+                <input asp-for="BuildingFloorID" type="hidden" />
+                <label asp-for="BuildingType" class="label-ajt-sm required"></label>
+                <select required asp-for="BuildingType" asp-items="Model.DDLBuildingType" class="form-control form-control-sm"></select>
+                <span class="text-danger" asp-validation-for="BuildingType"></span>
+            </div>
+        </div>
+        <div class="col-md-4 col-6 col-sm-6 col-xs-6 ">
+            <div class="form-group">
+                <label asp-for="BuildingID" class="label-ajt-sm required"></label>
+                <select required asp-for="BuildingID" asp-items="Model.DDLBuilding" class="form-control form-control-sm"></select>
+                <span class="text-danger" asp-validation-for="BuildingID"></span>
+            </div>
+        </div>
+        <div class="col-md-4 col-6 col-sm-6 col-xs-6 ">
+            <div class="form-group">
+                <label asp-for="FloorName" class="label-ajt-sm required"></label>
+                <input placeholder="Floor Name" asp-for="FloorName" class="form-control form-control-sm" type="text" />
+                <span class="text-danger" asp-validation-for="FloorName"></span>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-3 col-6 col-sm-6 col-xs-6 ">
+            <div class="form-group">
+                <label asp-for="FloorShortName" class="label-ajt-sm required"></label>
+                <input placeholder="Floor Description" asp-for="FloorShortName" class="form-control form-control-sm" type="text" />
+                <span class="text-danger" asp-validation-for="FloorShortName"></span>
+            </div>
+        </div>
+        <div class="col-md-3 col-6 col-sm-6 col-xs-6 ">
+            <div class="form-group">
+                <label asp-for="FloorDescription" class="label-ajt-sm required"></label>
+                <input placeholder="Floor Description" asp-for="FloorDescription" class="form-control form-control-sm" type="text" />
+                <span class="text-danger" asp-validation-for="FloorDescription"></span>
+            </div>
+        </div>
+        <div class="col-md-3 col-6 col-sm-6 col-xs-6 ">
+            <div class="form-group">
+                <label asp-for="FloorSerial" class="label-ajt-sm required"></label>
+                <select required asp-for="FloorSerial" asp-items="Model.DDLSerial" class="form-control form-control-sm"></select>
+                <span class="text-danger" asp-validation-for="FloorSerial"></span>
+            </div>
+        </div>
+        <div class="col-md-3 col-6 col-sm-6 col-xs-6 ">
+            <div class="form-group">
+                <label asp-for="FloorTypeID" class="label-ajt-sm required"></label>
+                <select required asp-for="FloorTypeID" asp-items="Model.DDLFloorType" class="form-control form-control-sm"></select>
+                <span class="text-danger" asp-validation-for="FloorTypeID"></span>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-3">
+            <div class="form-group">
+                <input type="button" class="btn btn-sm btn-success" id="btnSave" value="Save" />
+                <input type="button" class="btn btn-sm btn-warning d-none" value="Clear" id="btnClear" onclick="Clear()" />
+            </div>
+        </div>
+    </div>
+</form>
+<div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <div id="grid">
+        </div>
+    </div>
+</div>
+@section Scripts{
+    <script type="text/javascript">
+        $(() => {
+            GetListOfBuildingFloorInfo();
+            $("#BuildingType").change(function () {
+                let ID = $("#BuildingType").val();
+                if (ID != "") {
+                    HttpRequest.DropDown("Get", '/MaterialsManagement/BuildingFloorInfo/DDLBuildingTypeWiseBuildingInfo', { ID: ID }, 'BuildingID');
+                } else {
+                    $.alert.open('error', 'Building Type can not find!');
+                }
+            });
+
+            $("#btnSave").click(function () {
+                if ($("#FrmValid").valid()) {
+                    let buildingFloorID = $("#BuildingFloorID").val();
+                    let buildingID = $("#BuildingID").val()
+                    let floorName = $("#FloorName").val()
+                    let floorShortName = $("#FloorShortName").val()
+                    let floorDescription = $("#FloorDescription").val()
+                    let floorSerial = $("#FloorSerial").val()
+                    let floorTypeID = $("#FloorTypeID").val()
+
+                    var Obj = {
+                        BuildingID: buildingID,
+                        BuildingFloorID: buildingFloorID,
+                        FloorName: floorName,
+                        FloorShortName: floorShortName,
+                        FloorDescription: floorDescription,
+                        FloorSerial: floorSerial,
+                        FloorTypeID: floorTypeID
+                    }
+                    if (Obj.BuildingFloorID > 0) {
+                        HttpRequest.Ajax("POST", '/MaterialsManagement/BuildingFloorInfo/BuildingFloorInfoUpdate', { "modelUpdate": Obj }, saveSuccess, null, true);
+                    } else {
+                        HttpRequest.Ajax("POST", '/MaterialsManagement/BuildingFloorInfo/BuildingFloorInfoCreate', { "model": Obj }, saveSuccess, null, true);
+                    }
+                } else {
+                    $.alert.open('warning', "Need to filup All requried Field!!");
+                }
+            });
+        })
+
+        function GetListOfBuildingFloorInfo() {
+
+            var dataGrid = $("#grid").dxDataGrid({
+                height: 450,
+                remoteOperations: { paging: true, filtering: true, sorting: true, grouping: true, summary: true, groupPaging: true },
+                dataSource: DevExpress.data.AspNet.createStore({
+                    key: "BuildingFloorID",
+                    loadUrl: "/MaterialsManagement/BuildingFloorInfo/GetListOfBuildingFloorInfo",
+                }),
+                hoverStateEnabled: true,
+
+                showBorders: true,
+                columnAutoWidth: true,
+                filterRow: { visible: true },
+                pager: { visible: true, showInfo: true, allowedPageSizes: [10, 20, 50, 100, 500], showPageSizeSelector: true, },
+                paging: { pageSize: 10 },
+                selection: { mode: 'single' },
+                export: {
+                    //   enabled: true
+                },
+                columns: [
+                    {
+                        width: "auto",
+                        caption: "SL #",
+                        alignment: 'center',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        },
+                        cellTemplate: function (container, e) {
+                            var index = dataGrid.pageIndex() * dataGrid.pageSize() + e.rowIndex + 1;
+                            container.text(index);
+                        }
+
+                    },
+                    {
+                        dataField: "BuildingFloorID",
+                        visible: false,
+
+                    },
+
+                    {
+                        dataField: "BuildingTypeName",
+                        alignment: 'center',
+                        caption: 'Building Name',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+
+                    },
+                    {
+                        dataField: "FloorName",
+                        alignment: 'center',
+                        caption: 'Name',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+
+                    },
+                    {
+                        dataField: "FloorShortName",
+                        alignment: 'center',
+                        caption: 'Short Name',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+
+                    },
+                    {
+                        dataField: "FloorType",
+                        alignment: 'center',
+                        caption: 'Floor Type Name',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+
+                    },
+                    {
+                        dataField: "FloorDescription",
+                        alignment: 'center',
+                        caption: 'Description',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+
+                    },
+                    {
+                        caption: 'Action',
+                        alignment: 'center',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        },
+                        cellTemplate: function (container, options) {
+
+                            var returnText = '<button class="btn btn-xs btn-warning"><i class="fa fa-edit"></i> Edit</button>';
+                            $(returnText).on('dxclick', function () {
+                                Edit(options.data);
+                            }).appendTo(container);
+
+                            var returnText = '<span>&nbsp</span><button class="btn btn-xs btn-danger"><i class="fa fa-trash"></i> Delete</button>';
+                            returnText = returnText + '</div>';
+                            $(returnText).on('dxclick', function () {
+                                Delete(options.data.BuildingFloorID);
+                            }).appendTo(container);
+                        }
+                    }
+                ]
+
+            }).dxDataGrid("instance");
+        }
+        function Delete(BuildingFloorID) {
+            debugger
+            $.alert.open('confirm', 'Are you sure to delete this record?', function (button) {
+                if (button == 'yes') {
+                    HttpRequest.Ajax("POST", '/MaterialsManagement/BuildingFloorInfo/BuildingFloorInfoRemove', { "id": BuildingFloorID }, saveSuccess, true);
+
+                } else {
+                    return false;
+                }
+            });
+        }
+
+        function saveSuccess(data) {
+            if (data.result == 1) {
+                $.alert.open({
+                    type: 'Success',
+                    content: data.message,
+                    callback: function () {
+                        GetListOfBuildingFloorInfo();
+                        Clear();
+                    }
+                });
+            }
+            else {
+                $.alert.open("error", data.message);
+            }
+        }
+        const Edit = (data) => {
+            $("#BuildingFloorID").val(data.BuildingFloorID)
+            $("#BuildingType").val(data.ID)
+            $("#BuildingType").trigger('change');
+            $("#BuildingID").val(data.BuildingID)
+            $("#FloorName").val(data.FloorName)
+            $("#FloorShortName").val(data.FloorShortName)
+            $("#FloorDescription").val(data.FloorDescription)
+            $("#FloorSerial").val(data.FloorSerial)
+            $("#FloorTypeID").val(data.FloorTypeID)
+            $("#btnSave").val("Update");
+            $("#btnClear").removeClass('d-none');
+        }
+
+        const Clear = () => {
+            $("#BuildingFloorID").val('')
+            $("#BuildingType").val('')
+            $("#BuildingID").val('')
+            $("#FloorName").val('')
+            $("#FloorShortName").val('')
+            $("#FloorDescription").val('')
+            $("#FloorSerial").val('')
+            $("#FloorTypeID").val('')
+            $("#btnSave").val("Save");
+            $("#btnClear").addClass('d-none');
+        }
+    </script>
+}

@@ -1,0 +1,166 @@
+﻿@model RG.Application.ViewModel.AlgoHR.Business.CompanyKPI.CompanyKPICreateVM
+@{
+    ViewData[PageInfo.PageTitle] = "Company KPI";
+    ViewData[PageInfo.PageHeader] = "Company KPI";
+
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row">
+    <div class="col-md-12 col-sm-12 col-lg-12">
+        @*<div class="card mb-0">
+            <div class="card-body p-2">*@
+        <div class="row">
+            <div class="col-sm-3">
+                <div class="form-group mb-0">
+                    <label class="col-form-label" asp-for="KPIMonth"></label>
+                    <select asp-for="KPIMonth" asp-items="Model.DDLMonth" class="form-control form-control-sm"></select>
+                    <span asp-validation-for="KPIMonth" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="col-sm-3">
+                <div class="form-group mb-0">
+                    <label class="col-form-label" asp-for="KPIYear"></label>
+                    <select asp-for="KPIYear" asp-items="Model.DDLYear" class="form-control form-control-sm"></select>
+                    <span asp-validation-for="KPIYear" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+
+        @*</div>
+            </div>*@
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <label>&nbsp;</label>
+        <div class="form-group text-center">
+            <button type="button" class="btn btn-sm btn-warning" id="btnSearch">Search</button>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <table class="table table-sm table-striped table-bordered">
+            <thead class="">
+                <tr>
+                    <th colspan="4">Robintex Group</th>
+                </tr>
+                <tr>
+                    <th colspan="4">KPI of <span id="spanKPI"></span></th>
+                </tr>
+            </thead>
+            <tbody id="tbodyKPI" class="text-center">
+            </tbody>
+        </table>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <div class="form-group text-center">
+            <button type="button" class="btn btn-sm btn-success" id="btnSave">Save</button>
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script type="text/javascript">
+        const clearInputs = () => {
+            $('.particularValue').val('0');
+            $("#KPIMonth").val('');
+            $("#KPIYear").val('');
+        }
+        const saveSuccess = (data) => {
+            if (data.result == 1) {
+                $.alert.open({
+                    type: 'Success',
+                    content: data.message,
+                    callback: function () {
+                        clearInputs();
+                    }
+                });
+            }
+            else {
+                $.alert.open("error", data.message);
+            }
+        }
+        $(function () {
+            $('#btnSearch').click(function () {
+                let month = $('#KPIMonth').val();
+                let monthName = $('#KPIMonth option:selected').text();
+                let year = $('#KPIYear').val();
+                if (month > 0 && year > 0) {
+                    $('#spanKPI').html(`${monthName}, ${year}`);
+                    let data = HttpRequest.AjaxData('GET', '/AlgoHR/CompanyKPI/GetAllCompanyKPIParticulars', { month: month, year: year });
+                    debugger
+                    if (data.length > 0) {
+                        let trKPI = ``;
+                        let grpSL = 0;
+                        $.each(data, function (i, v) {
+                            debugger;
+                            let isAutoCalculation = v.AutoCalculation;
+                            let grpLength = data.filter(x => x.Serial == v.Serial).length;
+                            let inputField = '';
+                            if (isAutoCalculation) {
+                                inputField = `<span>Will be auto Cauculated</span>`;
+                            } else {
+                                inputField = `<input type='text' class='form-control form-control-sm particularValue' value='${v.ParticularValue}' />`;
+                            }
+                            if (grpSL == 0) {
+                                trKPI += `<tr class=''>
+                                            <td rowspan='${grpLength}' style='vertical-align: middle;' class='bg-dark p-0'>${v.Serial}</td>
+                                            <td rowspan='${grpLength}' style='vertical-align: middle;' class='p-0'>${v.ParticularHead}</td>
+                                            <td class='p-0'>${v.Particulars}</td>
+                                            <td class='col-md-3 p-0'><input type='hidden' class='hdnParticularID' value='${v.ID}' />
+                                            <input type='hidden' class='hdnParticularValueID' value='${v.ParticularValueID}' />
+                                            ${inputField}</td>
+                                        </tr>`;
+
+                            } else {
+                                trKPI += `<tr class=''>
+                                            <td class='p-0'>${v.Particulars}</td>
+                                            <td class='col-md-3 p-0'><input type='hidden' class='hdnParticularID' value='${v.ID}' />
+                                            <input type='hidden' class='hdnParticularValueID' value='${v.ParticularValueID}' />
+                                            ${inputField}</td>
+                                        </tr>`;
+                            }
+                            grpSL++;
+                            if (grpLength == grpSL) {
+                                grpSL = 0;
+                            }
+                        });
+                        $('#tbodyKPI').html(trKPI);
+                    }
+                }
+            });
+            $('#btnSave').click(function () {
+                let particularList = new Array();
+                let kpiMonth = $("#KPIMonth").val();
+                let kpiYear = $("#KPIYear").val();
+                $('#tbodyKPI tr').each(function () {
+                    let thatTr = $(this);
+                    let particularValue = parseFloat(thatTr.find('.particularValue').val());
+                    if (particularValue > 0 && kpiMonth > 0 && kpiYear > 0) {
+                        let particularID = parseInt(thatTr.find('.hdnParticularID').val());
+                        let particularValueID = parseInt(thatTr.find('.hdnParticularValueID').val());                       
+
+                        let particilar = {
+                            ID: particularValueID,
+                            ParticularID: particularID,
+                            ParticularValue: particularValue,
+                            KPIMonth: kpiMonth,
+                            KPIYear: kpiYear
+                        };
+                        particularList.push(particilar);
+                    }
+                });
+                if (particularList.length > 0) {
+                    HttpRequest.AjaxAsync("POST", "/AlgoHR/CompanyKPI/Create", { 'particularList': particularList }, saveSuccess);
+                } else {
+                    $.alert.open('warning', 'No data found to save');
+                }
+            });
+        });
+    </script>
+}

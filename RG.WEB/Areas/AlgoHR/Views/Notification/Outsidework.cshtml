@@ -1,0 +1,322 @@
+﻿
+@{
+    ViewData[PageInfo.PageTitle] = "Outside Duty Notification";
+    ViewData[PageInfo.PageHeader] = "Outside Duty Notification";
+
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row">
+    <div class="col-md-12 col-sm-12">
+        <div id="grid">
+        </div>
+    </div>
+</div>
+
+<div class="row pt-2">
+    <div class="col-md-12 col-sm-12 text-center">
+        <input type="button" class="btn btn-sm btn-danger d-none" value="Approve Multiple" id="btnApproveMultipel" />
+    </div>
+</div>
+
+<!-- Modal -->
+<div id="notificationDetailModal" class="modal fade" role="dialog" style="z-index:1050">
+    <div class="modal-dialog modal-lg">
+
+        @*Modal content*@
+        <div class="modal-content">
+            <div class="modal-header p-2">
+                <h5 class="modal-title">Application Detail</h5>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <input type="hidden" id="hdnNotificationID" />
+            </div>
+            <div class="modal-body">
+                <table id="tblNotificationDetail" class="table table-sm table-striped table-bordered text-sm">
+                    <thead class="bg-dark">
+                    </thead>
+                    <tbody id="tbodyNotificationDetail">
+                    </tbody>
+                </table>
+            </div>
+            @*<div class="modal-footer p-1">
+            <button type="button" class="btn btn-xs btn-success float-left" onclick="ApproveRejectNotification('approve')">Approve</button>
+            <button type="button" class="btn btn-xs btn-warning float-right" onclick="ApproveRejectNotification('reject')">Reject</button>
+        </div>*@
+            <div class="row p-1">
+                <div class="col-md-12 col-sm-12">
+                    <div class="col-md-12">
+                        <button type="button" class="btn btn-xs btn-danger float-left" onclick="ApproveRejectNotification('reject')">Reject</button>
+                        <button type="button" class="btn btn-xs btn-success float-right" onclick="ApproveRejectNotification('approve')">Approve</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+@section Scripts{
+    <script>
+        function saveSuccess(data) {
+
+            if (data.result == 1) {
+
+                $.alert.open({
+                    type: 'Success',
+                    content: data.message,
+                    callback: function () {
+                        $("#hdnNotificationID").val('');
+                        $('#notificationDetailModal').modal('hide');
+                        NotificationList();
+                    }
+                });
+            }
+            else {
+                $.alert.open("error", data.message);
+
+            }
+        }
+        function ApproveRejectNotification(type, notificationIDList) {
+
+            $.alert.open('prompt', 'Are you sure to ' + type + ' this record?<br/>Enter your comment here :', function (button, value) {
+                debugger
+                if (button == 'ok') {
+                    debugger;
+                    //if (value != "") {
+                    let notificationIDs = new Array();
+                    let notificationID = 0;
+                    if (typeof notificationIDList != 'undefined' && notificationIDList.length > 0) {
+                        notificationIDs = notificationIDList;
+                    } else {
+                        notificationID = $("#hdnNotificationID").val();
+                        notificationIDs.push(notificationID);
+                    }
+
+                    if (notificationIDs.length > 0) {
+                        if (type === 'approve') {
+                            HttpRequest.Ajax("POST", '/AlgoHR/Notification/ApproveNotification', { "notificationIDs": notificationIDs, 'comment': value }, saveSuccess, true);
+                        } else if (type === 'reject') {
+                            HttpRequest.Ajax("POST", '/AlgoHR/Notification/RejectNotification', { "notificationID": notificationID, 'comment': value }, saveSuccess, true);
+                        } else {
+                            $.alert.open("error", 'Error Occured!');
+                        }
+                    }
+                    //} else {
+                    //    $.alert.open('You must write a comment');
+                    //}
+
+                } else {
+                    $("#hdnNotificationID").val('');
+                }
+
+            });
+        }
+        function NotificationDetails(data) {
+
+            $("#tbodyNotificationDetail").html('');
+            $("#hdnNotificationID").val(0);
+            //var dataDetail = HttpRequest.AjaxData('GET', '/FiniteScheduler/Notification/GetMachineAndMaintenanceCheckListDetail', { masterID: data.MaintenanceCheckMasterID });
+            if (data != null) {
+
+                let tr = '';
+
+                tr = `<tr><td><b>Application Date :</b> ${data.OutsideTaskDate}</td></tr>
+                    <tr><td><b>Duration :</b> ${data.TaskDurationType}</td></tr>
+                    <tr><td><b>From :</b> ${data.TimeFrom} <b>to</b> ${data.TimeTo}</td></tr>
+                    <tr><td class='bg-danger text-white'><b>Reason :</b> ${data.Reason}</td></tr>
+                    <tr><td><b>Address :</b> ${data.TaskAddress}</td></tr>`;
+
+                $("#hdnNotificationID").val(data.NotificationID);
+                $("#tbodyNotificationDetail").html(tr);
+
+                $('#notificationDetailModal').modal('toggle');
+            }
+
+        }
+        function NotificationList() {
+            var dataGrid = $("#grid").dxDataGrid({
+                height: 510,
+                remoteOperations: { paging: true, filtering: true, sorting: true, grouping: false, summary: false, groupPaging: false },
+                dataSource: DevExpress.data.AspNet.createStore({
+                    key: "NotificationID",
+                    loadUrl: "/AlgoHR/Notification/GetOutsideWorkNotificationList"
+                }),
+                hoverStateEnabled: true,
+
+                showBorders: true,
+                columnAutoWidth: true,
+                sorting: {
+                    mode: "multiple"
+                },
+                filterRow: { visible: true },
+                pager: { visible: true, showInfo: true, allowedPageSizes: [10, 20, 50, 100, 500], showPageSizeSelector: true, },
+                paging: { pageSize: 10 },
+                selection: { mode: 'multiple' },
+                export: {
+                    //   enabled: true
+                },
+                columns: [
+                    {
+                        width: "auto",
+                        caption: "SL #",
+                        alignment: 'center',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        },
+                        cellTemplate: function (container, e) {
+                            var index = dataGrid.pageIndex() * dataGrid.pageSize() + e.rowIndex + 1;
+                            container.text(index);
+                        }
+
+                    },
+                    {
+                        dataField: "NotificationID",
+                        visible: false,
+
+                    },
+                    {
+                        dataField: "EmployeeCode",
+                        alignment: 'center',
+                        caption: 'Code',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+                    },
+                    {
+                        dataField: "ApplicantName",
+                        alignment: 'center',
+                        caption: 'Name',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+                    },
+                    {
+                        dataField: "OutsideTaskDate",
+                        alignment: 'center',
+                        caption: 'Date',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+                    },
+                    {
+                        dataField: "TaskDurationType",
+                        alignment: 'center',
+                        caption: 'Duration',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+                    },
+                    {
+                        dataField: "TimeFrom",
+                        alignment: 'center',
+                        caption: 'From',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+                    },
+                    {
+                        dataField: "TimeTo",
+                        alignment: 'center',
+                        caption: 'To',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+                    },
+                    {
+                        dataField: "Division",
+                        alignment: 'center',
+                        caption: 'Division',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+                    },
+                    {
+                        dataField: "Department",
+                        alignment: 'center',
+                        caption: 'Department',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+                    },
+                    {
+                        dataField: "Section",
+                        alignment: 'center',
+                        caption: 'Section',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+                    }, {
+                        dataField: "Designation",
+                        alignment: 'center',
+                        caption: 'Designation',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+                    },
+                    {
+                        caption: "Action",
+                        alignment: 'center',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        },
+                        cellTemplate: function (container, options) {
+                            var returnText = '<button class="btn btn-xs btn-info"><i class="fa fa-bars"></i></button>';
+                            returnText = returnText + '</div>';
+                            $(returnText).on('dxclick', function (e) {
+                                e.stopPropagation();
+                                NotificationDetails(options.data);
+                            }).appendTo(container);
+
+                            var returnText = '<span>&nbsp;</span><button class="btn btn-xs btn-success"><i class="fa fa-check"></i></button>';
+                            returnText = returnText + '</div>';
+                            $(returnText).on('dxclick', function (e) {
+                                e.stopPropagation();
+                                $("#hdnNotificationID").val(options.data.NotificationID);
+                                ApproveRejectNotification('approve');
+                            }).appendTo(container);
+                        }
+                    }
+
+                ]
+
+            }).dxDataGrid("instance");
+            $("#select-all-mode").dxSelectBox({
+                dataSource: ["allPages", "page"],
+                value: "allPages",
+                onValueChanged: function (data) {
+                    dataGrid.option("selection.selectAllMode", data.value);
+                }
+            });
+        }
+
+        $(document).ready(function () {
+            NotificationList();
+            // $("#grid").dxCheckBox("instance").on("valueChanged", HideShowMultipleApproveBtn)
+
+
+            $("#grid").dxDataGrid({
+                onSelectionChanged: function (e) {
+                    debugger;
+                    var dataGrid = $("#grid").dxDataGrid("instance");
+                    var selectedRowsData = dataGrid.getSelectedRowsData();
+                    if (selectedRowsData.length > 0) {
+                        $("#btnApproveMultipel").removeClass('d-none');
+                    } else {
+                        $("#btnApproveMultipel").addClass('d-none');
+                    }
+                }
+            });
+
+            $("#btnApproveMultipel").click(function () {
+                debugger;
+                var dataGrid = $("#grid").dxDataGrid("instance");
+                var selectedRowsData = dataGrid.getSelectedRowsData();
+                let notificationIDs = new Array();
+                $.each(selectedRowsData, function (i, v) {
+                    notificationIDs.push(v.NotificationID);
+                });
+
+                ApproveRejectNotification('approve', notificationIDs);
+            });
+        });
+    </script>
+}

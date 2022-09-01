@@ -1,0 +1,400 @@
+﻿@model RG.Application.ViewModel.MaterialsManagement.Setup.YarnRackCreateVM
+@using RG.Application.Enums;
+@{
+    ViewData[PageInfo.PageHeader] = "Rack Create";
+    ViewData[PageInfo.PageTitle] = "Rack Create";
+    ViewData[PageInfo.btnText1] = "Back To List";
+    ViewData[PageInfo.PageLink1] = "/MaterialsManagement/YarnRack/Index";
+    ViewData[PageInfo.btnClass1] = "btn-warning";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+}
+<form asp-action="Create" asp-area="Embro" asp-controller="Loan" method="post" id="frmYarnRack">
+    <div class="row">
+        <div class="col-md-3">
+            <div class="form-group">
+                <input type="hidden" asp-for="RackID" />
+                <label asp-for="RackName" class="required"></label>
+                <input type="text" asp-for="RackName" class="form-control form-control-sm" autocomplete="off" placeholder="Rack Name" />
+                <span asp-validation-for="RackName" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="form-group">
+                <label asp-for="RackShortName" class="required"></label>
+                <input type="text" asp-for="RackShortName" class="form-control form-control-sm" autocomplete="off" placeholder="Rack Short Name" />
+                <span asp-validation-for="RackShortName" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="col-md-2">
+            <div class="form-group">
+                <label asp-for="RackSerial" class="required"></label>
+                <select asp-for="RackSerial" class="form-control form-control-sm " asp-items="Model.DDLRackNumber"></select>
+                <span asp-validation-for="RackSerial" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="form-group">
+                <label asp-for="RackDescription"></label>
+                <textarea placeholder="Rack Description..." rows="1" cols="3" maxlength="50" asp-for="RackDescription" class="form-control form-control-sm "></textarea>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-3">
+            <div class="form-group">
+                <label asp-for="Building" class="required"></label>
+                <select asp-for="Building" class="form-control form-control-sm " asp-items="Model.DDLBuilding"></select>
+                <span asp-validation-for="Building" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="form-group">
+                <label asp-for="BuildingFloorID" class="required"></label>
+                <select asp-for="BuildingFloorID" class="form-control form-control-sm " asp-items="Model.DDLLBuildingFloor"></select>
+                <span asp-validation-for="BuildingFloorID" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="form-group">
+                <label asp-for="RackRow" class="required"></label>
+                <select asp-for="RackRow" class="form-control form-control-sm " asp-items="Model.DDLRackNumber"></select>
+                <span asp-validation-for="RackRow" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="form-group">
+                <label asp-for="RackColumn" class="required"></label>
+                <select asp-for="RackColumn" class="form-control form-control-sm " asp-items="Model.DDLRackNumber"></select>
+                <span asp-validation-for="RackColumn" class="text-danger"></span>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            <input type="hidden" asp-for="SubRackID" />
+            <div class="form-group text-center">
+                <table class="table table-sm table-bordered table-striped text-sm  text-center " id="tblYarnRack">
+                    <thead class="bg-dark">
+                        <tr>
+                            <th>Sl</th>
+                            <th>Sub.Rack Name</th>
+                            <th>Sub.Rack Short Name</th>
+                            <th>Sub.Rack Serial</th>
+                            <th>Description</th>
+                            <th>Storage Limit</th>
+                            @*<th>Action</th>*@
+                        </tr>
+                    </thead>
+                    <tbody id="tblSubRack">
+                        @if (Model.RackID > 0)
+                        {
+                            var subRackSL = 0;
+
+                            var sl = 1;
+                            foreach (var item in Model.YarnSubRackSetup)
+                            {
+                                for (int i = 0; i < item.SubRackID; i++)
+                                {
+                                    subRackSL = i;
+                                }
+                                <tr data-id='@item.SubRackID'>
+                                    <td class="col-sm-1">@(sl)</td>
+                                    <td class="col-sm-2">
+                                        <input type='hidden' class='hdnRowSl' value="@item.SubRackRowSerial" />
+                                        <input type='hidden' class='hdnColumnSl' value="@item.SubRackColumnSerial" />
+                                        <input type="text" placeholder="Sub.Rack Name" value="@item.SubRackName" class="form-control form-control-sm hdnsubRackName" />
+                                    </td>
+                                    <td class="col-sm-2">
+                                        <input type="text" placeholder="Sub.Rack Short Name" value="@item.SubRackShortName" class="form-control form-control-sm hdnsubShortRackName" />
+                                    </td>
+                                    <td class="col-sm-2">
+                                        <select class="form-control form-control-sm subRackSl hdnsubRackSerial">
+                                            @for (int i = 1; i <= Model.RackRow * Model.RackColumn; i++)
+                                            {
+                                                if (item.SubRackSerial == i)
+                                                {
+                                                    <option selected>@i</option>
+                                                }
+                                                else
+                                                {
+                                                    <option>@i</option>
+                                                }
+                                            }
+                                        </select>
+                                    </td>
+                                    <td class="col-sm-2">
+                                        <textarea placeholder="Rack Description..." rows="1" cols="3" maxlength="50" class="form-control form-control-sm hdnSubRackDescription">@item.SubRackDescription</textarea>
+                                    </td>
+                                    <td class="col-sm-2">
+                                        <input type="number" value="@item.StorageLimit" placeholder="Sub.Rack Name" class="form-control form-control-sm hdnstorageLimit" />
+                                    </td>
+                                </tr>
+                                sl++;
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="form-group text-center">
+                @if (Model.RackID > 0)
+                {
+                    <input type="button" class="btn btn-sm btn-success mr-2" value="Update" id="btnSave" />
+                }
+                else
+                {
+                    <input type="button" class="btn btn-sm btn-success mr-2" value="Save" id="btnSave" />
+                }
+                <input type="button" class="btn btn-sm btn-warning" value="Clear" id="btnClear" onclick="clearForm()" />
+            </div>
+        </div>
+    </div>
+</form>
+
+<div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <div id="grid">
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script type="text/javascript">
+        const getAtoZplus = (number) => {
+           
+            var baseChar = ("A").charCodeAt(0),
+                letters = "";
+            do {
+                number -= 1;
+                letters = String.fromCharCode(baseChar + (number % 26)) + letters;
+                number = (number / 26) >> 0; // quick `floor`
+            } while (number > 0);
+
+            return letters;
+        }
+        const generateSubRackTable = (row, column) => {
+            let subRackTr = ``;
+            if (row > 0 && column > 0) {
+                let subRackID = $("#SubRackID").val();
+                let totalSubRack = row * column;
+                let rackShortName = $("#RackShortName").val();
+                let subRackName = "";
+                let subRackSl = ``;
+                for (var i = 1; i <= totalSubRack; i++) {
+                    subRackSl += `<option value=${i}>${i}</option>`;
+                }
+                let subRackNameRowSl = 1;
+                for (var i = 1; i <= totalSubRack; i++) {
+               
+                    let subRackNameColumnSl = i % column;
+                    if (subRackNameColumnSl == 0) {
+                        subRackNameColumnSl = column;
+                    };
+
+                    let rackRows = getAtoZplus(Math.ceil(i / column));
+
+                    subRackName = `${rackShortName}-${rackRows}-${subRackNameColumnSl}`;
+
+                    subRackTr += `<tr data-id='${subRackID}'>
+                                      <td class="col-sm-1">${i}</td>
+                                      <td class="col-sm-2">
+                                          <input type='hidden' class='hdnRowSl' value='${subRackNameRowSl}'/>
+                                          <input type='hidden' class='hdnColumnSl' value='${subRackNameColumnSl}'/>
+                                          <input type="text" placeholder="Sub.Rack Name" value=${subRackName} class="form-control form-control-sm hdnsubRackName"/>
+                                      </td>
+                                      <td class="col-sm-2">
+                                          <input type="text" placeholder="Sub.Rack Short Name" class="form-control form-control-sm hdnsubShortRackName"/>
+                                      </td>
+                                      <td class="col-sm-2">
+                                          <select class="form-control form-control-sm subRackSl hdnsubRackSerial">${subRackSl}</select>
+                                      </td>
+                                      <td class="col-sm-2">
+                                          <textarea placeholder="Rack Description..." rows="1" cols="3" maxlength="50" class="form-control form-control-sm hdnSubRackDescription"></textarea>
+                                      </td>
+                                      <td class="col-sm-2">
+                                          <input type="number"  placeholder="Storage Limit" value="5000" class="form-control form-control-sm hdnstorageLimit"/>
+                                      </td>
+                                      </tr>`;
+                    if (i % column == 0) {
+                        ++subRackNameRowSl
+                    };
+                }
+            }
+
+            $("#tblSubRack").html(subRackTr);
+
+            $("#tblSubRack tr .subRackSl").each(function (i, v) {
+                $(this).val(i + 1);
+            })
+
+        }
+
+        const checkShortName = (that) => {
+            let rackShortName = $("#RackShortName").val();
+            if (rackShortName === "") {
+                $.alert.open('alert', "Rack Short Name can't Empty!!!");
+                $(that).val("");
+            } else {
+                generateSubRackTable($("#RackRow").val(), $("#RackColumn").val())
+            }
+        }
+
+        function BuildingWiseFloor() {
+ 
+            let building = $("#Building").val();
+            if (building != "") {
+                HttpRequest.DropDown("Get", "/MaterialsManagement/BuildingFloorInfo/GetDDLBuildingFloor", { Building: building,FloorType:@((int)enum_FloorType.YarnStore) }, 'BuildingFloorID', true);
+            } else {
+                HttpRequest.DropDownDefault("BuildingFloorID");
+            }
+
+        }
+
+        $(function () {
+
+            //$("#btnClear").click(function () {
+            //    $('#btnClear').prop('disabled', true);
+            //    setTimeout(function () {
+            //        $('#btnClear').prop('disabled', false);
+            //    }, 100);
+            //    clearForm();
+            //});
+
+
+
+            rowAndColumnDisable();
+            if ('@Model.Building' > 0) {
+              
+                BuildingWiseFloor();
+                $("#BuildingFloorID").val(@Model.BuildingFloorID);
+            }
+            $("#RackRow,#RackColumn").change(function () {
+                checkShortName(this);
+            });
+
+            $("#btnSave").click(function () {
+             
+                $('#btnSave').prop('disabled', true);
+                //setTimeout(function () {
+                //    $('#btnSave').prop('disabled', false);
+                //}, 3000);
+                if ($("#frmYarnRack").valid()) {
+                    let rackID = $("#RackID").val();
+                    let rackName = $("#RackName").val();
+                    let rackShortName = $("#RackShortName").val();
+                    let rackSerial = $("#RackSerial").val();
+                    let rackDescription = $("#RackDescription").val();
+                    let buildingFloorID = $("#BuildingFloorID").val();
+                    let rackRow = $("#RackRow").val();
+                    let rackColumn = $("#RackColumn").val();
+
+                    //Yarn Sub Rack Setup
+                    let yarnSubRackSetup = new Array();
+                    $("#tblYarnRack tbody tr").each(function () {
+                        let thatTr = $(this);
+                        let subRackID = thatTr.data('id');
+                        let subRackRowSl = thatTr.find(".hdnRowSl").val();
+                        let subRackColumnSl = thatTr.find(".hdnColumnSl").val();
+                        let subRackName = thatTr.find(".hdnsubRackName").val();
+                        let subShortRackName = thatTr.find(".hdnsubShortRackName").val();
+                        let subRackSerial = thatTr.find(".hdnsubRackSerial").val();
+                        let subRackDescription = thatTr.find(".hdnSubRackDescription").val();
+                        let storageLimit = thatTr.find(".hdnstorageLimit").val();
+
+
+                        let yarnSubRack = {
+                            SubRackID: subRackID,
+                            RackID: rackID,
+                            SubRackName: subRackName,
+                            SubRackShortName: subShortRackName,
+                            SubRackSerial: subRackSerial,
+                            SubRackRowSerial: subRackRowSl,
+                            SubRackColumnSerial: subRackColumnSl,
+                            SubRackDescription: subRackDescription,
+                            StorageLimit: storageLimit
+                        };
+                        yarnSubRackSetup.push(yarnSubRack);
+                    });
+                    let YarnRackData = {
+                        RackID: rackID,
+                        RackName: rackName,
+                        RackShortName: rackShortName,
+                        RackSerial: rackSerial,
+                        BuildingFloorID: buildingFloorID,
+                        RackDescription: rackDescription,
+                        RackRow: rackRow,
+                        RackColumn: rackColumn,
+                        YarnSubRackSetup: yarnSubRackSetup
+                    }
+                    if (rackID == 0) {
+                        HttpRequest.AjaxAsync("POST", '/MaterialsManagement/YarnRack/Create', { "yarnRackCreateVM": YarnRackData }, saveSuccess, '#btnSave', null,false);
+                    } else {
+                        HttpRequest.AjaxAsync("POST", '/MaterialsManagement/YarnRack/Update', { "rackUpdate": YarnRackData }, saveSuccess, '#btnSave', null, false);
+                    }
+                    clearForm();
+                }
+            });
+
+            $("#Building").change(function () {
+                BuildingWiseFloor();
+            });
+
+        });
+
+        function saveSuccess(data) {
+            if (data.result == 1) {
+                $.alert.open({
+                    type: 'Success',
+                    content: data.message,
+                    callback: function () {
+                    }
+                });
+            }
+            else {
+                $.alert.open("error", data.message);
+            }
+        }
+
+        function clearForm() {
+            $("#RackID").val('0');
+            $("#RackName").val("");
+            $("#RackShortName").val("");
+            $("#RackSerial").val("");
+            $("#RackDescription").val("");
+            $("#Building").val("");
+            $("#RackRow").val("");
+            $("#RackColumn").val("");
+            $("#SubRackID").val('0');
+            $("#tblYarnRack tbody").html('');
+            $("#btnSave").val("Save");
+            $("#RackRow").prop('disabled', false);
+            $("#RackColumn").prop('disabled', false);
+            $("#RackShortName").prop('disabled', false);
+            HttpRequest.DropDownDefault("BuildingFloorID");
+        }
+
+        function DisableEnable() {
+            document.getElementById("#btnClear").disabled = true;
+            setTimeout(function () {
+                document.getElementById("#btnClear").disabled = false;
+            }, 2000);
+        }
+
+        function rowAndColumnDisable() {
+          
+            const rackID = $("#RackID").val();
+            if (rackID > 0) {
+                $("#RackRow").prop('disabled', true);
+                $("#RackColumn").prop('disabled', true);
+                $("#RackShortName").prop('disabled', true);
+            }
+        }
+
+    </script>
+}

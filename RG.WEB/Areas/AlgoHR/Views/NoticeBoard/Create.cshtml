@@ -1,0 +1,308 @@
+﻿@model RG.Application.ViewModel.AlgoHR.Setup.SystemNotice.SystemNoticeVM
+@{
+    ViewData[PageInfo.PageTitle] = "Create Notice";
+    ViewData[PageInfo.PageHeader] = "Create Notice";
+    ViewData[PageInfo.btnText1] = "Back to List";
+    ViewData[PageInfo.PageLink1] = "/AlgoHR/NoticeBoard/Index";
+    ViewData[PageInfo.btnClass1] = "btn-warning";
+
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+}
+<head>
+    <script src="~/AdminLTE-3.1.0/plugins/moment/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.39.0/js/tempusdominus-bootstrap-4.min.js" integrity="sha512-k6/Bkb8Fxf/c1Tkyl39yJwcOZ1P4cRrJu77p83zJjN2Z55prbFHxPs9vN7q3l3+tSMGPDdoH51AEU8Vgo1cgAA==" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.39.0/css/tempusdominus-bootstrap-4.min.css" integrity="sha512-3JRrEUwaCkFUBLK1N8HehwQgu8e23jTH4np5NHOmQOobuC4ROQxFwFgBLTnhcnQRMs84muMh0PnnwXlPq5MGjg==" crossorigin="anonymous" />
+</head>
+<div class="row">
+    <div class="col-sm-12 col-md-12">
+        <div class="card card-dark">
+            <div class="card-header m-0 p-1">
+                <h5 class="card-title">Create Notice</h5>
+            </div>
+            <div class="card-body p-2">
+                <div class="row">
+                    <div class="col-12 col-sm-12 col-md-12">
+                        <div class="form-group mb-2">
+                            <label asp-for="NoticeTitle" class="required"></label>
+                            <input type="text" asp-for="NoticeTitle" class="form-control form-control-sm" />
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12 col-sm-12 col-md-12">
+                        <div class="form-group mb-2">
+                            <label asp-for="NoticeDescription" class=""></label>
+                            <textarea rows="5" asp-for="NoticeDescription" class="form-control form-control-sm"></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-6 col-sm-2 col-md-2">
+                        <div class="form-group mb-2">
+                            <label asp-for="ValidDateFrom" class="required"></label>
+                            <div class="input-group">
+                                <input type="text" asp-for="ValidDateFrom" class="form-control form-control-sm dateField readonlyNormal" readonly />
+                                <div class="input-group-append">
+                                    <span class="input-group-text"><i class="fa fa-calendar" aria-hidden="true"></i></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-sm-2 col-md-2">
+                        <div class="form-group">
+                            <label asp-for="ValidTimeFrom" class="required"></label>
+                            <div class="input-group date" id="ValidTimeFromPicker" data-target-input="nearest">
+                                <input type="text" asp-for="ValidTimeFrom" class="form-control form-control-sm datetimepicker-input" data-target="#ValidTimeFromPicker" data-toggle="datetimepicker" />
+                                <div class="input-group-append" data-target="#ValidTimeFromPicker" data-toggle="datetimepicker">
+                                    <span class="input-group-text"><i class="fa fa-clock" aria-hidden="true"></i></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class=" col-6 col-sm-2 col-md-2">
+                        <div class="form-group mb-2">
+                            <label asp-for="ValidDateTo" class="required"></label>
+                            <div class="input-group">
+                                <input type="text" asp-for="ValidDateTo" class="form-control form-control-sm dateField readonlyNormal" readonly />
+                                <div class="input-group-append">
+                                    <span class="input-group-text"><i class="fa fa-calendar" aria-hidden="true"></i></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-sm-2 col-md-2">
+                        <div class="form-group">
+                            <label asp-for="ValidTimeTo" class="required"></label>
+                            <div class="input-group date" id="ValidTimeToPicker" data-target-input="nearest">
+                                <input type="text" asp-for="ValidTimeTo" class="form-control form-control-sm datetimepicker-input" data-target="#ValidTimeToPicker" data-toggle="datetimepicker" />
+                                <div class="input-group-append" data-target="#ValidTimeToPicker" data-toggle="datetimepicker">
+                                    <span class="input-group-text"><i class="fa fa-clock" aria-hidden="true"></i></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-6 col-sm-3">
+                        <div class="form-group mb-2">
+                            <input type="checkbox" asp-for="ShowDetail" /><b> Notice has details view</b>
+                        </div>
+                    </div>
+                    <div class="col-6 col-sm-3">
+                        <div class="form-group mb-2">
+                            <input type="checkbox" asp-for="MulticastNotice" /><b> Multicast Notice</b>
+                        </div>
+                    </div>
+                </div>
+                <div class="row d-none divMulticastNotice">
+                    <div class="col-sm-12">
+                        <div class="text-right">
+                            <button type="button" class="btn btn-xs btn-danger" id="btnAdd"><i class="fa fa-plus" aria-hidden="true"></i> Add New</button>
+                        </div>
+                        <table class="table table-sm table-striped table-bordered text-xs text-center">
+                            <thead class="bg-dark">
+                                <tr>
+                                    <td>SL#</td>
+                                    <td>Company</td>
+                                    <td>Division</td>
+                                    <td>Department</td>
+                                    <td>Section</td>
+                                    <td>Action</td>
+                                </tr>
+                            </thead>
+                            <tbody id="tbodyMulticastNotice">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+
+                <div class="row">
+                    <div class="col-12 col-md-12 text-center">
+                        <div class="form-group">
+                            <button type="button" class="btn btn-sm btn-success" id="btnSave">Save</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section scripts{
+
+    <script type="text/javascript">
+        function ClearForm() {
+            $("#NoticeTitle").val('');
+            $("#NoticeDescription").val('');
+            $("#ValidDateFrom").val('');
+            $("#ValidTimeFrom").val('');
+            $("#ValidDateTo").val('');
+            $("#ValidTimeTo").val('');
+
+            $("#MulticastNotice").prop('checked',false);
+            $("#ShowDetail").prop('checked', false);
+            $("#tbodyMulticastNotice").html('');
+            $(".divMulticastNotice").addClass('d-none');
+        }
+        function RemoveRow(that, id) {
+
+            $.alert.open('confirm', 'Are you sure to remove this record', function (button) {
+                if (button == 'yes') {
+
+                    let tr = $(that).parent().parent();
+                    let currentTable = tr.parent();
+                    tr.remove();
+                    $('.trSerial').each(function (i, v) {
+                        let thatSerial = $(this);
+                        thatSerial.text(++i);
+                    });
+                }
+            });
+        }
+        function GetCompanyWiseDivision(that) {
+            let companyID = $(that).val();
+            if (companyID != "" && companyID > 0) {
+                let divisionOptions = HttpRequest.DropDownOptions('GET', '/AlgoHR/CommonDropDown/GetDDLDivisionListByEmbroCompany', { embroCompanyID: companyID });
+                $(that).parent().parent().find('.ddlDivision').html(divisionOptions);
+            } else {
+                $(that).parent().parent().find('.ddlDivision').html(defaultOption);
+                $(that).parent().parent().find('.ddlDepartment').html(defaultOption);
+                $(that).parent().parent().find('.ddlSection').html(defaultOption);
+            }
+        }
+        function GetDivisionWiseDepartment(that) {
+            let divisionID = $(that).val();
+
+            if (divisionID > 0) {
+                let departmentOptions = HttpRequest.DropDownOptions('GET', '/AlgoHR/CommonDropDown/GetDDLDeptList', { divisionID: divisionID });
+                $(that).parent().parent().find('.ddlDepartment').html(departmentOptions);
+            } else {
+
+            }
+        }
+        function GetDepartmentWiseSection(that) {
+            let departmentID = $(that).val();
+            if (departmentID > 0) {
+                let sectionOptions = HttpRequest.DropDownOptions('GET', '/AlgoHR/CommonDropDown/GetDDLSectionList', { deptID: departmentID });
+                $(that).parent().parent().find('.ddlSection').html(sectionOptions);
+            } else {
+
+            }
+        }
+        function saveSuccess(data) {
+            if (data.result == 1) {
+                $.alert.open({
+                    type: 'Success',
+                    content: data.message,
+                    callback: function () {
+                        ClearForm();
+                    }
+                });
+            }
+            else {
+                $.alert.open("error", data.message);
+            }
+        }
+        $(function () {
+
+            $("#MulticastNotice").click(function () {
+                let isChecked = $(this).is(':checked');
+                if (isChecked) {
+                    $(".divMulticastNotice").removeClass('d-none');
+                    $("#btnAdd").trigger('click');
+                } else {
+                    $("#tbodyMulticastNotice").html('');
+                    $(".divMulticastNotice").addClass('d-none');
+                }
+            });
+            debugger;
+            if (@Model.NoticeID> 0) {
+                if (RtnBoolToLower('@Model.ShowDetail')) {
+                    $("#ShowDetail").prop('checked', true);
+                }
+                if (@Model.CustomCusting.Count> 0) {
+                    debugger;
+                    $("#MulticastNotice").trigger('click');
+                    let casting =@Html.Raw(Json.Serialize(Model.CustomCusting));
+                }
+            }
+           
+
+            $('#ValidTimeFromPicker,#ValidTimeToPicker').datetimepicker({
+                format: 'LT'
+            });
+
+            let companyOptions = HttpRequest.DropDownOptions('GET', '/AlgoHR/NoticeBoard/GetDDLCompany', {});
+            defaultOption = '<option value="">Please Select</option>';
+            $("#btnAdd").click(function () {
+                debugger;
+                let sl = $("#tbodyMulticastNotice tr").length;
+                $("#tbodyMulticastNotice").append(
+                    `<tr class='trMulticastNotice'>
+                            <td class="trSerial">${sl + 1}</td>
+                            <td class='p-0'><select onchange="GetCompanyWiseDivision(this)" class="form-control form-control-sm ddlCompany">${companyOptions}</select></td>
+                            <td class='p-0'><select onchange="GetDivisionWiseDepartment(this)" class="form-control form-control-sm ddlDivision">${defaultOption}</select></td>
+                            <td class='p-0'><select onchange="GetDepartmentWiseSection(this)" class="form-control form-control-sm ddlDepartment">${defaultOption}</select></td>
+                            <td class='p-0'><select class="form-control form-control-sm ddlSection">${defaultOption}</select></td>
+                            <td class='p-0'><button type="button" class="btn btn-xs btn-danger" onclick="RemoveRow(this,'')"><i class="fa fa-trash" aria-hidden="true"></i></button></td>
+                        </tr>`
+                );
+            });
+
+            $("#btnSave").click(function () {
+                let noticeTitle = $("#NoticeTitle").val();
+                let noticeDescription = $("#NoticeDescription").val();
+                let validDateFrom = $("#ValidDateFrom").val();
+                let validTimeFrom = $("#ValidTimeFrom").val();
+                let validDateTo = $("#ValidDateTo").val();
+                let validTimeTo = $("#ValidTimeTo").val();
+
+                let isMulticastNotice = $("#MulticastNotice").is(':checked');
+                let isShowDetail = $("#ShowDetail").is(':checked');
+
+                let customCasting = new Array();
+                if (isMulticastNotice) {
+                    $('.trMulticastNotice').each(function () {
+                        let thisTr = $(this);
+                        let companyID = thisTr.find('.ddlCompany').val();
+                        let divisionID = thisTr.find('.ddlDivision').val();
+                        let departmentID = thisTr.find('.ddlDepartment').val();
+                        let sectionID = thisTr.find('.ddlSection').val();
+                        if (companyID != "" && companyID > 0) {
+                            let cast = {
+                                CompanyID: companyID,
+                                DivisionID: divisionID,
+                                DepartmentID: departmentID,
+                                SectionID: sectionID
+                            }
+                            customCasting.push(cast);
+                        } else {
+                            $.alert("warning", 'Please Provide Company');
+                            return false;
+                        }
+
+                    });
+                }
+                if (noticeTitle != "") {
+                    let notice = {
+                        NoticeTitle: noticeTitle,
+                        NoticeDescription: noticeDescription,
+                        ValidDateFrom: validDateFrom,
+                        ValidTimeFrom: validTimeFrom,
+                        ValidDateTo: validDateTo,
+                        ValidTimeTo: validTimeTo,
+                        ShowDetail: isShowDetail,
+                        CustomCasting: customCasting
+                    }
+                    HttpRequest.Ajax("POST", "/AlgoHR/NoticeBoard/Create", { 'notice': notice }, saveSuccess);
+                } else {
+                    $.alert("warning", 'Please Provide Notice Title');
+                }
+
+
+
+            });
+        });
+    </script>
+}

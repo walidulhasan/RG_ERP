@@ -1,0 +1,84 @@
+﻿@model List<RG.Application.ViewModel.FiniteScheduler.Setup.AssetInfo.ReportDataVM>
+@{
+
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Asset Report</title>
+    <link href="~/AdminLTE-3.1.0/plugins/jquery-ui/jquery-ui.min.css" rel="stylesheet" />
+    <link href="~/lib/bootstrap-5.0.2/css/bootstrap.min.css" rel="stylesheet" />
+    <script src="~/AdminLTE-3.1.0/plugins/jquery/jquery.min.js"></script>
+    <script src="~/AdminLTE-3.1.0/plugins/jquery-ui/jquery-ui.min.js"></script>
+    <script src="~/lib/bootstrap-5.0.2/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/qrcode/qrcode.js"></script>
+    <link href="~/css/printA4.css" rel="stylesheet" />
+
+    <style>
+    </style>
+</head>
+
+<body>
+    <div class="row main-page">
+        @{
+            if (Model.Count > 0)
+            {
+                foreach (var item in Model.OrderBy(x => x.AssetID))
+                {
+                    var qrCodeID = "qrCode" + item.AssetID;
+                    <div class="col-6 col-sm-6 col-md-6 mt-3 mb-3 assetStickerCard">
+                        <div class="card" style="border:1px solid red;">
+                            <div class="card-body p-1">
+                                <div data-id="@item.AssetID" class="row assetSticker">
+                                    <div class="col-3 col-sm-3 col-md-3">
+                                        <div id="@qrCodeID" class="assetQrCode"></div>
+                                    </div>
+                                    <div class="col-9 col-sm-9 col-md-9 assetInfo">
+                                        <h5 class="text-danger assetCode">@item.Code</h5>
+                                        <h6 class="text-primary assetName">@item.AssetName</h6>
+                                        <p class="mb-0 text-secondary assetCompany">@item.CompanyName</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+        }
+    </div>
+</body>
+</html>
+<script type="text/javascript">
+    const GenerateQrCode = () => {
+        $('.assetSticker').each(function () {
+            let that = $(this);
+            let assetID = that.data("id");
+
+            let qrCodeID = `qrCode${assetID}`;
+
+            let assetCode = that.find('.assetCode').text();
+            let assetName = that.find('.assetName').text();
+            let assetCompany = that.find('.assetCompany').text();
+
+            let qrCodeText = `${assetCode},${assetName},${assetCompany}`;
+            var qrcode = new QRCode(qrCodeID, {
+                text: qrCodeText,
+                width: 90,
+                height: 80,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+
+
+        });
+    }
+
+    $(function () {
+        GenerateQrCode();
+
+    });
+</script>
+

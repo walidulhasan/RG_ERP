@@ -1,0 +1,18 @@
+﻿@using RG.Application.Common.CommonInterfaces;
+@{
+
+@inject ICurrentUserService _currentUserService
+string companyName = "Robintex-Group Bangladesh";
+    if (!String.IsNullOrEmpty(_currentUserService.CompanyName))
+    {
+        companyName= _currentUserService.CompanyName;
+    }
+}
+<footer class="main-footer">
+    <strong class="text-xs text-sm text-md">Copyright &copy; @DateTime.Now.Year <a href="http://www.robintexbd.com/">@companyName</a>.</strong>
+    All rights reserved.
+    <div class="float-right d-none d-sm-inline-block">
+        <b>Version</b> 0.0.1.0
+    </div>
+</footer>
+

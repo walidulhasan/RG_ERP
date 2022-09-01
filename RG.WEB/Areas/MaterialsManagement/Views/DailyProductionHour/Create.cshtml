@@ -1,0 +1,261 @@
+﻿
+@model RG.Application.Contracts.MaterialsManagement.Setups.DailyProductionHour.Commands.DataTransferModel.DailyProductionHourDTM
+@{
+    ViewData[PageInfo.PageHeader] = "Daily Production Hour";
+    ViewData[PageInfo.PageTitle] = "Daily Production Hour";
+    ViewData[PageInfo.btnClass1] = "btn-warning";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<form asp-action="Create" asp-area="MaterialsManagement" asp-controller="DailyProductionHour" method="post" id="frmDailyProductionHour">
+
+    <div class="row">
+        <div class="col-md-3">
+            <div class="form-group">
+                <input type="hidden" asp-for="ID" />
+                <label asp-for="ProductionType" class="required"></label>
+                <input asp-for="ProductionType" class="form-control form-control-sm " autocomplete="off" placeholder="Production Type" />
+                <span asp-validation-for="ProductionType" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="form-group">
+                <label asp-for="TimeFrom" class="required"></label>
+                <input asp-for="TimeFrom" type="number" class="form-control form-control-sm" autocomplete="off" />
+                <span asp-validation-for="TimeFrom" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="form-group">
+                <label asp-for="TimeTo" class="required"></label>
+                <input asp-for="TimeTo" type="number" class="form-control form-control-sm" autocomplete="off" />
+                <span asp-validation-for="TimeTo" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="form-group">
+                <label asp-for="LapTiming" class="required"></label>
+                <input asp-for="LapTiming" type="number" class="form-control form-control-sm" autocomplete="off" />
+                <span asp-validation-for="LapTiming" class="text-danger"></span>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-3">
+            <div class="form-group">
+                <label asp-for="Description"></label>
+                <input asp-for="Description" class="form-control form-control-sm" autocomplete="off" placeholder="Description" />
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-sm-3">
+            <label>&nbsp;</label>
+            <div class="form-group">
+                <input type="button" class="btn btn-sm btn-success" id="btnSave" value="Save" />
+                <input type="button" class="btn btn-sm btn-warning d-none" value="Clear" id="btnClear" onclick="clearForm()" />
+            </div>
+        </div>
+    </div>
+</form>
+<div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <div id="grid">
+        </div>
+    </div>
+</div>
+@section scripts{
+
+    <script type="text/javascript">
+        $(function () {
+            getAllGridData();
+            clearForm();
+
+            $("#btnSave").click(function () {
+                debugger
+                let id = $("#ID").val();
+                if ($("#frmDailyProductionHour").valid()) {
+                    let productionType = $("#ProductionType").val();
+                    let timeFrom = $("#TimeFrom").val();
+                    let timeTo = $("#TimeTo").val();
+                    let lapTiming = $("#LapTiming").val();
+                    let description = $("#Description").val();
+
+                    var Obj = {
+                        ID: id,
+                        ProductionType: productionType,
+                        TimeFrom: timeFrom,
+                        TimeTo: timeTo,
+                        LapTiming: lapTiming,
+                        Description: description
+                    }
+                    if (Obj.ID > 0) {
+                        HttpRequest.Ajax("POST", '/MaterialsManagement/DailyProductionHour/Update', { "model": Obj }, saveSuccess, null, true);
+
+                    } else {
+                        HttpRequest.Ajax("POST", '/MaterialsManagement/DailyProductionHour/Create', { "model": Obj }, saveSuccess, null, true);
+                    }
+                    getAllGridData();
+                    clearForm();
+                }
+            });
+        })
+
+        function saveSuccess(data) {
+            if (data.result == 1) {
+                $.alert.open({
+                    type: 'Success',
+                    content: data.message,
+                    callback: function () {
+                    }
+                });
+            }
+            else {
+                $.alert.open("error", data.message);
+            }
+        }
+
+
+        function getAllGridData() {
+
+            var dataGrid = $("#grid").dxDataGrid({
+                height: 300,
+                remoteOperations: { paging: true, filtering: true, sorting: true, grouping: true, summary: true, groupPaging: true },
+                dataSource: DevExpress.data.AspNet.createStore({
+                    key: "ID",
+                    loadUrl: "/MaterialsManagement/DailyProductionHour/GetAllGridData",
+                    loadParams: {}
+                }),
+                hoverStateEnabled: true,
+
+                showBorders: true,
+                columnAutoWidth: true,
+                filterRow: { visible: true },
+                pager: { visible: true, showInfo: true, allowedPageSizes: [10, 20, 50], showPageSizeSelector: true, },
+                paging: { pageSize: 10 },
+                selection: { mode: 'single' },
+                export: {
+                    //   enabled: true
+                },
+                columns: [
+                    {
+                        width: "auto",
+                        caption: "SL #",
+                        alignment: 'center',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        },
+                        cellTemplate: function (container, e) {
+                            var index = dataGrid.pageIndex() * dataGrid.pageSize() + e.rowIndex + 1;
+                            container.text(index);
+                        }
+
+                    },
+                    {
+                        dataField: "ID",
+                        visible: false
+                    },
+                    {
+                        dataField: "ProductionType",
+                        alignment: 'center',
+                        caption: 'Production Type',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+
+                    },
+                    {
+                        dataField: "TimeFrom",
+                        alignment: 'center',
+                        caption: 'Time From',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+
+                    },
+                    {
+                        dataField: "TimeTo",
+                        alignment: 'center',
+                        caption: 'Time To',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+
+                    },
+                    {
+                        dataField: "LapTiming",
+                        alignment: 'center',
+                        caption: 'Lap Timing',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+
+                    },
+                    {
+                        dataField: "Description",
+                        alignment: 'center',
+                        caption: 'Description',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+
+                    },
+
+                    {
+                        caption: 'Action',
+                        alignment: 'center',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        },
+                        cellTemplate: function (container, options) {
+
+                            var returnText = '<button class="btn btn-xs btn-warning"><i class="fa fa-edit"></i> Edit</button>';
+                            $(returnText).on('dxclick', function () {
+                                edit(options.data);
+                            }).appendTo(container);
+
+                            var returnText = '<span>&nbsp</span><button class="btn btn-xs btn-danger"><i class="fa fa-trash"></i> Delete</button>';
+                            returnText = returnText + '</div>';
+                            $(returnText).on('dxclick', function () {
+                                remove(options.data.ID);
+                            }).appendTo(container);
+                        }
+                    }
+                ]
+
+            }).dxDataGrid("instance");
+        }//end
+        function remove(id) {
+            $.alert.open('confirm', 'Are you sure to delete this record?', function (button) {
+                if (button == 'yes') {
+                    HttpRequest.Ajax("PUT", '/MaterialsManagement/DailyProductionHour/Remove', { "id": id }, saveSuccess, true);
+                    getAllGridData();
+                }
+            });
+        }
+        function edit(data) {
+            debugger
+            $("#ID").val(data.ID);
+            $("#ProductionType").val(data.ProductionType);
+            $('#ProductionType').attr("disabled", true)
+            $("#TimeFrom").val(data.TimeFrom);
+            $("#TimeTo").val(data.TimeTo);
+            $("#LapTiming").val(data.LapTiming);
+            $("#Description").val(data.Description);
+            $("#btnSave").val("Update");
+            $("#btnClear").removeClass('d-none');
+        }
+
+        function clearForm() {
+            debugger
+            $("#ID").val('0');
+            $("#ProductionType").val("");
+            $('#ProductionType').attr("disabled", false)
+            $("#TimeFrom").val("");
+            $("#TimeTo").val("");
+            $("#LapTiming").val("");
+            $("#Description").val("");
+            $("#btnSave").val("Save");
+            $("#btnClear").addClass('d-none');
+        }
+    </script>
+}

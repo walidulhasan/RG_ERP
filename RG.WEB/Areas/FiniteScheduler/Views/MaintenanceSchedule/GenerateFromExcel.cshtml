@@ -1,0 +1,173 @@
+﻿@model RG.Application.ViewModel.FiniteScheduler.Setup.MaintenanceSchedule.GenerateFromExcelVM
+@{
+    ViewData[PageInfo.PageTitle] = "Machine Maintenance";
+    ViewData[PageInfo.PageHeader] = "Machine Maintenance List";
+
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<form id="frmMachineSchedule">
+    <div class="row">
+        <div class="col-sm-3">
+            <div class="form-group">
+                <label asp-for="MonthID" class="col-form-label-sm required"></label>
+                <select asp-for="MonthID" class="form-control form-control-sm" asp-items="Model.DDLMonths"></select>
+                <span asp-validation-for="MonthID" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-sm-3">
+            <div class="form-group">
+                <label asp-for="YearID" class="col-form-label-sm required"></label>
+                <select asp-for="YearID" class="form-control form-control-sm" asp-items="Model.DDLYears"></select>
+                <span asp-validation-for="YearID" class="text-danger"></span>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            <label asp-for="ScheduleData" class="col-form-label-sm required" required"></label>
+            <textarea asp-for="ScheduleData" class="form-control form-control-sm" placeholder="Excel Format : Machine Name || Schedule Date "></textarea>
+            <span asp-validation-for="ScheduleData" class="text-danger"></span>
+        </div>
+    </div>
+    <div class="row mt-2 text-center">
+        <div class="col-sm-12">
+            <button type="button" class="btn btn-sm btn-danger" id="btnValidate">Validate</button>
+        </div>
+    </div>
+    <div class="row mt-2">
+        <div class="col-sm-12">
+            <table class="table table-sm">
+                <thead class="">
+                    <tr>
+                        <th>SL</th>
+                        <th>Machine Name</th>
+                        <th>Schedule Date</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="tblscheduleBody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="row text-center">
+        <div class="col-sm-12 ">
+            <button type="button" class="btn btn-sm btn-primary" id="btnSave">Save</button>
+        </div>
+    </div>
+</form>
+
+@section scripts{
+    
+    <script type="text/javascript">
+        var isInValidExcel = 0;
+
+        function excelDataTableGenerate(data) {
+            var tr = "";
+            var tblscheduleBody = $("#tblscheduleBody");
+            console.log(data);
+            if (data && data.length > 0) {
+                $.each(data, function (s, d) {
+                    if (!d.MachineID || d.MachineID == 0) {
+                        d.Status += ` ${d.MachineName} Machine is not found`;
+                    }
+                    isInValidExcel += d.Status && d.Status.length > 0 ? 1 : 0;
+                    var statusColor = (d.Status && d.Status.length > 0) ? 'bg-danger' : "";
+                   
+                    tr += `<tr>
+                <td>${s + 1}</td>
+                <td>${d.MachineName}<input type="hidden" class="tdTxtMacineId" value="${d.MachineID}"></td>
+                <td class="tdScheduleDate">${d.ScheduleDate}</td>
+                <td class="${statusColor}">${d.Status}</td>
+                </tr>`
+                });
+    
+            } else {
+                tr = "";
+            }
+            console.log(tr);
+            tblscheduleBody.html(tr);
+        }
+        $(function () {
+            $("#btnValidate").click(function () {
+                isInValidExcel = 0;
+                var ScheduleData = $("#ScheduleData").val();
+                if (ScheduleData.length > 0) {
+
+                    $.ajax({
+                        type: 'POST',
+                        // contentType: "application/json; charset=utf-8",
+                        url: '/FiniteScheduler/MaintenanceSchedule/ValidateMachineSchedule',
+                        data: { ScheduleExcelData: ScheduleData },
+                        dataType: 'json',
+                        async: false,
+                        success: function (data) {
+                          
+                            if (data.result == 1) {
+                                $("#ScheduleData").val("");
+
+                                excelDataTableGenerate(data.data);
+                                if (isInValidExcel == 0) {
+                                    $("#btnSave").removeAttr("disabled");
+                                    console.log("remove");
+                                } else {
+                                    $("#btnSave").attr('disabled', 'true');
+                                }
+                            }
+                            else {
+                                $.alert.open("error", data.message);
+                            }
+                            $("#AjaxLoader").hide();
+                        },
+                        error: function (request, status, error) {
+                            $("#AjaxLoader").hide();
+                            alert(request.statusText + "/" + request.statusText + "/" + error);
+                        }
+                    });
+                } else {
+                    $("#AjaxLoader").hide();
+                    $.alert.open("error", `Paste data from excel sheet.`);
+                    return false;
+                }
+
+            });
+
+            $("#btnSave").click(function () {
+                debugger;
+                var tbodyLength = $("#tblscheduleBody tr").length;
+                if (!tbodyLength || tbodyLength < 1) {
+                    $.alert.open("warning", "Add Schedule");
+                    return ;
+                }
+                let scheduleList = new Array();
+                $("#tblscheduleBody tr").each(function () {
+                    var $this = $(this);
+                    var MachineID = $this.find(".tdTxtMacineId").val();
+                    var ScheduleDate = $this.find(".tdScheduleDate").text();
+                    var trData = { MachineID: MachineID, ScheduleDate: ScheduleDate };
+                    scheduleList.push(trData);
+                });
+                console.log(scheduleList);
+                $.ajax({
+                    type: 'POST',
+                    // contentType: "application/json; charset=utf-8",
+                    url: '/FiniteScheduler/MaintenanceSchedule/SaveSchedule',
+                    data: { model: scheduleList },
+                    dataType: 'json',
+                    async: false,
+                    success: function (data) {
+                        if (data.result == 0) {
+                            $.alert.open("error", data.message);
+                            return false;
+                        }
+                        $.alert.open("success", data.message);
+                        $("#tblscheduleBody tr").html("");
+                    }
+                });
+
+                return false;
+            })
+        })
+    </script>
+}

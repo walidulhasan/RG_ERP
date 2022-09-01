@@ -1,0 +1,58 @@
+﻿@model RG.Application.ViewModel.AlgoHR.Business.CompanyKPI.CompanyKPIReportVM
+@{
+    ViewData[PageInfo.PageTitle] = "Company KPI Report";
+    ViewData[PageInfo.PageHeader] = "Company KPI Report";
+
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row">
+    <div class="col-md-12 col-sm-12 col-lg-12">
+        @*<div class="card mb-0">
+            <div class="card-body p-2">*@
+        <div class="row">
+            <div class="col-sm-3">
+                <div class="form-group mb-0">
+                    <label class="col-form-label" asp-for="KPIMonth"></label>
+                    <select asp-for="KPIMonth" asp-items="Model.DDLMonth" class="form-control form-control-sm"></select>
+                    <span asp-validation-for="KPIMonth" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="col-sm-3">
+                <div class="form-group mb-0">
+                    <label class="col-form-label" asp-for="KPIYear"></label>
+                    <select asp-for="KPIYear" asp-items="Model.DDLYear" class="form-control form-control-sm"></select>
+                    <span asp-validation-for="KPIYear" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+
+        @*</div>
+            </div>*@
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <label>&nbsp;</label>
+        <div class="form-group text-center">
+            <button type="button" class="btn btn-sm btn-warning" id="btnShow">Show</button>
+        </div>
+    </div>
+</div>
+
+@section scripts{ 
+<script type="text/javascript">
+    $(function () {
+        $('#btnShow').click(function () {
+
+            let month = $('#KPIMonth').val();
+            let year = $('#KPIYear').val();
+            if (year > 0) {
+                let url = `/AlgoHR/CompanyKPI/KPIReport?month=${month}&year=${year}&forLastYears=${1}`;
+                newWindow(url, "KPI Report");
+            }
+        });
+    });
+</script>
+}

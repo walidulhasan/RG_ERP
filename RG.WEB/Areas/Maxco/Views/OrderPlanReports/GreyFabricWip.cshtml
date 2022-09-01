@@ -1,0 +1,153 @@
+﻿@model List<RG.Application.Contracts.Maxco.Buisness.OrderPlanReports.Queries.RequestResponseModel.GreigeFabricPlanRM>
+@{ 
+    Layout = null;
+}
+
+<html>
+<head>
+    <title>Grey Fabric WIP</title>
+    <link href="~/AdminLTE-3.1.0/plugins/jquery-ui/jquery-ui.min.css" rel="stylesheet" />
+    <link href="~/lib/bootstrap-5.0.2/css/bootstrap.min.css" rel="stylesheet" />
+    <script src="~/AdminLTE-3.1.0/plugins/jquery/jquery.min.js"></script>
+    <script src="~/AdminLTE-3.1.0/plugins/jquery-ui/jquery-ui.min.js"></script>
+    <script src="~/lib/bootstrap-5.0.2/js/bootstrap.bundle.min.js"></script>
+
+
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.12/css/jquery.dataTables.min.css" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/1.2.2/css/buttons.dataTables.min.css" />
+    <script type="text/javascript" src="https://code.jquery.com/jquery-1.12.3.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.2.2/js/dataTables.buttons.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/2.5.0/jszip.min.js"></script>
+    <script type="text/javascript" src="https://cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/pdfmake.min.js"></script>
+    <script type="text/javascript" src="https://cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/vfs_fonts.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.2.2/js/buttons.html5.min.js"></script>
+
+    <style>
+        .header {
+            position: sticky;
+            top: 0;
+        }
+    </style>
+
+</head>
+
+<body>
+    <div class="container-fluid">
+        <div class="row" style="height:50px;">
+            <div class="col-12 text-center">
+                <h5 class="mb-0">Robintex Group Bangladesh</h5>
+                <h6>Grey Fabric WIP</h6>
+
+            </div>
+        </div>
+        <table class="table table-sm table-bordered table-striped text-sm text-center display nowrap" id="tblGreigeStatus" style="font-size:11px;">
+            <thead class="bg-dark text-white header">
+                <tr>
+                    <th style="vertical-align:middle">SL#</th>
+                    <th style="vertical-align:middle">Buyer</th>
+                    <th style="vertical-align:middle">Order No</th>
+                    <th style="vertical-align:middle">Order Qty (Pcs)</th>
+                    <th style="vertical-align:middle">Req Finish (Kg)</th>
+                    <th style="vertical-align:middle">Req Grey (Kg)</th>
+                    <th style="vertical-align:middle">KRS No</th>
+                    <th style="vertical-align:middle">KRS Qty</th>
+                    <th style="vertical-align:middle">KRS Qty With %</th>
+                    <th style="vertical-align:middle">Yarn Issued</th>
+                    <th style="vertical-align:middle">Yarn Balance</th>
+                    <th style="vertical-align:middle">Knitting Prod (Kg)</th>
+                    <th style="vertical-align:middle">Yarn Inhand KRS</th>
+                    <th style="vertical-align:middle">Yarn Status</th>
+                    <th style="vertical-align:middle">Knitting Balance</th>
+                    <th style="vertical-align:middle">Knitting Closing Date</th>
+                    <th style="vertical-align:middle">Batch Qty</th>
+                    <th style="vertical-align:middle">Batch Balance</th>
+                    <th style="vertical-align:middle">Additional (Kg)</th>
+                    <th style="vertical-align:middle">Last Batch</th>
+                    <th style="vertical-align:middle">Last Batch Ready Date</th>
+                    <th style="vertical-align:middle">Batch Status</th>
+                    <th style="vertical-align:middle">Cut of Days</th>
+                    <th style="vertical-align:middle">Batch Commitment Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    var sl = 0;
+                    foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@(++sl)</td>
+                            <td>@item.Buyer</td>
+                            <td>@item.OrderNo</td>
+                            <td>@item.NumberOfGarments</td>
+                            <td>@item.FirstRequiredQty</td>
+                            <td>@item.RequiredQuantityWastageKG</td>
+                            <td>@item.KrsNo</td>
+                            <td>@item.KRSQuantity</td>
+                            <td></td>
+                            <td>@item.YarnIssue</td>
+                            <td>@item.YarnBalance</td>
+                            <td>@item.GreigeProduceQty</td>
+                            <td>@item.YarnBalance</td>
+                            <td></td>
+                            <td>@item.KnittingBalance</td>
+                            <td>@item.KnittingCloseDateMsg</td>
+                            <td>@item.BatchQty</td>
+                            <td>@item.BatchBalance</td>
+                            <td>@item.DiffFabricQty</td>
+                            <td></td>
+                            <td>@item.LastBatchDateMsg</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+        <div class="text-center">
+            <input type="button" class="btn btn-sm btn-success" value="Excel" id="btnPdf" onclick="exportToExcel()" />
+        </div>
+        <br />
+    </div>
+    <script type="text/javascript">
+        function bodyOnload() {
+            //   $("body").removeClass("loading");
+
+        }
+
+        function exportToExcel() {
+            var htmls = "";
+            var uri = 'data:application/vnd.ms-excel;base64,';
+            var template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>';
+            var base64 = function (s) {
+                return window.btoa(unescape(encodeURIComponent(s)))
+            };
+
+            var format = function (s, c) {
+                return s.replace(/{(\w+)}/g, function (m, p) {
+                    return c[p];
+                })
+            };
+
+            htmls = document.getElementById("tblGreigeStatus").innerHTML;
+
+            var ctx = {
+                worksheet: 'Worksheet',
+                table: htmls
+            }
+            var link = document.createElement("a");
+            link.download = "GreigeStatus.xls";
+            link.href = uri + base64(format(template, ctx));
+            link.click();
+        }
+        $(function () {
+            $(document).ready(function () {
+                // $("body").addClass("loading");
+
+            });
+        });
+    </script>
+</body>
+
+</html>

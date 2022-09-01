@@ -1,0 +1,143 @@
+﻿@model List<RG.Application.Contracts.AlgoHR.Business.SalaryAnalysisDivisions.Query.RequestResponseModel.AnalysisDivisionWiseAllowanceRM>
+@{
+
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Analysis Division Wise Allowance</title>
+    <link href="~/AdminLTE-3.1.0/plugins/jquery-ui/jquery-ui.min.css" rel="stylesheet" />
+    <link href="~/lib/bootstrap-5.0.2/css/bootstrap.min.css" rel="stylesheet" />
+    <script src="~/AdminLTE-3.1.0/plugins/jquery/jquery.min.js"></script>
+    <script src="~/AdminLTE-3.1.0/plugins/jquery-ui/jquery-ui.min.js"></script>
+    <script src="~/lib/bootstrap-5.0.2/js/bootstrap.bundle.min.js"></script>
+
+
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.12/css/jquery.dataTables.min.css" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/1.2.2/css/buttons.dataTables.min.css" />
+    <script type="text/javascript" src="https://code.jquery.com/jquery-1.12.3.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.2.2/js/dataTables.buttons.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/2.5.0/jszip.min.js"></script>
+    <script type="text/javascript" src="https://cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/pdfmake.min.js"></script>
+    <script type="text/javascript" src="https://cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/vfs_fonts.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.2.2/js/buttons.html5.min.js"></script>
+
+    <style>
+        .header {
+            position: sticky;
+            top: 0;
+        }
+    </style>
+
+</head>
+
+<body>
+    <div class="container-fluid">
+        <div class="row">
+
+            @{
+                int sl = 0;
+                if (Model.Count > 0)
+                {
+                    <div class="col-12 col-sm-12 col-md-12 col-lg-12 text-center">
+                        <h5 class="mb-0">Robintex (Bangladesh) Limited</h5>
+
+
+                        <h6>Allowance Analysis Report Of @Model[0].DepartmentGroup, For The Month Of @Model[0].MonthYear</h6>
+
+                        <table class="table table-sm table-bordered table-striped text-xs text-center display nowrap" style="font-size:12px;" id="tblDocuments">
+                            <thead class="bg-dark text-white header font-weight-bold">
+                                <tr>
+                                    <th>SL#</th>
+                                    <th>Code</th>
+                                    <th>Old Code</th>
+                                    <th>Name</th>
+                                    <th>Designation</th>
+                                    <th>Allowance Type</th>
+                                    <th>Allowance</th>
+                                    <th>Total Allowance</th>
+
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{
+                                    var prevEmpCode = "";
+                                    foreach (var item in Model)
+                                    {
+                                        var allowanceCount = Model.Where(x => x.EmployeeCode == item.EmployeeCode).ToList().Count;
+
+
+
+                                        <tr class="">
+                                            @if (prevEmpCode == "" || prevEmpCode != item.EmployeeCode)
+                                            {
+                                                <td rowspan="@allowanceCount" style="vertical-align:middle">@(++sl)</td>
+                                                <td rowspan="@allowanceCount" style="vertical-align:middle" class="">@item.EmployeeCode</td>
+                                                <td rowspan="@allowanceCount" style="vertical-align:middle" class="">@item.EmployeeOldCode</td>
+                                                <td rowspan="@allowanceCount" style="vertical-align:middle" class="">@item.EmployeeName</td>
+                                                <td rowspan="@allowanceCount" style="vertical-align:middle" class="">@item.Designation</td>
+                                            }
+                                            <td class="text-end">@item.AllowanceName</td>
+                                            <td class="text-end">@(String.Format("{0:n2}", item.AllowanceAmt))</td>
+                                            @if (prevEmpCode == "" || prevEmpCode != item.EmployeeCode)
+                                            {
+                                                <td rowspan="@allowanceCount" style="vertical-align:middle" class="text-end">@(String.Format("{0:n2}", item.TotalAllowanceAmt))</td>
+                                            }
+
+                                        </tr>
+                                        prevEmpCode = item.EmployeeCode;
+                                        if (item == Model.Last())
+                                        {
+                                            <tr class="bg-info">
+                                                <th colspan="6">Total</th>
+                                                <th class="text-end">@(String.Format("{0:n2}", Model.Sum(x => x.AllowanceAmt)))</th>
+                                                <th class="text-end">@(String.Format("{0:n2}", Model.Sum(x => x.AllowanceAmt)))</th>
+
+                                            </tr>
+                                        }
+
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                        <div class="text-center">
+                            <input type="button" class="btn btn-sm btn-success" value="Excel" id="btnExcel" onclick="exportToExcel()" />
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+</body>
+</html>
+
+<script type="text/javascript">
+    function exportToExcel() {
+        var htmls = "";
+        var uri = 'data:application/vnd.ms-excel;base64,';
+        var template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>';
+        var base64 = function (s) {
+            return window.btoa(unescape(encodeURIComponent(s)))
+        };
+
+        var format = function (s, c) {
+            return s.replace(/{(\w+)}/g, function (m, p) {
+                return c[p];
+            })
+        };
+
+        htmls = document.getElementById("tblDocuments").innerHTML;
+
+        var ctx = {
+            worksheet: 'Worksheet',
+            table: htmls
+        }
+        var link = document.createElement("a");
+        link.download = "AnalysisDivisionWiseSalary.xls";
+        link.href = uri + base64(format(template, ctx));
+        link.click();
+    }
+</script>

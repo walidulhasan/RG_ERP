@@ -1,0 +1,142 @@
+﻿@model RG.Application.ViewModel.Embro.Business.AccountsLedgers.LedgerReportVM
+@{
+    ViewData[PageInfo.PageTitle] = "Ledger Report";
+    ViewData[PageInfo.PageHeader] = "Ledger Report";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<form asp-action="LedgerReport" asp-area="Embro" asp-controller="AccountsLedger" method="post" id="FrmCuttingAdditionalFabric">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="form-group">
+
+                <label class="label-ajt-sm required">Company</label>
+                <select required asp-for="CompanyID" asp-items="Model.DDLCompany" class="form-control form-control-sm"></select>
+                <span class="text-danger" asp-validation-for="CompanyID"></span>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="form-group">
+                <label asp-for="CostCenterID" class="label-ajt-sm"></label>
+                <select required asp-for="CostCenterID" class="form-control form-control-sm"></select>
+                @*<span class="text-danger" asp-validation-for="CostCenterID"></span>*@
+            </div>
+        </div>
+        <div class="form-group col-md-4">
+            <div class="form-group">
+                <label asp-for="ActivityID" class="label-ajt-sm "></label>
+                <select required asp-for="ActivityID" class="form-control form-control-sm"></select>
+                @*<span class="text-danger" asp-validation-for="ActivityID"></span>*@
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-4">
+            <div class="form-group">
+                <label asp-for="AccCategoryID" class="label-ajt-sm required"></label>
+                <select required asp-for="AccCategoryID" class="form-control form-control-sm"></select>
+                <span class="text-danger" asp-validation-for="AccCategoryID"></span>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="form-group">
+                <label asp-for="AccID" class="label-ajt-sm required"></label>
+                <select required asp-for="AccID" class="form-control form-control-sm"></select>
+                <span class="text-danger" asp-validation-for="AccID"></span>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-3">
+            <div class="form-group">
+                <label asp-for="StartDate" class="label-ajt-sm required"></label>
+                <input asp-for="StartDate" type="text" class="form-control form-control-sm dateField" readonly />
+                <span class="text-danger" asp-validation-for="StartDate"></span>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="form-group">
+                <label asp-for="EndtDate"   class="label-ajt-sm required"></label>
+                <input asp-for="EndtDate" type="text" class="form-control form-control-sm dateField" readonly />
+                <span class="text-danger" asp-validation-for="EndtDate"></span>
+            </div>
+        </div>
+    </div>
+    <div>
+        <div class="col-sm-12">
+            <input type="button" class="btn btn-sm btn-success mr-2" value="Show" id="btnShow" />
+        </div>
+    </div>
+</form>
+@section scripts{
+    <script type="text/javascript">
+        function CompanyWiseCostCenter() {
+            let companyID = $("#CompanyID").val();
+            if (companyID != "") {
+                HttpRequest.DropDown("Get", "/Embro/BasicCOA/GetDDLCompanyWiseChartOfAccountsQuery", { "ParentID": companyID, levelID: 11 }, 'CostCenterID', true);
+            } else {
+                HttpRequest.DropDownDefault("CostCenterID");
+            }
+            CostCenterWiseActivity();
+            CompanyWiseCategory();
+        }
+        function CostCenterWiseActivity() {
+            debugger;
+            let costCenterID = $("#CostCenterID").val();
+            if (costCenterID != "") {
+                HttpRequest.DropDown("Get", "/Embro/BasicCOA/GetDDLBasicCOAByParent", { "ParentID": costCenterID, levelID: 12 }, 'ActivityID', true);
+            } else {
+                HttpRequest.DropDownDefault("ActivityID");
+            }
+        }
+
+        function CompanyWiseCategory() {
+            debugger;
+            let companysID = $("#CompanyID").val();
+            if (companysID != "") {
+                HttpRequest.DropDown("Get", "/Embro/BasicCOA/GetDDLBasicCOAByParent", { "parentID": companysID, levelID: 4 }, 'AccCategoryID', true);
+            } else {
+                HttpRequest.DropDownDefault("AccCategoryID");
+            }
+        }
+        function CompanyCategoryWiseLedger() {
+            debugger;
+            let companysID = $("#CompanyID").val();
+            let category = $("#AccCategoryID option:Selected").text();
+            if (companysID != "" && category != "") {
+                HttpRequest.DropDownSelect2Group("Get", "/Embro/BasicCOA/GetDDLChartOfAccountsCategoryQuery", { "CompanyID": companysID, LevelID: 0, Category: category }, 'AccID', false);
+            } else {
+                HttpRequest.DropDownDefault("AccID");
+            }
+        }
+
+        $(function () {
+
+            debugger;
+            $("#AccID").select2({
+                placeholder: 'Please Select',
+                allowClear: true
+            });
+            CompanyWiseCostCenter();
+            $("#CompanyID").change(function () {
+                CompanyWiseCostCenter();
+                CompanyWiseCategory();
+            });
+            $("#CostCenterID").change(function () {
+                CostCenterWiseActivity();
+            });
+            $("#AccCategoryID").change(function () {
+                CompanyCategoryWiseLedger();
+            });
+
+            //$("#btnShow").click(function () {
+            //    debugger;
+            //    if ($("#FrmCuttingAdditionalFabric").valid()) {
+            //        alert("Check Validation");
+            //    }
+            //});
+        });
+       
+    </script>
+}

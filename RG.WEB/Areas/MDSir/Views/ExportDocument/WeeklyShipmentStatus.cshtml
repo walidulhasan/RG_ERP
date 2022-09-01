@@ -1,0 +1,72 @@
+﻿@model RG.Application.ViewModel.EMS.Business.ShipmentReport.WeeklyShipmentStatusVM
+@{
+    ViewData[PageInfo.PageTitle] = "Shipment Status";
+    ViewData[PageInfo.PageHeader] = "Shipment Status";
+    Layout = "~/Views/Shared/_LayoutMDSir.cshtml";
+}
+<form asp-action="" asp-area="EMS" asp-controller="" method="post" id="">
+
+    <div class="row">
+        <div class="col-md-3">
+            <div class="form-group">
+                <label asp-for="Year" class="label-ajt-sm required"></label>
+                <select required asp-for="Year" asp-items="Model.DDLYear" class="form-control form-control-sm"></select>
+                <span class="text-danger" asp-validation-for="Year"></span>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="form-group">
+                <label asp-for="Month" class="label-ajt-sm"></label>
+                <select asp-for="Month" asp-items="Model.DDLMonth" class="form-control form-control-sm"></select>
+                <span class="text-danger" asp-validation-for="Month"></span>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="form-group">
+                <label asp-for="Week" class="label-ajt-sm"></label>
+                <select asp-for="Week" asp-items="Model.DDLWeek" class="form-control form-control-sm"></select>
+                <span class="text-danger" asp-validation-for="Week"></span>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="text-center">
+        <div class="col-sm-12">
+            <input type="button" class="btn btn-sm btn-success" value="Show" id="btnShow" onclick="showReport()" />
+
+
+        </div>
+    </div>
+</form>
+@section scripts{
+    <script type="text/javascript">
+        function showReport() {
+            debugger;
+            let year = $("#Year").val();
+            let month = $("#Month").val();
+            let week = $("#Week").val();
+            //let exFactoryDateFrom = $("#ExFactoryDateFrom").val();
+            //let exFactoryDateTo = $("#ExFactoryDateTo").val();
+
+            if (year != "") {
+                var urlParm = `Year=${encodeURIComponent(year)}&Month=${encodeURIComponent(month)}&Week=${encodeURIComponent(week)}`;
+                const fullUrl = `/EMS/ShipmentReport/WeeklyShipmentStatusReport?${urlParm}`;
+
+                newWindow(fullUrl, "Shipment Status");
+            } else {
+                $.alert.open("Please provide year");
+            }
+        }
+        $(function () {
+
+            $("#Year,#Month").change(function () {
+                let year = $("#Year").val();
+                let month = $("#Month").val();
+
+                HttpRequest.DropDown('GET', '/EMS/ShipmentReport/GetDDLWeekPeriod', { year: year, month: month }, 'Week');
+            });
+
+        });
+    </script>
+}

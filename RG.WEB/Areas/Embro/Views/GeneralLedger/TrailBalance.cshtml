@@ -1,0 +1,235 @@
+﻿@model RG.Application.ViewModel.Embro.Business.GeneralLedgers.GeneralLedgerTrailBalanceVM
+
+@{
+    ViewData[PageInfo.PageTitle] = "Trial Balance";
+    ViewData[PageInfo.PageHeader] = "Trial Balance";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData[PageInfo.PageHeaderFaIcon] = "fa fa-archive";
+}
+
+<form id="trailBalance" role="form">
+    <div class="row">
+        <div class="col-6">
+            <div class="form-group">
+                <label asp-for="CompanyID" class="required"></label>
+                <select asp-for="CompanyID" class="form-control form-control-sm" asp-items="Model.DDLCompany"></select>
+                <span asp-validation-for="CompanyID" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-6">
+            <div class="form-group">
+                <label asp-for="BusinessID" class="required"></label>
+                <select asp-for="BusinessID" class="form-control form-control-sm" asp-items="Model.DDLBusiness"></select>
+                <span asp-validation-for="BusinessID" class="text-danger"></span>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-2">
+            <div class="form-group">
+                <label asp-for="AccountLevel" class="required"></label>
+                <select asp-for="AccountLevel" class="form-control form-control-sm" asp-items="Model.DDLAccountLevel"></select>
+                <span asp-validation-for="AccountLevel" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="form-group">
+                <label asp-for="SelectByCostCenter" class="required"></label>
+                <select asp-for="SelectByCostCenter" class="form-control form-control-sm" asp-items="Model.DDLSelectByCostCenter"></select>
+                <span asp-validation-for="SelectByCostCenter" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="form-group">
+                <label asp-for="SelectWithDetail" class="label-ajt-sm"></label>
+                <select asp-for="SelectWithDetail" class="form-control form-control-sm" asp-items="Model.DDLSelectWithDetail"></select>
+                <span asp-validation-for="SelectWithDetail" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="form-group">
+                <label asp-for="ReportGroup" class="label-ajt-sm"></label>
+                <select asp-for="ReportGroup" class="form-control form-control-sm" asp-items="Model.DDLReportGroup"></select>
+                <span asp-validation-for="ReportGroup" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="form-group">
+                <label asp-for="VoucherPosted" class="label-ajt-sm"></label>
+                <select asp-for="VoucherPosted" class="form-control form-control-sm" asp-items="Model.DDLVoucherPosted"></select>
+                <span asp-validation-for="VoucherPosted" class="text-danger"></span>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-2">
+            <div class="form-group">
+                <label asp-for="DateFrom" class="label-ajt-sm"></label>
+                <input type="text" id="DateFrom" name="DateFrom" value="@Model.DateFromST" class="form-control form-control-sm dateField" readonly />
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="form-group">
+                <label asp-for="DateTo" class="label-ajt-sm"></label>
+                <input type="text" id="DateTo" name="DateTo" value="@Model.DateToST" class="form-control form-control-sm dateField" readonly />
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <!-- checkbox -->
+            <label class="label-ajt-sm"></label>
+            <div class="form-group clearfix">
+
+                <div class="icheck-success d-inline">
+                    <input type="checkbox" checked="" asp-for="IsExcludeZeroBalance">
+                    <label for="checkboxSuccess3">
+                        Exclude Zero Balance in Current Activity Duration.
+                    </label>
+                </div>
+
+
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-3">
+            <div class="form-group">
+                <label asp-for="ExecutionType" class="required"></label>
+                <select asp-for="ExecutionType" class="form-control form-control-sm" asp-items="Model.DDLExecutionType"></select>
+                <span asp-validation-for="ExecutionType" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-sm-3">
+            <label>&nbsp;</label>
+            <div class="form-group">
+                @*<button type="button" class="btn btn-sm btn-success mr-2" id="btnShowTrailBalanceView">Trail Balance View</button>
+            <button type="button" class="btn btn-sm btn-success mr-2" id="btnShowTrailBalancePdf">Trail Balance PDF</button>
+            <button type="button" class="btn btn-sm btn-warning mr-2" id="btnShowTrailBalanceExcel">Trail Balance Excel</button>*@
+
+                <button type="button" class="btn btn-sm btn-warning mr-2" id="btnExecute">Execute</button>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section scripts{
+    <script type="text/javascript">
+        function showReport(reportType) {
+            const companyID = $("#CompanyID").val();
+            const BusinessID = $("#BusinessID").val();
+            const SelectLevel = $("#AccountLevel").val();
+            const SelectByCostCenter = $("#SelectByCostCenter").val();
+            const SelectWithDetail = $("#SelectWithDetail").val();
+            const ReportGroup = $("#ReportGroup").val();
+            const VoucherPosted = $("#VoucherPosted").val();
+            const DateFrom = $("#DateFrom").val();
+            const DateTo = $("#DateTo").val();
+            const IsExcludeZeroBalance = $("#IsExcludeZeroBalance").is(':checked') ? 1 : 0;
+
+
+            var urlParm = `CompanyID=${encodeURIComponent(companyID)}&BusinessID=${encodeURIComponent(BusinessID)}&SelectLevel=${encodeURIComponent(SelectLevel)}&SelectByCostCenter=${encodeURIComponent(SelectByCostCenter)}`;
+            urlParm += `&SelectWithDetail=${encodeURIComponent(SelectWithDetail)}&ReportGroup=${encodeURIComponent(ReportGroup)}`;
+            urlParm += `&VoucherPosted=${encodeURIComponent(VoucherPosted)}&DateFrom=${encodeURIComponent(DateFrom)}`;
+            urlParm += `&DateTo=${encodeURIComponent(DateTo)}&IsExcludeZeroBalance=${encodeURIComponent(IsExcludeZeroBalance)}&ReportFormat=${reportType}`;
+            const fullUrl = `/Embro/GeneralLedger/TrailBalanceReport?${urlParm}`;
+
+            newWindow(fullUrl, "Trail Balance");
+        }
+
+        $(function () {
+            //$("#btnShowTrailBalanceView").click(function () {
+            //    const CompanyID = $("#CompanyID").val();
+            //    const BusinessID = $("#BusinessID").val();
+            //    const SelectLevel = $("#AccountLevel").val();
+            //    const SelectByCostCenter = $("#SelectByCostCenter").val();
+            //    const SelectWithDetail = $("#SelectWithDetail").val();
+            //    const ReportGroup = $("#ReportGroup").val();
+            //    const VoucherPosted = $("#VoucherPosted").val();
+            //    const DateFrom = $("#DateFrom").val();
+            //    const DateTo = $("#DateTo").val();
+            //    const IsExcludeZeroBalance = $("#IsExcludeZeroBalance").is(':checked') ? 1 : 0;
+
+            //    //window.open(`/Embro/GeneralLedger/TrailBalanceReportView?CompanyID=${CompanyID}&BusinessID=${BusinessID}&SelectLevel=${SelectLevel}&SelectByCostCenter=${SelectByCostCenter}&SelectWithDetail=${SelectWithDetail}&ReportGroup=${ReportGroup}&VoucherPosted=${VoucherPosted}&DateFrom=${DateFrom}&DateTo=${DateTo}&IsExcludeZeroBalance=${IsExcludeZeroBalance}`, "Order Status", "width=900,height=600");
+
+            //    let url = `/Embro/GeneralLedger/TrailBalanceReportView?CompanyID=${CompanyID}&BusinessID=${BusinessID}&SelectLevel=${SelectLevel}&SelectByCostCenter=${SelectByCostCenter}&SelectWithDetail=${SelectWithDetail}&ReportGroup=${ReportGroup}&VoucherPosted=${VoucherPosted}&DateFrom=${DateFrom}&DateTo=${DateTo}&IsExcludeZeroBalance=${IsExcludeZeroBalance}`;
+            //    newWindow(url, "Trial Balance");
+            //});
+            //$("#btnShowTrailBalancePdf").click(function () {
+            //    showReport("PDF");
+            //});
+            //$("#btnShowTrailBalanceExcel").click(function () {
+            //    showReport("EXCEL");
+            //});
+
+            $("#CompanyID").change(function () {
+                HttpRequest.DropDown("Get", '/Embro/BasicCOA/GetDDLBasicCOAByParent', { parentID: $("#CompanyID").val(), levelID: 2, isDefaultSelect: false }, 'BusinessID');
+            });
+            $("#btnExecute").click(function () {
+                let executionType = $("#ExecutionType option:selected").text();
+                if (executionType == "Trial Balance View") {
+                    const CompanyID = $("#CompanyID").val();
+                    const BusinessID = $("#BusinessID").val();
+                    const SelectLevel = $("#AccountLevel").val();
+                    const SelectByCostCenter = $("#SelectByCostCenter").val();
+                    const SelectWithDetail = $("#SelectWithDetail").val();
+                    const ReportGroup = $("#ReportGroup").val();
+                    const VoucherPosted = $("#VoucherPosted").val();
+                    const DateFrom = $("#DateFrom").val();
+                    const DateTo = $("#DateTo").val();
+                    const IsExcludeZeroBalance = $("#IsExcludeZeroBalance").is(':checked') ? 1 : 0;
+
+                    let url = `/Embro/GeneralLedger/TrailBalanceReportView?CompanyID=${CompanyID}&BusinessID=${BusinessID}&SelectLevel=${SelectLevel}&SelectByCostCenter=${SelectByCostCenter}&SelectWithDetail=${SelectWithDetail}&ReportGroup=${ReportGroup}&VoucherPosted=${VoucherPosted}&DateFrom=${DateFrom}&DateTo=${DateTo}&IsExcludeZeroBalance=${IsExcludeZeroBalance}`;
+                    newWindow(url, "Trial Balance");
+                } else if (executionType == "Trial Balance PDF") {
+                    showReport("PDF");
+                } else if (executionType == "Trial Balance Excel") {
+                    showReport("EXCEL");
+                } else if (executionType == "Notes to Balance Sheet" || executionType == "Notes to Income Statement") {
+
+                    let noteGroupID = $("#ExecutionType").val();
+                    const CompanyID = $("#CompanyID").val();
+                    const BusinessID = $("#BusinessID").val();
+                    const SelectLevel = $("#AccountLevel").val();
+                    const SelectByCostCenter = $("#SelectByCostCenter").val();
+                    const SelectWithDetail = $("#SelectWithDetail").val();
+                    const ReportGroup = $("#ReportGroup").val();
+                    const VoucherPosted = $("#VoucherPosted").val();
+                    const DateFrom = $("#DateFrom").val();
+                    const DateTo = $("#DateTo").val();
+                    const IsExcludeZeroBalance = $("#IsExcludeZeroBalance").is(':checked') ? 1 : 0;
+
+                    let url = `/Embro/GeneralLedger/TrailBalanceNotesReportView?CompanyID=${CompanyID}&BusinessID=${BusinessID}&SelectLevel=${SelectLevel}&SelectByCostCenter=${SelectByCostCenter}&SelectWithDetail=${SelectWithDetail}&ReportGroup=${ReportGroup}&VoucherPosted=${VoucherPosted}&DateFrom=${DateFrom}&DateTo=${DateTo}&IsExcludeZeroBalance=${IsExcludeZeroBalance}&NoteGroupID=${noteGroupID}`;
+                    newWindow(url, "Trial Balance");
+                } else if (executionType == "Statement of Financial Position") {                    
+                    const CompanyID = $("#CompanyID").val();
+                    const BusinessID = $("#BusinessID").val();
+                    const DateFrom = $("#DateFrom").val();
+                    const DateTo = $("#DateTo").val();
+                    const WithDetail = $("#SelectWithDetail").val();
+                    const Status = $("#VoucherPosted").val();
+                    const WithClosingBalance = $("#IsExcludeZeroBalance").is(':checked') ? 1 : 0;
+
+                    let url = `/Embro/GeneralLedger/FinancialPositionReportView?CompanyID=${CompanyID}&BusinessID=${BusinessID}&DateFrom=${DateFrom}&DateTo=${DateTo}&WithDetail=${WithDetail}&Status=${Status}&WithClosingBalance=${WithClosingBalance}`;
+                    newWindow(url, "Financial Position Report");
+                } else if (executionType == "Statement of Profit or Loss and Other Comprehensive Income") {
+                    const CompanyID = $("#CompanyID").val();
+                    const BusinessID = $("#BusinessID").val();
+                    const DateFrom = $("#DateFrom").val();
+                    const DateTo = $("#DateTo").val();
+                    const WithDetail = $("#SelectWithDetail").val();
+                    const Status = $("#VoucherPosted").val();
+                    const WithClosingBalance = $("#IsExcludeZeroBalance").is(':checked') ? 1 : 0;
+
+                    let url = `/Embro/GeneralLedger/ProfitLossComprehensiveIncomeReportView?CompanyID=${CompanyID}&BusinessID=${BusinessID}&DateFrom=${DateFrom}&DateTo=${DateTo}&WithDetail=${WithDetail}&Status=${Status}&WithClosingBalance=${WithClosingBalance}`;
+                    newWindow(url, "Profit Loss & Comprehensive Income Report");
+                }
+
+                else {
+
+                }
+            });
+
+        });
+
+    </script>
+}

@@ -1,0 +1,162 @@
+﻿@model RG.Application.ViewModel.MaterialsManagement.Setup.YarnRackCreateVM
+@using RG.Application.Enums;
+@{
+    ViewData[PageInfo.PageHeader] = "Rack List";
+    ViewData[PageInfo.PageTitle] = "Rack List";
+    ViewData[PageInfo.btnText1] = "Create New";
+    ViewData[PageInfo.PageLink1] = "/MaterialsManagement/YarnRack/Create";
+    ViewData[PageInfo.btnClass1] = "btn-success";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+}
+
+<div class="row">
+    <div class="col-sm-12 col-md-12">
+        <div class="card card-dark">
+            <div class="card-header m-0 p-1">
+                <h5 class="card-title">Rack Information</h5>
+            </div>
+            <div class="card-body mb-0">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label asp-for="Building" class="required"></label>
+                            <select asp-for="Building" class="form-control form-control-sm " asp-items="Model.DDLBuilding"></select>
+                            <span asp-validation-for="Building" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label asp-for="BuildingFloorID" class="required"></label>
+                            <select asp-for="BuildingFloorID" class="form-control form-control-sm " asp-items="Model.DDLLBuildingFloor"></select>
+                            <span asp-validation-for="BuildingFloorID" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-12 col-md-12">
+                        <div class="card card-gray-dark">
+                            <div class="card-header m-0 p-1">
+                                <h4 class="card-title">Rack Information List</h4>
+                            </div>
+                            <div class="card-body m-0 p-0 my-1 mx-1 " id="cardRackInfo">
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+@section scripts{
+    <script type="text/javascript">
+        $(function () {
+            $("#Building").change(function () {
+                BuildingWiseFloor();
+            });
+            $("#BuildingFloorID").change(function () {
+                FloorWiseRackAndSubRack();
+            });
+        })
+
+        function FloorWiseRackAndSubRack() {
+            debugger;
+            $("#tblRack").html("");
+            let rackTr = ``;
+            let buidlingFloor = $("#BuildingFloorID").val();
+            var data = HttpRequest.AjaxData("GET", "/MaterialsManagement/YarnRack/GetFloorWiseRackInfo", { "buildingFloorID": buidlingFloor });
+            if (data.length > 0) {
+                let rackDiv = ``;
+                $.each(data, function (i, v) {
+                    debugger
+                    let subRackTr = ``;
+                    for (var j = 1; j <= v.RackRow; j++) {
+                        subRackTr += '<tr>';
+                        for (var k = 1; k <= v.RackColumn; k++) {
+                            let subRack = v.YarnSubRackSetup.filter(x => x.SubRackRowSerial == j && x.SubRackColumnSerial == k);
+                            let subRackName = subRack[0].SubRackName;
+                            subRackTr += `<td>${subRackName}</td>`;
+                        }
+                        subRackTr += '</tr>';
+                    }
+                    let rackTable = `<table class="table table-sm table-stripprd table-bordered text-xs text-center">
+                                        <thead>
+                                            <tr>
+                                                <th class="bg-info text-black" colspan=${v.RackColumn}>
+                                                    ${v.RackName}
+                                                    <span class="float-right">
+                                                        <a href="Javascript:void(0);" onclick="edit(${v.RackID})" title="Edit" class="btn-sm"><i class="fas fa-edit text-white fa-1x"></i></a>
+                                                        <a href="Javascript:void(0);" onclick="DeleteRack(${v.RackID})" title="Delete" class="btn-sm"><i class="fas fa-trash text-danger fa-1x"></i></a>
+                                                    </span>
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>${subRackTr}</tbody>
+                                    </table>`;
+
+                    rackDiv += `<div class="col-md-4">
+                                ${rackTable}
+                              </div>`;
+
+                    if ((i > 0 && i / 3 == 0) || (data.length == i + 1)) {
+                        rackTr += `<div class="row">
+                                        ${rackDiv}
+                                    </div>`;
+                        rackDiv = '';
+                    }
+
+                });
+            } else {
+                $.alert.open('alert', 'Record is empty?');
+            }
+            $("#cardRackInfo").html(rackTr);
+        }
+
+        function BuildingWiseFloor() {
+            debugger;
+            let building = $("#Building").val();
+            if (building != "") {
+                HttpRequest.DropDown("Get", "/MaterialsManagement/BuildingFloorInfo/GetDDLBuildingFloor", { Building: building,FloorType:@((int)enum_FloorType.YarnStore) }, 'BuildingFloorID', true);
+            } else {
+                HttpRequest.DropDownDefault("BuildingFloorID");
+            }
+        }
+
+        function DeleteRack(rackId) {
+            debugger;
+            $.alert.open('confirm', 'Are you sure to delete this record!!', function (button) {
+                if (button == 'yes') {
+                    HttpRequest.Ajax("Post", '/MaterialsManagement/YarnRack/Remove', { "id": rackId }, saveSuccess, true);
+                    FloorWiseRackAndSubRack();
+                }
+            });
+        }
+        function saveSuccess(data) {
+            if (data.result == 1) {
+                $.alert.open({
+                    type: 'Success',
+                    content: data.message,
+                    callback: function () {
+                    }
+                });
+            }
+            else {
+                $.alert.open("error", data.message);
+            }
+        }
+
+        function edit(rackId) {
+            debugger
+            if (rackId > 0 && rackId != "") {
+                window.location.replace('/MaterialsManagement/YarnRack/Edit?rackID=' + rackId)
+            }
+            else {
+                alert("Something is missing!!");
+            }
+        }
+    </script>
+}

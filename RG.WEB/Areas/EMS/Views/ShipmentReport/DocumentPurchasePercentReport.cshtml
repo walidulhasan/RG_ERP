@@ -1,0 +1,209 @@
+﻿@model List<RG.Application.Contracts.EMS.Business.ExportDocuments.Queries.RequestResponseModel.DocumentsPurchaseRatioRM>
+@{
+
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Document Purchase Ratio</title>
+    <link href="~/AdminLTE-3.1.0/plugins/jquery-ui/jquery-ui.min.css" rel="stylesheet" />
+    <link href="~/lib/bootstrap-5.0.2/css/bootstrap.min.css" rel="stylesheet" />
+    <script src="~/AdminLTE-3.1.0/plugins/jquery/jquery.min.js"></script>
+    <script src="~/AdminLTE-3.1.0/plugins/jquery-ui/jquery-ui.min.js"></script>
+    <script src="~/lib/bootstrap-5.0.2/js/bootstrap.bundle.min.js"></script>
+
+
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.12/css/jquery.dataTables.min.css" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/1.2.2/css/buttons.dataTables.min.css" />
+    <script type="text/javascript" src="https://code.jquery.com/jquery-1.12.3.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.2.2/js/dataTables.buttons.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/2.5.0/jszip.min.js"></script>
+    <script type="text/javascript" src="https://cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/pdfmake.min.js"></script>
+    <script type="text/javascript" src="https://cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/vfs_fonts.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.2.2/js/buttons.html5.min.js"></script>
+
+    <style>
+        .header {
+            position: sticky;
+            top: 0;
+        }
+    </style>
+
+</head>
+
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12 text-center">
+                <h5 class="mb-0">Robintex (Bangladesh) Limited</h5>
+                <h6>Bhulta,Rupganj,Narayanganj</h6>
+                <h6>Document Purchase Ratio</h6>
+            </div>
+        </div>
+        <table class="table table-sm table-bordered table-striped text-sm text-center display nowrap" id="tblDocuments" style="font-size:11px;">
+            <thead class="bg-dark text-white header font-weight-bold">
+                <tr>
+                    <td>Sl#</td>
+                    <td>Year</td>
+                    <td>Month</td>
+                    <td>Company</td>
+                    <td>Buyer</td>
+                    <td>Bank</td>
+                    <td>Master LC#</td>
+                    <td>Document No</td>
+                    <td>Document Date</td>
+                    <td>Document Amt</td>
+                    <td>Margin %</td>
+                    <td>Margin Amt</td>
+                    <td>Purchase Amt</td>
+                </tr>
+            </thead>
+            <tbody>
+                @{ var sl = 0;
+                    var prevYear = 0;
+                    var prevMonth = "";
+                    var prevYearMonth = 0;
+
+                    foreach (var item in Model)
+                    {
+
+                        sl++;
+                        @if (prevYearMonth != 0 && prevYearMonth != item.YearMonth)
+                        {
+                            var yearMonthData = Model.Where(x => x.YearMonth == prevYearMonth).ToList();
+                            var totalDocAmt = yearMonthData.Sum(x => x.DocumentAmt);
+
+                            var totalPurRatAmt = yearMonthData.Sum(x => x.PurchaseRatioAmt);
+                            var totalPurAmt = yearMonthData.Sum(x => x.PurchaseAmt);
+                            <tr class="bg-primary text-white">
+                                <td></td>
+
+                                <td colspan="7"><b>@prevMonth Total</b></td>
+                                <td class="text-end"><b>@(String.Format("{0:n2}", totalDocAmt))</b></td>
+                                <td></td>
+                                <td class="text-end"><b>@(String.Format("{0:n2}", totalPurRatAmt))</b></td>
+                                <td class="text-end"><b>@(String.Format("{0:n2}", totalPurAmt))</b></td>
+                            </tr>
+                        }
+                        @if (prevYear != 0 && prevYear != item.Year)
+                        {
+                            var yearData = Model.Where(x => x.Year == prevYear).ToList();
+                            var totalDocAmt = yearData.Sum(x => x.DocumentAmt);
+
+                            var totalPurRatAmt = yearData.Sum(x => x.PurchaseRatioAmt);
+                            var totalPurAmt = yearData.Sum(x => x.PurchaseAmt);
+                            <tr class="bg-info">
+                                <td colspan="9"><b>@prevYear Total</b></td>
+                                <td class="text-end"><b>@(String.Format("{0:n2}", totalDocAmt))</b></td>
+                                <td></td>
+                                <td class="text-end"><b>@(String.Format("{0:n2}", totalPurRatAmt))</b></td>
+                                <td class="text-end"><b>@(String.Format("{0:n2}", totalPurAmt))</b></td>
+                            </tr>
+                        }
+
+
+
+                        <tr>
+                            <td>@sl</td>
+                            @if (prevYear == 0 || prevYear != item.Year)
+                            {
+                                var yearRowCount = Model.Where(x => x.Year == item.Year).ToList().Count();
+                                var yearMonthCount = Model.Where(x => x.Year == item.Year).Select(x => x.YearMonth).Distinct().ToList().Count();
+                                <td rowspan="@(yearRowCount+yearMonthCount)" class="font-weight-bold" title="@item.Year">@item.Year</td>
+                            }
+                            @if (prevYear == 0 || prevYearMonth != item.YearMonth)
+                            {
+                                var yearMonthRowCount = Model.Where(x => x.YearMonth == item.YearMonth).ToList().Count();
+                                var title = $"{item.MonthName}-{item.Year}";
+                                <td rowspan="@(yearMonthRowCount)" class="font-weight-bold" title="@title">@item.MonthName</td>
+                            }
+                            <td>@item.CompanyShortName</td>
+                            <td>@item.Buyer</td>
+                            <td>@item.BankName</td>
+                            <td>@item.LOM_CODE</td>
+                            <td>                            
+                            <a style="cursor:pointer;" class="text-primary"
+                               onclick="window.open(`http://119.148.55.92/erp/lcm/md/MLC_Template_CTX.asp?id=${@item.FDBPP_ID}`, '_blank', 'location=yes,height=570,width=1000,scrollbars=yes,status=yes');">
+                                @item.DocumentNo
+                            </a>
+                            </td>
+                            <td>@item.DocumentDateMsg</td>
+                            <td class="text-end bg-success text-white">@(String.Format("{0:n2}", item.DocumentAmt))</td>
+                            <td class="bg-warning">@(String.Format("{0:n2}", item.PurchasePercent))</td>
+                            <td class="text-end bg-info">@(String.Format("{0:n2}", item.PurchaseRatioAmt))</td>
+                            <td class="text-end ">@(String.Format("{0:n2}", item.PurchaseAmt))</td>
+                        </tr>
+                        prevYear = item.Year;
+                        prevYearMonth = item.YearMonth;
+                        prevMonth = item.MonthName;
+                        if (Model.Last() == item)
+                        {
+                            var yearData = Model.Where(x => x.Year == item.Year).ToList();
+                            var totalDocAmt = yearData.Sum(x => x.DocumentAmt);
+
+                            var totalPurRatAmt = yearData.Sum(x => x.PurchaseRatioAmt);
+                            var totalPurAmt = yearData.Sum(x => x.PurchaseAmt);
+
+                            var yearMonthData = Model.Where(x => x.YearMonth == prevYearMonth).ToList();
+                            var totalMonthDocAmt = yearMonthData.Sum(x => x.DocumentAmt);
+
+                            var totalMonthPurRatAmt = yearMonthData.Sum(x => x.PurchaseRatioAmt);
+                            var totalMonthPurAmt = yearMonthData.Sum(x => x.PurchaseAmt);
+                            <tr class="bg-primary text-white">
+                                <td></td>
+                                <td colspan="7"><b>@item.MonthName Total</b></td>
+                                <td class="text-end"><b>@(String.Format("{0:n2}", totalMonthDocAmt))</b></td>
+                                <td></td>
+                                <td class="text-end"><b>@(String.Format("{0:n2}", totalMonthPurRatAmt))</b></td>
+                                <td class="text-end"><b>@(String.Format("{0:n2}", totalMonthPurAmt))</b></td>
+                            </tr>
+
+                            <tr class="bg-info">
+                                <td colspan="9"><b>@item.Year Total</b></td>
+                                <td class="text-end"><b>@(String.Format("{0:n2}", totalDocAmt))</b></td>
+                                <td></td>
+                                <td class="text-end"><b>@(String.Format("{0:n2}", totalPurRatAmt))</b></td>
+                                <td class="text-end"><b>@(String.Format("{0:n2}", totalPurAmt))</b></td>
+                            </tr>
+                        }
+                    }
+                }
+            </tbody>
+        </table>
+        <div class="text-center">
+            <input type="button" class="btn btn-sm btn-success" value="Excel" id="btnExcel" onclick="exportToExcel()" />
+        </div>
+    </div>
+</body>
+</html>
+
+<script type="text/javascript">
+    function exportToExcel() {
+        var htmls = "";
+        var uri = 'data:application/vnd.ms-excel;base64,';
+        var template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>';
+        var base64 = function (s) {
+            return window.btoa(unescape(encodeURIComponent(s)))
+        };
+
+        var format = function (s, c) {
+            return s.replace(/{(\w+)}/g, function (m, p) {
+                return c[p];
+            })
+        };
+
+        htmls = document.getElementById("tblDocuments").innerHTML;
+
+        var ctx = {
+            worksheet: 'Worksheet',
+            table: htmls
+        }
+        var link = document.createElement("a");
+        link.download = "PurchaseDocumentsReport.xls";
+        link.href = uri + base64(format(template, ctx));
+        link.click();
+    }
+</script>

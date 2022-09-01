@@ -1,0 +1,1023 @@
+﻿@model RG.Application.ViewModel.FiniteScheduler.Setup.AssetInfoIndexs.AssetInfoIndexVM
+@using RG.Application.Enums;
+@{
+    ViewData[PageInfo.PageTitle] = "Asset Information List";
+    ViewData[PageInfo.PageHeader] = "Asset Information List";
+    ViewData[PageInfo.btnText1] = "Create New";
+    ViewData[PageInfo.PageLink1] = "/FiniteScheduler/AssetManagement/AssetInfo";
+    ViewData[PageInfo.btnClass1] = "btn-success";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="row">
+    <input hidden asp-for="AssetLoactionID" />
+    <div class="col-sm-12 col-md-12">
+        <div class="card card-dark">
+            <div class="card-header m-0 p-1">
+                <h5 class="card-title">Asset</h5>
+
+            </div>
+            <div class="card-body p-2">
+                <div class="row">
+                    <div class="col-6 col-sm-3">
+                        <div class="form-group mb-2">
+                            <label asp-for="AssetTypeID" class=""></label>
+                            <select asp-for="AssetTypeID" asp-items="Model.DDLAssetTypeName" class="form-control form-control-sm"></select>
+                        </div>
+                    </div>
+                    <div class="col-6 col-sm-3">
+                        <div class="form-group mb-2">
+                            <label asp-for="AssetSubTypeID" class=""></label>
+                            <select asp-for="AssetSubTypeID" asp-items="Model.DDLAssetSubType" class="form-control form-control-sm"></select>
+                        </div>
+                    </div>
+                    <div class="col-3 col-md-3">
+                        <label>&nbsp;</label>
+                        <div class="form-group">
+                            <button type="button" class="btn btn-sm btn-success" id="btnSearch">Search</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12 col-sm-12 col-xs-12">
+                        <div id="grid">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Modal For Employee Asset -->
+<!--<div id="modalForEmployee" class="modal fade" role="dialog">
+    <div class="modal-dialog modal-lg">-->
+<!-- Modal content-->
+<!--<div class="modal-content">
+            <div class="modal-header p-2 bg-dark">
+                <h6 class="modal-title modTitle"> </h6>
+                <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body px-2 py-0">
+                <div id="divEmpAssign">
+                    <div class="row">
+                        <div class="col-md-4 col-sm-4 ForEmp">
+                            <div class="form-group mb-2">
+                                <label asp-for="EmployeeCode" class="required"></label>
+                                <select asp-for="EmployeeCode" asp-items="Model.DDLEmployee" class="form-control form-control-sm"></select>
+                                <span asp-validation-for="EmployeeCode" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="form-group col-md-3 col-3 col-sm-3 col-lg-3 ForEmp">
+                            <div class="form-group">
+                                <label asp-for="DateFromforEmployee" class="label-ajt-sm required"></label>
+                                <div class="input-group">
+                                    <input asp-for="DateFromforEmployee" required type="text" name="FormDate" readonly class="form-control form-control-sm dateField text-center" />
+                                    <div class="input-group-append">
+                                        <span class="input-group-text"><i class="fa fa-calendar" aria-hidden="true"></i></span>
+                                    </div>
+                                </div>
+                                <span asp-validation-for="DateFromforEmployee"></span>
+                            </div>
+                        </div>
+                        <div class="form-group col-md-3 col-3 col-sm-3 col-lg-3 ForEmp">
+                            <div class="form-group">
+                                <label asp-for="DateToforEmployee" class="label-ajt-sm required"></label>
+                                <div class="input-group">
+                                    <input asp-for="DateToforEmployee" required type="text" name="FormDate" readonly class="datepic form-control form-control-sm dateField text-center" />
+                                    <div class="input-group-append">
+                                        <span class="input-group-text"><i class="fa fa-calendar" aria-hidden="true"></i></span>
+                                    </div>
+                                </div>
+                                <span asp-validation-for="DateToforEmployee"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-md-2 col-2 col-sm-2 col-lg-2 ForEmp" style="">
+                            <label>&nbsp;</label>
+                            <div class="form-check">
+                                <span>
+                                    <input asp-for="IsReturnedEmp" type="checkbox" class="form-check-input"> IsReturned
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-6 col-sm-3 ForEmp">
+                            <div class="form-group mb-2">
+                                <label asp-for="EmployeeCode" class=""></label>
+                                <input type="text" id="EmpCode" class="form-control form-control-sm" readonly />
+                            </div>
+                        </div>
+                        <div class="col-6 col-sm-3 ForEmp">
+                            <div class="form-group mb-2">
+                                <label asp-for="EmployeeName" class=""></label>
+                                <input type="text" asp-for="EmployeeName" class="form-control form-control-sm" readonly />
+                            </div>
+                        </div>
+                        <div class="col-6 col-sm-3 ForEmp">
+                            <div class="form-group mb-2">
+                                <label asp-for="CompanyName" class=""></label>
+                                <input type="text" asp-for="CompanyName" class="form-control form-control-sm" readonly />
+                            </div>
+                        </div>
+                        <div class=" col-6 col-sm-3 ForEmp">
+                            <div class="form-group mb-2">
+                                <label asp-for="DivisionName" class=""></label>
+                                <input type="text" asp-for="DivisionName" class="form-control form-control-sm" readonly />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-6 col-sm-3 ForEmp">
+                            <div class="form-group mb-2">
+                                <label asp-for="DepartmentName" class="label-ajt-sm required"></label>
+                                <input type="text" asp-for="DepartmentName" class="form-control form-control-sm" readonly />
+                            </div>
+                        </div>
+                        <div class="col-6 col-sm-3 ForEmp">
+                            <div class="form-group mb-2">
+                                <label asp-for="SectionName" class=""></label>
+                                <input type="text" asp-for="SectionName" class="form-control form-control-sm" readonly />
+                            </div>
+                        </div>
+                        <div class="col-6 col-sm-3 ForEmp">
+                            <div class="form-group mb-2">
+                                <label asp-for="Designation" class=""></label>
+                                <input type="text" asp-for="Designation" class="form-control form-control-sm" readonly />
+                            </div>
+                        </div>
+                        <div class="col-6 col-sm-3 ForEmp">
+                            <div class="form-group mb-2">
+                                <label asp-for="AppointmentDate" class=""></label>
+                                <input type="text" asp-for="AppointmentDate" class="form-control form-control-sm" readonly />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer p-1 d-flex justify-content-center">
+                <input type="button" class="btn btn-warning btn-sm" id="btnEmpAssign" value="Asset Assign to Employee" />
+            </div>
+        </div>
+
+    </div>
+</div>-->
+<!-- Modal for Assign Asset-->
+<div id="modalForAssignAsset" class="modal fade" role="dialog">
+    <input hidden asp-for="AssetID" />
+    <div class="modal-dialog modal-lg">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <form id="frmAssetInfoIndex">
+                <div class="modal-header p-2 bg-dark">
+                    <h6 class="modal-title modTitle"> </h6>
+                    <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body px-2 py-0">
+                    <div id="divAssignAsset">
+                        <div class="row removeForDepriciationHistory">
+                            <div class="col-md-3 col-3 col-sm-3 col-lg-3 ForDep LoaCompany">
+                                <label class="col-form-label-sm required m-0" asp-for="LoaCompanyID"></label>
+                                <select asp-for="LoaCompanyID" asp-items="Model.DDLCompany" class="form-control form-control-sm"></select>
+                                <span asp-validation-for="LoaCompanyID" class="span-form-validation"></span>
+                            </div>
+                            <div class="col-md-3 col-3 col-sm-3 col-lg-3 ForDep OfficeDivision">
+                                <label class="col-form-label-sm required m-0" asp-for="OfficeDivisionID"></label>
+                                <select asp-for="OfficeDivisionID" asp-items="Model.DDLDevision" class="form-control form-control-sm"></select>
+                                <span asp-validation-for="OfficeDivisionID" class="span-form-validation"></span>
+                            </div>
+                            <div class="col-md-3 col-3 col-sm-3 col-lg-3 ForDep">
+
+                                <label class="col-form-label-sm required m-0" asp-for="DepartmentID"></label>
+                                <select asp-for="DepartmentID" class="form-control form-control-sm" asp-items="Model.DDLDepartment"></select>
+                                <span asp-validation-for="DepartmentID" class="span-form-validation"></span>
+                            </div>
+                            <div class="col-md-3 col-3 col-sm-3 col-lg-3 ForDep">
+
+                                <label class="col-form-label-sm required m-0" asp-for="BuildingID"></label>
+                                <select asp-for="BuildingID" class="form-control form-control-sm " asp-items="Model.DDLBuilding"></select>
+                                <span asp-validation-for="BuildingID" class="span-form-validation"></span>
+                            </div>
+
+
+                            <div class="col-md-4 col-sm-4 ForEmp">
+                                <div class="form-group mb-2">
+                                    <label asp-for="EmployeeCode" class="required"></label>
+                                    <select asp-for="EmployeeCode" asp-items="Model.DDLEmployee" class="form-control form-control-sm"></select>
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-3 col-sm-3 col-lg-3 ForDep">
+
+                                <label class="col-form-label-sm required m-0" asp-for="FloorID"></label>
+                                <select asp-for="FloorID" class="form-control form-control-sm" asp-items="Model.DDLLBuildingFloor"></select>
+                                <span asp-validation-for="FloorID" class="span-form-validation"></span>
+                            </div>
+                            <div class="form-group col-md-3 col-3 col-sm-3 col-lg-3 ForEmp ForDep depDateFrom">
+                                <div class="form-group">
+                                    <label asp-for="DateFrom" class="label-ajt-sm required"></label>
+                                    <div class="input-group">
+                                        <input asp-for="DateFrom" required type="text" name="FormDate" readonly class="form-control form-control-sm dateField text-center" />
+                                        <div class="input-group-append">
+                                            <span class="input-group-text"><i class="fa fa-calendar" aria-hidden="true"></i></span>
+                                        </div>
+                                    </div>
+                                    <span asp-validation-for="DateFrom"></span>
+                                </div>
+                            </div>
+                            <div class="form-group col-md-3 col-3 col-sm-3 col-lg-3 ForEmp ForDep dateto depDateto">
+                                <div class="form-group">
+                                    <label asp-for="DateTo" class="label-ajt-sm required"></label>
+                                    <div class="input-group">
+                                        <input asp-for="DateTo" required type="text" name="FormDate" readonly class="datepic form-control form-control-sm dateField text-center" />
+                                        <div class="input-group-append">
+                                            <span class="input-group-text"><i class="fa fa-calendar" aria-hidden="true"></i></span>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-3 col-sm-3 col-lg-3 d-none rate">
+                                <div class="form-group">
+                                    <label asp-for="Rate" class="label-ajt-sm required"></label>
+                                    <div class="input-group">
+                                        <input placeholder="Rate" onKeyPress="if(this.value.length==3) return false;" value="" asp-for="Rate" class="form-control form-control-sm " type="number" />
+                                        <div class="input-group-append">
+                                            <span class="input-group-text"><i class="fa fa-percent" aria-hidden="true"></i></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="AssetCollectForhdn" class="col-md-2 col-2 col-sm-2 col-lg-2 ForEmp ForDep isreturn" style="">
+                                <label>&nbsp;</label>
+                                <div class="form-check">
+                                    <span>
+                                        <input asp-for="IsReturned" type="checkbox" class="form-check-input"> IsReturned
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="col-md-2 col-2 col-sm-2 col-lg-2" style="">
+                                <label>&nbsp;</label>
+                                <div class="form-group">
+                                    <div class="input-group">
+                                        <input type="button" class="btn btn-warning btn-sm d-none" id="btnDepInfo" />
+                                        <input type="button" class="btn btn-warning btn-sm d-none" id="btnDepInfoUpdate" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <input hidden id="hdnDepriciationID" />
+                            <input hidden id="hdnAssetId" />
+                            <table id="tblDepriciationHistoryDetail" class="table table-sm table-striped table-bordered text-center d-none text-xs  mt-1">
+
+                                <thead class="bg-dark">
+                                    <tr>
+                                        <th>SL#</th>
+                                        <th>Asset Name</th>
+                                        <th>Date From</th>
+                                        <th>Date To</th>
+                                        <th>Rate</th>
+                                        <th>Deprication Value</th>
+                                        <th>Value After Deprication</th>
+                                        @*<th>Action</th>*@
+                                    </tr>
+                                </thead>
+                                <tbody id="tbodyDepriciationHistory">
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-6 col-sm-3 ForEmp">
+                                <div class="form-group mb-2">
+                                    <label asp-for="EmployeeCode" class=""></label>
+                                    <input type="text" id="EmpCode" class="form-control form-control-sm" readonly />
+                                </div>
+                            </div>
+                            <div class="col-6 col-sm-3 ForEmp">
+                                <div class="form-group mb-2">
+                                    <label asp-for="EmployeeName" class=""></label>
+                                    <input type="text" asp-for="EmployeeName" class="form-control form-control-sm" readonly />
+                                </div>
+                            </div>
+                            <div class="col-6 col-sm-3 ForEmp">
+                                <div class="form-group mb-2">
+                                    <label asp-for="CompanyName" class=""></label>
+                                    <input type="text" asp-for="CompanyName" class="form-control form-control-sm" readonly />
+                                </div>
+                            </div>
+                            <div class=" col-6 col-sm-3 ForEmp">
+                                <div class="form-group mb-2">
+                                    <label asp-for="DivisionName" class=""></label>
+                                    <input type="text" asp-for="DivisionName" class="form-control form-control-sm" readonly />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-6 col-sm-3 ForEmp">
+                                <div class="form-group mb-2">
+                                    <label asp-for="DepartmentName" class="label-ajt-sm"></label>
+                                    <input type="text" asp-for="DepartmentName" class="form-control form-control-sm" readonly />
+                                </div>
+                            </div>
+                            <div class="col-6 col-sm-3 ForEmp">
+                                <div class="form-group mb-2">
+                                    <label asp-for="SectionName" class=""></label>
+                                    <input type="text" asp-for="SectionName" class="form-control form-control-sm" readonly />
+                                </div>
+                            </div>
+                            <div class="col-6 col-sm-3 ForEmp">
+                                <div class="form-group mb-2">
+                                    <label asp-for="Designation" class=""></label>
+                                    <input type="text" asp-for="Designation" class="form-control form-control-sm" readonly />
+                                </div>
+                            </div>
+                            <div class="col-6 col-sm-3 ForEmp">
+                                <div class="form-group mb-2">
+                                    <label asp-for="AppointmentDate" class=""></label>
+                                    <input type="text" asp-for="AppointmentDate" class="form-control form-control-sm" readonly />
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="modal-footer p-1  justify-content-center btnRemoveForDepriciation">
+                    <input type="button" class="btn btn-warning btn-sm" id="btnAssetAssign" value="Asset Assign to Employee" />
+                </div>
+            </form>
+        </div>
+
+    </div>
+</div>
+
+<!-- Modal For Collect Asset -->
+
+<div id="modalForCollectAsset" class="modal fade" role="dialog">
+    <div class="modal-dialog modal-lg">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header p-2 bg-dark">
+                <h6 class="modal-title modTitle"> </h6>
+                <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body px-2 py-0">
+                <div id="divAssetInfo">
+
+                </div>
+            </div>
+            <div class="modal-footer p-1 d-flex justify-content-center">
+                <input type="button" class="btn btn-warning btn-sm" id="btnColAssetFromCom" value="" />
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@section scripts{
+    <script type="text/javascript">
+        const GetDepriciationHistoryDetail=(AssetId)=>{
+            debugger
+            $("#tblDepriciationHistoryDetail").removeClass('d-none');
+            var data = HttpRequest.AjaxData('POST', '/FiniteScheduler/AssetManagement/GetListAssetDepriciationHistory', { id: AssetId });
+            let rowDepriciationHistory = '';
+            $.each(data, function (d, e) {
+                rowDepriciationHistory += `<tr>
+
+                            <td>${++d}</td>
+                            <td  class="hdnID d-none">${e.ID}</td>
+                            <td>${e.AssetName}</td>
+                            <td class="hdnDateFrom" >${e.DateFromMsg}</td>
+                            <td class="hdnDateTo" >${e.DateTo}</td>
+                            <td class="hdnRate" >${e.Rate}</td>
+                            <td class="hdnRate" >${e.DepricationValue}</td>
+                            <td class="hdnValueFaterDeprication" >${e.ValueAfterDeprication}</td>
+                            `
+                    //< td ><a onClick="btnEditDepriciation(this)" title="Edit Depriciation" class="btn btn-primary btn-xs"> <i class="fas fa-edit fa-sm"></i></a><span> </span><a onClick="btnDeleteDepriciation(${AssetId},${e.ID})" title="Delete Depriciation" class="btn btn-danger btn-xs"><i class="fas fa-trash fa-sm"></i></a></td >
+                    //        </tr >
+            });
+
+            $("#tbodyDepriciationHistory").html(rowDepriciationHistory);
+        }
+
+        $(function () {
+            //$("#EmployeeCode").select2();
+            $('#EmployeeCode').select2({
+                dropdownParent: $('#modalForAssignAsset')
+            });
+            GetAssetInfoList();
+            DDLEmployees();
+            $("#AssetTypeID").change(function () {
+                AssetSumTypeName();
+            });
+            $("#EmployeeCode").change(function () {
+                GetEmployeeShortInfo();
+            });
+            $(".dateField").datepicker(
+                {
+                    dateFormat: "dd-M-yy",
+                    showAnim: "scale",
+                    changeMonth: true,
+                    yearRange: "2000:2050",
+                    changeYear: true
+                }).css('z-index', 99999);
+            $('[data-toggle="tooltip"]').tooltip({
+                html: true
+            });
+
+
+            $("#modalForAssignAsset").on("hidden.bs.modal", function () {
+                modaAssetAssignClear();
+            });
+
+
+
+            $('#btnAssetAssign').click(function (e) {
+                debugger
+                e.preventDefault()
+                if ($("#frmAssetInfoIndex").valid()) {
+                    let assetLoactionID = $("#AssetLoactionID").val();
+                    let employeeCode = $('#EmployeeCode').val();
+                    let dateFrom = $('#DateFrom').val();
+                    let dateTo = $('#DateTo').val();
+                    let departmentID = $("#DepartmentID").val();
+                    let buildingID = $("#BuildingID").val();
+                    let floorID = $("#FloorID").val();
+                    let assetID = $("#AssetID").val();
+
+
+                    if (assetLoactionID > 0) {
+                        let Obj = {
+                            ID: assetLoactionID,
+                            DateTo: dateTo,
+                        }
+                        if (dateTo != "") {
+                            HttpRequest.Ajax("POST", '/FiniteScheduler/AssetManagement/AssetCollectLoaction', { "assetLocationDTModel": Obj }, saveSuccess, true);
+                        } else {
+                            $.alert.open("Alert", "Date To is Empty");
+                        }
+                    } else if (assetLoactionID <= 0) {
+                        let Obj = {
+                            AssetID: assetID,
+                            EmployeeCode: employeeCode,
+                            DateFrom: dateFrom,
+                            DepartmentID: departmentID,
+                            BuildingID: buildingID,
+                            FloorID: floorID,
+                        }
+                        if (employeeCode != null && employeeCode != "") {
+                            HttpRequest.Ajax("POST", '/FiniteScheduler/AssetManagement/AssetLocationAssign', { "DbModel": Obj }, saveSuccess, true);
+                        } else if (departmentID != "" && departmentID != null && FloorID != "" && FloorID != null) {
+                            HttpRequest.Ajax("POST", '/FiniteScheduler/AssetManagement/AssetLocationAssign', { "DbModel": Obj }, saveSuccess, true);
+                        } else {
+                            $.alert.open("error", "Required Field Cannot be Empty!!");
+                        }
+                    }
+                } else{
+                    $.alert.open("error", "Required Field Cannot be Empty!!");
+                }
+
+            })
+
+            $("#OfficeDivisionID").change(function () {
+
+                let officeDivisionID = $("#OfficeDivisionID").val();
+                if (officeDivisionID != "") {
+
+                    HttpRequest.DropDown("Get", "/FiniteScheduler/AssetManagement/GetDivisionWiseDDLDepartment", { DivisionId: officeDivisionID }, 'DepartmentID', true);
+
+                }
+            });
+
+            $("#LoaCompanyID").change(function () {
+                debugger
+                let compID = $("#LoaCompanyID").val();
+                if (compID != "") {
+                    HttpRequest.DropDown("Get", "/FiniteScheduler/AssetManagement/EmbroCompanyWiseDDLDivision", { 'embroCompanyID': compID }, 'OfficeDivisionID', true);
+                    //$("#OfficeDivisionID").trigger('change');
+                } else {
+                    HttpRequest.DropDownDefault("OfficeDivisionID");
+                }
+            });
+            $("#BuildingID").change(function () {
+                BuildingWiseFloor();
+            });
+
+            function saveSuccess(data) {
+                if (data.result == 1) {
+                    $.alert.open({
+                        type: 'Success',
+                        content: data.message,
+                        callback: function () {
+                            GetAssetInfoList();
+                        }
+                    });
+                    $('#modalForAssignAsset').modal('hide');
+                    modaAssetAssignClear();
+                }
+                else {
+                    $.alert.open("error", data.message);
+                }
+            }
+
+            $("#btnDepInfoUpdate").click(function () {
+                debugger
+                let dateToF = $("#DateTo").val();
+                let dateFromF = $("#DateFrom").val();
+                let rateF = $("#Rate").val();
+                let id = $("#hdnDepriciationID").val();
+                let depAssetId = $("#hdnAssetId").val();
+                let Obj = {
+                    ID: id,
+                    DateTo: dateToF,
+                    DateFrom: dateFromF,
+                    Rate: rateF
+                }
+                if (Obj.ID > 0 && Obj.DateTo != "" && Obj.DateFrom != "" && Obj.Rate !="") {
+                    HttpRequest.Ajax("POST", '/FiniteScheduler/AssetManagement/AssetDepriciationHistoryUpdate', { "model": Obj }, saveSuccess, true);
+                    GetDepriciationHistoryDetail(depAssetId);
+                    function saveSuccess(data) {
+                        if (data.result == 1) {
+                            $.alert.open({
+                                type: 'Success',
+                                content: data.message,
+                                callback: function () {
+                                    ClearDepHistory();
+                                }
+                            });
+                        }
+                        else {
+                            $.alert.open("error", data.message);
+                        }
+                    }
+                } else {
+                    $.alert.open("error", 'Any Required Field is Empty!!');
+                }
+
+
+            })
+
+            $("#btnDepInfo").click(function () {
+                let depAssetId = $("#hdnAssetId").val();
+                let depDateFrom = $("#DateFrom").val();
+                let depDateTo = $("#DateTo").val();
+                let depRate = $("#Rate").val();
+                let Obj = {
+                    AssetID: depAssetId,
+                    DateFrom: depDateFrom,
+                    DateTo: depDateTo,
+                    Rate: depRate
+                }
+                if (Obj.AssetID > 0 && Obj.DateTo != "" && Obj.DateFrom != "" && Obj.Rate != "") {
+                    HttpRequest.Ajax("POST", '/FiniteScheduler/AssetManagement/AssetDepriciationHistorieCreate', { "depriciationHistory": Obj }, saveSuccess, true);
+                    GetDepriciationHistoryDetail(depAssetId);
+                    function saveSuccess(data) {
+                        if (data.result == 1) {
+                            $.alert.open({
+                                type: 'Success',
+                                content: data.message,
+                                callback: function () {
+                                    ClearDepHistory();
+                                }
+                            });
+                        }
+                        else {
+                            $.alert.open("error", data.message);
+                        }
+                    }
+                } else {
+                    $.alert.open("error", 'Any Required Field is Empty!!');
+                }
+            });
+
+        })
+
+
+        const GetAssetInfoList = () => {
+
+            var dataGrid = $("#grid").dxDataGrid({
+                height: 450,
+                remoteOperations: { paging: true, filtering: true, sorting: true, grouping: true, summary: true, groupPaging: true },
+                dataSource: DevExpress.data.AspNet.createStore({
+                    key: "AssetID",
+                    loadUrl: "/FiniteScheduler/AssetManagement/GetAllAssetInfo",
+                    loadParams: {
+
+                    }
+                }),
+                hoverStateEnabled: true,
+
+                showBorders: true,
+                columnAutoWidth: true,
+                filterRow: { visible: true },
+                pager: { visible: true, showInfo: true, allowedPageSizes: [50, 100, 500,750,1000,1500], showPageSizeSelector: true, },
+                paging: { pageSize: 50 },
+                
+                selection: { mode: 'single' },
+                export: {
+                    //   enabled: true
+                },
+                columns: [
+                    {
+                        width: "auto",
+                        caption: "SL #",
+                        alignment: 'center',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        },
+                        cellTemplate: function (container, e) {
+                            var index = dataGrid.pageIndex() * dataGrid.pageSize() + e.rowIndex + 1;
+                            container.text(index);
+                        }
+                    },
+                    {
+                        dataField: "AssetID",
+                        visible: false,
+                    }, {
+                        dataField: "TypeName",
+                        alignment: 'center',
+                        caption: 'Asset Type',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+                    },
+                    {
+                        dataField: "SubTypeName",
+                        alignment: 'center',
+                        caption: 'Asset Sub Type',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+                    },
+                    {
+                        dataField: "BrandName",
+                        alignment: 'center',
+                        caption: 'Brand',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+                    },
+                    {
+                        dataField: "AssetName",
+                        alignment: 'center',
+                        caption: 'Asset Name',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        },
+                        cellTemplate: function (container, options) {
+                            var returnText = `<span>&nbsp</span><button title="Asset Already Assign" class="btn btn-xs btn-success">${options.data.AssetName}</button>`;
+                            returnText = returnText + '</div>';
+                            $(returnText).on('dxclick', function () {
+                                let assetid = options.data.AssetID
+                                AssetDepriciationinfo(assetid)
+                            }).appendTo(container);
+                        }
+                    },
+                    {
+                        dataField: "Code",
+                        alignment: 'center',
+                        caption: 'Code',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+                    },
+                    {
+                        dataField: "PurchaseValue",
+                        alignment: 'center',
+                        caption: 'Purchase Value',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+                    },
+                    {
+                        dataField: "CodeSerial",
+                        alignment: 'center',
+                        caption: 'Serial',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+                    },
+                    {
+                        dataField: "IsFreeAsset",
+                        alignment: 'center',
+                        caption: 'IsFreeAsset',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        },
+                        cellTemplate: function (container, options) {
+                            var returnText = ``;
+                            let assetStatus = options.data.IsFreeAsset
+                            let assetID = options.data.AssetID;
+                            let assetLoactionID = options.data.AssetLoactionID;
+                            let assetAssignedType = options.data.AssetAssignedType;
+                            if (assetStatus === false) {
+                                returnText = '<span>&nbsp</span><button title="Asset Already Assign" class="btn btn-xs btn-danger">Asset Collect</button>';
+                            } else if (assetStatus === true) {
+                                if (assetAssignedType === 1) {
+                                    returnText = '<span>&nbsp</span><button title="Asset Assign for Compnay " class="btn btn-xs btn-secondary">Company Asset</button>';
+                                } else if (assetAssignedType === 2) {
+                                    returnText = '<span>&nbsp</span><button title="Free Asset for Department " class="btn btn-xs btn-info">Asset Assign</button>';
+                                } else if (assetAssignedType === 3) {
+                                    returnText = '<span>&nbsp</span><button title="Free Asset for Employee " class="btn btn-xs btn-primary">Asset Assign</button>';
+                                }
+
+                            }
+                            returnText = returnText + '</div>';
+                            $(returnText).on('dxclick', function () {
+                                debugger
+                                if (assetStatus === true) {
+                                    AssetCollectAndAssetAssign(assetID, assetStatus, assetAssignedType, assetLoactionID)
+                                } else if (assetStatus === false) {
+                                    AssetCollectAndAssetAssign(assetID, assetStatus, assetAssignedType, assetLoactionID)
+                                };
+                            }).appendTo(container);
+                        }
+                    },
+                    {
+                        caption: 'Action',
+                        alignment: 'center',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        },
+                        cellTemplate: function (container, options) {
+
+                            var returnText = '<button title="Edit" class="btn btn-xs btn-warning"><i class="fa fa-edit"></i></button>';
+                            $(returnText).on('dxclick', function () {
+                                AssetEdit(options.data.AssetID);
+                            }).appendTo(container);
+
+                            var returnText = '<span>&nbsp</span><button title="Delete" class="btn btn-xs btn-danger"><i class="fa fa-trash"></i></button>';
+                            returnText = returnText + '</div>';
+                            $(returnText).on('dxclick', function () {
+                                DeleteRow(options.data.AssetID);
+                            }).appendTo(container);
+                        }
+                    }
+                ]
+            }).dxDataGrid("instance");
+        }
+        const DeleteRow = (AssetID) => {
+            debugger
+            $.alert.open('confirm', 'Are you sure to delete this record?', function (button) {
+                if (button == 'yes') {
+                    HttpRequest.Ajax("GET", '/FiniteScheduler/AssetManagement/Remove', { "ID": AssetID }, saveSuccess, true);
+                } else {
+
+                }
+            });
+            function saveSuccess(data) {
+                if (data.result == 1) {
+                    $.alert.open({
+                        type: 'Success',
+                        content: data.message,
+                        callback: function () {
+                            /* $("#btnSearch").trigger('click');*/
+                            GetAssetInfoList();
+                        }
+                    });
+                    /* $('#modalForAssignAsset').modal('hide');*/
+                    /*modaAssetAssignClear();*/
+                }
+                else {
+                    $.alert.open("error", data.message);
+                }
+            }
+        }
+        const AssetEdit = (id) => {
+            debugger
+            if (id != "") {
+                window.location.replace('/FiniteScheduler/AssetManagement/GetDataToUpdateAssetEdit?id=' + id)
+            } else {
+                $.alert.open("error", "Somthing is Error");
+            }
+        }
+        const AssetSumTypeName = () => {
+
+            let AssetTypeID = $("#AssetTypeID").val();
+            if (AssetTypeID != "") {
+                HttpRequest.DropDown("Get", "/FiniteScheduler/AssetManagement/GetDDLAssetSubType", { AssetTypeID: AssetTypeID }, 'AssetSubTypeID', true);
+            } else {
+                HttpRequest.DropDownDefault("AssetSubTypeID");
+            }
+        }
+
+        const AssetCollectAndAssetAssign = (AssetID, AssetStatus, AssetAssignedTypeID, AssetLoactionID) => {
+            debugger
+            let assetID = AssetID;
+            let assetStatus = AssetStatus;
+            let AssetAssignedType = AssetAssignedTypeID;
+            let assetLoactionId =AssetLoactionID;
+            if (assetStatus === true) {
+                if (AssetAssignedType === 1) {
+                    return false
+                } else if (AssetAssignedType === 2) {
+                    $('.modTitle').text('Assign Asset to Department');
+                    $(".ForEmp").addClass("d-none");
+                    $(".ForDep").removeClass("d-none");
+                    $(".dateto").addClass("d-none");
+                    $(".isreturn").addClass("d-none");
+                    $("#LoaCompanyID").prop('disabled', false);
+                    $("#OfficeDivisionID").prop('disabled', false);
+                    $("#btnAssetAssign").val("Asset Assign to Department");
+                    $("#AssetID").val(assetID);
+                    $('#modalForAssignAsset').modal('toggle');
+
+                } else if (AssetAssignedType === 3) {
+                    $('.modTitle').text('Assign Asset to Employee');
+                    $(".ForDep").addClass("d-none");
+                    $(".ForEmp").removeClass("d-none");
+                    $(".dateto").addClass("d-none");
+                    $(".isreturn").addClass("d-none");
+                    $("#btnAssetAssign").val("Asset Assign to Employee");
+                    $("#AssetID").val(assetID);;
+                    $('#modalForAssignAsset').modal('toggle');
+                }
+
+
+            } else if (assetStatus === false) {
+                dataAssetAssignById = HttpRequest.AjaxData("Get", '/FiniteScheduler/AssetManagement/GetAssetLoactionById', { 'id': assetLoactionId });
+                console.log(dataAssetAssignById);
+                if (dataAssetAssignById.DepartmentID > 0 || dataAssetAssignById.EmployeeCode == null) {
+                    $('.modTitle').text('Asset Collection From Department');
+                    $(".ForEmp").addClass("d-none");
+                    $(".ForDep").removeClass("d-none");
+                    $("#BuildingID").val(dataAssetAssignById.BuildingID).trigger("change").prop('disabled', true);
+                    $("#FloorID").val(dataAssetAssignById.FloorID).trigger("change").prop('disabled', true);
+
+                    $("#LoaCompanyID").val(dataAssetAssignById.CompanyID).trigger("change").prop('disabled', true);
+                    $("#OfficeDivisionID").val(dataAssetAssignById.DivisionID).trigger("change").prop('disabled', true);
+
+                    $("#DepartmentID").val(dataAssetAssignById.DepartmentID).trigger("change").prop('disabled', true);
+                    $("#DateFrom").val(dataAssetAssignById.DateFromMsg).prop('disabled', true);
+                    $(".LoaCompany").removeClass("d-none");
+                    $(".OfficeDivision").removeClass("d-none");
+                    $("#AssetID").val(assetID);
+                    $("#btnAssetAssign").val("Asset Collect");
+                    $("#AssetCollectForhdn").addClass('d-none');
+                    $("#AssetLoactionID").val(dataAssetAssignById.ID);
+                    $('#modalForAssignAsset').modal('toggle');
+                } else if (dataAssetAssignById.EmployeeCode != null || dataAssetAssignById.DepartmentID <= 0) {
+                    debugger
+                    $('.modTitle').text('Asset Collection From Employee');
+                    $(".ForDep").addClass("d-none");
+                    $(".ForEmp").removeClass("d-none");
+                    $("#btnAssetAssign").val("Asset Collect");
+                    let newOption = new Option(dataAssetAssignById.EmployeeCode, dataAssetAssignById.EmployeeCode, false, false);
+                    $('#EmployeeCode').append(newOption).trigger('change').prop('disabled', true);
+                    $("#DateFrom").val(dataAssetAssignById.DateFromMsg).prop('disabled', true);
+                    $("#DateTo").val(dataAssetAssignById.DateTo);
+                    $("#AssetCollectForhdn").addClass('d-none');
+                    $("#AssetLoactionID").val(dataAssetAssignById.ID);
+                    $('#modalForAssignAsset').modal('toggle');
+
+                }
+            } else {
+                 $.alert.open("alert", 'Data Empty!!');
+            }
+
+        }
+
+        function DDLEmployees() {
+            HttpRequest.DropDownSelect2Group("Get", "/AlgoHR/CommonDropDown/GetDDLEmployee", {}, 'EmployeeCode');
+        }
+
+        function GetEmployeeShortInfo() {
+
+            let employeeCode = $("#EmployeeCode").val();
+            let employeeID = 0;
+            let empInfo = HttpRequest.AjaxData('GET', '/AlgoHR/EmployeeLeave/GetEmployeeShortInfo', { employeeCode: employeeCode, employeeID: employeeID });
+            let empCode = empInfo.EmployeeID;
+            if (empInfo != null) {
+                $("#EmployeeID").val(empInfo.EmployeeID);
+                $("#EmpCode").val(empInfo.EmployeeCode);
+                $("#EmployeeName").val(empInfo.EmployeeName);
+                $("#CompanyName").val(empInfo.CompanyName);
+                $("#DivisionName").val(empInfo.DivisionName);
+                $("#DepartmentName").val(empInfo.DepartmentName);
+                $("#SectionName").val(empInfo.SectionName);
+                $("#Designation").val(empInfo.DesignationName);
+                $("#AppointmentDate").val(empInfo.Emp_Appointment);
+
+                HttpRequest.DropDownCustom('GET', '/AlgoHR/EmployeeLeave/GetDDLCustomEmpLeaves', { employeeID: empInfo.EmployeeID, employeeCode: employeeCode }, 'LeaveID');
+
+            }
+        }
+        const modaAssetAssignClear = () => {
+            debugger
+            $("#AssetID").val("0");
+            $('#EmployeeCode').val(null).trigger('change');
+            $("#EmpCode").val("");
+            $("#EmployeeName").val("");
+            $("#CompanyName").val("");
+            $("#DivisionName").val("");
+            $("#DepartmentName").val("");
+            $("#SectionName").val("");
+            $("#Designation").val("");
+            $("#AppointmentDate").val("");
+            $("#DateFrom").val("@DateTime.Now.ToString("dd-MMM-yyyy")");
+            $("#DateTo").val("");
+            $('#IsReturned').prop('checked', false);
+            $("#LoaCompanyID").val("");
+            $("#OfficeDivisionID").val("");
+            $("#DepartmentID").val("").prop('disabled', false);
+            $("#BuildingID").val("").prop('disabled', false);
+            $("#FloorID").val("").prop('disabled', false);
+            $("#AssetLoactionID").val("0");
+            $("#Rate").val("");
+            $(".rate").addClass("d-none");
+            $("#btnDepInfo").addClass("d-none");
+            $("#btnAssetAssign").removeClass("d-none");
+            $("#tblDepriciationHistoryDetail").addClass('d-none');
+            $("#btnDepInfoUpdate").addClass('d-none');
+            $("#hdnDepriciationID").val("");
+            $("#hdnAssetId").val("");
+            $('#EmployeeCode').prop('disabled', false);
+            $("#DateFrom").prop('disabled', false);
+            $(".removeForDepriciationHistory,.btnRemoveForDepriciation").removeClass("d-none");
+            
+            /*$(".preDepriciationHistory").addClass("d-none");*/
+
+
+        }
+
+          const BuildingWiseFloor = () => {
+            let building = $("#BuildingID").val();
+            if (building != "") {
+                HttpRequest.DropDown("Get", "/MaterialsManagement/BuildingFloorInfo/GetDDLBuildingFloor", { Building: building, FloorType:@((int)enum_FloorType.Asset) }, 'FloorID', true);
+            } else {
+                HttpRequest.DropDownDefault("FloorID");
+            }
+        }
+
+        const AssetDepriciationinfo = (AssetId) => {
+            debugger
+            $("#hdnAssetId").val(AssetId);
+            GetDepriciationHistoryDetail(AssetId);
+            $('.modTitle').text('Asset Depriciation info');
+            $(".ForEmp").addClass("d-none");
+            $(".ForDep").addClass("d-none");
+            $(".removeForDepriciationHistory").addClass("d-none");
+            $(".btnRemoveForDepriciation").addClass("d-none");
+            //$(".depDateFrom").removeClass("d-none");
+            //$(".depDateto").removeClass("d-none");
+            //$("#btnDepInfo").removeClass("d-none");
+            //$("#btnAssetAssign").addClass("d-none");
+            //$(".rate").removeClass("d-none");
+            /*$("#btnDepInfo").val("Insert Depriciation");*/
+            
+            $('#modalForAssignAsset').modal('toggle');
+            
+        }
+
+
+        const btnEditDepriciation = (that) => {
+            debugger
+            $("#btnDepInfo").addClass('d-none');
+            $("#btnDepInfoUpdate").val("Update Depriciation");
+            $("#btnDepInfoUpdate").removeClass('d-none');
+            let paretnTr = $(that).parent().parent();
+            let dateFrom = paretnTr.find(".hdnDateFrom").text();
+            let dateTo = paretnTr.find(".hdnDateTo").text();
+            let rate = paretnTr.find(".hdnRate").text();
+            let depriciationID = paretnTr.find(".hdnID").text();
+            $("#DateTo").val(dateTo);
+            $("#DateFrom").val(dateFrom);
+            $("#Rate").val(rate);
+            $("#hdnDepriciationID").val(depriciationID);
+        };
+        const btnDeleteDepriciation = (AssetId,id) => {
+            $.alert.open('confirm', 'Are you sure to delete this record?', function (button) {
+                if (button == 'yes') {
+                    HttpRequest.Ajax("GET", '/FiniteScheduler/AssetManagement/AssetDepriciationHistoryRemove', { "id": id }, saveSuccess, true);
+                    GetDepriciationHistoryDetail(AssetId);
+                } else {
+
+                }
+            });
+            function saveSuccess(data) {
+                if (data.result == 1) {
+                    $.alert.open({
+                        type: 'Success',
+                        content: data.message,
+                        callback: function () {
+
+                        }
+                    });
+                }
+                else {
+                    $.alert.open("error", data.message);
+                }
+            }
+        };
+
+        const ClearDepHistory = () => {
+            $("#DateTo").val("");
+            $("#DateFrom").val("@DateTime.Now.ToString("dd-MMM-yyyy")");
+            $("#Rate").val("");
+            $("#btnDepInfoUpdate").addClass("d-none");
+            $("#btnDepInfo").removeClass("d-none");
+
+        }
+
+    </script>
+}

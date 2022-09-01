@@ -1,0 +1,232 @@
+﻿@model RG.Application.ViewModel.Maxco.Business.OrderPlanReports.IndexVM
+@{
+    ViewData[PageInfo.PageTitle] = "Order Plan Reports";
+    ViewData[PageInfo.PageHeader] = "Order Plan Reports";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="row">
+    <div class="col-sm-12 col-md-12">
+        <div class="card card-dark">
+            <div class="card-header m-0 p-1">
+                <h5 class="card-title">Order Plan Reports</h5>
+            </div>
+            <div class="card-body p-2">
+                <div class="row">
+                    <div class="col-sm-3">
+                        <div class="form-group mb-2">
+                            <label asp-for="ReportType" class="required"></label>
+                            <select asp-for="ReportType" asp-items="Model.DDLReportType" class="form-control form-control-sm"></select>
+                            <span asp-validation-for="ReportType" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="row pb-2">
+                            <div class="col-sm-3 d-none searchField clsOS clsFTWOS clsWS clsOWS clsWWS clsBWS clsAWFS clsDUFF clsPGF clsDBR clsDFFD clsPNO clsFFS clsDPPS clsDUFS clsFSCS clsMSR">
+                                <label asp-for="DateFrom" class="required"></label>
+                                <div class="input-group">
+
+                                    <input asp-for="DateFrom" type="text" class="form-control form-control-sm dateField bg-white text-center" readonly />
+                                    <div class="input-group-append">
+                                        <span class="input-group-text"><i class="fa fa-calendar" aria-hidden="true"></i></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-3 d-none searchField clsOS clsFTWOS clsWS clsOWS clsWWS clsBWS clsAWFS clsDUFF clsPGF clsDBR clsDFFD clsPNO clsFFS clsDPPS clsDUFS clsFSCS clsMSR">
+                                <label asp-for="DateTo" class="required"></label>
+                                <div class="input-group">
+                                    <input asp-for="DateTo" type="text" class="form-control form-control-sm dateField bg-white text-center" readonly />
+                                    <div class="input-group-append">
+                                        <span class="input-group-text"><i class="fa fa-calendar" aria-hidden="true"></i></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-3 d-none searchField clsOS clsFTWOS clsWS clsOWS clsWWS clsBWS clsAWFS clsDUFF clsPGF clsDBR clsDFFD clsPNO clsFFS clsDPPS clsDUFS clsFSCS clsMSR">
+                                <div class="form-group mb-2">
+                                    <label asp-for="BuyerID" class=""></label>
+                                    <select asp-for="BuyerID" asp-items="Model.DDLBuyer" class="form-control form-control-sm"></select>
+                                    <span asp-validation-for="BuyerID" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-sm-3 d-none searchField clsOS clsFTWOS clsWS clsOWS clsWWS clsBWS clsAWFS clsDUFF clsPGF clsDBR clsDFFD clsPNO clsFFS clsDPPS clsDUFS clsFSCS clsMSR">
+                                <div class="form-group mb-2">
+                                    <label asp-for="OrderID" class=""></label>
+                                    <select asp-for="OrderID" asp-items="Model.DDLOrder" class="form-control form-control-sm"></select>
+                                    <span asp-validation-for="OrderID" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+                <div class="row d-none" id="divButton">
+                    <div class="col-md-12 text-center">
+                        <div class="form-group">
+                            <button type="button" class="btn btn-sm btn-success" id="btnShow">Show</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section scripts{
+    <script type="text/javascript">
+        $(function () {
+            $("#BuyerID").select2();
+            $("#OrderID").select2({
+                placeholder: 'Please Select',
+                allowClear: true
+            });
+            $("#ReportType").change(function () {
+                debugger;
+                let reportType = $("#ReportType").val();
+                $('.searchField').addClass('d-none');
+                $('#divButton').addClass('d-none');
+                if (reportType != '') {
+                    $(`.cls${reportType}`).removeClass('d-none');
+                    $('#divButton').removeClass('d-none');
+                }
+            });
+            $("#BuyerID").change(function () {
+                HttpRequest.DropDownSelect2Group('GET', '/Maxco/Order/GetOrder', { buyerID: $("#BuyerID").val(), predict: $("#OrderID").val() }, 'OrderID');
+                // HttpRequest.DropDownSelect2('GET', '/Maxco/OrderPlanReports/DDLBuyerWisePlanOrders', { buyerID: $("#BuyerID").val(), predict: $("#OrderID").val() }, 'OrderID');
+            });
+            //DDLBuyerWisePlanOrders
+            $("#btnShow").click(function () {
+                let reportType = $("#ReportType").val();
+                let buyerID = $("#BuyerID").val();
+                let orderID = $("#OrderID").val();
+                let dateFrom = $("#DateFrom").val();
+                let dateTo = $("#DateTo").val();
+
+                if (reportType == 'OS') {
+                    if (dateFrom != '' && dateTo != '') {
+                        window.open(`/Maxco/OrderPlanReports/OrderStatusDetail?dateFrom=${dateFrom}&dateTo=${dateTo}&buyerID=${buyerID}&orderID=${orderID}`, "Order Status", "width=900,height=600");
+                    }
+                } else if (reportType == 'FTWOS') {
+                    window.open(`/Maxco/OrderPlanReports/FabricTypeWiseOrderStatus?dateFrom=${dateFrom}&dateTo=${dateTo}&buyerID=${buyerID}&orderID=${orderID}`, "Fabric Type Wise Order Status", "width=900,height=600");
+                }else if (reportType == 'BWS') {
+                    window.open(`/Maxco/OrderPlanReports/BuyerWiseStatus?dateFrom=${dateFrom}&dateTo=${dateTo}&buyerID=${buyerID}&orderID=${orderID}`, "Fabric Type Wise Order Status", "width=900,height=600");
+                } else if (reportType == 'OWS') {
+                    window.open(`/Maxco/OrderPlanReports/OrderWiseStatus?dateFrom=${dateFrom}&dateTo=${dateTo}&buyerID=${buyerID}&orderID=${orderID}`, "Fabric Type Wise Order Status", "width=900,height=600");
+                } else if (reportType == 'WWS') {
+                    window.open(`/Maxco/OrderPlanReports/WeekWiseStatus?dateFrom=${dateFrom}&dateTo=${dateTo}&buyerID=${buyerID}&orderID=${orderID}`, "Fabric Type Wise Order Status", "width=900,height=600");
+                }
+                else if (reportType == 'WS') {
+                    window.open(`/Maxco/OrderPlanReports/WeeklySummary?dateFrom=${dateFrom}&dateTo=${dateTo}&buyerID=${buyerID}&orderID=${orderID}`, "Weekly Summary", "width=900,height=600");
+                }
+                else if (reportType == 'AWFS') {
+                    if (!buyerID) {
+                        buyerID = 0;
+                    }
+                    if (!orderID) {
+                        orderID = 0;
+                    }
+                    let url = `/Maxco/OrderPlanReports/ArtWorkPlanSummary?dateFrom=${dateFrom}&dateTo=${dateTo}&buyerID=${buyerID}&orderID=${orderID}`;
+                    newWindow(url, "Art Work Fabric Summary");
+                }
+                else if (reportType == 'DUFF') {
+                    if (!buyerID) {
+                        buyerID = 0;
+                    }
+                    if (!orderID) {
+                        orderID = 0;
+                    }
+                    let url = `/Maxco/OrderPlanReports/DyeingProductionFinishFabricWeekReport?dateFrom=${dateFrom}&dateTo=${dateTo}&buyerID=${buyerID}&orderID=${orderID}`;
+                    newWindow(url, "Dyeing Unit wise Fabric");
+                }
+                else if (reportType == 'PGF') {
+                    if (!buyerID) {
+                        buyerID = 0;
+                    }
+                    if (!orderID) {
+                        orderID = 0;
+                    }
+                    let url = `/Maxco/OrderPlanReports/GreyFabricWip?dateFrom=${dateFrom}&dateTo=${dateTo}&buyerID=${buyerID}&orderID=${orderID}`;
+                    newWindow(url, "Plan Greige Fabric");
+                }
+                else if (reportType == 'PNO') {
+                    if (!buyerID) {
+                        buyerID = 0;
+                    }
+                    if (!orderID) {
+                        orderID = 0;
+                    }
+                    let url = `/Maxco/OrderPlanReports/PlanNewOrder?dateFrom=${dateFrom}&dateTo=${dateTo}&buyerID=${buyerID}&orderID=${orderID}`;
+                    newWindow(url, "Plan Greige Fabric");
+                }
+                else if (reportType == 'DBR') {
+                    if (!buyerID) {
+                        buyerID = 0;
+                    }
+                    if (!orderID) {
+                        orderID = 0;
+                    }
+                    let url = `/Maxco/OrderPlanReports/DailyBatchReport?dateFrom=${dateFrom}&dateTo=${dateTo}&buyerID=${buyerID}&orderID=${orderID}`;
+                    newWindow(url, "Daily Batch Report");
+                }
+                else if (reportType == 'DFFD') {
+                    if (!buyerID) {
+                        buyerID = 0;
+                    }
+                    if (!orderID) {
+                        orderID = 0;
+                    }
+                    let url = `/Maxco/OrderPlanReports/DailyFinishFabricDeliveryReport?dateFrom=${dateFrom}&dateTo=${dateTo}&buyerID=${buyerID}&orderID=${orderID}`;
+                    newWindow(url, "Daily Finish Fabric Report");
+                } else if (reportType == 'FFS') {
+                    if (!buyerID) {
+                        buyerID = 0;
+                    }
+                    if (!orderID) {
+                        orderID = 0;
+                    }
+                    let url = `/Maxco/OrderPlanReports/PlanFloorStatus?dateFrom=${dateFrom}&dateTo=${dateTo}&buyerID=${buyerID}&orderID=${orderID}`;
+                    newWindow(url, "Floor Status");
+                }
+                else if (reportType == 'DPPS') {
+                    if (!buyerID) {
+                        buyerID = 0;
+                    }
+                    if (!orderID) {
+                        orderID = 0;
+                    }
+                    let url = `/Maxco/OrderPlanReports/DailyPrintProductionSummery?dateFrom=${dateFrom}&dateTo=${dateTo}&buyerID=${buyerID}&orderID=${orderID}`;
+                    newWindow(url, "Daily Batch Report");
+                }
+                else if (reportType == 'DUFS') {
+                    if (!buyerID) {
+                        buyerID = 0;
+                    }
+                    if (!orderID) {
+                        orderID = 0;
+                    }
+                    let url = `/Maxco/OrderPlanReports/DailyUsedFabricStatus?dateFrom=${dateFrom}&dateTo=${dateTo}&buyerID=${buyerID}&orderID=${orderID}`;
+                    newWindow(url, "Cutting Status");
+                }
+                else if (reportType == 'FSCS') {
+                    if (!buyerID) {
+                        buyerID = 0;
+                    }
+                    if (!orderID) {
+                        orderID = 0;
+                    }
+                    let url = `/Maxco/OrderPlanReports/FabricsStatusOfCuttingSection?dateFrom=${dateFrom}&dateTo=${dateTo}&buyerID=${buyerID}&orderID=${orderID}`;
+                    newWindow(url, "Cutting Status");
+                }
+                else if (reportType == 'MSR') {
+                    if (!buyerID) {
+                        buyerID = 0;
+                    }
+                    if (!orderID) {
+                        orderID = 0;
+                    }
+                    let url = `/Maxco/OrderPlanReports/ManagementStatusReport?dateFrom=${dateFrom}&dateTo=${dateTo}&buyerID=${buyerID}&orderID=${orderID}`;
+                    newWindow(url, "Cutting Status");
+                }
+            });
+        });
+    </script>
+}

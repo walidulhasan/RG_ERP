@@ -1,0 +1,666 @@
+﻿@model RG.Application.ViewModel.FiniteScheduler.Setup.AssetInfo.AssetInfoVM
+@using RG.Application.Enums;
+@{
+    ViewData[PageInfo.PageTitle] = "Create";
+    ViewData[PageInfo.PageHeader] = "Asset";
+    ViewData[PageInfo.btnText1] = "Assetinfo List";
+    ViewData[PageInfo.PageLink1] = "/FiniteScheduler/AssetManagement/AssetInfoIndex";
+    ViewData[PageInfo.btnClass1] = "btn-primary";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div>
+    <form id="frmInvoice">
+
+        <div class="row">
+            <div class="col-sm-12 col-md-12">
+                <div class="card card-dark">
+                    <div class="card-header m-0 p-1">
+                        <h5 class="card-title">Asset Info</h5>
+                    </div>
+                    <div class="card-body mb-0">
+                        <div class="row">
+                            <div class="col-md-3 col-3 col-sm-3 col-lg-3">
+                                <input asp-for="AssetID" type="hidden" />
+                                <div class="form-group">
+                                    <label class="col-form-label-sm required m-0" asp-for="AssetAssignedType"></label>
+                                    <select asp-for="AssetAssignedType" class="form-control form-control-sm" asp-items="Model.DDLAssetAssignedType"></select>
+                                    <span asp-validation-for="AssetAssignedType" class="span-form-validation"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-3 col-sm-3 col-lg-3">
+                                <div class="form-g">
+                                    <label class="col-form-label-sm required m-0" asp-for="CompanyID"></label>
+                                    <select asp-for="CompanyID" class="form-control form-control-sm" asp-items="Model.DDLCompany"></select>
+                                    <span class="text-danger" asp-validation-for="CompanyID"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-3 col-sm-3 col-lg-3">
+                                <div class="form-group">
+                                    <label class="col-form-label-sm required m-0" asp-for="AssetTypeName"></label>
+                                    <select asp-for="AssetTypeName" asp-items="Model.DDLAssetTypeName" class="form-control form-control-sm"></select>
+                                    <span asp-validation-for="AssetTypeName" class="span-form-validation"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-3 col-sm-3 col-lg-3">
+                                <div class="form-group">
+                                    <label class="col-form-label-sm required m-0" asp-for="AssetSubTypeID"></label>
+                                    <select asp-for="AssetSubTypeID" class="form-control form-control-sm" asp-items="Model.DDLAssetSubTypeID"></select>
+                                    <span asp-validation-for="AssetSubTypeID" class="span-form-validation"></span>
+                                </div>
+                            </div>
+
+
+
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-3 col-3 col-sm-3 col-lg-3">
+                                <div class="form-group">
+                                    <label asp-for="AssetName" class="label-ajt-sm required"></label>
+                                    <input placeholder="Asset Name" autocomplete="off" asp-for="AssetName" class="form-control form-control-sm" type="text" onkeyup="AssetNameAutocomplete()" />
+                                    <span class="text-danger" asp-validation-for="AssetName"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-3 col-sm-3 col-lg-3">
+                                <div class="form-group">
+                                    <label asp-for="Code" class="label-ajt-sm required"></label>
+                                    <input placeholder="Code" autocomplete="off" asp-for="Code" class="form-control form-control-sm" type="text" readonly />
+                                    <span class="text-danger" asp-validation-for="Code"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-3 col-sm-3 col-lg-3">
+                                <div class="form-group">
+                                    <label asp-for="BrandName" class="label-ajt-sm"></label>
+                                    <input placeholder="Brand Name" autocomplete="off" asp-for="BrandName" class="form-control form-control-sm" type="text" />
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-3 col-sm-3 col-lg-3">
+                                <div class="form-group">
+                                    <label asp-for="PurchaseDate" class="label-ajt-sm required"></label>
+                                    <div class="input-group">
+                                        <input autocomplete="off" asp-for="PurchaseDateMsg" required type="text" name="FormDate" readonly class="datepic form-control form-control-sm dateField text-center" />
+                                        <div class="input-group-append">
+                                            <span class="input-group-text"><i class="fa fa-calendar" aria-hidden="true"></i></span>
+                                        </div>
+                                    </div>
+                                    <span asp-validation-for="PurchaseDate"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3 col-3 col-sm-3 col-lg-3">
+                                <div class="form-group">
+                                    <label asp-for="PurchaseValue" class="label-ajt-sm required"></label>
+                                    <input min="1" placeholder="Purchase Value" autocomplete="off" asp-for="PurchaseValue" class="form-control form-control-sm " type="number" />
+                                    <span class="text-danger" asp-validation-for="PurchaseValue"></span>
+                                </div>
+                            </div>
+                            <div class="ccol-md-3 col-3 col-sm-3 col-lg-3">
+                                <div class="form-group">
+                                    <label asp-for="Description" class="label-ajt-sm "></label>
+                                    <input placeholder="Description" autocomplete="off" asp-for="Description" class="form-control form-control-sm " type="text" />
+                                </div>
+                            </div>
+                            <div class="ccol-md-3 col-3 col-sm-3 col-lg-3">
+                                <div class="form-group">
+                                    <label asp-for="Remarks" class="label-ajt-sm "></label>
+                                    <input placeholder="Remarks" autocomplete="off" asp-for="Remarks" class="form-control form-control-sm " type="text" />
+                                    <span class="text-danger" asp-validation-for="Remarks"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-2 col-2 col-sm-2 col-lg-2" style="">
+                                <label>&nbsp;</label>
+                                <div class="form-check">
+                                    <span>
+                                        @if (Model.IsReturnable == true)
+                                        {
+                                            <input asp-for="IsReturnable" type="checkbox" checked class="form-check-input" /><b>IsReturnable</b>
+                                        }
+                                        else if (Model.AssetID <= 0)
+                                        {
+                                            <input asp-for="IsReturnable" type="checkbox" checked class="form-check-input" /><b>IsReturnable</b>
+                                        }
+                                        else if (Model.IsReturnable == false)
+                                        {
+                                            <input asp-for="IsReturnable" type="checkbox" class="form-check-input" /><b>IsReturnable</b>
+                                        }
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3 col-3 col-sm-3 col-lg-3">
+                                <div class="form-group">
+                                    <label asp-for="Capacity" class="label-ajt-sm"></label>
+                                    <input placeholder="Enter Machine Capacity" autocomplete="off" asp-for="Capacity" class="form-control form-control-sm" type="number" min="1" />
+                                    <span class="text-danger" asp-validation-for="Capacity"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-3 col-sm-3 col-lg-3">
+                                <div class="form-g">
+                                    <label class="col-form-label-sm m-0" asp-for="CapacityUnitID"></label>
+                                    <select asp-for="CapacityUnitID" class="form-control form-control-sm" asp-items="Model.DDLCapacityUnit"></select>
+                                    <span class="text-danger" asp-validation-for="CapacityUnitID"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-3 col-sm-3 col-lg-3">
+                                <div class="form-group">
+                                    <label class="col-form-label-sm required m-0" asp-for="FunctionalStatusID"></label>
+                                    <select asp-for="FunctionalStatusID" asp-items="Model.DDLFunctionalStatus" class="form-control form-control-sm"></select>
+                                    <span asp-validation-for="FunctionalStatusID" class="span-form-validation"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-3 col-sm-3 col-lg-3">
+                                <div class="form-group">
+                                    <label asp-for="ModelNo" class="label-ajt-sm required"></label>
+                                    <input placeholder="ModelNo" autocomplete="off" asp-for="ModelNo" class="form-control form-control-sm" type="text" />
+                                    <span class="text-danger" asp-validation-for="ModelNo"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3 col-3 col-sm-3 col-lg-3">
+                                <div class="form-group">
+                                    <label asp-for="LCNo" class="label-ajt-sm"></label>
+                                    <input placeholder="Enter LC No." autocomplete="off" asp-for="LCNo" class="form-control form-control-sm" type="text" />
+                                    <span class="text-danger" asp-validation-for="LCNo"></span>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="row d-none" id="divTblAttributes">
+                            <div class="col-md-12 col-12 col-sm-12 col-lg-12">
+                                <div class="form-group">
+                                    <table class="table table-sm table-bordered table-striped text-center text-sm">
+                                        <thead class="bg-dark">
+                                            <tr>
+                                                <td>SL#</td>
+                                                <td>Attribute Name</td>
+                                                <td>Value</td>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tbodyAttributes">
+                                            @if (Model.AssetWiseAttributeValues.Count > 0)
+                                            {
+                                                foreach (var item in Model.AssetWiseAttributeValues)
+                                                {
+                                                    <tr>
+                                                        <td>
+                                                            <input type='hidden' class='hdnAssociationValueID' value='@item.AssociationValueID' />
+                                                            <input type='hidden' class='hdnAssociationID' value='@item.AssociationID' />
+                                                            @item.PrioritySerial
+                                                        </td>
+                                                        <td>@item.AttributeName</td>
+                                                        <td><input type='text' class='form-control form-control-sm txtAttributeValue' value="@item.ValueDescription" /></td>
+                                                    </tr>
+                                                }
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row d-none" id="assetLoactionRow">
+            <div class="col-sm-12 col-md-12">
+                <div class="card card-dark">
+                    <div class="card-header m-0 p-1">
+                        <h5 class="card-title">Asset Location</h5>
+                    </div>
+                    <div class="card-body mb-0">
+                        <div class="row">
+                            <div class="col-md-3 col-3 col-sm-3 col-lg-3">
+                                <label class="col-form-label-sm  m-0" asp-for="LoaCompanyID"></label>
+                                <select asp-for="LoaCompanyID" asp-items="Model.DDLLocationCompany" class="form-control form-control-sm"></select>
+                                @*<span asp-validation-for="LoaCompanyID" class="span-form-validation"></span>*@
+                            </div>
+                            <div class="col-md-3 col-3 col-sm-3 col-lg-3">
+                                <label class="col-form-label-sm  m-0" asp-for="OfficeDivisionID"></label>
+                                <select asp-for="OfficeDivisionID" asp-items="Model.DDLDevision" class="form-control form-control-sm"></select>
+                                <span asp-validation-for="OfficeDivisionID" class="span-form-validation"></span>
+                            </div>
+                            <div class="col-md-3 col-3 col-sm-3 col-lg-3">
+
+                                <label class="col-form-label-sm m-0" asp-for="DepartmentID"></label>
+                                <select asp-for="DepartmentID" class="form-control  form-control-sm" asp-items="Model.DDLDepartment"></select>
+                                <span asp-validation-for="DepartmentID" class="span-form-validation"></span>
+                            </div>
+                            <div class="col-md-3 col-3 col-sm-3 col-lg-3">
+
+                                <label class="col-form-label-sm m-0" asp-for="BuildingID"></label>
+                                <select asp-for="BuildingID" class="form-control form-control-sm" asp-items="Model.DDLBuilding"></select>
+                                <span asp-validation-for="BuildingID" class="span-form-validation"></span>
+                            </div>
+
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3 col-3 col-sm-3 col-lg-3">
+
+                                <label class="col-form-label-sm  m-0" asp-for="FloorID"></label>
+                                <select asp-for="FloorID" class="form-control form-control-sm" asp-items="Model.DDLLBuildingFloor"></select>
+                                <span asp-validation-for="FloorID" class="span-form-validation"></span>
+                            </div>
+                            <div class="form-group col-md-3">
+                                <div class="form-group">
+                                    <label asp-for="DateFrom" class="label-ajt-sm "></label>
+                                    <div class="input-group">
+                                        <input asp-for="DateFrom" required type="text" name="FormDate" readonly class="datepic form-control form-control-sm dateField text-center" />
+                                        <div class="input-group-append">
+                                            <span class="input-group-text"><i class="fa fa-calendar" aria-hidden="true"></i></span>
+                                        </div>
+                                    </div>
+                                    <span asp-validation-for="DateFrom"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-3 col-sm-3 col-lg-3" hidden style="">
+                                <label>&nbsp;</label>
+                                <div class="form-check">
+                                    <span>
+                                        <input asp-for="IsReturned" type="checkbox" class="form-check-input"> IsReturned
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        @*<div class="row">
+                                <div class="form-group col-md-3">
+                                    <div class="form-group">
+
+                                        <label asp-for="DateTo" class="label-ajt-sm required"></label>
+                                        <div class="input-group">
+                                            <input asp-for="DateTo" required type="text" name="FormDate" readonly class="datepic form-control form-control-sm dateField text-center" />
+                                            <div class="input-group-append">
+                                                <span class="input-group-text"><i class="fa fa-calendar" aria-hidden="true"></i></span>
+                                            </div>
+                                        </div>
+                                        <span asp-validation-for="DateTo"></span>
+                                    </div>
+                                </div>
+                            </div>*@
+                    </div>
+                </div>
+            </div>
+        </div>
+        @*@if (Model.AssetID <= 0)
+        {*@
+            <div class="row">
+                <div class="col-sm-12 col-md-12">
+                    <div class="card card-dark">
+                        <div class="card-header m-0 p-1">
+                            <h5 class="card-title">Asset Depriciation info</h5>
+                        </div>
+                        <div class="card-body mb-0">
+                            <div class="row">
+                                <div class="col-md-3 col-3 col-sm-3 col-lg-3">
+                                    <div class="form-group">
+                                        <label asp-for="DapricationDateFrom" class="label-ajt-sm required"></label>
+                                        <div class="input-group">
+                                            <input asp-for="DapricationDateFrom" required type="text" name="DapricationDateFrom" readonly class="datepic form-control form-control-sm dateField text-center" />
+                                            <div class="input-group-append">
+                                                <span class="input-group-text"><i class="fa fa-calendar" aria-hidden="true"></i></span>
+                                            </div>
+                                        </div>
+                                        <span asp-validation-for="DapricationDateFrom" class="span-form-validation"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 col-3 col-sm-3 col-lg-3">
+                                    <div class="form-group">
+                                        <label asp-for="DapricationDateTo" class="label-ajt-sm required"></label>
+                                        <div class="input-group">
+                                            <input asp-for="DapricationDateTo" required type="text" name="DateToDepriciation" readonly class="datepic form-control form-control-sm dateField text-center" />
+                                            <div class="input-group-append">
+                                                <span class="input-group-text"><i class="fa fa-calendar" aria-hidden="true"></i></span>
+                                            </div>
+                                        </div>
+                                        <span asp-validation-for="DapricationDateTo" class="span-form-validation"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 col-3 col-sm-3 col-lg-3">
+                                    <div class="form-group">
+                                        <label asp-for="DepriciationPercent" class="label-ajt-sm required"></label>
+                                        <div class="input-group">
+                                            <input placeholder="Depriciation Percent" max="99" min="1" value="" onKeyPress="if (this.value.length == 3) return false;" onkeyup="checkNumeric(e)" asp-for="DepriciationPercent" class="form-control form-control-sm " type="number" />
+                                            <div class="input-group-append">
+                                                <span class="input-group-text"><i class="fa fa-percent" aria-hidden="true"></i></span>
+                                            </div>
+                                        </div>
+                                        <span asp-validation-for="DepriciationPercent" class="span-form-validation"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @*//}*@
+
+
+
+        <div class="row">
+            <div class="col-md-12 col-12 col-sm-12 col-lg-12 ml-0">
+                <div class="form-group text-center">
+                    @if (Model.AssetID > 0)
+                    {
+                        <input type="button" class="btn btn-sm btn-primary " value="Update" id="btnSave" />
+                    }
+                    else
+                    {
+                        <input type="button" class="btn btn-sm btn-success " value="Save" id="btnSave" />
+                    }
+
+                    @*<input type="button" class="btn btn-sm btn-warning d-none" value="Clear" id="btnClear" onclick="Clear()" />*@
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+@section scripts{
+    <script type="text/javascript">
+
+        const GetAssetSubTypeWiseAttributes = () => {
+            let assetSubTypeID = $("#AssetSubTypeID").val();
+            if (assetSubTypeID!="") {
+                var data = HttpRequest.AjaxData("GET", '/FiniteScheduler/AssetManagement/GetAssetSubTypeWiseAttributes', { "assetSubTypeID": assetSubTypeID });
+                let tr = ``;
+                if (data.length > 0) {
+
+                    $.each(data, function (i, v) {
+                        tr += `<tr>
+                                <td>
+                                    <input type='hidden' class='hdnAssociationValueID' value='0' />
+                                    <input type='hidden' class='hdnAssociationID'value='${v.AssociationID}'/>
+                                    ${v.PrioritySerial}
+                                </td>
+                                <td>${v.AttributeName}</td>
+                                <td><input type='text' class='form-control form-control-sm txtAttributeValue'/></td>
+                            </tr>`;
+                    });
+                    $("#divTblAttributes").removeClass('d-none');
+                } else {
+                    $("#divTblAttributes").addClass('d-none');
+                }
+                $("#tbodyAttributes").html(tr);
+            }
+        }
+        const AssetAttributeAssociationValue = () => {
+            let data = new Array();
+            $("#tbodyAttributes tr").each(function (i, v) {
+                let thatTr = $(this);
+
+                let associationValueID = thatTr.find('.hdnAssociationValueID').val();
+                let associationID = thatTr.find('.hdnAssociationID').val();
+                let valueDescription = thatTr.find('.txtAttributeValue').val();
+
+
+                let dataItem = {
+                    AssociationValueID: associationValueID,
+                    AssociationID: associationID,
+                    ValueDescription: valueDescription
+                };
+                data.push(dataItem);
+            });
+            return data;
+        }
+        const AssetNameAutocomplete = () => {
+            debugger;
+            let assetSubTypeID = $("#AssetSubTypeID").val();
+            let predict = $("#AssetName").val();
+            if (assetSubTypeID!="") {
+            let Values = HttpRequest.AjaxData('GET', '/FiniteScheduler/AssetManagement/AssetNameAutocomplete', { assetSubTypeID: assetSubTypeID,  predict: predict })
+            $("#AssetName").autocomplete({
+                source: Values
+            });
+            }
+        }
+        $(function () {
+
+
+            $("#AssetSubTypeID").change(function () {
+                GetAssetSubTypeWiseAttributes();
+            });
+            $("#OfficeDivisionID").change(function () {
+
+                let officeDivisionID = $("#OfficeDivisionID").val();
+                if (officeDivisionID != "") {
+
+                    HttpRequest.DropDown("POST", "/FiniteScheduler/AssetManagement/GetDivisionWiseDDLDepartment", { DivisionId: officeDivisionID }, 'DepartmentID', true);
+
+                }
+            });
+            $("#LoaCompanyID").change(function () {
+                let compID = $("#LoaCompanyID").val();
+                if (compID != "") {
+                    HttpRequest.DropDown("POST", "/FiniteScheduler/AssetManagement/EmbroCompanyWiseDDLDivision", { embroCompanyID: compID }, 'OfficeDivisionID', true);
+                    $("#OfficeDivisionID").trigger('change');
+                } else {
+                    HttpRequest.DropDownDefault("OfficeDivisionID");
+                }
+            });
+            $("#AssetTypeName").change(function () {
+                AssetSubTypeName();
+            });
+            $("#BuildingID").change(function () {
+                BuildingWiseFloor();
+            });
+            $("#AssetAssignedType").change(function () {
+                let type = $(this).val();
+                if (type === "2") {
+                    $("#assetLoactionRow").removeClass("d-none");
+                } else {
+                    $("#assetLoactionRow").addClass("d-none");
+                }
+            })
+
+            $("#btnSave").click(function (e) {
+                debugger
+                e.preventDefault()
+                if ($("#frmInvoice").valid()) {
+                    let assetID = $("#AssetID").val();
+                    let assetName = $("#AssetName").val();
+                    let assetSubTypeID = $("#AssetSubTypeID").val();
+                    let assetAssignedType = $("#AssetAssignedType").val();
+                    let code = $("#Code").val();
+                    let brandName = $("#BrandName").val();
+                    let purchaseDate = $("#PurchaseDateMsg").val();
+                    let purchaseValue = $("#PurchaseValue").val();
+
+                    let companyID = $("#CompanyID").val();
+                    let isReturnable = $("#IsReturnable").is(':checked') ? true : false;
+                    let description = $("#Description").val();
+                    let remarks = $("#Remarks").val();
+
+                    let capacity = $("#Capacity").val();
+                    let capacityUnitID = $("#CapacityUnitID").val();
+                    let functionalStatusID = $("#FunctionalStatusID").val();
+                    let modelNo = $("#ModelNo").val();
+                    let lcNo = $("#LCNo").val();
+
+
+                    //assetLoaction
+                    let buildingID = $("#BuildingID").val();
+                    let floorID = $("#FloorID").val();
+                    let departmentID = $("#DepartmentID").val();
+                    let dateFrom = $("#DateFrom").val();
+                    let isReturned = $("#IsReturned").is(':checked') ? true : false;
+                    //AssetDepriciationinfo
+                    let dapricationDateFrom = $("#DapricationDateFrom").val();
+                    let dapricationDateTo = $("#DapricationDateTo").val();
+                    let depriciationPercent = $("#DepriciationPercent").val();
+
+                    /*var assetDepriciationList = new Array();*/
+                    var assetLoactaionList = new Array();
+
+
+                    if (assetName != "" && assetSubTypeID != "") {
+                        if (assetID <= 0) {
+
+                            if (floorID != "") {
+                                let assetLoactaion = {
+                                    BuildingID: buildingID,
+                                    FloorID: floorID,
+                                    DepartmentID: departmentID,
+                                    DateFrom: dateFrom,
+                                    IsReturned: isReturned
+                                }
+                                assetLoactaionList.push(assetLoactaion)
+                            }
+                            var AssetinfoObj = {
+                                AssetName: assetName,
+                                AssetSubTypeID: assetSubTypeID,
+                                AssetAssignedType: assetAssignedType,
+                                Code: code,
+                                BrandName: brandName,
+                                PurchaseDate: purchaseDate,
+                                PurchaseValue: purchaseValue,
+                                CompanyID: companyID,
+                                IsReturnable: isReturnable,
+                                Description: description,
+                                Remarks: remarks,
+                                DapricationDateFrom: dapricationDateFrom,
+                                DapricationDateTo: dapricationDateTo,
+                                DepriciationPercent: depriciationPercent,
+                                AssetLocation: assetLoactaionList,
+                                Capacity: capacity,
+                                CapacityUnitID: capacityUnitID,
+                                FunctionalStatusID: functionalStatusID,
+                                ModelNo: modelNo,
+                                LCNo: lcNo,
+                                AssetAttributeAssociationValue:AssetAttributeAssociationValue()
+                            }
+                        } else if (assetID > 0) {
+                            var AssetinfoObjUpdate = {
+                                AssetID: assetID,
+                                AssetName: assetName,
+                                AssetSubTypeID: assetSubTypeID,
+                                AssetAssignedType: assetAssignedType,
+                                Code: code,
+                                BrandName: brandName,
+                                PurchaseDate: purchaseDate,
+                                PurchaseValue: purchaseValue,
+                                CompanyID: companyID,
+                                IsReturnable: isReturnable,
+                                Description: description,
+                                Remarks: remarks,
+                                Capacity: capacity,
+                                CapacityUnitID: capacityUnitID,
+                                FunctionalStatusID: functionalStatusID,
+                                ModelNo: modelNo,
+                                LCNo: lcNo,
+                                AssetAttributeAssociationValue: AssetAttributeAssociationValue()
+                            }
+                        }
+
+                        if (assetID > 0) {
+                            HttpRequest.Ajax("POST", '/FiniteScheduler/AssetManagement/AssetinfoUpdate', { "assetInfoDTmodel": AssetinfoObjUpdate }, updateSuccess , true);
+                        } else if (assetID <= 0) {
+                            HttpRequest.Ajax("POST", '/FiniteScheduler/AssetManagement/AssetinfoCreate', { "AssetCreate": AssetinfoObj }, saveSuccess, true);
+                        }
+                    } else {
+                        $.alert.open('warning', "Something is Error");
+                        return false;
+                    }
+                } else {
+                    $.alert.open('warning', "Need to filup All requried Field!!");
+                }
+
+            });
+
+            if ('@Model.AssetID' > 0) {
+
+
+                $("#AssetAssignedType").trigger('change');
+                $("#AssetTypeName").trigger('change');
+                $("#AssetSubTypeID").val('@Model.AssetSubTypeID');
+                $("#divTblAttributes").removeClass('d-none');
+
+
+            }
+
+
+
+        })
+        function saveSuccess(data) {
+            debugger;
+            if (data.result == 1) {
+                $.alert.open({
+                    type: 'Success',
+                    content: data.message,
+                    callback: function () {
+                        Clear();
+
+                    }
+                });
+            }
+            else {
+                $.alert.open("error", data.message);
+            }
+        }
+        function updateSuccess(data) {
+            debugger;
+            if (data.result == 1) {
+                $.alert.open({
+                    type: 'Success',
+                    content: data.message,
+                    callback: function () {
+                        window.location.replace('/FiniteScheduler/AssetManagement/AssetInfoIndex');
+
+                    }
+                });
+            }
+            else {
+                $.alert.open("error", data.message);
+            }
+        }
+        const Clear = () => {
+            $("#AssetID").val("0");
+            $("#AssetName").val("");
+            $("#AssetSubTypeID").val("");
+            $("#AssetTypeName").val("");
+            $("#AssetAssignedType").val("");
+            $("#BrandName").val("");
+            $("#PurchaseDateMsg").val("@DateTime.Now.ToString("dd-MMM-yyyy")");
+            $("#PurchaseValue").val("");
+            $("#CompanyID").val("");
+            $("#IsReturnable").attr("checked");
+            $("#Description").val("");
+            $("#Remarks").val("");
+            $("#BuildingID").val("");
+            $("#FloorID").val("");
+            $("#DepartmentID").val("");
+            $("#DateFrom").val("@DateTime.Now.ToString("dd-MMM-yyyy")");
+            $('#IsReturned').prop('checked', false);
+            $("#DapricationDateFrom").val("@DateTime.Now.ToString("dd-MMM-yyyy")");
+            $("#DapricationDateTo").val("");
+            $("#DepriciationPercent").val("");
+            $("#Capacity").val("");
+            $("#CapacityUnitID").val("");
+            $("#FunctionalStatusID").val($("#FunctionalStatusID option:first").val());
+            $("#ModelNo").val("");
+            $("#LCNo").val("");
+            $("#assetLoactionRow").addClass("d-none");
+            $("#tbodyAttributes").html('');
+            $("#divTblAttributes").addClass('d-none');
+        }
+
+        const BuildingWiseFloor = () => {
+            let building = $("#BuildingID").val();
+            if (building != "") {
+                HttpRequest.DropDown("Get", "/MaterialsManagement/BuildingFloorInfo/GetDDLBuildingFloor", { Building: building, FloorType:@((int)enum_FloorType.Asset) }, 'FloorID', true);
+            } else {
+                HttpRequest.DropDownDefault("FloorID");
+            }
+        }
+        const AssetSubTypeName = () => {
+            debugger
+            let AssetTypeID = $("#AssetTypeName").val();
+            if (AssetTypeID != "") {
+                HttpRequest.DropDown("Get", "/FiniteScheduler/AssetManagement/GetDDLAssetSubType", { AssetTypeID: AssetTypeID }, 'AssetSubTypeID', true);
+            } else {
+                HttpRequest.DropDownDefault("AssetSubTypeID");
+            }
+        }
+
+    </script>
+}

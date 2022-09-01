@@ -1,0 +1,363 @@
+﻿@model RG.Application.ViewModel.AlgoHR.Business.Training.TrainingCreateVM
+@{
+    ViewData[PageInfo.PageTitle] = "Training";
+    ViewData[PageInfo.PageHeader] = "Training";
+    ViewData[PageInfo.btnText1] = "Back To List";
+
+    ViewData[PageInfo.PageLink1] = "/AlgoHR/Training/Index";
+    ViewData[PageInfo.btnClass1] = "btn-success";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+}
+
+<form class=""  asp-area="AlgoHR" asp-controller="Training" asp-action="Create" method="post" >
+    <div class="card card-default">
+        <div class="card-body p-2">
+            <div class="row pt-0">
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <label asp-for="TrainingTypeID"></label>
+                        <select class="form-control form-control-sm" asp-for="TrainingTypeID" asp-items="Model.DDLTrainingType"></select>
+                        <span asp-validation-for="TrainingTypeID" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-sm-8">
+                    <div class="form-group mb-2">
+                        <label asp-for="TrainingName" class=""></label>
+                        <input type="text" asp-for="TrainingName" class="form-control form-control-sm" />
+                    </div>
+                </div>
+            </div>
+            <div class="row pt-0">
+               
+                <div class="col-sm-12">
+                    <div class="form-group mb-2">
+                        <label asp-for="TrainingDescription" class=""></label>
+                        <textarea asp-for="TrainingDescription" cols="2" class="form-control form-control-sm"></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <h6 class="card-header p-1"><i class="fa-solid fa-paperclip"></i> Training Documents</h6>
+                <div class="card-body p-1">
+                    <div class="row pt-0">
+                        <div class="col-sm-2">
+                            <div class="form-group">
+                                <label asp-for="FileSerial"></label>
+                                <select class="form-control form-control-sm" asp-for="FileSerial" asp-items="Model.DDLFileSerial"></select>
+                                <span asp-validation-for="FileSerial" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-sm-2">
+                            <div class="form-group">
+                                <label asp-for="DocumentTypeID"></label>
+                                <select class="form-control form-control-sm" asp-for="DocumentTypeID" asp-items="Model.DDLDocumentType"></select>
+                                <span asp-validation-for="DocumentTypeID" class="text-danger"></span>
+                            </div>
+                        </div>
+
+
+                        <div class="col-6 col-sm-8">
+                            <div class="form-group mb-2">
+                                <label asp-for="FileTitle" class=""></label>
+                                <input type="text" asp-for="FileTitle" class="form-control form-control-sm" />
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="row pt-0">
+                        <div class="col-6 col-sm-3 pt-3 pl-3">
+                            <div class="form-group">
+                                <input class="" type="checkbox" asp-for="IsExternalFile">
+                                <label class="">External File</label>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-2 d-none externalFile">
+                            <div class="form-group">
+                                <label asp-for="FileExtension"></label>
+                                <select class="form-control form-control-sm" asp-for="FileExtension" asp-items="Model.DDLFileExtension"></select>
+                                <span asp-validation-for="FileExtension" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-6 col-sm-5 d-none externalFile">
+                            <div class="form-group">
+                                <label asp-for="FileUrl" class=""></label>
+                                <input type="text" asp-for="FileUrl" class="form-control form-control-sm" />
+                            </div>
+                        </div>
+                        <div class="col-6 col-sm-7 internalFile">
+                            <div class="form-group">
+                                <label asp-for="UploadFile" class=""></label>
+                                <input type="file" id="fileupload" name="fileupload" class="form-control form-control-sm p-0" />
+                            </div>
+                        </div>
+                        <div class="col-6 col-sm-2">
+                            <label>&nbsp;</label>
+                            <div class="form-group">
+                                <input type="button" class="btn btn-sm btn-primary" id="btnAdd" value="Add File" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row pt-0 justify-content-center">
+                        <div class="col-12 col-sm-12">
+                            <div class="form-group">
+                                <table class="table table-bordered table-striped table-sm text-xs text-center">
+                                    <thead class="bg-dark">
+                                        <tr>
+                                            <td class="col-sm-1">SL#</td>
+                                            <td class="col-sm-2">Doc Type</td>
+                                            <td class="col-sm-4">File Title</td>
+                                            <td class="col-sm-4">File</td>
+                                            <td class="col-sm-1">Action</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tbodyFiles">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row pt-1 justify-content-center">
+                <input type="button" class="btn btn-sm btn-success" id="btnSave" value="Save" />
+            </div>
+        </div>
+    </div>
+</form>
+
+
+@section scripts{
+    <script type="text/javascript">
+        function ClearForm() {
+            $("#TrainingTypeID").val('');
+            $("#TrainingName").val('');
+            $("#TrainingDescription").val('');
+            $("#tbodyFiles").html('');
+        }
+        function saveSuccess(data) {
+            if (data.result == 1) {
+                $.alert.open({
+                    type: 'Success',
+                    content: data.message,
+                    callback: function () {
+                        ClearForm();
+                    }
+                });
+            }
+            else {
+                $.alert.open("error", data.message);
+            }
+        }
+
+
+        const ClearTrainingDocuments = () => {
+            $("#FileSerial").val("");
+            $("#DocumentTypeID").val($("#DocumentTypeID option:first").val());
+            $("#FileTitle").val("");
+            $("#IsExternalFile").prop("checked", false).trigger("change");
+            $("#fileupload").val('');
+            $("#FileExtension").val("");
+            $("#FileUrl").val();
+        }
+        const DeleteDocument = (that,id) => {
+            $.alert.open('confirm', 'Are you sure to delete this record?', function (button) {
+                if (button == 'yes') {
+                    $(that).parent().parent().remove();
+                    HttpRequest.Ajax("GET", '/AlgoHR/Training/DeleteDocument', { "id": id }, saveSuccess, true);
+                } else {
+
+                }
+            });
+        }
+
+        const LoadTrainingInfo = (trainingID) => {
+            let data = HttpRequest.AjaxData('GET', '/AlgoHR/Training/GetTrainingInfo', { trainingID: trainingID });
+            if (data != null) {
+                $("#TrainingTypeID").val(data.TrainingTypeID);
+                $("#TrainingName").val(data.TrainingName);
+                $("#TrainingDescription").val(data.TrainingDescription);
+                let tr = ``;
+                $.each(data.TrainingDocuments, function (i, v) {
+
+                        let fileUrl = ``;
+                        let fileExtension = v.FileExtension;
+                        let href = `/${decodeURI(v.FileUrl)}`;
+                        if (fileExtension === "pdf") {
+                            fileUrl = `<a title='View Pdf' href=${href} target="_blank"><i class="fas fa-file-pdf text-danger fa-2x"></i></a>`;
+                        } else if (fileExtension === "xls" || fileExtension === "xlsx") {
+                            fileUrl = `<a title='Download Excel' href=${href} target="_blank"><i class="fas fa-file-excel text-success fa-2x"></i></a>`;
+                        } else if (fileExtension === "doc" || fileExtension === "docx") {
+                            fileUrl = `<a title='Download Doc' href=${href} target="_blank"><i class="fas fa-file text-info fa-2x"></i></a>`;
+                        } else if (fileExtension === "jpg" || fileExtension === "jpeg" || fileExtension === "png") {
+                            fileUrl = `<a title='Download Image' href=${href} target="_blank"><i class="fa-solid fa-image text-success fa-2x"></i></i></a>`;
+                        } else if (fileExtension === "ppt" || fileExtension === "pptx") {
+                            fileUrl = `<a title='Download Powerpoint' href=${href} target="_blank"><i class="fas fa-file-powerpoint text-info fa-2x"></i></a>`;
+                        } else {
+                            fileUrl = v.FileUrl;
+                            debugger
+                            if (window.matchMedia("(pointer:coarse)").matches && fileUrl.indexOf("iframe") >= 0) {
+                                fileUrl = fileUrl.replace(`width="560"`, `width="120"`).replace(`height="315"`, `height="80"`);
+                            }
+                        }
+                        tr += `<tr data-id="${v.ID}">
+                                        <td class="col-1 col-sm-1 col-md-1">${v.FileSerial}</td>
+                                        <td class="col-2 col-sm-2 col-md-2">${v.DocumentType}</td>
+                                        <td class="col-3 col-sm-3 col-md-3">${v.FileTitle}</td>
+                                        <td class="col-6 col-sm-6 col-md-6">${fileUrl}</td>
+                                        <td>
+                                            <button type="button" title="Delete" onclick="DeleteDocument(this,'${v.ID}')" class="btn btn-xs btn-danger"><i class="fa fa-trash"></i></button>
+                                        </td>
+                                    </tr>`;
+
+
+                });
+                $("#tbodyFiles").html(tr);
+            }
+        }
+
+        $(function () {
+            if ('@Model.ID'>0) {
+                LoadTrainingInfo('@Model.ID');
+            }
+            var formData = new FormData();
+            $("#btnAdd").click(function () {
+                
+                let fileSerial = $("#FileSerial").val();
+                let documentTypeID = $("#DocumentTypeID").val();
+                let documentType = $("#DocumentTypeID option:selected").text();
+                let fileTitle = $("#FileTitle").val();
+                let isExternalFile = $("#IsExternalFile").is(':checked');
+                let fileExtension = '';
+                let fileUrl = '';
+                let fileUrlValue = '';
+                debugger
+                let file = 0;
+                if (!isExternalFile) {
+                    let fileSize = fileupload.files[0].size;
+                    file = Math.round((fileSize / 1024));
+                }
+                if (isExternalFile || file<=5120) {// File not more than 5mb
+                    if (isExternalFile) {
+                        fileExtension = $("#FileExtension").val();
+                        //fileUrlValue = $("#FileUrl").val();
+                        fileUrl = $("#FileUrl").val();
+                    } else {
+                        fileUrlValue = fileupload.files[0].name;
+                        href = $("#fileupload").val();
+                        fileExtension = fileUrlValue.replace(/^.*\./, '');
+                    }
+                   
+                    if (fileExtension === "pdf") {
+                        fileUrl = `<i class="fas fa-file-pdf text-danger fa-2x" title="${fileUrlValue}"></i>`;
+                    } else if (fileExtension === "xls" || fileExtension === "xlsx") {
+                        fileUrl = `<i class="fas fa-file-excel text-success fa-2x" title="${fileUrlValue}"></i>`;
+                    } else if (fileExtension === "doc" || fileExtension === "docx") {
+                        fileUrl = `<i class="fas fa-file text-info fa-2x" title="${fileUrlValue}"></i>`;
+                    } else if (fileExtension === "jpg" || fileExtension === "jpeg" || fileExtension === "png") {
+                        fileUrl = `<i class="fa-solid fa-image text-success fa-2x" title="${fileUrlValue}"></i>`;
+                    } else if (fileExtension === "ppt" || fileExtension === "pptx") {
+                        fileUrl = `<i class="fas fa-file-powerpoint text-info fa-2x" title="${fileUrlValue}"></i>`;
+                    } else {
+                        
+                        if (window.matchMedia("(pointer:coarse)").matches && fileUrl.indexOf("iframe") >= 0) {
+                            fileUrl = fileUrl.replace(`width="560"`, `width="120"`).replace(`height="315"`, `height="80"`);
+                        }
+                    }
+
+                    if (fileSerial > 0 && fileTitle != "") {
+                        let tr = `<tr data-id="0">
+                                    <td>
+                                        <input type='hidden' class='hdnFileSerial' value=${fileSerial}>
+                                        <input type='hidden' class='hdnDocumentTypeID' value=${documentTypeID}>
+                                        <input type='hidden' class='hdnFileTitle' value=${fileTitle}>
+                                        <input type='hidden' class='hdnIsExternalFile' value=${isExternalFile}>
+                                        <input type='hidden' class='hdnFileExtension' value=${fileExtension}>
+                                        <input type='hidden' class='hdnFileUrl' value='${fileUrlValue}'>
+                                        ${fileSerial}
+                                    </td>
+                                    <td>${documentType}</td>
+                                    <td>${fileTitle}</td>
+                                    <td>${fileUrl}</td>
+                                    <td><button title="Delete" class="btn btn-xs btn-danger"><i class="fa fa-trash"></i></button></td>
+                                </tr>`;
+                        $("#tbodyFiles").append(tr);
+                        formData.append("file_" + fileSerial, fileupload.files[0]);
+                        ClearTrainingDocuments();
+                    }
+                } else {
+                    $.alert.open("warning", "Uploaded file size must be under 5 mb");
+                    $("#fileupload").val('');
+                }
+            });
+            $("#IsExternalFile").change(function () {
+                if ($(this).is(':checked')) {
+                    $(".externalFile").removeClass('d-none');
+                    $(".internalFile").addClass('d-none');
+                } else {
+                    $(".internalFile").removeClass('d-none');
+                    $(".externalFile").addClass('d-none');
+                }
+            });
+            $("#btnSave").click(function () {
+               
+                let trainingTypeID = $("#TrainingTypeID").val();
+                let trainingName = $("#TrainingName").val();
+                let trainingDescription = $("#TrainingDescription").val();
+                if (trainingTypeID !="" && trainingName != "" && trainingDescription != "") {
+                    var files = new Array();
+
+                    $("#tbodyFiles tr").each(function () {
+                        let thisTr = $(this);
+                        let dataID = thisTr.data("id")
+                        if (dataID==0) {
+                            let file = {
+                                FileSerial: parseInt(thisTr.find(".hdnFileSerial").val()),
+                                DocumentTypeID: parseInt(thisTr.find(".hdnDocumentTypeID").val()),
+                                FileTitle: thisTr.find(".hdnFileTitle").val(),
+                                IsExternalFile: thisTr.find(".hdnIsExternalFile").val() === 'true',
+                                FileExtension: thisTr.find(".hdnFileExtension").val(),
+                                FileUrl: thisTr.find(".hdnFileUrl").val()
+
+                            }
+                            files.push(file)
+                        }
+                    });
+
+                    if (files.length > 0) {
+                        formData.append("ID", '@Model.ID');
+                        formData.append("TrainingTypeID", trainingTypeID);
+                        formData.append("TrainingName", trainingName);
+                        formData.append("TrainingDescription", trainingDescription);
+                        formData.append("TrainingDocumentsJson", JSON.stringify(files));
+
+                        $.ajax({
+                            url: '/AlgoHR/Training/Create',
+                            type: "POST",
+                            dataType: 'json',
+                            enctype: 'multipart/form-data',
+                            cache: false,
+                            async: false,
+                            contentType: false,
+                            processData: false,
+                            data: formData,
+                            success: function (data) {
+                                saveSuccess(data);
+                            },
+                            error: function (err) {
+                                alert(err.statusText);
+                            }
+                        });
+                    } else {
+                        $.alert.open('warning', "Traning needs atleast a single file to save");
+                    }
+                }
+
+                else {
+                    $.alert.open('warning', 'Please provide required fields');
+                }
+            });
+        });
+    </script>
+}

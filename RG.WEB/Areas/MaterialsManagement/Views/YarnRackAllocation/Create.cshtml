@@ -1,0 +1,402 @@
+﻿@using RG.Application.Common.CommonInterfaces;
+@model RG.Application.ViewModel.MaterialsManagement.Business.YarnRackAllocation.YarnRackAllocationCreateVM
+
+@using RG.Application.Enums;
+@inject ICurrentUserService _currentUserService
+@{
+    ViewData[PageInfo.PageTitle] = "Create";
+    ViewData[PageInfo.PageHeader] = "Yarn Rack Allocation";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+   
+}
+<form asp-action="Create" asp-area="Embro" asp-controller="Loan" method="post" id="frmLoan">
+    <div class="row">
+        <div class="col-md-5">
+            <div class="form-group">
+                <label asp-for="SupplierID" class="required"></label>
+                <select asp-for="SupplierID" asp-items="Model.DDLSupplier" class="form-control form-control-sm"></select>
+                <span asp-validation-for="SupplierID" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="form-group">
+                <label asp-for="POID" class="required"></label>
+                <select asp-for="POID" class="form-control form-control-sm" asp-items="Model.DDLPO"></select>
+                <span asp-validation-for="POID" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="form-group">
+                <label asp-for="PermanentReceivingNo"></label>
+                <div class="input-group input-group-sm">
+                    <div class="input-group-prepend">
+                        <div class="input-group-text">GRN-</div>
+                    </div>
+                    <input value="" asp-for="PermanentReceivingNo" class="form-control form-control-sm" autocomplete="off" />
+                </div>
+                @* <input value="" asp-for="PermanentReceivingNo" class="form-control form-control-sm" autocomplete="off" />*@
+                <span asp-validation-for="PermanentReceivingNo" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="form-group">
+                <label asp-for="LotNo" class="required"></label>
+                <select asp-for="LotNo" class="form-control form-control-sm" asp-items="Model.DDLLot"></select>
+                <span asp-validation-for="LotNo" class="text-danger"></span>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="form-group text-center">
+                <input type="button" class="btn btn-sm btn-warning mr-2" value="Search" id="btnSearch" />
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            <table class="table table-sm table-stripprd table-bordered text-xs text-center">
+                <thead class="bg-dark">
+                    <tr>
+                        <th>SL#</th>
+                        <th>PO No.</th>
+                        <th>PO Date</th>
+                        <th>Supplier</th>
+                        <th>Lot No.</th>
+                        <th>Receive No.</th>
+                        <th>Receive Date</th>
+                        <th>Composition</th>
+                        <th>Count</th>
+                        <th>Quality</th>
+                        <th>Total Qty</th>
+                        <th>Allocated Qty</th>
+                    </tr>
+                </thead>
+                <tbody id="tblYarnRackAllocation">
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="form-group text-center">
+                <input type="button" class="btn btn-sm btn-success mr-2" value="Save" id="btnSave" />
+            </div>
+        </div>
+    </div>
+</form>
+@section scripts{
+
+    <script type="text/javascript">
+        const supplierWisePO = (supplierID) => { 
+            HttpRequest.DropDownSelect2("Get", '/MaterialsManagement/YarnRackAllocation/GetDDLYarnPONo', { supplierID: supplierID, poDate: '@Model.ConditionPOData' }, 'POID');
+        }
+        const suppliers = () => {
+            let parm;
+            if ('@_currentUserService.CompanyID' == '183') {
+                parm = { 'AccCategoryID': 2 };
+            } else {
+                parm = { 'AccCategoryID': 20002 };
+            }
+
+            HttpRequest.DropDownSelect2Group("Get", '/Embro/SupplierSetup/DDLSuppliers', parm, 'SupplierID');
+        }
+        const ShowDetails = (that, YarnPermRecID) => {
+
+            let isCollapsed = $(that).find('i').hasClass('fa-angles-right');
+            if (isCollapsed) {
+                $(that).find('i').removeClass('fa-angles-right').addClass('fa-angles-down');
+                $(`#tblYarnRackAllocation tr[data-id=allocation_${YarnPermRecID}]`).removeClass('d-none');
+                let allocationTrcount = $(`#tblAllocation_${YarnPermRecID} tbody tr`).length;
+                if (allocationTrcount==0) {
+                    AddNewRow(YarnPermRecID);
+                }
+            } else {
+                $(that).find('i').removeClass('fa-angles-down').addClass('fa-angles-right');
+                $(`#tblYarnRackAllocation tr[data-id=allocation_${YarnPermRecID}]`).addClass('d-none');
+
+            }
+        }
+        const GetBuildingWiseFloor = (that) => {
+
+            let defaultOption = '<option value="">Please Select</option>';
+
+            let thatTr = $(that).parent().parent();
+            let buildingID = thatTr.find('.ddlBuilding').val();
+            if (buildingID!="") {
+                let buildingFloorOptions = HttpRequest.DropDownOptions("Get", '/MaterialsManagement/BuildingFloorInfo/GetDDLBuildingFloor', { Building: buildingID, FloorType:@((int)enum_FloorType.YarnStore)});
+                thatTr.find('.ddlBuildingFloor').html(buildingFloorOptions);
+            } else {
+                thatTr.find('.ddlBuildingFloor').html(defaultOption);
+            }
+            thatTr.find('.ddlFloorRack').html(defaultOption);
+            thatTr.find('.ddlFloorSubRack').html(defaultOption);
+        }
+        const GetBuildingFloorWiseRack = (that) => {
+
+            let defaultOption = '<option value="">Please Select</option>';
+
+            let thatTr = $(that).parent().parent();
+            let buildingID = thatTr.find('.ddlBuilding').val();
+            let buildingFloorID = thatTr.find('.ddlBuildingFloor').val();
+            if (buildingFloorID!="") {
+                let buildingFloorWisrRackOptions = HttpRequest.DropDownOptions("Get", '/MaterialsManagement/YarnRack/GetDDLBuildingFloorWiseRack', { buildingFloorID: buildingFloorID});
+                thatTr.find('.ddlFloorRack').html(buildingFloorWisrRackOptions);
+            } else {
+                thatTr.find('.ddlFloorRack').html(defaultOption);
+            }
+            thatTr.find('.ddlFloorSubRack').html(defaultOption);
+        }
+        const GetBuildingFloorRackWiseSubRack = (that) => {
+
+            let defaultOption = '<option value="">Please Select</option>';
+
+            let thatTr = $(that).parent().parent();
+            let buildingID = thatTr.find('.ddlBuilding').val();
+            let buildingFloorID = thatTr.find('.ddlBuildingFloor').val();
+            let floorRackID = thatTr.find('.ddlFloorRack').val();
+            if (floorRackID != "") {
+
+                let buildingFloorWisrSubRackOptions = HttpRequest.DropDownCustomOptions("Get", '/MaterialsManagement/YarnSubRack/GetCustomDDLRackWiseSubRack', { rackID: floorRackID, withStorageLimit:true });
+                thatTr.find('.ddlFloorSubRack').html(buildingFloorWisrSubRackOptions);
+            } else {
+                thatTr.find('.ddlFloorSubRack').html(defaultOption);
+            }
+
+        }
+        const GetSubRackCurrentStatus = (that) => {
+
+            let thatTableTr = $(that).parent().parent();
+            let thatTable = thatTableTr.parent().parent();
+            let subRackID = thatTableTr.find('.ddlFloorSubRack').val();
+            let yarnStockTransactionID = thatTable.data('yarnstocktransactionid');
+            if (subRackID != "" && yarnStockTransactionID > 0) {
+                let data = HttpRequest.AjaxData('GET', '/MaterialsManagement/YarnRackAllocation/GetSubRackCurrentStatus', { yarnStockTransactionID: yarnStockTransactionID, subRackID: subRackID });
+                thatTableTr.find('.txtPrevAllocatedQty').val(data.AllocatedQty);
+                thatTableTr.find('.txtCurrAllocationQty').val(data.CurrentYstAllocationQty);
+            } else {
+                thatTableTr.find('.txtPrevAllocatedQty').val('');
+                thatTableTr.find('.txtCurrAllocationQty').val('');
+            }
+        }
+        const ReCalculateAllocatedQty = (yarnPermRecID) => {
+            let totalCurrentAllocation = 0;
+            $(`#tblAllocation_${yarnPermRecID} tbody tr`).each(function (i, v) {
+                totalCurrentAllocation += parseFloat($(this).find('.txtCurrAllocationQty ').val());
+            });
+            $("#tblYarnRackAllocation tr[data-id='" + yarnPermRecID + "']").find('.txtAllocatedQty').text(totalCurrentAllocation);
+        }
+        const CalculateAllocatedQty = (that, yarnPermRecID) => {
+
+            let totalCurrentAllocation = 0;
+            let thisQty= parseFloat($(that).val());
+
+            $(`#tblAllocation_${yarnPermRecID} tbody tr`).each(function (i, v) {
+                totalCurrentAllocation += parseFloat($(this).find('.txtCurrAllocationQty ').val());
+            });
+            let transactionQty = parseFloat($("#tblYarnRackAllocation tr[data-id='" + yarnPermRecID + "']").find('.hdnTransactionQty').val());
+            let subRackCapacity = 0;
+            let isEdited = $(that).parent().parent().data('isedited');
+
+            if (isEdited == 0) {
+                subRackCapacity = parseFloat($(that).parent().parent().find('.ddlFloorSubRack :selected').attr('data-custom1'));
+            } else {
+                subRackCapacity = parseFloat($(that).parent().parent().find('.hdnSubRackCapacity').val());
+            }
+
+
+            let remainingCapacity = subRackCapacity - (parseFloat($(that).parent().parent().find('.txtPrevAllocatedQty').val()));
+
+            if (totalCurrentAllocation <= transactionQty && remainingCapacity >= thisQty) {
+                $("#tblYarnRackAllocation tr[data-id='" + yarnPermRecID + "']").find('.txtAllocatedQty').text(totalCurrentAllocation);
+            } else {
+                if (totalCurrentAllocation > transactionQty) {
+                    $.alert.open('warning', `Allocated quantity can't be greater than total quantity`);
+                } else {
+                    $.alert.open('warning', `Allocated quantity can't be greater than rack capacity`);
+                }
+
+                $(that).val('0');
+                totalCurrentAllocation = 0;
+                $(`#tblAllocation_${yarnPermRecID} tbody tr`).each(function (i, v) {
+                    totalCurrentAllocation += parseFloat($(this).find('.txtCurrAllocationQty ').val());
+                });
+                $("#tblYarnRackAllocation tr[data-id='" + yarnPermRecID + "']").find('.txtAllocatedQty').text(totalCurrentAllocation);
+            }
+        }
+        const RegenerateTableSerial = (tableID) => {
+            $(`${tableID} tbody tr td:first-child`).each(function (i, v) {
+                $(this).text(i + 1);
+            });
+        }
+        const IgnoreRow = (that, yarnPermRecID) => {
+            debugger;
+            let aa=$(that).parent().parent();
+            aa.remove();
+            let tableID = `#tblAllocation_${yarnPermRecID}`;
+            RegenerateTableSerial(tableID);
+            ReCalculateAllocatedQty(yarnPermRecID);
+        }
+        const EditRow = (that, allocatedQuantity, yarnPermRecID) => {
+
+            $(that).parent().prev().addClass('p-0').html(`<input type='text' class='form-control form-control-sm txtCurrAllocationQty' onkeyup="CalculateAllocatedQty(this,${yarnPermRecID})" value='${allocatedQuantity}'/>`);
+            $(that).parent().parent().attr('data-isedited', 1);
+
+        }
+        const AddNewRow = (YarnPermRecID) => {
+
+            let currentTrCount = $(`#tblAllocation_${YarnPermRecID} tbody tr`).length;
+
+            let buildingOptions = HttpRequest.DropDownOptions("Get", '/MaterialsManagement/BuildingInfo/GetDDLFloorTypeWiseBuilding', { FloorType:@((int)enum_FloorType.YarnStore)});
+
+            var newTr = `<tr data-rackallocationid='0' data-isedited='0' style='font-size:11px;'>
+                            <td style='font-size:11px;'>${++currentTrCount}</td>
+                            <td class='p-0'><select style='font-size:11px;' class="form-control form-control-sm ddlBuilding" onchange='GetBuildingWiseFloor(this)'>${buildingOptions}</select></td>
+                            <td class='p-0'><select style='font-size:11px;' class='form-control form-control-sm ddlBuildingFloor' onchange='GetBuildingFloorWiseRack(this)'><option value="">Please Select</option></select></td>
+                            <td class='p-0'><select style='font-size:11px;' class='form-control form-control-sm ddlFloorRack' onchange='GetBuildingFloorRackWiseSubRack(this)' ><option value="">Please Select</option></select></td>
+                            <td class='p-0'><select style='font-size:11px;' class='form-control form-control-sm ddlFloorSubRack'onchange='GetSubRackCurrentStatus(this)' ><option value="">Please Select</option></select></td>
+                            <td class='p-0'><input type='text' style='font-size:11px;' class='form-control form-control-sm txtPrevAllocatedQty' readonly value='0'/></td>
+                            <td class='p-0'><input type='text' style='font-size:11px;' class='form-control form-control-sm txtCurrAllocationQty' onkeypress="return checkDecimal(event)" onkeyup="CalculateAllocatedQty(this,${YarnPermRecID})" value='0'/></td>
+                            <td><a href="Javascript:void(0);" onclick="IgnoreRow(this,${YarnPermRecID})" title='Ignore'><i class="fa fa-trash text-danger"></i></a></td>
+                        </tr>`;
+            $(`#tblAllocation_${YarnPermRecID} tbody`).append(newTr);
+
+        }
+        const saveSuccess=(data)=> {
+            if (data.result == 1) {
+                $.alert.open({
+                    type: 'Success',
+                    content: data.message,
+                    callback: function () {
+                        $("#btnSearch").trigger('click');
+                    }
+                });
+            }
+            else {
+                $.alert.open("error", data.message);
+            }
+        }
+        const getBalanceLot = () => {
+            const supplierID = $("#SupplierID").val() == null ? 0 : $("#SupplierID").val();
+            const poID = $("#POID").val() == null ? 0 : $("#POID").val();
+            HttpRequest.DropDownSelect2("Get", '/MaterialsManagement/YarnPermanentReceiving/DDLYarnReceivedBalanceLot', { supplierID: supplierID, poID: poID }, 'LotNo');
+
+        }
+        $(function () {
+            $("#SupplierID").select2();
+            $("#POID").select2();
+            $("#LotNo").select2();
+            suppliers();
+            getBalanceLot();
+            $("#SupplierID").change(function () {
+                supplierWisePO($("#SupplierID").val());
+                getBalanceLot();
+            });
+            $("#POID").change(function () {
+                getBalanceLot();
+            })
+            $("#btnSearch").click(function () {
+                let poID = $("#POID").val();
+                let permanentReceivingID = $("#PermanentReceivingNo").val();
+                let lotNo = $("#LotNo").val();
+                if (+poID || (permanentReceivingID !== "" && permanentReceivingID.length > 1) || lotNo !== null) {
+
+                    let tableTr = ``;
+                    let data = HttpRequest.AjaxData('GET', '/MaterialsManagement/YarnPermanentReceiving/GetYarnReceivingByPOForRackAllocation', { supplierID: 0, poID: poID, yarnPermRecID: permanentReceivingID, lotNo: lotNo });
+                    if (data.length > 0) {
+
+
+                        $.each(data, function (i, v) {
+                            let allocaitonTableTr = ``;
+                            if (v.YarnRackAllocation.length > 0) {
+                                $.each(v.YarnRackAllocation, function (l, m) {
+                                    let editRowOption = 'Issued';
+                                    if (!m.IsIssuedFromBalance) {
+                                        editRowOption = `<a href="Javascript:void(0);" onclick="EditRow(this,${m.AllocatedQuantity},${v.YarnPermRecID})" title='Edit'><i class="fas fa-edit text-info"></i></a>`;
+                                    }
+                                    allocaitonTableTr += `
+                                                        <tr data-rackallocationid=${m.RackAllocationID} data-isedited='0' style='font-size:11px;'>
+                                                            <td>${++l}</td><td>${m.BuildingName}</td><td>${m.BuildingFloor}</td><td><input type='hidden' class='hdnSubRackCapacity' value='${m.SubRackLimitQuantity}'>${m.RackName}</td><td>${m.SubRackName} (${m.SubRackLimitQuantity} kg)</td>
+                                                            <td><input type='hidden' class='txtPrevAllocatedQty' value='${m.LimitRemaining}'/>${m.TotalRackAllocated}</td><td style='font-size:11px;'><input type='hidden' class='txtCurrAllocationQty' value='${m.AllocatedQuantity}'/>${m.AllocatedQuantity}</td>
+                                                            <td>${editRowOption}</td>
+                                                        </tr>`;
+                                });
+                            }
+
+                            tableTr += `<tr data-id=${v.YarnPermRecID}>
+                                            <td class='p-0'>${++i}<a href="Javascript:void(0);" onclick="ShowDetails(this,${v.YarnPermRecID})">   <i class="fa-solid fa-angles-right"></i></a></td>
+                                            <td>${v.PONo}</td>
+                                            <td>${v.PODateST}</td>
+                                            <td>${v.SupplierName}</td>
+                                            <td>${v.LotNo}</td>
+                                            <td>${v.YarnPermRecNo}</td>
+                                            <td>${v.YarnPermRecDateST}</td>
+                                            <td>${v.YarnComposition}</td>
+                                            <td>${v.YarnCount}</td>
+                                            <td>${v.YarnQuality}</td>
+                                            <td><input type='hidden' class='hdnTransactionQty' value='${v.TransactionQty}'/>${v.TransactionQty}</td>
+                                            <td class='txtAllocatedQty'>${v.AllocatedQty}</td>
+                                        </tr>
+                                        <tr class='d-none' data-id=allocation_${v.YarnPermRecID}>
+                                             <td><a href="Javascript:void(0);" onclick="AddNewRow(${v.YarnPermRecID})"><i class="fa-solid fa-plus"></i></a></td>
+                                             <td colspan=11>
+                                                <table id=tblAllocation_${v.YarnPermRecID} data-yarnstocktransactionid=${v.YarnStockTransactionID} class="table table-sm table-stripprd table-bordered text-xs text-center tblSubRackAllocation mb-0">
+                                                    <thead class="bg-dark" style='font-size:11px;'>
+                                                        <tr>
+                                                        <th class='col-sm-1'>SL#</th><th class='col-sm-2'>Building</th><th class='col-sm-2'>Floor</th><th class='col-sm-2'>Rack</th><th class='col-sm-2'>Sub Rack</th><th class='col-sm-1'>Alloc.</th><th class='col-sm-1'>Curr. Alloc.</th><th class='col-sm-1'>Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>${allocaitonTableTr}</tbody>
+                                                </table>
+                                             </td>
+                                        </tr>`;
+                        });
+                    }
+                    $("#tblYarnRackAllocation").html(tableTr);
+                }
+            });
+            $("#btnSave").click(function () {
+                debugger;
+                let yarnRackAllocation = new Array();
+                $('.tblSubRackAllocation').each(function () {
+                    let thatTbl = $(this);
+                    let yarnStockTransactionID = thatTbl.data('yarnstocktransactionid');
+
+                    if (thatTbl.find('tbody tr').length > 0) {
+
+                        thatTbl.find('tbody tr').each(function () {
+                            let thatTr = $(this);
+
+                            let rackallocationid = thatTr.data('rackallocationid');
+                            let isedited = thatTr.data('isedited');
+                            if (rackallocationid == 0 || (rackallocationid > 0 && isedited == 1)) {
+                                let subRackID = 0;
+                                if (isedited==0) {
+                                    subRackID = thatTr.find('.ddlFloorSubRack').val();
+                                }
+                                let allocatedQuantity = thatTr.find('.txtCurrAllocationQty').val();
+
+                                if (subRackID > 0 || isedited==1) {
+                                    let allocation = {
+                                        RackAllocationID: rackallocationid,
+                                        YarnStockTransactionID: yarnStockTransactionID,
+                                        SubRackID: subRackID,
+                                        AllocatedQuantity: allocatedQuantity,
+                                        BalanceQuantity: allocatedQuantity
+                                    };
+                                    yarnRackAllocation.push(allocation);
+                                }
+                            }
+                        })
+
+                    }
+                });
+                if (yarnRackAllocation.length > 0) {
+                    HttpRequest.AjaxAsync("POST", "/MaterialsManagement/YarnRackAllocation/Create", { 'yarnRackAllocation': yarnRackAllocation }, saveSuccess, "#btnSave",null);
+                } else {
+                    $.alert.open('warning', 'No data found to save');
+                }
+            });
+        })
+    </script>
+}

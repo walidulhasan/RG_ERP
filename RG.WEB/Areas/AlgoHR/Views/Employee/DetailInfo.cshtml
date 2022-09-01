@@ -1,0 +1,516 @@
+﻿@model RG.Application.ViewModel.AlgoHR.Business.Employee.DetailInfoVM
+@{
+    ViewData[PageInfo.PageHeader] = "Employee Detail";
+    ViewData[PageInfo.PageTitle] = "Employee Detail";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@*<script src="~/js/customScripts/HRComDivDeptSecDesigEmpLookUp.js"></script>*@
+
+
+
+<div class="row" id="">
+    <div class="col-sm-4 col-md-4 col-lg-4">
+        <div class="form-group mb-2">
+            <label class="col-form-label-sm m-0 required" asp-for="EmployeeCode"></label>
+            <select asp-for="EmployeeCode" asp-items="Model.DDLEmployees" class="form-control form-control-sm"></select>
+            <span asp-validation-for="EmployeeCode" class="span-form-validation"></span>
+            <input type="hidden" id="hdnEmployeeID" value="0" />
+        </div>
+    </div>
+</div>
+<div id="accordion">
+    <div class="card mb-1">
+        <div class="card-header p-0" id="headingPersonalInfo">
+            <h5 class="mb-0">
+                <button id="btnPersonalInfo" data-id="PersonalInfo" data-loaded="false"  class="btn btn-link collapsed btnCollapse" data-toggle="collapse" data-target="#collapsePersonalInfo" aria-expanded="true" aria-controls="collapsePersonalInfo">
+                    <b>Employee Personal Info</b>
+                </button>
+
+                <button class="btn btn-xs btn-outline-danger float-right m-1 d-none btnPersonalInfoEdit" title="Edit" onclick="EditPersonalInfo()">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button class="btn btn-xs btn-outline-info float-right m-1 d-none btnPersonalInfoCancel" title="Cancel Edit" onclick="CancelEditPersonalInfo()">
+                    <i class="fas fa-times"></i>
+                </button>
+                <button class="btn btn-xs btn-outline-success float-right m-1 d-none btnPersonalInfoSave" title="Save" onclick="SavePersonalInfo()">
+                    <i class="fas fa-check"></i>
+                </button>
+            </h5>
+
+        </div>
+        <div id="collapsePersonalInfo" class="collapse show" aria-labelledby="headingPersonalInfo" data-parent="#accordion">
+            <div class="card-body p-2">
+                <div class="row ">
+                    <div class="col-sm-2 col-md-2 col-lg-2 text-center">
+                        <div class="form-group m-0">
+                            <img id="EmployeeImage" src="~/CustomSiteImages/blankUserImg.png" width="80" height="80" />
+                        </div>
+                    </div>
+                    <div class="col-sm-2 col-md-2 col-lg-2">
+                        <div class="form-group mb-1">
+                            <label class="col-form-label-sm m-0" asp-for="Emp_Cd"></label>
+                            <input asp-for="Emp_Cd" class="form-control form-control-sm" type="text" disabled />
+                        </div>
+                    </div>
+                    <div class="col-sm-2 col-md-2 col-lg-2">
+                        <div class="form-group mb-1">
+                            <label class="col-form-label-sm m-0" asp-for="Emp_oldNo"></label>
+                            <input asp-for="Emp_oldNo" class="form-control form-control-sm inputPersonalInfo" type="text" disabled />
+                        </div>
+                    </div>
+                    <div class="col-sm-2 col-md-2 col-lg-2">
+                        <div class="form-group mb-1">
+                            <label class="col-form-label-sm m-0" asp-for="Emp_Fname"></label>
+                            <input asp-for="Emp_Fname" class="form-control form-control-sm inputPersonalInfo" type="text" disabled />
+                        </div>
+                    </div>
+                    <div class="col-sm-2 col-md-2 col-lg-2">
+                        <div class="form-group mb-1">
+                            <label class="col-form-label-sm m-0" asp-for="Emp_Mname"></label>
+                            <input asp-for="Emp_Mname" class="form-control form-control-sm inputPersonalInfo" type="text" disabled />
+                        </div>
+                    </div>
+                    <div class="col-sm-2 col-md-2 col-lg-2">
+                        <div class="form-group mb-1">
+                            <label class="col-form-label-sm m-0" asp-for="Emp_Lname"></label>
+                            <input asp-for="Emp_Lname" class="form-control form-control-sm inputPersonalInfo" type="text" disabled />
+                        </div>
+                    </div>
+
+                </div>
+                <div class="row ">
+                    @*<div class="col-sm-2 col-md-2 col-lg-2">
+            <div class="form-group mb-1">
+                <label class="col-form-label-sm m-0" asp-for="Emp_Fname"></label>
+                <input asp-for="Emp_Fname" class="form-control form-control-sm inputPersonalInfo" type="text" disabled />
+            </div>
+        </div>
+        <div class="col-sm-2 col-md-2 col-lg-2">
+            <div class="form-group mb-1">
+                <label class="col-form-label-sm m-0" asp-for="Emp_Mname"></label>
+                <input asp-for="Emp_Mname" class="form-control form-control-sm inputPersonalInfo" type="text" disabled />
+            </div>
+        </div>
+        <div class="col-sm-2 col-md-2 col-lg-2">
+            <div class="form-group mb-1">
+                <label class="col-form-label-sm m-0" asp-for="Emp_Lname"></label>
+                <input asp-for="Emp_Lname" class="form-control form-control-sm inputPersonalInfo" type="text" disabled />
+            </div>
+        </div>*@
+
+                    <div class="col-sm-4 col-md-4 col-lg-4">
+                        <div class="form-group mb-1">
+                            <label class="col-form-label-sm m-0" asp-for="Emp_Father"></label>
+                            <input asp-for="Emp_Father" class="form-control form-control-sm inputPersonalInfo" type="text" disabled />
+                        </div>
+                    </div>
+                    <div class="col-sm-4 col-md-4 col-lg-4">
+                        <div class="form-group mb-1">
+                            <label class="col-form-label-sm m-0" asp-for="Emp_MotherName"></label>
+                            <input asp-for="Emp_MotherName" class="form-control form-control-sm inputPersonalInfo" type="text" disabled />
+                        </div>
+                    </div>
+                    <div class="col-sm-2 col-md-2 col-lg-2">
+                        <div class="form-group mb-1">
+                            <label class="col-form-label-sm m-0" asp-for="Emp_DOB"></label>
+                            <input asp-for="Emp_DOB" class="form-control form-control-sm dateField inputPersonalInfo" type="text" disabled />
+                        </div>
+                    </div>
+                    <div class="col-sm-2 col-md-2 col-lg-2">
+                        <div class="form-group">
+                            <label asp-for="Emp_Gender" class="col-form-label-sm m-0 "></label>
+                            <select asp-for="Emp_Gender" asp-items="Model.DDLGender" class="form-control form-control-sm inputPersonalInfo" disabled></select>
+
+                        </div>
+                    </div>
+                </div>
+                <div class="row ">
+
+                    <div class="col-sm-4 col-md-4 col-lg-4">
+                        <div class="form-group mb-1">
+                            <label class="col-form-label-sm m-0" asp-for="Emp_SSN"></label>
+                            <input asp-for="Emp_SSN" class="form-control form-control-sm inputPersonalInfo" type="text" disabled />
+                        </div>
+                    </div>
+                    <div class="col-sm-2 col-md-2 col-lg-2">
+                        <div class="form-group mb-1">
+                            <label class="col-form-label-sm m-0" asp-for="Emp_Appointment"></label>
+                            <input asp-for="Emp_Appointment" class="form-control form-control-sm dateField inputPersonalInfo" type="text" disabled />
+                        </div>
+                    </div>
+                    <div class="col-sm-2 col-md-2 col-lg-2">
+                        <div class="form-group mb-1">
+                            <label class="col-form-label-sm m-0" asp-for="Emp_Confirmation"></label>
+                            <input asp-for="Emp_Confirmation" class="form-control form-control-sm dateField inputPersonalInfo" type="text" disabled />
+                        </div>
+                    </div>
+                    <div class="col-sm-2 col-md-2 col-lg-2">
+                        <div class="form-group">
+                            <label asp-for="Emp_Religion" class="col-form-label-sm m-0 "></label>
+                            <select asp-for="Emp_Religion" asp-items="Model.DDLReligion" class="form-control form-control-sm inputPersonalInfo" disabled></select>
+
+                        </div>
+                    </div>
+                    <div class="col-sm-2 col-md-2 col-lg-2">
+                        <div class="form-group">
+                            <label asp-for="emp_type" class="col-form-label-sm m-0 "></label>
+                            <select asp-for="emp_type" asp-items="Model.DDLEmployeeType" class="form-control form-control-sm inputPersonalInfo" disabled></select>
+
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+
+
+
+        <div class="card mb-1">
+            <div class="card-header p-0" id="headingAddressInfo">
+                <h5 class="mb-0">
+                    <button id="btnAddressInfo" data-id="AddressInfo" class="btn btn-link collapsed btnCollapse" data-isloaded="false" data-toggle="collapse" data-target="#collapseAddressInfo" aria-expanded="false" aria-controls="collapseAddressInfo">
+                        <b>Employee Address Info</b>
+                    </button>
+
+                    <button class="btn btn-xs btn-outline-danger float-right m-1 d-none btnAddressInfoEdit" title="Edit" onclick="EditAddressInfo()">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn btn-xs btn-outline-info float-right m-1 d-none btnAddressInfoCancel" title="Cancel Edit" onclick="CancelEditAddressInfo()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <button class="btn btn-xs btn-outline-success float-right m-1 d-none btnAddressInfoSave" title="Save" onclick="SaveAddressInfo()">
+                        <i class="fas fa-check"></i>
+                    </button>
+                </h5>
+            </div>
+            <div id="collapseAddressInfo" class="collapse" aria-labelledby="collapseAddressInfo" data-parent="#accordion">
+                <div class="card-body p-0 m-0">
+                    <div class="card">
+                        <div class="card-header p-0" id="headingAddressInfo">
+                            <h5 class="p-1">Present Address</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-sm-2 col-md-2 col-lg-2">
+                                    <div class="form-group">
+                                        <label asp-for="Emp_Country1" class="col-form-label-sm m-0 "></label>
+                                        <select asp-for="Emp_Country1" asp-items="Model.DDLCountryList" class="form-control form-control-sm inputAddressInfo" disabled></select>
+
+                                    </div>
+                                </div>
+                                <div class="col-sm-2 col-md-2 col-lg-2">
+                                    <div class="form-group mb-1">
+                                        <label class="col-form-label-sm m-0" asp-for="Emp_State1"></label>
+                                        <input asp-for="Emp_State1" class="form-control form-control-sm inputAddressInfo" type="text" disabled />
+                                    </div>
+                                </div>
+                                <div class="col-sm-2 col-md-2 col-lg-2">
+                                    <div class="form-group mb-1">
+                                        <label class="col-form-label-sm m-0" asp-for="Emp_City1"></label>
+                                        <input asp-for="Emp_City1" class="form-control form-control-sm  inputAddressInfo" type="text" disabled />
+                                    </div>
+                                </div>
+                                <div class="col-sm-2 col-md-2 col-lg-2">
+                                    <div class="form-group mb-1">
+                                        <label class="col-form-label-sm m-0" asp-for="Emp_Zip1"></label>
+                                        <input asp-for="Emp_Zip1" class="form-control form-control-sm  inputAddressInfo" type="text" disabled />
+                                    </div>
+                                </div>
+                                <div class="col-sm-4 col-md-4 col-lg-4">
+                                    <div class="form-group">
+                                        <label asp-for="Emp_Address1" class="col-form-label-sm m-0 "></label>
+                                        <input asp-for="Emp_Address1" class="form-control form-control-sm  inputAddressInfo" type="text" disabled />
+
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-0 m-0">
+                    <div class="card">
+                        <div class="card-header p-0" id="headingAddressInfo">
+                            <h5 class="p-1">Permanent Address</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-sm-2 col-md-2 col-lg-2">
+                                    <div class="form-group">
+                                        <label asp-for="Emp_Country2" class="col-form-label-sm m-0 "></label>
+                                        <select asp-for="Emp_Country2" asp-items="Model.DDLCountryList" class="form-control form-control-sm inputAddressInfo" disabled></select>
+
+                                    </div>
+                                </div>
+                                <div class="col-sm-2 col-md-2 col-lg-2">
+                                    <div class="form-group mb-1">
+                                        <label class="col-form-label-sm m-0" asp-for="Emp_State2"></label>
+                                        <input asp-for="Emp_State2" class="form-control form-control-sm inputAddressInfo" type="text" disabled />
+                                    </div>
+                                </div>
+                                <div class="col-sm-2 col-md-2 col-lg-2">
+                                    <div class="form-group mb-1">
+                                        <label class="col-form-label-sm m-0" asp-for="Emp_City2"></label>
+                                        <input asp-for="Emp_City2" class="form-control form-control-sm  inputAddressInfo" type="text" disabled />
+                                    </div>
+                                </div>
+                                <div class="col-sm-2 col-md-2 col-lg-2">
+                                    <div class="form-group mb-1">
+                                        <label class="col-form-label-sm m-0" asp-for="Emp_Zip2"></label>
+                                        <input asp-for="Emp_Zip2" class="form-control form-control-sm  inputAddressInfo" type="text" disabled />
+                                    </div>
+                                </div>
+                                <div class="col-sm-4 col-md-4 col-lg-4">
+                                    <div class="form-group">
+                                        <label asp-for="Emp_Address2" class="col-form-label-sm m-0 "></label>
+                                        <input asp-for="Emp_Address2" class="form-control form-control-sm  inputAddressInfo" type="text" disabled />
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @*<div class="card mb-1">
+                <div class="card-header p-0" id="headingThree">
+                    <h5 class="mb-0">
+                        <button class="btn btn-link collapsed btnCollapse" data-toggle="collapse" data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                            Collapsible Group Item #3
+                        </button>
+                    </h5>
+                </div>
+                <div id="collapseThree" class="collapse" aria-labelledby="headingThree" data-parent="#accordion">
+                    <div class="card-body">
+                        Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod. Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin coffee nulla assumenda shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo. Leggings occaecat craft beer farm-to-table, raw denim aesthetic synth nesciunt you probably haven't heard of them accusamus labore sustainable VHS.
+                    </div>
+                </div>
+            </div>*@
+    </div>
+
+</div>
+@section scripts{
+    <script type="text/javascript">
+        const saveSuccess = data => {
+            if (data.result == 1) {
+                $.alert.open({
+                    type: 'Success',
+                    content: data.message,
+                    callback: function () {
+                        $(".btnPersonalInfoSave,.btnPersonalInfoCancel,.btnAddressInfoSave,.btnAddressInfoCancel").addClass('d-none');
+                        $(".btnPersonalInfoEdit,.btnAddressInfoEdit").removeClass('d-none');
+                        $(".inputPersonalInfo,.inputAddressInfo").attr('disabled', true);
+                    }
+                });
+            }
+            else {
+                $.alert.open("error", data.message);
+            }
+        }
+
+        const SavePersonalInfo = () => {
+            let employeeID = $("#hdnEmployeeID").val();
+            if (employeeID > 0) {
+                let personalInfo = {
+                    Emp_ID: employeeID,
+                    Emp_oldNo: $("#Emp_oldNo").val(),
+                    Emp_Fname: $("#Emp_Fname").val(),
+                    Emp_Mname: $("#Emp_Mname").val(),
+                    Emp_Lname: $("#Emp_Lname").val(),
+                    Emp_Appointment: $("#Emp_Appointment").val(),
+                    Emp_Confirmation: $("#Emp_Confirmation").val(),
+                    emp_type: $("#emp_type").val(),
+                    Emp_Religion: $("#Emp_Religion").val(),
+                    Emp_SSN: $("#Emp_SSN").val(),
+                    Emp_Father: $("#Emp_Father").val(),
+                    Emp_MotherName: $("#Emp_MotherName").val(),
+                    Emp_DOB: $("#Emp_DOB").val(),
+                    Emp_Gender:$("#Emp_Gender").val()
+                }
+                HttpRequest.Ajax("POST", "/AlgoHR/Employee/UpdateEmployeePersonalInfo", { 'PersonalInfo': personalInfo }, saveSuccess);
+                
+            }
+        }
+
+        const SaveAddressInfo = () => {
+          
+            let employeeID = $("#hdnEmployeeID").val();
+            if (employeeID > 0) {
+                let addressInfo = {
+                    Emp_ID: employeeID,
+                    Emp_Country1: $("#Emp_Country1").val(),
+                    Emp_Country2: $("#Emp_Country2").val(),
+                    Emp_State1: $("#Emp_State1").val(),
+                    Emp_State2: $("#Emp_State2").val(),
+                    Emp_City1: $("#Emp_City1").val(),
+                    Emp_City2: $("#Emp_City2").val(),
+                    Emp_Address1: $("#Emp_Address1").val(),
+                    Emp_Address2: $("#Emp_Address2").val(),
+                    Emp_Zip1: $("#Emp_Zip1").val(),
+                    Emp_Zip2: $("#Emp_Zip2").val(),
+                }
+                HttpRequest.Ajax("POST", "/AlgoHR/Employee/UpdateEmployeeAddressInfo", { 'addressInfo': addressInfo }, saveSuccess);
+            }
+        }
+        const CancelEditPersonalInfo = () => {
+            GetDetailInfo("PersonalInfo");
+            $(".btnPersonalInfoSave,.btnPersonalInfoCancel").addClass('d-none');
+            $(".btnPersonalInfoEdit").removeClass('d-none');
+            $(".inputPersonalInfo").attr('disabled', true);
+        }
+        const CancelEditAddressInfo = () => {
+            GetDetailInfo("AddressInfo");
+            $(".btnAddressInfoSave,.btnAddressInfoCancel").addClass('d-none');
+            $(".btnAddressInfoEdit").removeClass('d-none');
+            $(".inputAddressInfo").attr('disabled', true);
+        }
+        const EditPersonalInfo = () => {
+           
+            let isDataLoaded = $('#btnPersonalInfo').attr("data-loaded");
+            if (isDataLoaded) {
+                $(".btnPersonalInfoSave,.btnPersonalInfoCancel").removeClass('d-none');
+                $(".btnPersonalInfoEdit").addClass('d-none');
+                $(".inputPersonalInfo").removeAttr('disabled');
+            } else {
+                $.alert.open('warning', "Data not found to edit, select employee first")
+            }
+        }
+        const EditAddressInfo = () => {
+         
+            let isDataLoaded = $('#btnAddressInfo').attr("data-isloaded");
+            if (isDataLoaded) {
+                $(".btnAddressInfoSave,.btnAddressInfoCancel").removeClass('d-none');
+                $(".btnAddressInfoEdit").addClass('d-none');
+                $(".inputAddressInfo").removeAttr('disabled');
+            } else {
+                $.alert.open('warning', "Data not found to edit, select employee first")
+            }
+        }
+
+        function DDLEmployees() {
+            HttpRequest.DropDownSelect2Group("Get", "/AlgoHR/CommonDropDown/GetDDLEmployee", {}, 'EmployeeCode');
+        }
+        const GetEmployeePersonalInfo = EmployeeCode => {
+            debugger
+            let data = HttpRequest.AjaxData("GET", "/AlgoHR/Employee/EmployeePersonalInfo", { EmployeeCode: EmployeeCode });
+            console.log(data);
+            if (data != null) {
+               
+                $("#hdnEmployeeID").val(data.Emp_ID);
+                $("#Emp_Cd").val(data.Emp_Cd);
+                $("#Emp_oldNo").val(data.Emp_oldNo);
+                $("#Emp_Fname").val(data.Emp_Fname);
+                $("#Emp_Mname").val(data.Emp_Mname);
+                $("#Emp_Lname").val(data.Emp_Lname);
+                $("#Emp_DOB").val(data.Emp_DOBMsg);
+                $("#Emp_Father").val(data.Emp_Father);
+                $("#Emp_MotherName").val(data.Emp_MotherName);
+                $("#Emp_SSN").val(data.Emp_SSN);
+                $("#Emp_Appointment").val(data.Emp_AppointmentMsg);
+                $("#Emp_Confirmation").val(data.Emp_ConfirmationMsg);
+                $("#Emp_Religion").val(data.Emp_Religion);
+                $("#emp_type").val(data.emp_type);
+                $("#Emp_Gender").val(data.Emp_Gender);
+                $("#EmployeeImage").attr("src", `/HRemployee/${data.Emp_Cd}.jpg`);
+                return true;
+            } else {
+                return false;
+            }
+        }
+        const GetEmployeeAddressInfo = EmployeeCode => {
+           
+            let data = HttpRequest.AjaxData("GET", "/AlgoHR/Employee/EmployeeAddressInfo", { EmployeeCode: EmployeeCode });
+            if (data != null) {
+                $("#Emp_Country1").val(data.Emp_Country1);
+                $("#Emp_Country2").val(data.Emp_Country2);
+                $("#Emp_State1").val(data.Emp_State1);
+                $("#Emp_State2").val(data.Emp_State2);
+                $("#Emp_City1").val(data.Emp_City1);
+                $("#Emp_City2").val(data.Emp_City2);
+                $("#Emp_Address1").val(data.Emp_Address1);
+                $("#Emp_Address2").val(data.Emp_Address2);
+                $("#Emp_Zip1").val(data.Emp_Zip1);
+                $("#Emp_Zip2").val(data.Emp_Zip2);
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+
+        const GetDetailInfo = collapseType => {
+           
+            let EmployeeCode = $("#EmployeeCode").val();
+            if (EmployeeCode != null && EmployeeCode != "" && collapseType != "") {
+                switch (collapseType) {
+                    case "PersonalInfo": {
+                        if (GetEmployeePersonalInfo(EmployeeCode)) {
+                            $('#btnPersonalInfo').attr('data-loaded', 'true');
+                            $(".btnPersonalInfoEdit").removeClass('d-none');
+                            
+                        }
+                        break;
+                    }
+                    case "AddressInfo": {
+                        if (GetEmployeeAddressInfo(EmployeeCode)) {
+                            $('#btnAddressInfo').attr('data-isloaded', 'true');
+                            if ($('.btnAddressInfoSave').is(':visible')) {
+                                $(".btnAddressInfoEdit").addClass('d-none');
+                            } else {
+                                $(".btnAddressInfoEdit").removeClass('d-none');
+                            }
+                            
+                        }
+                        break;
+                    }
+                }
+            } else {
+                $.alert.open('warning', "No Employee Selected")
+            }
+        }
+        $(function () {
+
+            $("#EmployeeCode").select2();
+            DDLEmployees();
+            $('#accordion').on('shown.bs.collapse', function () {
+               
+                $('.btnCollapse').each(function () {
+                    let thatCollapse = $(this);
+                    if (thatCollapse.attr("aria-expanded") === "true" && !thatCollapse.attr("data-loaded")) {
+                        let collapseType = thatCollapse.data("id");
+                        GetDetailInfo(collapseType);
+
+                    }
+
+                });
+
+            });
+            $("#EmployeeCode").change(function () {
+                
+                let EmployeeCode = $("#EmployeeCode").val();
+                if (EmployeeCode != null && EmployeeCode != "") {
+                    $("#hdnEmployeeID").val(0);
+                    GetDetailInfo("PersonalInfo");
+                    $(".btnPersonalInfoSave,.btnPersonalInfoCancel").addClass('d-none');
+                    $(".btnAddressInfoSave,.btnAddressInfoCancel,.btnAddressInfoEdit").addClass('d-none');
+                    Clear();
+                }
+            });
+
+            const Clear = () => {
+                $("#Emp_State1").val("");
+                $("#Emp_State2").val("");
+                $("#Emp_City1").val("");
+                $("#Emp_City2").val("");
+                $("#Emp_Address1").val("");
+                $("#Emp_Address2").val("");
+                $("#Emp_Zip1").val("");
+                $("#Emp_Zip2").val("");
+            }
+        });
+
+
+    </script>
+}

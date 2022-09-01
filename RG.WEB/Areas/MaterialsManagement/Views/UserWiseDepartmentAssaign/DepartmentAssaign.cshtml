@@ -1,0 +1,246 @@
+﻿@using Microsoft.AspNetCore.Antiforgery
+@inject Wangkanai.Detection.Services.IDetectionService DetectionService
+@inject IAntiforgery antiForgeryToken
+@model RG.Application.ViewModel.MaterialsManagement.Business.UserWiseDepartmentAssaign.UserWiseDepartmentAssaignVM
+
+@{
+    var token = antiForgeryToken.GetAndStoreTokens(Context);
+    ViewData[PageInfo.PageHeader] = "Department Assaign";
+    ViewData[PageInfo.PageTitle] = "Department Assaign";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var deviceType = DetectionService.Device.Type.ToString();
+
+}
+<div class="card card-primary">
+    <div class="row m-0">
+        <div class="col-12 col-sm-4 col-md-4 col-lg-4">
+            <div class="form-group">
+                <label class="col-form-label-sm m-0 required" asp-for="UserID"></label>
+                <select asp-for="UserID" asp-items="Model.UserNameList" class="form-control form-control-sm"></select>
+                <span asp-validation-for="UserID" class="span-form-validation"></span>
+            </div>
+        </div>
+    </div>
+    <div class="row m-0">
+        <div class="col-5 col-sm-5 col-md-5 col-lg-5">
+            <div class="form-group m-0">
+                <table class="table table-sm table-bordered table-striped" id="tblDepartmentNotAssigned">
+                    <thead class="text-center bg-warning">
+                        <tr>
+                            <td width="60%">Not Mapped</td>
+                            <td width="40%">
+                                <div class="input-group">
+                                    @if (deviceType != "Mobile")
+                                    {
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text"><i class="fas fa-search"></i></span>
+                                        </div>
+                                    }
+                                    <input type="text" class="form-control form-control-sm" onkeyup="SearchTableRowData(this)" placeholder="Search ...">
+                                </div>
+                            </td>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+
+            </div>
+        </div>
+        <div class="col-2 col-sm-2 col-md-2 col-lg-2">
+            <div class="form-group text-center">
+                <table class="table table-sm table-bordered table-striped">
+                    <thead class="bg-danger">
+                        <tr>
+                            <td>Action</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <button type="button" class="btn btn-sm btn-info" id="btnSave">>></button>
+                                <br />
+                                <br />
+                                <button type="button" class="btn btn-sm btn-warning" id="btnRemove"><<</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="col-5 col-sm-5 col-md-5 col-lg-5">
+            <div class="form-group">
+                <table class="table table-sm table-bordered table-striped" id="tblDepartmentAssigned">
+                    <thead class="text-center bg-info">
+                        <tr>
+                            <td width="60%">Mapped</td>
+                            <td width="40%">
+                                <div class="input-group">
+                                    @if (deviceType != "Mobile")
+                                    {
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text"><i class="fas fa-search"></i></span>
+                                        </div>
+                                    }
+                                    <input type="text" class="form-control form-control-sm" onkeyup="SearchTableRowData(this)" placeholder="Search ...">
+                                </div>
+                            </td>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    function SearchTableRowData(that) {
+        var input, filter, tableId, table, tr, td, i, txtValue;
+        input = that;
+        filter = input.value.trim().toUpperCase();
+        tableId = that.closest('table').id;
+        tr = $('#' + tableId).find('tbody tr');
+        for (i = 0; i < tr.length; i++) {
+            td = tr[i].getElementsByTagName("td")[0];
+            if (td) {
+                txtValue = td.textContent.trim() || td.innerText.trim();
+                if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                    tr[i].style.display = "";
+                } else {
+                    tr[i].style.display = "none";
+                }
+            }
+        }
+    }
+    function LoadAlgoUser() {
+
+        HttpRequest.DropDownSelect2Group("Get", "/AlgoHR/UserDepartmentAccess/GetDDLUserEmployee", {}, 'UserID', true);
+       // HttpRequest.DropDownSelect2Group("Get", "/AlgoHR/UserDepartmentAccess/GetDDLCustomUserEmployee", {}, 'UserID', true);
+    }
+
+    $(function () {
+        $("#UserID").select2();
+        LoadAlgoUser();
+
+        $("#UserID").change(function () {
+            const userId = $("#UserID").val();
+            if (userId > 0) {
+                GetUserWiseDepartment();
+            }
+
+
+        })
+        $("#btnSave").click(function () {
+            let checkedDataCount = $(".chkNotMapped:checkbox:checked").length;
+            let userID = $("#UserID").val();
+            if (checkedDataCount > 0 && userID != "") {
+                let data = new Array();
+                $(".chkNotMapped:checkbox:checked").each(function () {
+                    debugger;
+                    let that = $(this);
+                    let hdnDepartmentID = that.parent().find('.hdnDepartmentID').val();
+                    let checkedData = {
+                        AuthUserId: userID,
+                        DepartmentId: hdnDepartmentID
+                   };
+                    data.push(checkedData);
+                });
+                HttpRequest.Ajax("POST", '/MaterialsManagement/UserWiseDepartmentAssaign/DepartmentAssaign', { "dataList": data, '@token.HeaderName': '@token.RequestToken' }, saveSuccess);
+            }
+        });
+
+        $("#btnRemove").click(function () {
+            let checkedDataCount = $(".chkMapped:checkbox:checked").length;
+            if (checkedDataCount > 0) {
+                let data = new Array();
+                $(".chkMapped:checkbox:checked").each(function () {
+                    debugger;
+                    let that = $(this);
+                    let hdnUserDepartmentSetupID = that.parent().find('.hdnUserDepartmentSetupID').val();
+
+                    let checkedData = {
+                        Id: hdnUserDepartmentSetupID
+                    };
+                    data.push(checkedData);
+                });
+
+                HttpRequest.Ajax("POST", '/MaterialsManagement/UserWiseDepartmentAssaign/RemoveDepartmentAssaign', { "removeList": data }, saveSuccess, true);
+            }
+        });
+
+
+        var defaultUserID = new Option('Please Select', '', false, false);
+        $('#UserID').append(defaultUserID).trigger('change');
+    })
+
+
+
+
+    function saveSuccess(data) {
+        debugger
+        if (data.result == 1) {
+            $.alert.open({
+                type: 'Success',
+                content: data.message,
+                callback: function () {
+                   // $("#UserID").val();
+                    GetUserWiseDepartment();
+                }
+            });
+        }
+        else {
+            $.alert.open("error", data.message);
+        }
+    }
+
+
+    function GetUserWiseDepartment() {
+        debugger;
+        let userId = $("#UserID").val();
+        let sourceUserId = $("#UserID").find(':selected').attr('data-custom1');
+            $.ajax({
+                url: '/MaterialsManagement/UserWiseDepartmentAssaign/GetUserWiseDepartment',
+                type: 'GET',
+                data: {
+                    'userID': userId
+                },
+                dataType: 'json',
+                success: function (data) {
+                    let deptAssigned = "";
+                    let deptNotAssigned = "";
+                    if (data != null) {
+                        $("#userAssignTR").show();
+                        $.each(data, function (i, v) {
+                            if (v.DepartmentId != 0 && (v.UserID > 0 || v.AuthUserId>0)) {
+                               // deptAssigned += ` <tr> <td style="width:300px"><b>${v.DepartmentName}</b></td><td style="width:200px" class="text-center">
+                               //<input type="hidden" class="" id="" value="${v.DepartmentId}" /><input type="hidden" class="UserDepartmentSetupID" id="UserDepartmentSetupID" value="${v.UserDepartmentSetupID}" /><button class="btn-danger btnDelete" id="btnDelete" onclick="UserDepartmentRemove(${v.UserDepartmentSetupID})">X</button></td></tr>`
+                                deptAssigned += '<tr><td colspan="2"><input type="checkbox" class="chkMapped"><input type="hidden" class="hdnUserDepartmentSetupID" value="' + v.UserDepartmentSetupID + '"/>  ' + v.DepartmentName + '</td></tr>';
+                            } else {
+                                //deptNotAssigned += `<tr class="AvailableDepartment"><td style="width:300px"><b>${v.DepartmentName}</b></td><td style="width:200px"  class="text-center"><input type="hidden" class="ID" id="ID" value="${v.ID}" /><input class="chkAssignDepartment" type="checkbox" /></td></tr>`
+                                deptNotAssigned += '<tr><td colspan="2"><input type="checkbox" class="chkNotMapped"/><input type="hidden" class="hdnDepartmentID" value="' + v.ID + '"/>  ' + v.DepartmentName + '</td></tr>'
+                            }
+                        })
+                        $("#tblDepartmentNotAssigned tbody").html(deptNotAssigned);
+                        $("#tblDepartmentAssigned tbody").html(deptAssigned);
+                    }
+                },
+                error: function (request, error) {
+                    alert("Request: " + JSON.stringify(request));
+                }
+            });
+       /* })*/
+    }
+
+    function UserDepartmentRemove(userDepartmentSetupID) {
+
+        $.alert.open('confirm', 'Are you sure to delete this record?', function (button) {
+            if (button == 'yes') {
+                HttpRequest.Ajax("POST", "/MaterialsManagement/UserWiseDepartmentAssaign/RemoveUserWiseDepartment", { id: userDepartmentSetupID, '@token.HeaderName': '@token.RequestToken' }, saveSuccess)
+             } else {
+                return false;
+            }
+        });
+    }
+
+</script>

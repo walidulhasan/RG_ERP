@@ -1,0 +1,162 @@
+﻿@{
+    ViewData[PageInfo.PageTitle] = "Notice List";
+    ViewData[PageInfo.PageHeader] = "Notice List";
+    ViewData[PageInfo.btnText1] = "Create New";
+    ViewData[PageInfo.PageLink1] = "/AlgoHR/NoticeBoard/Create";
+    ViewData[PageInfo.btnClass1] = "btn-warning";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <div id="grid">
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script type="text/javascript">
+
+        function GetNoticeList() {
+            //let companyID = $("#CompanyID").val();
+            //let locationID = $("#LocationID").val();
+            //let machineGroupID = $("#MachineGroupID").val();
+
+            var dataGrid = $("#grid").dxDataGrid({
+                height: 450,
+                remoteOperations: { paging: true, filtering: true, sorting: true, grouping: true, summary: true, groupPaging: true },
+                dataSource: DevExpress.data.AspNet.createStore({
+                    key: "NoticeID",
+                    loadUrl: "/AlgoHR/NoticeBoard/GetNoticeList",
+                    loadParams: {
+                        //companyID: companyID,
+                        //locationID: locationID,
+                        //machineGroupID: machineGroupID
+                    }
+                }),
+                hoverStateEnabled: true,
+
+                showBorders: true,
+                columnAutoWidth: true,
+                filterRow: { visible: true },
+                pager: { visible: true, showInfo: true, allowedPageSizes: [10, 20, 50, 100, 500], showPageSizeSelector: true, },
+                paging: { pageSize: 10 },
+                selection: { mode: 'single' },
+                export: {
+                    //   enabled: true
+                },
+                columns: [
+                    {
+                        width: "auto",
+                        caption: "SL #",
+                        alignment: 'center',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        },
+                        cellTemplate: function (container, e) {
+                            var index = dataGrid.pageIndex() * dataGrid.pageSize() + e.rowIndex + 1;
+                            container.text(index);
+                        }
+
+                    },
+                    {
+                        dataField: "NoticeID",
+                        visible: false,
+
+                    },
+
+                    {
+                        dataField: "NoticeTitle",
+                        alignment: 'center',
+                        caption: 'Title',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+
+                    }, {
+                        dataField: "ValidDateFromMsg",
+                        alignment: 'center',
+                        caption: 'Valid From',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+
+                    },
+                    {
+                        dataField: "ValidDateToMsg",
+                        alignment: 'center',
+                        caption: 'Valid To',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+
+                    },
+                    //{
+                    //    dataField: "MachineCode",
+                    //    alignment: 'center',
+                    //    caption: 'MachineCode',
+                    //    headerCellTemplate: function (header, info) {
+                    //        $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                    //    }
+
+                    //},
+
+                    {
+                        caption: 'Action',
+                        alignment: 'center',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        },
+                        cellTemplate: function (container, options) {
+
+                            var returnText = '<button class="btn btn-xs btn-warning"><i class="fa fa-edit"></i> Edit</button>';
+                            
+                            $(returnText).on('dxclick', function () {
+                                DataEdit(options.data.NoticeID);
+                            }).appendTo(container);
+
+                            var returnText = '<span>&nbsp</span><button class="btn btn-xs btn-danger"><i class="fa fa-trash"></i> Delete</button>';
+                            returnText = returnText + '</div>';
+                            $(returnText).on('dxclick', function () {
+                                DeleteRow(options.data.NoticeID);
+                            }).appendTo(container);
+                        }
+                    }
+                ]
+
+            }).dxDataGrid("instance");
+        }
+
+        function saveSuccess(data) {
+            if (data.result == 1) {
+                $.alert.open({
+                    type: 'Success',
+                    content: data.message,
+                    callback: function () {
+                        GetNoticeList();
+                    }
+                });
+            }
+            else {
+                $.alert.open("error", data.message);
+            }
+        }
+        function DeleteRow(noticeID) {
+            $.alert.open('confirm', 'Are you sure to delete this record?', function (button) {
+                if (button == 'yes')
+                    HttpRequest.Ajax("PUT", '/AlgoHR/NoticeBoard/Remove', { "noticeID": noticeID }, saveSuccess, true);
+            });
+
+        }
+        function DataEdit(noticeID) {
+            location.replace('/AlgoHR/NoticeBoard/Edit?noticeID=' + noticeID);
+        }
+
+
+
+        $(function () {
+            GetNoticeList();
+        });
+    </script>
+}

@@ -1,0 +1,206 @@
+﻿@model List<RG.Application.Contracts.Maxco.Buisness.OrderPlanReports.Queries.RequestResponseModel.DyeingUnitProductionFabricWeekRM>
+
+@{
+    Layout = null;
+    var unitSum = Model.GroupBy(g => g.DyeingProductinUnit)
+.Select(x => new
+{
+    DyeingProductinUnit = x.Key,
+    UnitTotal = x.Sum(s => s.UnitWiseBuyerTotal)
+});
+
+    var unitBuyerSum = Model.GroupBy(g => new { g.DyeingProductinUnit, g.Buyer })
+       .Select(x => new
+       {
+           DyeingProductinUnit = x.Key.DyeingProductinUnit,
+           Buyer = x.Key.Buyer,
+           BuyerTotal = x.Sum(s => s.UnitWiseBuyerTotal)
+       });
+
+    var grandSum = Model.Sum(x => x.UnitWiseBuyerTotal);
+}
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Dyeing Product Report</title>
+    <link href="~/AdminLTE-3.1.0/plugins/jquery-ui/jquery-ui.min.css" rel="stylesheet" />
+    <link href="~/lib/bootstrap-5.0.2/css/bootstrap.min.css" rel="stylesheet" />
+    <script src="~/AdminLTE-3.1.0/plugins/jquery/jquery.min.js"></script>
+    <script src="~/AdminLTE-3.1.0/plugins/jquery-ui/jquery-ui.min.js"></script>
+    <script src="~/lib/bootstrap-5.0.2/js/bootstrap.bundle.min.js"></script>
+
+
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.12/css/jquery.dataTables.min.css" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/1.2.2/css/buttons.dataTables.min.css" />
+    <script type="text/javascript" src="https://code.jquery.com/jquery-1.12.3.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.2.2/js/dataTables.buttons.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/2.5.0/jszip.min.js"></script>
+    <script type="text/javascript" src="https://cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/pdfmake.min.js"></script>
+    <script type="text/javascript" src="https://cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/vfs_fonts.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.2.2/js/buttons.html5.min.js"></script>
+    <style>
+        .header {
+            position: sticky;
+            top: 0;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container-fluid">
+        <div class="row" style="height:50px;">
+            <div class="col-12 text-center">
+                <h5 class="mb-0">Robintex Group Bangladesh</h5>
+                <h6>Order Dyeing Product</h6>
+
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <table class="table table-sm table-bordered table-striped text-sm text-center display nowrap" id="tblDyeingProductionWeekReport" style="font-size:11px;">
+                    <thead class="bg-dark text-white header">
+                        <tr>
+                            <th>SL#</th>
+                            <th>Dyeing Unit</th>
+                            <th>Buyer</th>
+                            <th>Fabric Week</th>
+                            <th>Total</th>
+                            <th>Remarks</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            var sl = 0;
+                            var previousUnit = "";
+                            var previousUnitBuyer = "";
+
+                            var lastItem = Model.Last();
+
+
+                            foreach (var item in Model.OrderBy(x => x.DyeingProductinUnit).ThenBy(x => x.BuyerID))
+                            {
+                                var sameUnit = Model.Where(x => x.DyeingProductinUnit == item.DyeingProductinUnit).Count();
+                                var sameUnitBuyerCount = Model.Where(x => x.DyeingProductinUnit == item.DyeingProductinUnit).Select(x => x.Buyer).Distinct().Count();
+                                var sameUnitSameBuyer = Model.Where(x => x.DyeingProductinUnit == item.DyeingProductinUnit && x.BuyerID == item.BuyerID).Count();
+
+
+                                //2nd
+                                @if (previousUnitBuyer != "" && previousUnit != "" && (previousUnit != item.DyeingProductinUnit || previousUnitBuyer != item.Buyer))
+                                {
+                                    var buyerTotal = unitBuyerSum.Where(x => x.DyeingProductinUnit == previousUnit && x.Buyer == previousUnitBuyer).First().BuyerTotal;
+                                    <tr style="background-color:cornflowerblue !important;font-weight:bold !important;color:white">
+                                        <td colspan="2">@previousUnitBuyer Total</td>
+                                        <td>@String.Format("{0:n2}", buyerTotal)</td>
+                                        <td></td>
+                                    </tr>
+
+                                }
+                                if (previousUnit != "" && previousUnit != item.DyeingProductinUnit)
+                                {
+                                    var unitTotal = unitSum.Where(x => x.DyeingProductinUnit == previousUnit).First().UnitTotal;
+                                    <tr>
+                                        <td colspan="4">@previousUnit Total</td>
+                                        <td>@unitTotal</td>
+                                        <td></td>
+                                    </tr>
+                                }
+                                //1st +sameUnitBuyerCount
+                                <tr>
+                                    @if (previousUnit != item.DyeingProductinUnit)
+                                    {
+                                        <td rowspan="@(sameUnit+sameUnitBuyerCount)" style="vertical-align: middle;">@(++sl)</td>
+                                    }
+                                    @if (previousUnit != item.DyeingProductinUnit)
+                                    {
+                                        previousUnitBuyer = "";
+                                        <td rowspan="@(sameUnit+sameUnitBuyerCount)" style="vertical-align: middle;">@item.DyeingProductinUnit</td>
+
+                                    }
+                                    @if (previousUnitBuyer != item.Buyer)
+                                    {
+                                        <td rowspan="@sameUnitSameBuyer" style="vertical-align: middle;">@item.Buyer</td>
+                                    }
+
+                                    <td>Week- @item.FabricWeek</td>
+                                    <td>@String.Format("{0:n2}", item.UnitWiseBuyerTotal)</td>
+                                    <td> </td>
+                                </tr>
+
+                                //3rd
+                                if (lastItem.Equals(item))
+                                {
+                                    var unitTotal = unitSum.Where(x => x.DyeingProductinUnit == item.DyeingProductinUnit).First().UnitTotal;
+                                    var buyerTotal = unitBuyerSum.Where(x => x.DyeingProductinUnit == item.DyeingProductinUnit && x.Buyer == item.Buyer).First().BuyerTotal;
+                                    <tr style="background-color:cornflowerblue !important;font-weight:bold !important;color:white">
+                                        <td colspan="2">@item.Buyer Total</td>
+                                        <td>@String.Format("{0:n2}", buyerTotal)</td>
+                                        <td></td>
+                                    </tr>
+                                    <tr class="text-white" style="background-color:deepskyblue !important;font-weight:bold !important">
+                                        <td colspan="4">@item.DyeingProductinUnit Total</td>
+                                        <td>@String.Format("{0:n2}", unitTotal)</td>
+                                        <td></td>
+                                    </tr>
+                                    <tr class="text-white" style="background-color: deepskyblue !important; font-weight: bold !important">
+                                        <td colspan="4">Grand Total</td>
+                                        <td>@String.Format("{0:n2}", grandSum)</td>
+                                        <td></td>
+                                    </tr>
+                                }
+                                //grandSum
+                                previousUnit = item.DyeingProductinUnit;
+                                previousUnitBuyer = item.Buyer;
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <div class="text-center">
+                    <input type="button" class="btn btn-sm btn-success" value="Excel" id="btnPdf" onclick="exportToExcel()" />
+                </div>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript">
+        function bodyOnload() {
+            //   $("body").removeClass("loading");
+
+        }
+
+        function exportToExcel() {
+            var htmls = "";
+            var uri = 'data:application/vnd.ms-excel;base64,';
+            var template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>';
+            var base64 = function (s) {
+                return window.btoa(unescape(encodeURIComponent(s)))
+            };
+
+            var format = function (s, c) {
+                return s.replace(/{(\w+)}/g, function (m, p) {
+                    return c[p];
+                })
+            };
+
+            htmls = document.getElementById("tblDyeingProductionWeekReport").innerHTML;
+
+            var ctx = {
+                worksheet: 'Worksheet',
+                table: htmls
+            }
+            var link = document.createElement("a");
+            link.download = "DyeingProductionWeekReport.xls";
+            link.href = uri + base64(format(template, ctx));
+            link.click();
+        }
+        $(function () {
+            $(document).ready(function () {
+                // $("body").addClass("loading");
+
+            });
+        });
+    </script>
+</body>
+</html>

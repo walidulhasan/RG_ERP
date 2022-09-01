@@ -1,0 +1,297 @@
+﻿@model List<RG.Application.Contracts.Maxco.Buisness.OrderPlanReports.Queries.RequestResponseModel.ManagementStatusRM>
+@{
+    Layout = null;
+
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Management Status</title>
+    <link href="~/AdminLTE-3.1.0/plugins/jquery-ui/jquery-ui.min.css" rel="stylesheet" />
+    <link href="~/lib/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <script src="~/AdminLTE-3.1.0/plugins/jquery/jquery.min.js"></script>
+    <script src="~/AdminLTE-3.1.0/plugins/jquery-ui/jquery-ui.min.js"></script>
+    <script src="~/AdminLTE-3.1.0/plugins/bootstrap/js/bootstrap.bundle.js"></script>
+
+
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.12/css/jquery.dataTables.min.css" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/1.2.2/css/buttons.dataTables.min.css" />
+    <script type="text/javascript" src="https://code.jquery.com/jquery-1.12.3.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.2.2/js/dataTables.buttons.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/2.5.0/jszip.min.js"></script>
+    <script type="text/javascript" src="https://cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/pdfmake.min.js"></script>
+    <script type="text/javascript" src="https://cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/vfs_fonts.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.2.2/js/buttons.html5.min.js"></script>
+
+    <style>
+        .header {
+            position: sticky;
+            top: 0;
+        }
+
+        .tblBorder {
+            border: 1px solid;
+        }
+    </style>
+
+</head>
+
+<body>
+    <div class="container-fluid" id="containerManagementStatus">
+        @*<div class="row" style="height:50px;">
+                <div class="col-12 text-center">
+                    <h5 class="mb-0">Robintex Group Bangladesh</h5>
+                    <h6>Management Status</h6>
+                </div>
+            </div>*@
+        
+        <div class="row">
+            <div class="col-12 col-sm-12 col-md-12">
+                <table class="table table-sm table-bordered table-striped text-sm text-center display nowrap" id="tblManagementStatus" style="font-size:12px;">
+                    <thead class="bg-dark text-white header">
+                        <tr>
+                            <th colspan="21"><h5>Robintex Group Bangladesh</h5></th>
+                        </tr>
+                        <tr>
+                            <th colspan="21"><h6>Management Status</h6></th>
+                        </tr>
+
+                        <tr>
+                            @*<th rowspan="2">SL#</th>*@
+                            <th rowspan="2">Date</th>
+                            <th colspan="3">Knitting</th>
+                            <th colspan="4">Batch</th>
+                            <th colspan="5">Dyeing Delivery</th>
+                            <th colspan="4">Additional Fabric</th>
+                            <th colspan="4">Garments</th>
+                        </tr>
+                        <tr style="vertical-align:middle;">
+                            <th>In house</th>
+                            <th>Out Side</th>
+                            <th class="">Total</th>
+
+                            <th class="">CBL</th>
+                            <th class="">CPB</th>
+                            <th class="">AOP</th>
+                            <th class="">Total</th>
+
+                            <th class="">AOP</th>
+                            <th class="">CPB</th>
+                            <th class="">Total</th>
+
+                            <th class="">CBL</th>
+                            <th class="">Total</th>
+
+
+                            <th class="">Additional Required</th>
+                            <th class="">Additional Issue</th>
+                            <th class="">Additional Utilized</th>
+                            <th class="">Fabric Utilized</th>
+
+                            <th class="">Cutting</th>
+                            <th class="">Sewing</th>
+                            <th class="">Overall Efficeieny</th>
+                            <th class="">Shipment</th>
+
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @{
+                            if (Model.Any())
+                            {
+
+
+                                int sl = 0;
+                                var totalRowCount = Model.Select(x => x.StatusDate).Count();
+                                var lastItem = Model.Last();
+
+                                var last7Row = Model.TakeLast(7).ToList();
+                                var last7RowCount = last7Row.Select(x => x.StatusDate).Count();
+
+                                foreach (var item in Model)
+                                {
+                                    <tr>
+                                        @*<td>@(++sl)</td>*@
+                                        <td style="white-space:nowrap;">@item.StatusDateMsg</td>
+                                        <td>@String.Format("{0:n2}", item.KnittingInhouse)</td>
+                                        <td class="">@String.Format("{0:n2}", item.KnittingOutSide)</td>
+                                        <td class="" style="border-right:1px solid olive;"><b>@String.Format("{0:n2}", item.KnittingTotal)</b></td>
+                                        <td class="">@String.Format("{0:n2}", item.BatchCBL)</td>
+                                        <td class="">@String.Format("{0:n2}", item.BatchCPB)</td>
+                                        <td class="">@String.Format("{0:n2}", item.BatchAOP)</td>
+                                        <td class="" style="border-right: 1px solid olive;"><b>@String.Format("{0:n2}", item.BatchTotal)</b></td>
+                                        <td class="">@String.Format("{0:n2}", item.DyeingAOP)</td>
+                                        <td class="">@String.Format("{0:n2}", item.DyeingCPB)</td>
+                                        <td class="" style="border-right: 1px solid olive;"><b>@String.Format("{0:n2}", item.DyeingAOPCPBTotal)</b></td>
+                                        <td class="">@String.Format("{0:n2}", item.DyeingCBL)</td>
+                                        <td class="" style="border-right: 1px solid olive;"><b>@String.Format("{0:n2}", item.DyeingTotal)</b></td>
+                                        <td class="">@String.Format("{0:n0}", item.AdditionalReq)</td>
+                                        <td class="">@String.Format("{0:n0}", item.AdditionalIssue)</td>
+                                        <td class="">@String.Format("{0:n0}", item.AdditionalUtilized)</td>
+                                        <td class="">@String.Format("{0:n0}", item.FabricUtilized)</td>
+                                        <td class="">@String.Format("{0:n0}", item.GarmentsCutting)</td>
+                                        <td class="">@String.Format("{0:n0}", item.GarmentsSewing)</td>
+                                        <td class="">@String.Format("{0:n2}", item.GarmentsEfficiency)</td>
+                                        <td class="">@String.Format("{0:n0}", item.GarmentsShipment)</td>
+                                    </tr>
+                                    if (lastItem.Equals(item))
+                                    {
+                                        <tr class="bg-success text-white">
+                                            <td><b>Total</b></td>
+                                            <td class=""><b>@(String.Format("{0:n2}",Model.Sum(x => x.KnittingInhouse)))</b></td>
+                                            <td class=""><b>@(String.Format("{0:n2}",Model.Sum(x => x.KnittingOutSide)))</b></td>
+                                            <td class=""><b>@(String.Format("{0:n2}",Model.Sum(x => x.KnittingTotal)))</b></td>
+                                            <td class=""><b>@(String.Format("{0:n2}",Model.Sum(x => x.BatchCBL)))</b></td>
+                                            <td class=""><b>@(String.Format("{0:n2}",Model.Sum(x => x.BatchCPB)))</b></td>
+                                            <td class=""><b>@(String.Format("{0:n2}",Model.Sum(x => x.BatchAOP)))</b></td>
+                                            <td class=""><b>@(String.Format("{0:n2}",Model.Sum(x => x.BatchTotal)))</b></td>
+                                            <td class=""><b>@(String.Format("{0:n2}",Model.Sum(x => x.DyeingAOP)))</b></td>
+                                            <td class=""><b>@(String.Format("{0:n2}",Model.Sum(x => x.DyeingCPB)))</b></td>
+                                            <td class=""><b>@(String.Format("{0:n2}",Model.Sum(x => x.DyeingAOPCPBTotal)))</b></td>
+                                            <td class=""><b>@(String.Format("{0:n2}",Model.Sum(x => x.DyeingCBL)))</b></td>
+                                            <td class=""><b>@(String.Format("{0:n2}",Model.Sum(x => x.DyeingTotal)))</b></td>
+                                            <td class=""><b>@(String.Format("{0:n0}",Model.Sum(x => x.AdditionalReq)))</b></td>
+                                            <td class=""><b>@(String.Format("{0:n0}",Model.Sum(x => x.AdditionalIssue)))</b></td>
+                                            <td class=""><b>@(String.Format("{0:n0}",Model.Sum(x => x.AdditionalUtilized)))</b></td>
+                                            <td class=""><b>@(String.Format("{0:n0}",Model.Sum(x => x.FabricUtilized)))</b></td>
+                                            <td class=""><b>@(String.Format("{0:n0}",Model.Sum(x => x.GarmentsCutting)))</b></td>
+                                            <td class=""><b>@(String.Format("{0:n0}",Model.Sum(x => x.GarmentsSewing)))</b></td>
+                                            <td class="">@*<b>@(String.Format("{0:n0}",Model.Sum(x => x.GarmentsEfficiency)))</b>*@</td>
+                                            <td class=""><b>@(String.Format("{0:n0}",Model.Sum(x => x.GarmentsShipment)))</b></td>
+                                        </tr>
+                                        <tr class="bg-info text-white">
+                                            <td><b>AVG</b></td>
+                                            <td class=""><b>@(String.Format("{0:n2}",Model.Sum(x => x.KnittingInhouse)/ totalRowCount ))</b></td>
+                                            <td class=""><b>@(String.Format("{0:n2}",Model.Sum(x => x.KnittingOutSide)/ totalRowCount ))</b></td>
+                                            <td class=""><b>@(String.Format("{0:n2}",Model.Sum(x => x.KnittingTotal)/ totalRowCount))</b></td>
+                                            <td class=""><b>@(String.Format("{0:n2}",Model.Sum(x => x.BatchCBL)/ totalRowCount))</b></td>
+                                            <td class=""><b>@(String.Format("{0:n2}",Model.Sum(x => x.BatchCPB)/ totalRowCount))</b></td>
+                                            <td class=""><b>@(String.Format("{0:n2}",Model.Sum(x => x.BatchAOP)/ totalRowCount))</b></td>
+                                            <td class=""><b>@(String.Format("{0:n2}",Model.Sum(x => x.BatchTotal)/ totalRowCount))</b></td>
+                                            <td class=""><b>@(String.Format("{0:n2}",Model.Sum(x => x.DyeingAOP)/ totalRowCount))</b></td>
+                                            <td class=""><b>@(String.Format("{0:n2}",Model.Sum(x => x.DyeingCPB)/ totalRowCount))</b></td>
+                                            <td class=""><b>@(String.Format("{0:n2}",Model.Sum(x => x.DyeingAOPCPBTotal)/ totalRowCount))</b></td>
+                                            <td class=""><b>@(String.Format("{0:n2}",Model.Sum(x => x.DyeingCBL)/ totalRowCount))</b></td>
+                                            <td class=""><b>@(String.Format("{0:n2}",Model.Sum(x => x.DyeingTotal)/ totalRowCount))</b></td>
+                                            <td class=""><b>@(String.Format("{0:n0}",Model.Sum(x => x.AdditionalReq)/ totalRowCount))</b></td>
+                                            <td class=""><b>@(String.Format("{0:n0}",Model.Sum(x => x.AdditionalIssue)/ totalRowCount))</b></td>
+                                            <td class=""><b>@(String.Format("{0:n0}",Model.Sum(x => x.AdditionalUtilized)/ totalRowCount))</b></td>
+                                            <td class=""><b>@(String.Format("{0:n0}",Model.Sum(x => x.FabricUtilized)/ totalRowCount))</b></td>
+                                            <td class=""><b>@(String.Format("{0:n0}",Model.Sum(x => x.GarmentsCutting)/ totalRowCount))</b></td>
+                                            <td class=""><b>@(String.Format("{0:n0}",Model.Sum(x => x.GarmentsSewing)/ totalRowCount))</b></td>
+                                            <td class=""><b>@(String.Format("{0:n0}",Model.Sum(x => x.GarmentsEfficiency)/ totalRowCount))</b></td>
+                                            <td class=""><b>@(String.Format("{0:n0}",Model.Sum(x => x.GarmentsShipment)/ totalRowCount))</b></td>
+                                        </tr>
+
+
+                                        <tr class="bg-success text-white">
+                                            <td><b>Last 7 Days Total</b></td>
+                                            <td class=""><b>@String.Format("{0:n2}", last7Row.Sum(x => x.KnittingInhouse))</b></td>
+                                            <td class=""><b>@String.Format("{0:n2}", last7Row.Sum(x => x.KnittingOutSide))</b></td>
+                                            <td class=""><b>@String.Format("{0:n2}", last7Row.Sum(x => x.KnittingTotal))</b></td>
+                                            <td class=""><b>@String.Format("{0:n2}", last7Row.Sum(x => x.BatchCBL))</b></td>
+                                            <td class=""><b>@String.Format("{0:n2}", last7Row.Sum(x => x.BatchCPB))</b></td>
+                                            <td class=""><b>@String.Format("{0:n2}", last7Row.Sum(x => x.BatchAOP))</b></td>
+                                            <td class=""><b>@String.Format("{0:n2}", last7Row.Sum(x => x.BatchTotal))</b></td>
+                                            <td class=""><b>@String.Format("{0:n2}", last7Row.Sum(x => x.DyeingAOP))</b></td>
+                                            <td class=""><b>@String.Format("{0:n2}", last7Row.Sum(x => x.DyeingCPB))</b></td>
+                                            <td class=""><b>@String.Format("{0:n2}", last7Row.Sum(x => x.DyeingAOPCPBTotal))</b></td>
+                                            <td class=""><b>@String.Format("{0:n2}", last7Row.Sum(x => x.DyeingCBL))</b></td>
+                                            <td class=""><b>@String.Format("{0:n2}", last7Row.Sum(x => x.DyeingTotal))</b></td>
+                                            <td class=""><b>@String.Format("{0:n0}", last7Row.Sum(x => x.AdditionalReq))</b></td>
+                                            <td class=""><b>@String.Format("{0:n0}", last7Row.Sum(x => x.AdditionalIssue))</b></td>
+                                            <td class=""><b>@String.Format("{0:n0}", last7Row.Sum(x => x.AdditionalUtilized))</b></td>
+                                            <td class=""><b>@String.Format("{0:n0}", last7Row.Sum(x => x.FabricUtilized))</b></td>
+                                            <td class=""><b>@String.Format("{0:n0}", last7Row.Sum(x => x.GarmentsCutting))</b></td>
+                                            <td class=""><b>@String.Format("{0:n0}", last7Row.Sum(x => x.GarmentsSewing))</b></td>
+                                            <td class="">@*<b>@String.Format("{0:n0}", last7Row.Sum(x => x.GarmentsEfficiency))</b>*@</td>
+                                            <td class=""><b>@String.Format("{0:n0}", last7Row.Sum(x => x.GarmentsShipment))</b></td>
+                                        </tr>
+                                        <tr class="bg-info text-white">
+                                            <td><b>AVG (7 Days)</b></td>
+                                            <td class=""><b>@(String.Format("{0:n2}",last7Row.Sum(x => x.KnittingInhouse)/ last7RowCount ))</b></td>
+                                            <td class=""><b>@(String.Format("{0:n2}",last7Row.Sum(x => x.KnittingOutSide)/ last7RowCount ))</b></td>
+                                            <td class=""><b>@(String.Format("{0:n2}",last7Row.Sum(x => x.KnittingTotal)/ last7RowCount))</b></td>
+                                            <td class=""><b>@(String.Format("{0:n2}",last7Row.Sum(x => x.BatchCBL)/ last7RowCount))</b></td>
+                                            <td class=""><b>@(String.Format("{0:n2}",last7Row.Sum(x => x.BatchCPB)/ last7RowCount))</b></td>
+                                            <td class=""><b>@(String.Format("{0:n2}",last7Row.Sum(x => x.BatchAOP)/ last7RowCount))</b></td>
+                                            <td class=""><b>@(String.Format("{0:n2}",last7Row.Sum(x => x.BatchTotal)/ last7RowCount))</b></td>
+                                            <td class=""><b>@(String.Format("{0:n2}",last7Row.Sum(x => x.DyeingAOP)/ last7RowCount))</b></td>
+                                            <td class=""><b>@(String.Format("{0:n2}",last7Row.Sum(x => x.DyeingCPB)/ last7RowCount))</b></td>
+                                            <td class=""><b>@(String.Format("{0:n2}",last7Row.Sum(x => x.DyeingAOPCPBTotal)/ last7RowCount))</b></td>
+                                            <td class=""><b>@(String.Format("{0:n2}",last7Row.Sum(x => x.DyeingCBL)/ last7RowCount))</b></td>
+                                            <td class=""><b>@(String.Format("{0:n2}",last7Row.Sum(x => x.DyeingTotal)/ last7RowCount))</b></td>
+                                            <td class=""><b>@(String.Format("{0:n0}",last7Row.Sum(x => x.AdditionalReq)/ last7RowCount))</b></td>
+                                            <td class=""><b>@(String.Format("{0:n0}",last7Row.Sum(x => x.AdditionalIssue)/ last7RowCount))</b></td>
+                                            <td class=""><b>@(String.Format("{0:n0}",last7Row.Sum(x => x.AdditionalUtilized)/ last7RowCount))</b></td>
+                                            <td class=""><b>@(String.Format("{0:n0}",last7Row.Sum(x => x.FabricUtilized)/ last7RowCount))</b></td>
+                                            <td class=""><b>@(String.Format("{0:n0}",last7Row.Sum(x => x.GarmentsCutting)/ last7RowCount))</b></td>
+                                            <td class=""><b>@(String.Format("{0:n0}",last7Row.Sum(x => x.GarmentsSewing)/ last7RowCount))</b></td>
+                                            <td class=""><b>@(String.Format("{0:n0}",last7Row.Sum(x => x.GarmentsEfficiency)/ last7RowCount))</b></td>
+                                            <td class=""><b>@(String.Format("{0:n0}",last7Row.Sum(x => x.GarmentsShipment)/ last7RowCount))</b></td>
+                                        </tr>
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                <tr><td colspan="22">No Data Found</td></tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+                <div class="text-center">
+                    <input type="button" class="btn btn-sm btn-success" value="Excel" id="btnPdf" onclick="exportToExcel()" />
+                </div>
+                <br />
+            </div>
+
+        </div>
+    </div>
+
+    <script type="text/javascript">
+
+        function bodyOnload() {
+            setTimeout(function () {
+                $("body").removeClass("loading");
+            }, 1000)
+
+        }
+        function exportToExcel() {
+            var htmls = "";
+            var uri = 'data:application/vnd.ms-excel;base64,';
+            var template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>';
+            var base64 = function (s) {
+                return window.btoa(unescape(encodeURIComponent(s)))
+            };
+
+            var format = function (s, c) {
+                return s.replace(/{(\w+)}/g, function (m, p) {
+                    return c[p];
+                })
+            };
+
+            htmls = document.getElementById("containerManagementStatus").innerHTML;
+
+            var ctx = {
+                worksheet: 'Worksheet',
+                table: htmls
+            }
+            var link = document.createElement("a");
+            link.download = "ManagementStatus.xls";
+            link.href = uri + base64(format(template, ctx));
+            link.click();
+        }
+        $(function () {
+            $(document).ready(function () {
+
+                $("body").addClass("loading");
+
+            });
+        });
+    </script>
+</body>
+</html>

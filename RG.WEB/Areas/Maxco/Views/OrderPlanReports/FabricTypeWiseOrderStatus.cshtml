@@ -1,0 +1,301 @@
+﻿@model List<RG.Application.Contracts.Maxco.Buisness.OrderPlanReports.Queries.RequestResponseModel.GarmentAssortmentAndFabricsInfoRM>
+@{
+    Layout = null;
+    var weekQualityData = Model.GroupBy(b => new { b.FabricWeek, b.Quality }).Select(b => new
+    {
+        FabricWeek = b.Key.FabricWeek,
+        Quality = b.Key.Quality,
+        NumberOfOrder = b.Sum(t => t.NoOfOrders),
+        OrderQty = b.Sum(t => t.NumberofGarments),
+        FinishFabrBookKg = b.Sum(t => t.FinFabricBooking),
+        PlanKnittingKG = b.Sum(t => t.PlanKnittingQty),
+        KnittingKg = b.Sum(t => t.KnittingQty),
+        KnittingBalance = b.Sum(t => t.KnittingBalance),
+        BatchKg = b.Sum(t => t.BatchQty),
+        BatchBalance = b.Sum(t => t.BatchBalance),
+        FinishedDelivery = b.Sum(t => t.FinishFabricDeliveryQty),
+        RibQty = b.Sum(t => t.RibQty),
+        FinishFabricDeliveryBalance = b.Sum(t => t.FinishFabricDeliveryBal)
+    }).ToList();
+    var weekData = Model.GroupBy(b => new { b.FabricWeek }).Select(b => new
+    {
+        FabricWeek = b.Key.FabricWeek,
+
+        NumberOfOrder = b.Sum(t => t.NoOfOrders),
+        OrderQty = b.Sum(t => t.NumberofGarments),
+        FinishFabrBookKg = b.Sum(t => t.FinFabricBooking),
+        PlanKnittingKG = b.Sum(t => t.PlanKnittingQty),
+        KnittingKg = b.Sum(t => t.KnittingQty),
+        KnittingBalance = b.Sum(t => t.KnittingBalance),
+        BatchKg = b.Sum(t => t.BatchQty),
+        BatchBalance = b.Sum(t => t.BatchBalance),
+        FinishedDelivery = b.Sum(t => t.FinishFabricDeliveryQty),
+        RibQty = b.Sum(t => t.RibQty),
+        FinishFabricDeliveryBalance = b.Sum(t => t.FinishFabricDeliveryBal)
+    }).ToList();
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Fabric Type Wise Reports</title>
+    <link href="~/AdminLTE-3.1.0/plugins/jquery-ui/jquery-ui.min.css" rel="stylesheet" />
+    <link href="~/lib/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <script src="~/AdminLTE-3.1.0/plugins/jquery/jquery.min.js"></script>
+    <script src="~/AdminLTE-3.1.0/plugins/jquery-ui/jquery-ui.min.js"></script>
+    <script src="~/AdminLTE-3.1.0/plugins/bootstrap/js/bootstrap.bundle.js"></script>
+
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.12/css/jquery.dataTables.min.css" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/1.2.2/css/buttons.dataTables.min.css" />
+    <script type="text/javascript" src="https://code.jquery.com/jquery-1.12.3.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.2.2/js/dataTables.buttons.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/2.5.0/jszip.min.js"></script>
+    <script type="text/javascript" src="https://cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/pdfmake.min.js"></script>
+    <script type="text/javascript" src="https://cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/vfs_fonts.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.2.2/js/buttons.html5.min.js"></script>
+    <style>
+        .header {
+            position: sticky;
+            top: 0;
+        }
+    </style>
+</head>
+<body onload="bodyOnload()">
+    <div class="container-fluid">
+        <div class="row" style="height:50px;">
+            <div class="col-12 text-center">
+                <h5 class="mb-0">Robintex Group Bangladesh</h5>
+                <h6>Fabric Type Wise Order Status</h6>
+
+            </div>
+        </div>
+        <table class="table table-sm table-bordered table-striped text-sm text-center display nowrap" id="tblFabricTypeWiseOrderStatus" style="font-size:11px;">
+            <thead class="bg-dark text-white header">
+                <tr>
+                    <th>SL#</th>
+                    <th>Fabric Week</th>
+                    <th>Fabric Type</th>
+                    <th>Order No</th>
+                    <th>Batch Commitment</th>
+                    <th>DLV. Commitment</th>
+                    <th>Dyeing Production Unit</th>
+                    <th>PO Received Date</th>
+                    <th>Shipment Date</th>
+                    <th>Style</th>
+                    <th>Pantone</th>
+                    <th>Color</th>
+
+                    <th>Art Work</th>
+                    <th>GSM</th>
+                    <th>Req. Fab. Dia</th>
+                    <th>Order Qty.</th>
+                    <th>Fin. Fab. Book Kg</th>
+                    <th>Plan Knitting Kg</th>
+                    <th>Knitting Kg</th>
+                    <th>Knitting Balance</th>
+                    <th>Batch Kg</th>
+                    <th>Batch Balance</th>
+                    <th>Rib</th>
+                    <th>Finish Fab. Dlv.</th>
+                    <th>Finish Fab. Dlv. Bal.</th>
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    //var distinctWeeks = Model.OrderBy(x => x.FabricMonthSl).Select(x => new { x.FabricWeek ,x.FabricMonthSl}).Distinct().ToList();
+
+                    var sl = 1;
+
+                    //foreach (var itemWeek in distinctWeeks)
+                    //{
+                    var prevWeek = 0;
+                    long prevOrderID = 0;
+                    var prevQuality = "";
+
+                    //var weeklyOrders = Model.Where(x => x.FabricMonthSl == itemWeek.FabricMonthSl && x.FabricWeek==itemWeek.FabricWeek).ToList();
+                    foreach (var itemOrders in Model.OrderBy(x => x.FabricWeek).ThenBy(x => x.Quality).ThenBy(x => x.OrderID).ToList())
+                    {
+
+                        var lastItem = Model.OrderBy(x => x.FabricMonthSl).ThenBy(x => x.FabricWeek).ThenBy(x => x.Quality).ThenBy(x => x.OrderID).Last();
+                        var sameWeekOrderCount = Model.Where(x => x.FabricWeek == itemOrders.FabricWeek).Count();
+                        var sameOrderCount = Model.Where(x => x.FabricWeek == itemOrders.FabricWeek && x.Quality == itemOrders.Quality && x.OrderID == itemOrders.OrderID).Count();
+                        var sameQualityCount = Model.Where(x => x.FabricWeek == itemOrders.FabricWeek && x.Quality == itemOrders.Quality).Count();
+
+                        var qualityCount = Model.Where(x => x.FabricWeek == itemOrders.FabricWeek).Select(x => x.Quality).Distinct().Count();
+                        if ((itemOrders.FabricWeek != prevWeek && prevWeek > 0) || (itemOrders.Quality != prevQuality && prevQuality != ""))
+                        {
+                            var dataQualitySum = weekQualityData.Where(x => x.FabricWeek == prevWeek && x.Quality == prevQuality).First();
+
+                            <tr class="text-white" style="background-color:cornflowerblue !important;font-weight:bold !important">
+                                <th colspan="13">Week-@(prevWeek) @(prevQuality) Total</th>
+
+                                <th>@(String.Format("{0:n2}", dataQualitySum.OrderQty))</th>
+                                <th>@(String.Format("{0:n2}", dataQualitySum.FinishFabrBookKg))</th>
+                                <th>@(String.Format("{0:n2}", dataQualitySum.PlanKnittingKG))</th>
+                                <th>@(String.Format("{0:n2}", dataQualitySum.KnittingKg))</th>
+                                <th>@(String.Format("{0:n2}", dataQualitySum.KnittingBalance))</th>
+                                <th>@(String.Format("{0:n2}", dataQualitySum.BatchKg))</th>
+                                <th>@(String.Format("{0:n2}", dataQualitySum.BatchBalance))</th>
+                                <th>@(String.Format("{0:n2}", dataQualitySum.RibQty))</th>
+                                <th>@(String.Format("{0:n2}", dataQualitySum.FinishedDelivery))</th>
+                                <th>@(String.Format("{0:n2}", dataQualitySum.FinishFabricDeliveryBalance))</th>
+                            </tr>
+                            if (itemOrders.FabricWeek != prevWeek && prevWeek > 0)
+                            {
+                                var dataSum = weekData.Where(x => x.FabricWeek == prevWeek).First();
+
+                                <tr class="text-white" style="background-color:cornflowerblue !important;font-weight:bold !important">
+                                    <th colspan="15">Week-@(prevWeek)  Total</th>
+
+                                    <th>@(String.Format("{0:n2}",dataSum.OrderQty))</th>
+                                    <th>@(String.Format("{0:n2}",dataSum.FinishFabrBookKg))</th>
+                                    <th>@(String.Format("{0:n2}",dataSum.PlanKnittingKG))</th>
+                                    <th>@(String.Format("{0:n2}",dataSum.KnittingKg))</th>
+                                    <th>@(String.Format("{0:n2}",dataSum.KnittingBalance))</th>
+                                    <th>@(String.Format("{0:n2}",dataSum.BatchKg))</th>
+                                    <th>@(String.Format("{0:n2}",dataSum.BatchBalance))</th>
+                                    <th>@(String.Format("{0:n2}",dataSum.RibQty))</th>
+                                    <th>@(String.Format("{0:n2}",dataSum.FinishedDelivery))</th>
+                                    <th>@(String.Format("{0:n2}",dataSum.FinishFabricDeliveryBalance))</th>
+                                </tr>
+
+                            }
+                        }
+                        <tr>
+                            @if (itemOrders.FabricWeek != prevWeek)
+                            {
+                                <td rowspan="@(sameWeekOrderCount+qualityCount)" style="vertical-align: middle;">@(sl)</td>
+                                <td rowspan="@(sameWeekOrderCount+qualityCount)" style="vertical-align: middle;">Week-@(itemOrders.FabricWeek)</td>
+                            }
+                            @if (itemOrders.FabricWeek != prevWeek || itemOrders.Quality != prevQuality)
+                            {
+                                <td rowspan="@sameQualityCount" style="vertical-align: middle;">@(itemOrders.Quality)</td>
+                            }
+                            @if (itemOrders.Quality != prevQuality || itemOrders.FabricWeek != prevWeek || itemOrders.OrderID != prevOrderID)
+                            {
+                                <td style="width: 100px; vertical-align: middle;" rowspan="@(sameOrderCount)">@(itemOrders.OrderName)</td>
+                            }
+                            @*<td style="width: 100px; vertical-align: middle;">@(itemOrders.OrderName)</td>*@
+                            <td>@(itemOrders.BatchCommitmentDateMsg)</td>
+                            <td>@(itemOrders.DeliveryCommitmentDateMsg)</td>
+                            <td>@(itemOrders.DyeingProductionUnit)</td>
+                            <td>@(itemOrders.OrderReceiveDateMsg)</td>
+                            <td>@(itemOrders.DeliveryDateMsg)</td>
+                            <td>@(itemOrders.StyleName)</td>
+                            <td>@(itemOrders.PantoneNo)</td>
+                            <td>@(itemOrders.ColorName)</td>
+
+
+                            <td>@(itemOrders.ArtWork)</td>
+                            <td>@(itemOrders.GSM)</td>
+                            <td>@(itemOrders.FinishedWidth)</td>
+                            <td>@(itemOrders.NumberofGarments)</td>
+                            <td>@(String.Format("{0:n2}", itemOrders.FinFabricBooking))</td>
+                            <td>@(String.Format("{0:n2}", itemOrders.PlanKnittingQty))</td>
+                            <td>@(String.Format("{0:n2}", itemOrders.KnittingQty))</td>
+                            <td>@(String.Format("{0:n2}", itemOrders.KnittingBalance))</td>
+                            <td>@(String.Format("{0:n2}", itemOrders.BatchQty))</td>
+                            <td>@(String.Format("{0:n2}", itemOrders.BatchBalance))</td>
+                            <td>@(String.Format("{0:n2}", itemOrders.RibQty))</td>
+                            <td>@(String.Format("{0:n2}", itemOrders.FinishFabricDeliveryQty))</td>
+                            <td>@(String.Format("{0:n2}", itemOrders.FinishFabricDeliveryBal))</td>
+                        </tr>
+
+                        if (lastItem.Equals(itemOrders))
+                        {
+                            var dataQualitySum = weekQualityData.Where(x => x.FabricWeek == itemOrders.FabricWeek && x.Quality == itemOrders.Quality).First();
+
+                            <tr class="text-white" style="background-color:cornflowerblue !important;font-weight:bold !important">
+                                <th colspan="13">Week-@(itemOrders.FabricWeek) @(itemOrders.Quality) Total</th>
+
+                                <th>@(dataQualitySum.OrderQty)</th>
+                                <th>@(String.Format("{0:n2}",dataQualitySum.FinishFabrBookKg))</th>
+                                <th>@(String.Format("{0:n2}",dataQualitySum.PlanKnittingKG))</th>
+                                <th>@(String.Format("{0:n2}",dataQualitySum.KnittingKg))</th>
+                                <th>@(String.Format("{0:n2}",dataQualitySum.KnittingBalance))</th>
+                                <th>@(String.Format("{0:n2}",dataQualitySum.BatchKg))</th>
+                                <th>@(String.Format("{0:n2}",dataQualitySum.BatchBalance))</th>
+                                <th>@(String.Format("{0:n2}",dataQualitySum.RibQty))</th>
+                                <th>@(String.Format("{0:n2}",dataQualitySum.FinishedDelivery))</th>
+                                <th>@(String.Format("{0:n2}",dataQualitySum.FinishFabricDeliveryBalance))</th>
+                            </tr>
+                            var dataSum = weekData.Where(x => x.FabricWeek == itemOrders.FabricWeek).First();
+
+                            <tr class="text-white" style="background-color:cornflowerblue !important;font-weight:bold !important">
+                                <th colspan="15">Week-@(itemOrders.FabricWeek)  Total</th>
+
+                                <th>@(dataSum.OrderQty)</th>
+                                <th>@(String.Format("{0:n2}",dataSum.FinishFabrBookKg))</th>
+                                <th>@(String.Format("{0:n2}",dataSum.PlanKnittingKG))</th>
+                                <th>@(String.Format("{0:n2}",dataSum.KnittingKg))</th>
+                                <th>@(String.Format("{0:n2}",dataSum.KnittingBalance))</th>
+                                <th>@(String.Format("{0:n2}",dataSum.BatchKg))</th>
+                                <th>@(String.Format("{0:n2}",dataSum.BatchBalance)))</th>
+                                <th>@(String.Format("{0:n2}",dataSum.RibQty))</th>
+                                <th>@(String.Format("{0:n2}",dataSum.FinishedDelivery)) </th>
+                                <th>@(String.Format("{0:n2}",dataSum.FinishFabricDeliveryBalance)) </th>
+                            </tr>
+                        }
+                        @if (itemOrders.FabricWeek != prevWeek)
+                        {
+                            ++sl;
+                        }
+                        prevWeek = itemOrders.FabricWeek;
+                        prevOrderID = itemOrders.OrderID;
+                        prevQuality = itemOrders.Quality;
+
+                    }
+                    //}
+
+
+
+                }
+            </tbody>
+        </table>
+        <div class="text-center">
+            <input type="button" class="btn btn-sm btn-success" value="Excel" id="btnPdf" onclick="exportToExcel()" />
+        </div>
+
+    </div>
+</body>
+</html>
+<script type="text/javascript">
+    function bodyOnload() {
+        setTimeout(function () {
+            $("body").removeClass("loading");
+        }, 1000)
+
+    }
+
+    function exportToExcel() {
+        var htmls = "";
+        var uri = 'data:application/vnd.ms-excel;base64,';
+        var template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>';
+        var base64 = function (s) {
+            return window.btoa(unescape(encodeURIComponent(s)))
+        };
+
+        var format = function (s, c) {
+            return s.replace(/{(\w+)}/g, function (m, p) {
+                return c[p];
+            })
+        };
+
+        htmls = document.getElementById("tblFabricTypeWiseOrderStatus").innerHTML;
+
+        var ctx = {
+            worksheet: 'Worksheet',
+            table: htmls
+        }
+        var link = document.createElement("a");
+        link.download = "FabricTypeWiseOrderStatus.xls";
+        link.href = uri + base64(format(template, ctx));
+        link.click();
+    }
+    $(function () {
+        $(document).ready(function () {
+            $("body").addClass("loading");
+
+        });
+    });
+</script>

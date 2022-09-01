@@ -1,0 +1,219 @@
+﻿@model RG.Application.ViewModel.FiniteScheduler.Setup.MachineMaintenanceItemAssociation.AssociationVM
+
+@{
+    ViewData["Title"] = "Create-Association";
+    ViewData[PageInfo.PageHeader] = "Machine And Maintenance Item Association";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<form asp-action="Create" asp-controller="Style" method="post" id="FrmStyleCreate">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="form-group">
+                <label asp-for="CompanyID" class="label-ajt-sm"></label>
+                <select asp-for="CompanyID" class="form-control form-control-sm" asp-items="Model.DDLCompany"></select>
+                <span asp-validation-for="CompanyID" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="form-group">
+                <label asp-for="LocationID" class="label-ajt-sm"></label>
+                <select asp-for="LocationID" class="form-control form-control-sm" asp-items="Model.DDLLocation"></select>
+                <span asp-validation-for="LocationID" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="form-group">
+                <label asp-for="MachineID" class="label-ajt-sm"></label>
+                <select asp-for="MachineID" class="form-control form-control-sm" asp-items="Model.DDLMachine"></select>
+                <span asp-validation-for="MachineID" class="text-danger"></span>
+            </div>
+        </div>
+    </div>
+    <div class="row m-1">
+        <div class="col-sm-5 col-md-5 col-lg-5">
+            <div class="form-group m-0">
+                <table class="table table-sm table-bordered table-striped" id="tblAllMaintenanceItem">
+                    <thead class="text-center bg-warning">
+                        <tr>
+                            <td width="60%">All Item</td>
+                            <td width="40%">
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><i class="fas fa-search"></i></span>
+                                    </div>
+                                    <input type="text" class="form-control form-control-sm" onkeyup="HttpRequest.SearchTableRowData(this)" placeholder="Search ...">
+                                </div>
+                            </td>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+
+            </div>
+        </div>
+        <div class="col-sm-2 col-md-2 col-lg-2">
+            <div class="form-group text-center">
+                <table class="table table-sm table-bordered table-striped">
+                    <thead class="bg-danger">
+                        <tr><td>Action</td></tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <button type="button" class="btn btn-sm btn-info" id="btnSave">>></button>
+                                <br />
+                                <br />
+                                <button type="button" class="btn btn-sm btn-warning" id="btnRemove"><<</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="col-sm-5 col-md-5 col-lg-5">
+            <div class="form-group">
+                <table class="table table-sm table-bordered table-striped" id="tblMaintenanceItem">
+                    <thead class="text-center bg-info">
+                        <tr>
+                            <td width="60%">Maintenance Item</td>
+                            <td width="40%">
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><i class="fas fa-search"></i></span>
+                                    </div>
+                                    <input type="text" class="form-control form-control-sm" onkeyup="HttpRequest.SearchTableRowData(this)" placeholder="Search ...">
+                                </div>
+                            </td>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+
+            </div>
+        </div>
+    </div>
+</form>
+@section scripts
+{
+    <script> 
+        function GetMachineAndMaintenanceItem() {
+            debugger
+            let machineID = $("#MachineID").val();
+            var data = HttpRequest.AjaxData("GET", "/FiniteScheduler/MachineMaintenanceItemAssociation/GetMachineWiseMaintenanceItemList", { "machineID": machineID });
+            if (data.length > 0) {
+                let allItem = '';
+                let maintenanceItem = '';
+                $.each(data, function (i, v) {
+                    if (v.AssociationID === 0) {
+                        allItem = allItem + `<tr><td colspan="2">
+                                    <input type="checkbox" class="chkItem"/>
+                                    <input type="hidden" class="hdnItem" value="${v.MaintenanceItemID}"/>${v.ItemName}</td>
+                                </tr>`;
+                    } else {
+                        maintenanceItem = maintenanceItem + `<tr><td colspan="2">
+                                    <input type="checkbox" class="chkAssociation">
+                                    <input type="hidden" class="hdnAssociationID" value="${v.AssociationID}"/>${v.ItemName}</td>
+                                    </tr>`
+                    }
+                });
+                $("#tblAllMaintenanceItem tbody").html(allItem);
+                $("#tblMaintenanceItem tbody").html(maintenanceItem);
+            }
+        }
+        function ClearView() {
+            $("#tblAllMaintenanceItem tbody").html("");
+            $("#tblMaintenanceItem tbody").html("");
+        }
+
+        $(document).ready(function () {
+            $("#CompanyID").change(function () {
+                let companyID = $("#CompanyID").val();
+                if (companyID != "") {
+                    HttpRequest.DropDown("GET", "/FiniteScheduler/CommonDropDown/GetDDLCompanyWiseLocation", { "companyID": companyID }, "LocationID", "");
+                }
+
+            });
+            $("#LocationID").change(function () {
+                let locationID = $("#LocationID").val();
+                if (locationID != "") {
+                    HttpRequest.DropDown("GET", "/FiniteScheduler/CommonDropDown/GetDDLLocationWiseMachine", { "locationID": locationID }, "MachineID", "");                    
+                }
+            });
+
+            $("#MachineID").change(function () {
+              
+                let machineID = $("#MachineID").val();
+                if (machineID != "") {
+                    GetMachineAndMaintenanceItem();
+                } else {
+                    ClearView();
+                }
+            });
+
+            $("#btnSave").click(function () {
+                let checkedDataCount = $(".chkItem:checkbox:checked").length;
+                let machineID = $("#MachineID").val();
+                if (checkedDataCount > 0 && machineID != "") {
+                    let data = new Array();
+                    $(".chkItem:checkbox:checked").each(function () {
+                        
+                        let that = $(this);
+                        let maintenanceItemID = that.parent().find('.hdnItem').val();
+
+                        let checkedData = {
+                            MachineID: machineID,
+                            MaintenanceItemID: maintenanceItemID
+                        };
+                        data.push(checkedData);
+                    });
+
+                    HttpRequest.Ajax("POST", '/FiniteScheduler/MachineMaintenanceItemAssociation/Create', { "dataList": data }, saveSuccess, true);
+                }
+            });
+
+            $("#btnRemove").click(function () {
+                debugger;
+                let checkedDataCount = $(".chkAssociation:checkbox:checked").length;
+                let machineID = $("#MachineID").val();
+                if (checkedDataCount > 0 && machineID != "") {
+                    let data = new Array();
+                    $(".chkAssociation:checkbox:checked").each(function () {
+
+                        let that = $(this);
+                        let AssociationID = that.parent().find('.hdnAssociationID').val();
+
+                        let checkedData = {
+                            MachineID: machineID,
+                            AssociationID: AssociationID
+                        };
+                        data.push(checkedData);
+                    });
+
+                    HttpRequest.Ajax("POST", '/FiniteScheduler/MachineMaintenanceItemAssociation/RemoveAssociation', { "removeList": data }, saveSuccess, true);
+                }
+            });
+
+        });
+
+        function saveSuccess(data) {
+         
+            if (data.result == 1) {
+
+                $.alert.open({
+                    type: 'Success',
+                    content: data.message,
+                    callback: function () {
+                        // $("#CompanyID").val("");
+                        GetMachineAndMaintenanceItem();
+                    }
+                });
+            }
+            else {
+                $.alert.open("error", data.message);
+
+            }
+        }
+    </script>
+}
+

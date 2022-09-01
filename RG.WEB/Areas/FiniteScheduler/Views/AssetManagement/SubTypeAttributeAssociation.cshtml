@@ -1,0 +1,286 @@
+﻿@model RG.Application.ViewModel.FiniteScheduler.Setup.SubTypeAttributeAssociation.SubTypeAttributeAssociationVM
+
+@{
+    ViewData["Title"] = "Create-Association";
+    ViewData[PageInfo.PageHeader] = "Sub Type Attribute Association";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<form asp-action="Create" asp-controller="Style" method="post" id="FrmStyleCreate">
+    <div class="row">
+        <div class="col-md-6 col-6">
+            <div class="form-group">
+                <label asp-for="AssetType" class="label-ajt-sm"></label>
+                <select asp-for="AssetType" class="form-control form-control-sm" asp-items="Model.DDLAssetType"></select>
+                <span asp-validation-for="AssetType" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-md-6 col-6">
+            <div class="form-group">
+                <label asp-for="AssetSubType" class="label-ajt-sm"></label>
+                <select asp-for="AssetSubType" class="form-control form-control-sm" asp-items="Model.DDLAssetSubType"></select>
+                <span asp-validation-for="AssetSubType" class="text-danger"></span>
+            </div>
+        </div>
+    </div>
+    <div class="row m-1">
+        <div class="col-sm-5 col-md-5 col-lg-5">
+            <div class="form-group m-0">
+                <table class="table table-sm table-bordered table-striped" id="tblAllAssetAttribute">
+                    <thead class="text-center">
+                        <tr class="bg-warning">
+                            <td width="60%">All Attributes</td>
+                            <td width="40%" colspan="3">
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><i class="fas fa-search"></i></span>
+                                    </div>
+                                    <input type="text" class="form-control form-control-sm" id="search" placeholder="Search ...">
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="bg-dark">
+                            <td>Name</td>
+                            <td>Serial</td>
+                            <td>Visible</td>
+                            <td>Filterable</td>
+                        </tr>
+                    </thead>
+                    <tbody id="tbodyAllAssetAttribute"></tbody>
+                </table>
+
+            </div>
+        </div>
+        <div class="col-sm-1 col-md-1 col-lg-1">
+            <div class="form-group text-center">
+                <table class="table table-sm table-bordered table-striped">
+                    <thead class="bg-danger">
+                        <tr><td>Action</td></tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <button type="button" class="btn btn-sm btn-info" title="Attribute Assign into Sub Asset" id="btnSave"><i class="fas fa-save"></i></button>
+                                <br />
+                                <br />
+                                <button type="button" class="btn btn-sm btn-warning" title="Attribute Remove From Assignable Attribute" id="btnRemove"><i class="fa-solid fa-trash"></i></button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="col-sm-5 col-md-5 col-lg-5">
+            <div class="form-group">
+                <table class="table table-sm table-bordered table-striped" id="tblAssetSubTypeAttribute">
+                    <thead class="text-center bg-info">
+                        <tr>
+                            <td width="60%">Assignable Attribute</td>
+                            <td width="40%" colspan="4">
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><i class="fas fa-search"></i></span>
+                                    </div>
+                                    <input type="text" class="form-control form-control-sm " onkeyup="HttpRequest.SearchTableRowData(this)" placeholder="Search ...">
+                                </div>
+                            </td>
+                        <tr class="bg-dark">
+                            <td>Name</td>
+                            <td>Serial</td>
+                            <td>Visible</td>
+                            <td>Filterable</td>
+                            <td>Action</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+    </div>
+</form>
+@section scripts
+{
+    <script>
+
+        function GetAssetSubTypeWiseAttribute() {
+            let AssetSubTypeID = $("#AssetSubType").val();
+            var data = HttpRequest.AjaxData("GET", "/FiniteScheduler/AssetManagement/GetAssetSubTypeWiseAttribute", { "ID": AssetSubTypeID });
+            if (data.length > 0) {
+                let allAssetAttribute = '';
+                let assetSubTypeAttribute = '';
+                $.each(data, function (i, v) {
+                    if (v.AssociationID === 0) {
+                        allAssetAttribute = allAssetAttribute + `
+                                                <tr>
+                                                    <td colspan="1" style="width: 90%;">
+                                                        <input type="checkbox" class="chkAttribute"  value="${v.AttributeID}"/>
+                                                        <input  type="hidden"  class="hdnItem" value="${v.AttributeID}"/>
+                                                        ${v.AttributeName}
+                                                    </td>
+                                                    <td class="text-center"><input type="text" class="form-control form-control-sm txtSerial" /></td>
+                                                    <td class="text-center"><input type="checkbox" checked class="cheIsVisible" /></td>
+                                                    <td class="text-center"><input type="checkbox" class="cheIsFilterable" /></td>
+                                                </tr>`;
+                    } else {
+                        assetSubTypeAttribute = assetSubTypeAttribute + `<tr><td colspan="1" style="width: 90%;">
+                                                    <input type="checkbox" class="chkAssociation" value="${v.AttributeID}">
+                                                    <input type="hidden" class="hdnAssociationID" value="${v.AssociationID}"/>${v.AttributeName} </td>
+                                                    <td class="text-center"><input value="${v.PrioritySerial}" type="text" class="form-control form-control-sm txtUpSerial text-center" /></td>
+                                                    <td class="text-center"><input type="checkbox" ${v.IsVisible == true ? 'checked' : ''} class="chkItem chkUpIsVisible" /></td>
+                                                    <td class="text-center"><input type="checkbox" ${v.IsFilterable == true ? 'checked' : ''} class="chkItem cheUpIsFilterable" /></td>
+                                                    <td class="text-center"><a title="Update Assignable Attribute" onclick="UpdateAssignAttr(this)" ><i class="fa-solid fa-pen-to-square" style="color:red;cursor: pointer;"></i></a></td>
+                                                    </tr>`
+                    }
+                });
+                $("#tblAllAssetAttribute tbody").html(allAssetAttribute);
+                $("#tblAssetSubTypeAttribute tbody").html(assetSubTypeAttribute);
+            }
+        }
+
+        function ClearView() {
+            $("#tblAllAssetAttribute tbody").html("");
+            $("#tblAssetSubTypeAttribute tbody").html("");
+        }
+
+        $(() => {
+
+
+
+            $("#search").on("keyup", function () {
+                var value = $(this).val();
+
+                $("#tbodyAllAssetAttribute tr").each(function (index) {
+                    if (index !== 0) {
+
+                        $row = $(this);
+
+                        var id = $row.text();
+
+                        if (id.indexOf(value) !== -1) {
+                            $row.show();
+                        }
+                        else {
+                            $row.hide();
+                        }
+                    }
+                });
+            });
+
+
+
+            $("#AssetType").change(function () {
+                AssetSubType();
+            });
+            $("#AssetSubType").change(() => {
+                let assetSubType = $("#AssetSubType").val();
+                if (assetSubType != "") {
+                    GetAssetSubTypeWiseAttribute();
+                } else {
+                    ClearView();
+                }
+            });
+
+            $("#btnSave").click(function () {
+                debugger
+                let checkedDataCount = $(".chkAttribute:checkbox:checked").length;
+                let assetType = $("#AssetType").val();
+                let assetSubType = $("#AssetSubType").val();
+
+
+                if (checkedDataCount > 0 && assetType != "") {
+                    let data = new Array();
+                    $(".chkAttribute:checkbox:checked").each(function () {
+                        let that = $(this);
+                        let attributeID = that.parent().find('.chkAttribute').val();
+                        let prioritySerial = that.parent().parent().find('.txtSerial').val();
+                        let isVisible = that.parent().parent().find('.cheIsVisible').is(":checked") ? true : false;
+                        let isFilterable = that.parent().parent().find('.cheIsFilterable').is(":checked") ? true : false;
+
+                        let checkedData = {
+                            AssetType: assetType,
+                            AttributeID: attributeID,
+                            AssetSubTypeID: assetSubType,
+                            PrioritySerial: prioritySerial,
+                            IsVisible: isVisible,
+                            IsFilterable: isFilterable
+                        };
+                        data.push(checkedData);
+                    });
+                    HttpRequest.Ajax("POST", '/FiniteScheduler/AssetManagement/AssetAttributeAssociationCheckListSave', { "model": data }, saveSuccess, true);
+                }
+            });
+
+            $("#btnRemove").click(function () {
+                debugger;
+                let checkedDataCount = $(".chkAssociation:checkbox:checked").length;
+                let assetType = $("#AssetType").val();
+                if (checkedDataCount > 0 && assetType != "") {
+                    let data = new Array();
+                    $(".chkAssociation:checkbox:checked").each(function () {
+                        let that = $(this);
+                        let AssociationID = that.parent().find('.hdnAssociationID').val();
+                        let checkedData = {
+                            AssociationID: AssociationID
+                        };
+                        data.push(checkedData);
+                    });
+                    HttpRequest.Ajax("POST", '/FiniteScheduler/AssetManagement/AssetAttributeAssociationCheckListRemove', { "removeList": data }, saveSuccess, true);
+                }
+            });
+
+        });
+        const UpdateAssignAttr = (e) => {
+            debugger
+            let assetType = $("#AssetType").val();
+            let assetSubType = $("#AssetSubType").val();
+            let that = $(e);
+            let associationID = that.parent().parent().find('.hdnAssociationID').val();
+            /*let attributeID = that.parent().parent().find('.chkAssociation').val();*/
+            let prioritySerial = that.parent().parent().find('.txtUpSerial').val();
+            let isVisible = that.parent().parent().find('.chkUpIsVisible').is(":checked") ? true : false;
+            let isFilterable = that.parent().parent().find('.cheUpIsFilterable').is(":checked") ? true : false;
+            if (assetSubType > 0 && assetType != "") {
+                let checkedData = {
+                    AssociationID: associationID,
+                    PrioritySerial: prioritySerial,
+                    IsVisible: isVisible,
+                    IsFilterable: isFilterable
+                };
+                HttpRequest.Ajax("POST", '/FiniteScheduler/AssetManagement/AssetAttributeAssociationUpdate', { "UpdateModel": checkedData }, saveSuccess, true);
+            } else {
+                $.alert.open("error", "Ässet Type and Asset Sub Type can't selected");
+            }
+        }
+
+        function saveSuccess(data) {
+            if (data.result == 1) {
+                $.alert.open({
+                    type: 'Success',
+                    content: data.message,
+                    callback: function () {
+                        GetAssetSubTypeWiseAttribute();
+                    }
+                });
+            }
+            else {
+                $.alert.open("error", data.message);
+            }
+        }
+
+        const AssetSubType = () => {
+            let AssetTypeID = $("#AssetType").val();
+            if (AssetTypeID != "") {
+                HttpRequest.DropDown("Get", "/FiniteScheduler/AssetManagement/GetDDLAssetSubType", { AssetTypeID: AssetTypeID }, 'AssetSubType', true);
+            } else {
+                HttpRequest.DropDownDefault("AssetSubType");
+            }
+        }
+
+
+
+
+    </script>
+}
+

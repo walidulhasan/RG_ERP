@@ -1,0 +1,96 @@
+﻿@model RG.Application.ViewModel.EMS.Business.ShipmentReport.WeeklyExportDetailsVM
+@{
+    ViewData[PageInfo.PageTitle] = "Weekly Export Details";
+    ViewData[PageInfo.PageHeader] = "Weekly Export Details";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<form asp-action="" asp-area="EMS" asp-controller="" method="post" id="">
+    @*<div class="row">
+        <div class="col-md-3">
+            <div class="form-group">
+
+                <label class="label-ajt-sm required">Company</label>
+                <select required asp-for="ReportType" asp-items="Model.DDLReportType" class="form-control form-control-sm"></select>
+                <span class="text-danger" asp-validation-for="ReportType"></span>
+            </div>
+        </div>
+    </div>*@
+    <div class="row">
+        <div class="col-md-2">
+            <div class="form-group">
+                <label asp-for="ExFactoryDateFrom" class="label-ajt-sm required"></label>
+                <input asp-for="ExFactoryDateFrom" type="text" class="form-control form-control-sm dateField" readonly />
+                <span class="text-danger" asp-validation-for="ExFactoryDateFrom"></span>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="form-group">
+                <label asp-for="ExFactoryDateTo" class="label-ajt-sm required"></label>
+                <input asp-for="ExFactoryDateTo" type="text" class="form-control form-control-sm dateField" readonly />
+                <span class="text-danger" asp-validation-for="ExFactoryDateTo"></span>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="form-group">
+                <label class="label-ajt-sm required">Company</label>
+                <select required asp-for="CompanyID" asp-items="Model.DDLCompany" class="form-control form-control-sm"></select>
+                <span class="text-danger" asp-validation-for="CompanyID"></span>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="form-group">
+                <label class="label-ajt-sm">Buyer</label>
+                <select required asp-for="BuyerID" asp-items="Model.DDLBuyer" class="form-control form-control-sm"></select>
+                <span class="text-danger" asp-validation-for="BuyerID"></span>
+            </div>
+        </div>
+        <div class="form-group col-md-2">
+            <div class="form-group">
+                <label asp-for="OrderID" class="label-ajt-sm"></label>
+                <select required asp-for="OrderID" class="form-control form-control-sm"></select>
+                <span class="text-danger" asp-validation-for="OrderID"></span>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="text-center">
+        <div class="col-sm-12">
+            <input type="button" class="btn btn-sm btn-success mr-2" value="Show" id="btnShow" onclick="showReport()" />
+
+            @*<input type="button" class="btn btn-sm btn-warning mr-2" value="Excel" id="btnExcel" />*@
+        </div>
+    </div>
+</form>
+@section scripts{
+    <script type="text/javascript">
+        function showReport() {
+            debugger;
+            let companyID = RtnNumber($("#CompanyID").val());
+            let buyerID = RtnNumber($("#BuyerID").val());
+            let orderID = RtnNumber($("#OrderID").val());
+            let exFactoryDateFrom = $("#ExFactoryDateFrom").val();
+            let exFactoryDateTo = $("#ExFactoryDateTo").val();
+
+            if (exFactoryDateFrom != "" && exFactoryDateTo != "") {
+                var urlParm = `exFactoryDateFrom=${encodeURIComponent(exFactoryDateFrom)}&exFactoryDateTo=${encodeURIComponent(exFactoryDateTo)}&CompanyID=${encodeURIComponent(companyID)}&BuyerID=${encodeURIComponent(buyerID)}&OrderID=${encodeURIComponent(orderID)}`;
+                const fullUrl = `/EMS/ShipmentReport/WeeklyExportDetailsReport?${urlParm}`;
+
+                newWindow(fullUrl, "Shipment Status");
+            } else {
+                $.alert.open("Please provide dates");
+            }
+        }
+        $(function () {
+            $("#OrderID").select2({
+                placeholder: 'Please Select',
+                allowClear: true
+            });
+            $("#BuyerID").change(function () {
+
+                HttpRequest.DropDownSelect2Group('GET', '/Maxco/Order/GetOrder', { buyerID: $("#BuyerID").val(), predict: $("#OrderID").val() }, 'OrderID');
+            });
+
+        });
+    </script>
+}

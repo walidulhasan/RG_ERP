@@ -1,0 +1,280 @@
+﻿@model List<RG.Application.Contracts.UserAuthGBS.API.UserInfos.Queries.UserDashboardAccessRM>
+@inject Wangkanai.Detection.Services.IDetectionService DetectionService
+@{
+    ViewData[PageInfo.PageTitle] = "Robintex Group";
+    ViewData[PageInfo.PageHeader] = "Dashboard";
+
+    var employeeCode = User.FindFirstValue(SessionKey.User_EMPLOYEE_Code) ?? "";
+    var employeeName = User.FindFirstValue(SessionKey.EMPLOYEE_NAME) ?? "";
+    var designation = User.FindFirstValue(SessionKey.USER_Designation_Name) ?? "";
+    var department = User.FindFirstValue(SessionKey.USER_Department_Name) ?? "";
+
+    var deviceType = DetectionService.Device.Type.ToString();
+
+
+}
+@*<h1>@DetectionService.Device.Type</h1>
+    <h1>@DetectionService.Browser.Name</h1>
+    <h1>@DetectionService.Engine.Name</h1>
+    <h1>@DetectionService.Platform.Name</h1>
+    <h1>@DetectionService.Crawler.Name</h1>*@
+
+@if (deviceType == "Mobile")
+{
+
+    <div class="row border border-primary">
+        <div class="col-12 col-sm-12 col-md-12 d-flex align-items-stretch flex-column">
+            <div class="card bg-light d-flex flex-fill">
+                <div class="card-header text-muted border-bottom-0 p-2">
+                    Profile
+                </div>
+                <div class="card-body pt-0">
+                    <div class="row">
+                        <div class="col-5 col-sm-2 col-md-2 text-center ">
+                            <img src="~/HRemployee/@(employeeCode).jpg" alt="User Image" class="img-circle" width="100" height="100">
+                        </div>
+                        <div class="col-7 col-sm-10 col-md-10">
+                            <h2 class="lead mb-0"><b>@(employeeName)</b></h2>
+                            @*<p class="text-muted text-sm mb-1"><b>Designation:  </b>@(designation) </p>*@
+                            <p class="text-muted text-sm text-xs mb-0">@(designation) </p>
+                            <p class="text-muted text-sm text-xs">@(department)</p>
+                            @*<ul class="ml-4 mb-0 fa-ul text-muted">
+                                    <li class="small"><span class="fa-li"><i class="fas fa-lg fa-building"></i></span> Address: Demo Street 123, Demo City 04312, NJ</li>
+                                    <li class="small"><span class="fa-li"><i class="fas fa-lg fa-phone"></i></span> Phone #: + 800 - 12 12 23 52</li>
+                                </ul>
+                                    <sub class="text-muted">@(designation)</sub>
+                            *@
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row  border border-primary">
+
+
+        @{ if (Model != null && Model.Any())
+            {
+                foreach (var itemAccessType in Model)
+                {<div class="row">
+                        <div class="col-sm-12 col-md-12">
+                            <div class="card card-dark">
+                                <div class="card-header m-0 p-1">
+                                    <h5 class="card-title">@itemAccessType.AccessTypeName</h5>
+                                </div>
+                                <div class="card-body p-1 mb-0">
+                                    <div class="row">
+                                        @foreach (var item in itemAccessType.DDLAccessItems)
+                                        {
+                                            if (item.Text == "Leave")
+                                            {
+                                                <div class="col-6 col-xl-3 col-md-3 col-sm-6 col-xs-6">
+                                                    <div class="info-box">
+                                                        <span class="info-box-icon bg-info elevation-1" style="border-radius:50%;"><a href="/AlgoHR/EmployeeLeave/Application"><i class="fas fa-calendar-alt"></i></a></span>
+                                                        <div class="info-box-content pr-0">
+                                                            <span class="info-box-text">@item.Text</span>
+                                                            @*<span class="text-bold"> Casual: 10</span>*@
+                                                            @*<span class="text-bold"> Medical: 5</span>*@
+                                                        </div>
+                                                        <!-- /.info-box-content -->
+                                                    </div>
+                                                    <!-- /.info-box -->
+                                                </div>
+                                            }
+                                            if (item.Text == "Leave History")
+                                            {
+                                                <div class="col-6 col-xl-3 col-md-3 col-sm-6 col-xs-6">
+                                                    <div class="info-box mb-3">
+                                                        <span class="info-box-icon bg-blue elevation-1" style="border-radius:50%;"><a href="/AlgoHR/EmployeeLeave/IndividualLeaveHistory"><i class="fas fa-list-alt"></i></a></span>
+
+                                                        <div class="info-box-content pr-0">
+                                                            <span class="info-box-text">@item.Text</span>
+                                                            @*<span class="text-bold">November</span>*@
+                                                            @*<span class="text-bold">PD: 21</span>*@
+                                                        </div>
+                                                        <!-- /.info-box-content -->
+                                                    </div>
+                                                    <!-- /.info-box -->
+                                                </div>
+                                            }
+                                            else if (item.Text == "Attendance")
+                                            {
+                                                <div class="col-6 col-xl-3 col-md-3 col-sm-6 col-xs-6">
+                                                    <div class="info-box mb-3">
+                                                        <span class="info-box-icon bg-danger elevation-1" style="border-radius:50%;"><a href="/AlgoHR/EmployeeAttendance/MyAttendanceInfo"><i class="far fa-clock"></i></a></span>
+
+                                                        <div class="info-box-content pr-0">
+                                                            <span class="info-box-text">@item.Text</span>
+                                                            @*<span class="text-bold">November</span>*@
+                                                            @*<span class="text-bold">PD: 21</span>*@
+                                                        </div>
+                                                        <!-- /.info-box-content -->
+                                                    </div>
+                                                    <!-- /.info-box -->
+                                                </div>
+                                            }
+                                            else if (item.Text == "Salary")
+                                            {
+                                                <div class="col-6 col-xl-3 col-md-3 col-sm-6 col-xs-6">
+                                                    <div class="info-box mb-3">
+                                                        <span class="info-box-icon bg-success elevation-1" style="border-radius:50%;"><a href="~/AlgoHR/PaySlip/Salary"><i class="fas fa-hand-holding-usd"></i></a></span>
+
+                                                        <div class="info-box-content">
+                                                            <span class="info-box-text">@item.Text</span>
+                                                            @*<span class="info-box-number">760</span>*@
+                                                        </div>
+                                                        <!-- /.info-box-content -->
+                                                    </div>
+                                                    <!-- /.info-box -->
+                                                </div>
+                                            }
+                                            else if (item.Text == "Outside Duty")
+                                            {
+                                                <div class="col-6 col-xl-3 col-md-3 col-sm-6 col-xs-6">
+                                                    <div class="info-box mb-3">
+                                                        <span class="info-box-icon bg-purple elevation-1" style="border-radius:50%;"><a href="~/AlgoHR/OutsideDuty/Application"><i class="fas fa-external-link-alt"></i></a></span>
+
+                                                        <div class="info-box-content">
+                                                            <span class="info-box-text">@item.Text</span>
+
+                                                        </div>
+
+                                                    </div>
+
+                                                </div>
+                                            }
+                                            else if (item.Text == "Training")
+                                            {
+                                                <div class="col-6 col-xl-3 col-md-3 col-sm-6 col-xs-6">
+                                                    <div class="info-box mb-3">
+                                                        <span class="info-box-icon elevation-1" style="border-radius: 50%; background-color: #d5a38bfa"><i class="fa-solid fa-chalkboard-user"></i></span>
+                                                        <div class="dropdown mt-4">
+                                                            <button class="btn dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                                                           Training
+                                                            </button>
+                                                            <div class="dropdown-menu">
+                                                                <a class="dropdown-item" href="~/AlgoHR/Training/UserTraining">Training List</a> 
+                                                                <a class="dropdown-item" href="~/AlgoHR/Training/TrainingCalendar">Training Calendar</a>
+                                                             
+                                                            </div>
+                                                        </div>
+                                                        @*<span class="info-box-icon elevation-1" style="border-radius: 50%; background-color: #d5a38bfa"><a href="~/AlgoHR/Training/UserTraining"><i class="fa-solid fa-chalkboard-user"></i></a></span>
+        <div class="info-box-content">
+            <span class="info-box-text">@item.Text</span>
+        </div>*@
+
+                                                    </div>
+
+                                                </div>
+                                            }
+                                          
+                                            else
+                                            {
+                                                @*<div class="col-6 col-xl-3 col-md-3 col-sm-6 col-xs-6">
+                    <div class="info-box mb-3">
+                        <span class="info-box-icon bg-warning elevation-1" style="border-radius:50%;"><i class="fas fa-users"></i></span>
+
+                        <div class="info-box-content">
+                            <span class="info-box-text">New Members</span>
+
+                        </div>
+                         /.info-box-content
+                    </div>
+                     /.info-box
+                </div>*@
+                                            }
+
+                                        }
+                                        @*<div class="col-6 col-xl-3 col-md-3 col-sm-6 col-xs-6" title="On Going">
+            <div class="info-box mb-3">
+                <span class="info-box-icon bg-warning elevation-1" style="border-radius:50%;"><i class="fas fa-exchange-alt"></i></span>
+
+                <div class="info-box-content">
+                    <span class="info-box-text">Transfer</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-xl-3 col-md-3 col-sm-6 col-xs-6" title="On Going">
+            <div class="info-box mb-3">
+                <span class="info-box-icon bg-blue elevation-1" style="border-radius:50%;"><i class="fas fa-retweet"></i></span>
+
+                <div class="info-box-content">
+                    <span class="info-box-text">Requisition</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-xl-3 col-md-3 col-sm-6 col-xs-6" title="On Going">
+            <div class="info-box mb-3">
+                <span class="info-box-icon bg-success elevation-1" style="border-radius:50%;"><i class="fas fa-user-shield"></i></span>
+
+                <div class="info-box-content">
+                    <span class="info-box-text">PMS</span>
+                </div>
+            </div>
+        </div>*@
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+
+
+        }
+    </div>
+
+}
+
+@section scripts{
+    <!--<script type="text/javascript">
+
+        $(function () {-->
+
+
+        @*if ('@Model[0].IsMaxcoTestServer' === 'True') {
+                $('.isMaxcoInDevMode').removeClass('d-none');
+        } else {
+                $('.isMaxcoInDevMode').addClass('d-none');
+            }*@
+
+            <!--if ('@Model[0].IsMaxcoTestServer' === 'True') {
+                $('.isMaxcoInDevMode').removeClass('d-none');
+        } else {
+                $('.isMaxcoInDevMode').addClass('d-none');
+            }
+            if ('@Model[0].IsMaterialsManagementTestServer' === 'True') {
+                $('.isMaterialsManagementInDevMode').removeClass('d-none');
+        } else {
+                $('.isMaterialsManagementInDevMode').addClass('d-none');
+            }
+            if ('@Model[0].IsFiniteSchedulerTestServer' === 'True') {
+                $('.isFiniteSchedulerInDevMode').removeClass('d-none');
+        } else {
+                $('.isFiniteSchedulerInDevMode').addClass('d-none');
+            }
+            if ('@Model[0].IsEmbroTestServer' === 'True') {
+                $('.isEmbroInDevMode').removeClass('d-none');
+        } else {
+                $('.isEmbroInDevMode').addClass('d-none');
+        }
+        if ('@Model[0].IsAOPTestServer' === 'True') {
+            $('.isAOPInDevMode').removeClass('d-none');
+        } else {
+            $('.isAOPInDevMode').addClass('d-none');
+            }
+            if ('@Model[0].IsEMSTestServer' === 'True') {
+                $('.isEMSInDevMode').removeClass('d-none');
+        } else {
+                $('.isEMSInDevMode').addClass('d-none');
+            }
+            if ('@Model[0].IsAlgoHRTestServer' === 'True') {
+                $('.isAlgoHRInDevMode').removeClass('d-none');
+        } else {
+                $('.isAlgoHRInDevMode').addClass('d-none');
+        }
+    });
+    </script>-->
+}

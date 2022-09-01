@@ -1,0 +1,403 @@
+﻿@model RG.Application.ViewModel.Maxco.Setup.CuttingAdditionFabricRequiredVM
+@{
+    ViewData[PageInfo.PageTitle] = "Create";
+    ViewData[PageInfo.PageHeader] = "Add Cutting Additional Fabric";
+    Layout = "~/Views/Shared/_Layout.cshtml";Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<form asp-action="Create" asp-area="Maxco" asp-controller="CuttingAdditionFabricRequired" method="post" id="FrmCuttingAdditionalFabric">
+    <div class="row">
+        <div class="col-md-3">
+            <div class="form-group">
+                <input asp-for="ID" type="hidden" />
+                <label class="label-ajt-sm required">Buyer</label>
+                <select required asp-for="BuyerID" asp-items="Model.DDLBuyer" class="form-control form-control-sm"></select>
+                <span class="text-danger" asp-validation-for="BuyerID"></span>
+            </div>
+        </div>
+        <div class="form-group col-md-3">
+            <div class="form-group">
+                <label asp-for="OrderID" class="label-ajt-sm required"></label>
+                <select required asp-for="OrderID" class="form-control form-control-sm"></select>
+                <span class="text-danger" asp-validation-for="OrderID"></span>
+            </div>
+        </div>
+        <div class="form-group col-md-2">
+            <div class="form-group">
+                <label asp-for="RequisitionDate" class="label-ajt-sm required"></label>
+                <div class="input-group">
+                    <input required asp-for="RequisitionDate" readonly class="datepic form-control form-control-sm dateField " />
+                    <div class="input-group-append">
+                        <span class="input-group-text"><i class="fa fa-calendar" aria-hidden="true"></i></span>
+                    </div>
+                </div>
+                <span class="text-danger" asp-validation-for="RequisitionDate"></span>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="form-group">
+                <label asp-for="RequisitionQuantity" class="label-ajt-sm required"></label>
+                <input  value="" asp-for="RequisitionQuantity" class="form-control form-control-sm" type="number" />
+                <span class="text-danger" asp-validation-for="RequisitionQuantity"></span>
+            </div>
+        </div>
+
+        <div class="col-md-2">
+            <div class="form-group">
+                <label asp-for="PlanQuantity"></label>
+                <input asp-for="PlanQuantity" type="number" class="form-control form-control-sm" />
+                <span class="text-danger" asp-validation-for="PlanQuantity"></span>
+            </div>
+        </div>
+    </div>
+    @*<div class="row">
+        <div class="col-3">
+            <div class="form-group">
+                <label asp-for="StandardEfficiencyPercent" class="label-ajt-sm "></label>
+                <input  value="" asp-for="StandardEfficiencyPercent" class="form-control form-control-sm" type="number" />
+                <span class="text-danger" asp-validation-for="StandardEfficiencyPercent"></span>
+            </div>
+        </div>
+        <div class="col-3">
+            <div class="form-group">
+                <label asp-for="OverAllEfficiencyPercent" class="label-ajt-sm"></label>
+                <input  value="" asp-for="OverAllEfficiencyPercent" class="form-control form-control-sm" type="number" />
+                <span class="text-danger" asp-validation-for="OverAllEfficiencyPercent"></span>
+            </div>
+        </div>
+    </div>*@
+    <div class="text-center">
+        <div class="col-sm-12">
+            <input type="button" class="btn btn-sm btn-success mr-2" value="Save" id="btnSave" />
+
+            <input type="button" class="btn btn-sm btn-warning d-none" value="Clear" id="btnClear" onclick="Clear()" />
+        </div>
+    </div>
+</form>
+
+<div>
+    <i class="far fa-list-alt" aria-hidden="true"></i>
+    <span style="font-weight: bold">Search Cutting Additional Fabric</span>
+    <hr />
+</div>
+
+
+<div class="row">
+    <div class="col-md-3">
+        <div class="form-group">
+
+            <label class="label-ajt-sm required">Buyer</label>
+            <select required asp-for="SearchBuyerID" asp-items="Model.DDLBuyer" class="form-control form-control-sm"></select>
+            <span></span>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="form-group">
+            <label asp-for="SearchOrderID" class="label-ajt-sm required"></label>
+            <select required asp-for="SearchOrderID" class="form-control form-control-sm"></select>
+            <span asp-validation-for="SearchOrderID"></span>
+        </div>
+    </div>
+    <div class="form-group col-md-2">
+        <div class="form-group">
+            <label asp-for="FormDate" class="label-ajt-sm required"></label>
+            <div class="input-group">
+                <input required asp-for="FormDate" type="text" name="FormDate" readonly class="datepic form-control form-control-sm dateField " />
+                <div class="input-group-append">
+                    <span class="input-group-text"><i class="fa fa-calendar" aria-hidden="true"></i></span>
+                </div>
+            </div>
+            <span asp-validation-for="FormDate"></span>
+        </div>
+    </div>
+    <div class="form-group col-md-2">
+        <div class="form-group">
+            <label asp-for="ToDate" class="label-ajt-sm required"></label>
+            <div class="input-group">
+                <input required asp-for="ToDate" type="text" name="ToDate" readonly class="datepic form-control form-control-sm dateField " />
+                <div class="input-group-append">
+                    <span class="input-group-text"><i class="fa fa-calendar" aria-hidden="true"></i></span>
+                </div>
+            </div>
+            <span asp-validation-for="ToDate"></span>
+        </div>
+    </div>
+
+    <div class="col-sm-2">
+        <label>&nbsp;</label>
+        <div class="form-group">
+            <button type="button" class="btn btn-sm btn-success" id="btnSearch">Search</button>
+        </div>
+    </div>
+
+
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div id="grid">
+
+        </div>
+    </div>
+</div>
+@section scripts{
+    <script type="text/javascript">
+
+        $(function () {
+            GetCuttingAdditionFabricRequiredList();
+            $("#OrderID,#SearchOrderID").select2({
+                placeholder: 'Please Select',
+                allowClear: true
+            });
+            $("#BuyerID").change(function () {
+
+                HttpRequest.DropDownSelect2Group('GET', '/Maxco/Order/GetOrder', { buyerID: $("#BuyerID").val(), predict: $("#OrderID").val() }, 'OrderID');
+            });
+            $("#SearchBuyerID").change(function () {
+                debugger
+                HttpRequest.DropDownSelect2Group('GET', '/Maxco/Order/GetOrder', { buyerID: $("#SearchBuyerID").val(), predict: $("#SearchOrderID").val() }, 'SearchOrderID');
+            });
+
+            $("#btnSave").click(function () {
+                debugger
+                var msg = "";
+                let caFabricID = $("#ID").val();
+                if ($("#FrmCuttingAdditionalFabric").valid()) {
+                    let orderId = $("#OrderID").val();
+                    let requisitionDate = $("#RequisitionDate").val();
+                    let requisitionQuantity = $("#RequisitionQuantity").val();
+                    //let standardEfficiencyPercent = $("#StandardEfficiencyPercent").val();
+                    //let overAllEfficiencyPercent = $("#OverAllEfficiencyPercent").val();
+                    let requisitionQuantityNum = parseFloat(requisitionQuantity)
+                    const planQuantity = $("#PlanQuantity").val();
+                    const planQuantityNum = parseFloat(planQuantity);
+                    //// Plan quantity must be less than require quantity
+                    if (planQuantityNum > requisitionQuantityNum) {
+
+                       // $.alert.open('warning', "Plan qunati aklsdf asdlflk;sadj f;kl");
+                        $.alert.open('warning', "Plan Quantity must be less than Required Quantity");
+                        $("#PlanQuantity").focus();
+                        return false;
+                    }
+                    if (planQuantityNum <= requisitionQuantityNum) { 
+                    var caFabricObj = {
+                        ID: caFabricID,
+                        OrderID: orderId,
+                        RequisitionDate: requisitionDate,
+                        RequisitionQuantity: requisitionQuantity,
+                        PlanQuantity: planQuantity
+                        //StandardEfficiencyPercent: standardEfficiencyPercent,
+                        //OverAllEfficiencyPercent: overAllEfficiencyPercent
+                    }
+                    if (caFabricObj.ID > 0) {
+                        HttpRequest.Ajax("POST", '/Maxco/CuttingAdditionFabricRequired/Update', { "dtm": caFabricObj }, saveSuccess, true);
+                       
+
+                    } else {
+                        HttpRequest.Ajax("POST", '/Maxco/CuttingAdditionFabricRequired/Create', { "model": caFabricObj }, saveSuccess, true);
+                       
+                        }
+                    } else { 
+                        $.alert.open('warning', "Plan Quantity must be less than Required Quantity");
+                        $("#PlanQuantity").focus();
+                        return false;
+
+                    }
+                }
+            });
+            $("#btnSearch").click(function () {
+                GetCuttingAdditionFabricRequiredList();
+            });
+        })
+        function saveSuccess(data) {
+            if (data.result == 1) {
+                $.alert.open({
+                    type: 'Success',
+                    content: data.message,
+                    callback: function () {
+                        $("#btnSave").val("Save");
+                        Clear();
+                        GetCuttingAdditionFabricRequiredList();
+                    }
+                });
+            }
+            else {
+                $.alert.open("error", data.message);
+            }
+        }
+
+        function Clear() {
+            /*$('#FrmCuttingAdditionalFabric').trigger("reset");*/
+            $("#ID").val("");
+            /*$("#OrderID").val("");*/
+            $("#BuyerID").val("").trigger("change");
+            $("#RequisitionDate").val("@DateTime.Now.ToString("dd-MMM-yyyy")");
+            $("#RequisitionQuantity").val("");
+            $("#PlanQuantity").val("");
+            $("#StandardEfficiencyPercent").val("");
+            $("#OverAllEfficiencyPercent").val("");
+            $("#btnSave").val("Save");
+            $("#btnClear").addClass('d-none');
+        }
+
+        function GetCuttingAdditionFabricRequiredList() {
+            debugger
+            let buyerID = $("#SearchBuyerID").val();
+            let orderID = $("#SearchOrderID").val();
+
+            let dateFrom = $("#FormDate").val();
+            let dateTo = $("#ToDate").val();
+
+            var dataGrid = $("#grid").dxDataGrid({
+                height: 450,
+                remoteOperations: { paging: true, filtering: true, sorting: true, grouping: true, summary: true, groupPaging: true },
+                dataSource: DevExpress.data.AspNet.createStore({
+                    key: "ID",
+                    loadUrl: "/Maxco/CuttingAdditionFabricRequired/GetCuttingAdditionFabricRequiredList",
+                    loadParams: {
+                        orderID: orderID,
+                        buyerID: buyerID,
+                        dateFrom: dateFrom,
+                        dateTo:dateTo
+                    }
+                }),
+                hoverStateEnabled: true,
+
+                showBorders: true,
+                columnAutoWidth: true,
+                filterRow: { visible: true },
+                pager: { visible: true, showInfo: true, allowedPageSizes: [10, 20, 50, 100, 500], showPageSizeSelector: true, },
+                paging: { pageSize: 10 },
+                selection: { mode: 'single' },
+                export: {
+                    //   enabled: true
+                },
+                columns: [
+                    {
+                        width: "auto",
+                        caption: "SL #",
+                        alignment: 'center',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        },
+                        cellTemplate: function (container, e) {
+                            var index = dataGrid.pageIndex() * dataGrid.pageSize() + e.rowIndex + 1;
+                            container.text(index);
+                        }
+
+                    },
+                    {
+                        dataField: "ID",
+                        visible: false,
+
+                    },
+
+                    {
+                        dataField: "BuyerName",
+                        alignment: 'center',
+                        caption: 'Buyer',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+
+                    },
+                    {
+                        dataField: "OrderNo",
+                        alignment: 'center',
+                        caption: 'Order',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+
+                    },
+                    {
+                        dataField: "RequisitionDateStr",
+                        alignment: 'center',
+                        caption: 'Req. Date',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+
+                    },
+                    {
+                        dataField: "RequisitionQuantity",
+                        alignment: 'center',
+                        caption: 'Requisition Qty',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+
+                    }, {
+                        dataField: "PlanQuantity",
+                        alignment: 'center',
+                        caption: 'Planing Qty',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+                    },
+                    //{
+                    //    dataField: "StandardEfficiencyPercent",
+                    //    alignment: 'center',
+                    //    caption: 'Standard Eff. %',
+                    //    headerCellTemplate: function (header, info) {
+                    //        $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                    //    }
+                    //},
+                    //{
+                    //    dataField: "OverAllEfficiencyPercent",
+                    //    alignment: 'center',
+                    //    caption: 'OverAll Eff. %',
+                    //    headerCellTemplate: function (header, info) {
+                    //        $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                    //    }
+                    //},
+                    {
+                        caption: 'Action',
+                        alignment: 'center',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        },
+                        cellTemplate: function (container, options) {
+
+                            var returnText = '<button class="btn btn-xs btn-warning"><i class="fa fa-edit"></i> Edit</button>';
+                            //$(returnText).appendTo(container);
+                            $(returnText).on('dxclick', function () {
+                                EditMachine(options.data);
+                            }).appendTo(container);
+
+                            var returnText = '<span>&nbsp</span><button class="btn btn-xs btn-danger"><i class="fa fa-trash"></i> Delete</button>';
+                            returnText = returnText + '</div>';
+                            $(returnText).on('dxclick', function () {
+                                DeleteRow(options.data.ID);
+                            }).appendTo(container);
+                        }
+                    }
+                ]
+
+            }).dxDataGrid("instance");
+        }
+        function DeleteRow(ID) {
+            $.alert.open('confirm', 'Are you sure to delete this record?', function (button) {
+                if (button == 'yes')
+                    HttpRequest.Ajax("GET", '/Maxco/CuttingAdditionFabricRequired/Remove', { "ID": ID }, saveSuccess, true);
+            });
+        }
+
+        function EditMachine(data) {
+            debugger
+            $("#ID").val(data.ID);
+            $("#BuyerID").val(data.BuyerId).trigger("change");
+
+            $("#RequisitionDate").val(data.RequisitionDateStr);
+            $("#RequisitionQuantity").val(data.RequisitionQuantity);
+            $("#PlanQuantity").val(data.PlanQuantity);
+            //$("#StandardEfficiencyPercent").val(data.StandardEfficiencyPercent);
+            //$("#OverAllEfficiencyPercent").val(data.OverAllEfficiencyPercent);
+            $("#btnSave").val("Update");
+            $("#btnClear").removeClass('d-none');
+            var newOption = new Option(data.OrderNo, data.OrderID, false, false);
+            $('#OrderID').append(newOption).trigger('change');
+
+        }
+
+    </script>
+}

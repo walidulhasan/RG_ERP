@@ -1,0 +1,64 @@
+﻿@model RG.Application.ViewModel.MDSir.CMBLPurchaseOrder.POSearchVM
+@{
+    ViewData[PageInfo.PageTitle] = "PO Search";
+    ViewData[PageInfo.PageHeader] = "PO Search";
+    Layout = "~/Views/Shared/_LayoutMDSir.cshtml";
+}
+<form id="AspNetRolesCreate">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="form-group">
+                <label asp-for="CompanyID" class="label-ajt-sm"></label>
+                <select asp-for="CompanyID" asp-items="Model.DDLCompany" class="form-control form-control-sm"></select>
+                <span asp-validation-for="CompanyID" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div class="form-group">
+                <label asp-for="POID" class="label-ajt-sm"></label>
+                <select asp-for="POID" asp-items="Model.DDLPO" class="form-control form-control-sm"></select>
+                <span asp-validation-for="POID" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <label>&nbsp;</label>
+            <div class="form-group">
+                <button type="button" class="btn btn-sm btn-success" id="btnShow">Show</button>
+            </div>
+        </div>
+    </div>    
+   
+</form>
+@section scripts{
+    <script type="text/javascript">
+        const GetDDLPO = (companyID) => {
+            HttpRequest.DropDownSelect2Group("GET", '/MDSir/CMBLPurchaseOrder/GetDDLPO', { companyID: companyID, predict: $("#POID").val() }, "POID");
+
+        }
+        $(function () {
+            $("#POID").select2();
+            if ('@Model.CompanyID'>0) {
+                GetDDLPO('@Model.CompanyID');
+            }
+           
+            $("#CompanyID").change(function () {
+                let companyID = $("#CompanyID").val();
+                GetDDLPO(companyID);
+            });
+
+            
+            $("#btnShow").click(function () {
+
+                let poid = $("#POID").val()
+
+                if (poid != "") {
+
+                    let action = `/MDSir/CMBLPurchaseOrder/POReport?poid=${poid}`;
+                    newWindow(action, "PO Report");
+                } else {
+                    $.alert.open('warning', 'Please provide required search data');
+                }
+            });
+        })
+    </script>
+}

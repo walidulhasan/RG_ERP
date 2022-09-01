@@ -1,0 +1,343 @@
+﻿@model RG.Application.ViewModel.MaterialsManagement.Business.YarnStockReports.YarnStockReportVM
+@{
+    ViewData[PageInfo.PageHeader] = "Yarn Stock Report";
+    ViewData[PageInfo.PageTitle] = "Yarn Stock Report";
+    Layout = null;
+
+}
+<!doctype html>
+<html lang="en">
+<head>
+    <style type="text/css">
+        .tableFixHead {
+            overflow-y: auto;
+            max-height: auto;
+        }
+
+            .tableFixHead thead {
+                position: sticky;
+                top: 0;
+                background: #eee;
+            }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        .txtAlignCenter {
+            text-align: center;
+        }
+
+        .trAllocationInfo {
+            overflow-y: scroll;
+        }
+    </style>
+
+</head>
+<body>
+
+
+    @*<div class="row m-0">
+        <div class="col-md-5 col-5 col-sm-5 col-lg-5">
+            <div class="form-check">
+                <span id="spnWithAllTransaction">
+                    <input type="checkbox" class="form-check-input" name="WithAllTransaction" id="WithAllTransaction" /> All Transaction
+                </span>
+                <br />
+                <span id="spnShowEmptyClosing">
+                    <input type="checkbox" class="form-check-input" name="ShowEmptyClosing" id="ShowEmptyClosing" /> Show Empty Closing Lot
+                </span>
+            </div>
+        </div>
+    </div>*@
+    <div class="row m-0">
+        <div class="col-md-12 col-12 col-sm-3 col-lg-12">
+            <div class="input-group">
+                <div class="col-3 col-sm-3 col-md-3 col-lg-3 p-0">
+                    <div class="form-group">
+                        <label asp-for="DateForm" class="col-form-label-sm m-0 required"></label>
+                        <input asp-for="DateForm" type="text" class="form-control form-control-sm dateField" placeholder="Date From" readonly>
+                        <span asp-validation-for="DateForm" class="span-form-validation"></span>
+                    </div>
+                </div>
+
+                <div class="col-3 col-sm-3 col-md-3 col-lg-3 p-0 p-0 pl-2">
+                    <div class="form-group">
+                        <label asp-for="DateTo" class="col-form-label-sm m-0 required"></label>
+                        <input asp-for="DateTo" type="text" class="form-control form-control-sm dateField" placeholder="Date To" readonly>
+                        <span class="span-form-validation"></span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <div class="row m-0">
+        <div class="col-sm-3 col-md-3 col-lg-3">
+            <div class="form-group">
+                <button type="button" class="btn btn-sm btn-warning mr-1" value="Show" id="btnShow">
+                    <i hidden class="fas fa-spinner fa-pulse "></i> Show
+                </button>
+                <input type="button" class="btn btn-sm btn-primary" value="Excel" id="btnExcel" onclick="exportToExcel()" />
+            </div>
+        </div>
+    </div>
+    <div aria-controls="hdtbMenus" class="row d-flex justify-content-end m-0">
+        <div class="input-group col-sm-5 col-lg-5 mb-2 ">
+
+            <input id="btnSearch" type="text" class="form-control form-control-sm" placeholder="Search ...">
+            <div class="input-group-prepend">
+                <span class="input-group-text"><i class="fas fa-search"></i></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="row m-0">
+
+        <div class="col-sm-12 tableFixHead">
+            <table class="table table-sm table-stripprd table-bordered text-xs text-center" id="tblYarnStockWithRack">
+
+                <thead class="bg-dark">
+                    <tr>
+
+                        <th colspan="7"></th>
+                        <th colspan="2" class="text-center">Opening</th>
+                        <th colspan="2" class="txtAlignCenter">Receive</th>
+                        <th colspan="2" class="txtAlignCenter">Issue</th>
+                        <th colspan="3" class="txtAlignCenter">Closing</th>
+
+                    </tr>
+                    <tr>
+                        <th>SL#</th>
+                        <th>Company Name</th>
+                        <th>Supplier</th>
+                        <th>Yarn Count</th>
+                        <th>Yarn Composition</th>
+                        <th>Lot No.</th>
+                        <th>Attribute Instance</th>
+                        <th>op. Quantity</th>
+                        <th>op. Value</th>
+                        <th>Rcv. Quantity</th>
+                        <th>RCV Value</th>
+                        <th>Iss. Quantity</th>
+                        <th>Iss. Value</th>
+                        <th>Closing Quantity</th>
+                        <th>Closing Value</th>
+                        <th>Rate</th>
+                    </tr>
+                </thead>
+                <tbody id="tblYarnStockSummaryWithRack">
+                </tbody>
+                <tfoot id="tFootForTotal">
+
+                </tfoot>
+            </table>
+        </div>
+    </div>
+</body>
+</html>
+
+<script type="text/javascript">
+    $(function () {
+        Search();
+        $("#ReportType").change(function () {
+            ShowreportType();
+        });
+
+        $("#btnShow").click(function () {
+            $(this).prop('disabled', true);
+            $(this).find('i').prop('hidden', false);
+            setTimeout(function () {
+                ShowMasterAndChild();
+            }, 1000);
+        });
+
+        $(".dateField").datepicker(
+            {
+                dateFormat: "dd-M-yy",
+                showAnim: "scale",
+                changeMonth: true,
+                yearRange: "2000:2050",
+                changeYear: true
+            });
+
+    });
+
+    function ShowMasterAndChild (){
+
+        let DateForm = $("#DateForm").val();
+        let DateTo = $("#DateTo").val();
+        let WithAllTransaction = $('#WithAllTransaction').is(':checked') ? 1 : 0;
+        let ShowEmptyClosing = $("#ShowEmptyClosing").is(':checked') ? 1 : 0;
+        let data;
+        if (DateForm != "" & DateTo != "") {
+
+            data = HttpRequest.AjaxData("GET", "/MaterialsManagement/StockReport/GetYarnStockSummaryWithRack", { "dateForm": DateForm, 'dateTo': DateTo, 'withAllTransaction': WithAllTransaction, 'showEmptyClosing': ShowEmptyClosing });
+
+        } else {
+            $.alert.open('alert', "Date Can't Empty!!!");
+            $("#btnShow").prop('disabled', false);
+            $("#btnShow").find('i').prop('hidden', true);
+        }
+
+        if (data.length > 0) {
+
+            let tableTr = ``;
+            let totalClosingQuantity = 0;
+            let totalClosingValue = 0;
+            let totalIssQuantity = 0;
+            let totalIssValue = 0;
+            let totalRcvQuantity = 0;
+            let totalRCVValue = 0;
+            let totalopQuantity = 0;
+            let totalopValue = 0;
+
+            $.each(data, function (i, v) {
+                totalClosingQuantity += v.ClosingQuantity;
+                totalClosingValue += v.ClosingValue;
+                totalIssQuantity += v.IssQuantity;
+                totalIssValue += v.IssValue;
+                totalRcvQuantity += v.RcvQuantity;
+                totalRCVValue += v.RCVValue;
+                totalopQuantity += v.opQuantity;
+                totalopValue += v.opValue;
+
+                let yarnSubRackAllocationBalanceTr = ``;
+                if (v.YarnSubRackAllocationBalance.length > 0) {
+                    $.each(v.YarnSubRackAllocationBalance, function (l, m) {
+                        yarnSubRackAllocationBalanceTr += `
+                                                                               <tr style='font-size:11px;'>
+                                                                                   <td class='text-center'>${++l}</td>
+                                                                                   <td>${m.BuildingName}</td>
+                                                                                   <td>${m.FloorName}</td>
+                                                                                   <td>${m.RackName}</td>
+                                                                                   <td>${m.RackShortName}</td>
+                                                                                   <td>${m.SubRackName}</td>
+                                                                                   <td>${m.LotNo}</td>
+                                                                                   <td>${m.BalanceQuantity}</td>
+                                                                                </tr>`;
+                    });
+                }
+                tableTr += `<tr class="trYarnIfo">
+                                                     <td>${i + 1}<a href="Javascript:void(0);" onclick="ShowDetails(this,${i})">   <i class="fa-solid fa-angles-right"></i></a></td>
+                                                     <td>${v.CompanyName}</td>
+                                                     <td>${v.Supplier}</td>
+                                                     <td>${v.YarnCount}</td>
+                                                     <td>${v.YarnComposition}</td>
+                                                     <td>${v.LotNo}</td>
+                                                     <td>${v.AttributeInstanceID}</td>
+                                                     <td>${v.opQuantity}</td>
+                                                     <td>${v.opValue}</td>
+                                                     <td>${v.RcvQuantity}</td>
+                                                     <td>${v.RCVValue}</td>
+                                                     <td>${v.IssQuantity}</td>
+                                                     <td>${v.IssValue}</td>
+                                                     <td>${v.ClosingQuantity}</td>
+                                                     <td>${v.ClosingValue}</td>
+                                                     <td>${v.Rate}</td>
+                                                 </tr>
+                                                 <tr class='trAllocationInfo d-none' data-id=allocation_${i}>
+                                                      <td></td>
+                                                       <td colspan=15>
+                                                           <table class="table table-sm table-stripprd table-bordered text-xs text-center mb-0">
+                                                                  <thead class="bg-light" style='font-size:10px;'>
+                                                                         <tr>
+                                                                             <th>SL</th>
+                                                                             <th>Building</th>
+                                                                             <th>Floor</th>
+                                                                             <th>Rack</th>
+                                                                             <th>Rack Short Name</th>
+                                                                             <th>Sub Rack</th>
+                                                                             <th>Lot No</th>
+                                                                             <th>Balance Quantity</th>
+                                                                          </tr>
+                                                                   </thead>
+                                                                   <tbody>
+                                                                       ${yarnSubRackAllocationBalanceTr}
+                                                                   </tbody>
+                                                          </table>
+                                                       </td>
+                                               </tr>`;
+            });
+            let tfootForTotal = `<tr class="bg-dark text-white">
+                                                     <td style="background-color:#00001a;color:#ffffff;text-align: center; font-weight: bold;" colspan="7">Total</td>
+                                                     <td style="background-color:#00001a;color:#ffffff;text-align: center; font-weight: bold;">${totalopQuantity.toLocaleString({ minimumFractionDigits: 2 })}</td>
+                                                     <td style="background-color:#00001a;color:#ffffff;text-align: center; font-weight: bold;">${totalopValue.toLocaleString({ minimumFractionDigits: 2 })}</td>
+                                                     <td style="background-color:#00001a;color:#ffffff;text-align: center; font-weight: bold;">${totalRcvQuantity.toLocaleString({ minimumFractionDigits: 2 })}</td>
+                                                     <td style="background-color:#00001a;color:#ffffff;text-align: center; font-weight: bold;">${totalRCVValue.toLocaleString({ minimumFractionDigits: 2 })}</td>
+                                                     <td style="background-color:#00001a;color:#ffffff;text-align: center; font-weight: bold;">${totalIssQuantity.toLocaleString({ minimumFractionDigits: 2 })}</td>
+                                                     <td style="background-color:#00001a;color:#ffffff;text-align: center; font-weight: bold;">${totalIssValue.toLocaleString({ minimumFractionDigits: 2 })}</td>
+                                                     <td style="background-color:#00001a;color:#ffffff;text-align: center; font-weight: bold;">${totalClosingQuantity.toLocaleString({ minimumFractionDigits: 2 })}</td>
+                                                     <td style="background-color:#00001a;color:#ffffff;text-align: center; font-weight: bold;">${totalClosingValue.toLocaleString({ minimumFractionDigits: 2 })}</td>
+                                                     <td style="background-color:#00001a;color:#ffffff;text-align: center; font-weight: bold;"></td>
+                                                 </tr>`
+            $("#tblYarnStockSummaryWithRack").html(tableTr);
+            $("#tFootForTotal").html(tfootForTotal);
+            $("#btnShow").prop('disabled', false);
+            $("#btnShow").find('i').prop('hidden', true);
+        } else {
+            $("#btnShow").prop('disabled', false);
+            $("#btnShow").find('i').prop('hidden', true);
+        }
+    }
+    function ShowDetails(that, slNo){
+        debugger
+        let isCollapsed = $(that).find('i').hasClass('fa-angles-right');
+        if (isCollapsed) {
+            $(that).find('i').removeClass('fa-angles-right').addClass('fa-angles-down');
+            $(`#tblYarnStockSummaryWithRack tr[data-id=allocation_${slNo}]`).removeClass('d-none');
+        } else {
+            $(that).find('i').removeClass('fa-angles-down').addClass('fa-angles-right');
+            $(`#tblYarnStockSummaryWithRack tr[data-id=allocation_${slNo}]`).addClass('d-none');
+        }
+    }
+    function ShowreportType(){
+        let rptType = $("#ReportType").val();
+        if (rptType == 1) {
+            $("#spnWithAllTransaction").show();
+            $("#spnShowEmptyClosing").show();
+        } else {
+            $("#spnWithAllTransaction").hide();
+            $("#spnShowEmptyClosing").hide();
+        }
+    }
+
+    function exportToExcel(){
+        var htmls = "";
+        var uri = 'data:application/vnd.ms-excel;base64,';
+        var template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>';
+        var base64 = function (s) {
+            return window.btoa(unescape(encodeURIComponent(s)))
+        };
+
+        var format = function (s, c) {
+            return s.replace(/{(\w+)}/g, function (m, p) {
+                return c[p];
+            })
+        };
+
+        htmls = document.getElementById("tblYarnStockWithRack").innerHTML;
+
+        var ctx = {
+            worksheet: 'Worksheet',
+            table: htmls
+        }
+        var link = document.createElement("a");
+        link.download = "YarnStockWithRack.xls";
+        link.href = uri + base64(format(template, ctx));
+        link.click();
+    }
+
+    function Search(){
+        $("#btnSearch").on("keyup", function () {
+            $(".trAllocationInfo").each(function () {
+                $(this).addClass("d-none");
+            })
+            var value = $(this).val().toLowerCase();
+            $(".trYarnIfo").filter(function () {
+                $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+            });
+        });
+    }
+</script>

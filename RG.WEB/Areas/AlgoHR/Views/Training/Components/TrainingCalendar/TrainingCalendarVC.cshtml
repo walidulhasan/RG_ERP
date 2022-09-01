@@ -1,0 +1,128 @@
+﻿@model RG.Application.Contracts.AlgoHR.Business.TrainingCalendars.Queries.RequestResponseModel.TrainingCalendarRM
+@{
+    int weekNo = 1;
+    var year = Model.CalendarDays.First().Date.Year;
+}
+
+<style type="text/css">
+   
+    .tooltip {       
+        font-size: 11px;
+    }
+
+    .tooltip-inner {
+        text-align: left !important;
+    }
+</style>
+<div class="row m-0 cols-sm-12">
+
+    <div class="col-sm-12 col-md-12 col-lg-12 bg-dark text-center"><h4>Training Calendar Of @year</h4></div>
+
+</div>
+<div class="row m-0">
+    @foreach (var itemMonth in Model.YearWiseMonths)
+    {
+        <div class="col-sm-3 col-md-3 col-lg-3 text-xs text-center">
+            <div class="form-group m-0">
+                <table class="table table-sm table-bordered table-striped">
+                    <thead>
+                        <tr><th colspan="7" class="bg-dark">@itemMonth.MonthName</th></tr>
+                        <tr>
+                            @foreach (var itemDay in Model.WeekDays)
+                            {
+                                <th class="bg-cyan">@itemDay.DayName</th>
+                            }
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            var monthDateList = Model.CalendarDays.Where(x => x.MonthNo == itemMonth.MonthNo).ToList();
+                            var minWeekNo = monthDateList.Min(x => x.WeekNo);
+                            var maxWeekNo = monthDateList.Max(x => x.WeekNo);
+                            for (int i = minWeekNo; i <= maxWeekNo; i++)
+                            {
+                                <tr>
+                                    @{
+                                        var weekDays = monthDateList.Where(x => x.WeekNo == i);
+                                        for (int j = 1; j <= 7; j++)
+                                        {
+                                            var weekDay = weekDays.Where(x => x.WeekDayNo == j).FirstOrDefault();
+                                            if (weekDay == null)
+                                            {
+                                                <td></td>
+                                            }
+                                            else
+                                            {
+                                                var dayColorClass = "";
+                                                if (weekDay.IsHoliday)
+                                                {
+                                                    dayColorClass = "bg-danger";
+                                                }                                               
+                                                if (weekDay.Trainings!=null)
+                                                {
+                                                    dayColorClass = "bg-success";
+                                                }
+                                                <td title='@weekDay.SplittedTrainings' data-html="true" data-toggle="tooltip" onclick="TrainingSchedule('@weekDay.Date.ToString("dd-MMM-yyyy")')" class="@dayColorClass">@weekDay.Day</td>
+                                            }
+                                        }
+                                    }
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+    }
+</div>
+
+    <script type="text/javascript">
+        const btnDelete = (id) => {
+            $.alert.open('confirm', 'Are you sure to delete this record?', function (button) {
+                if (button == 'yes') {
+                    HttpRequest.Ajax("GET", '/AlgoHR/Training/CalenderEventDetailsRemove', { "id": id }, saveSuccess, true);
+                    
+                } else {
+                    return false;
+                }
+            });
+        };
+        $(function () {
+            $("[data-toggle='tooltip']").tooltip();
+        });
+       
+
+
+        const btnEdit = (that) => {
+            
+            let paretnTr = $(that).parent().parent();
+            let title = paretnTr.find(".tdtitle").text();
+            let venue = paretnTr.find(".tdvenue").text();
+            let trainingCategoryId = paretnTr.find(".tdTrainingCategoryId").text();
+            let time = paretnTr.find(".tdtime").text();
+            let trainer = paretnTr.find(".tdtrainer").text();
+            let stakeholder = paretnTr.find(".tdStakeholder").text();
+            let duration = paretnTr.find(".tdduration").text();
+            let type = paretnTr.find(".tdtype").text();
+            let id = paretnTr.find(".hdnID").text();
+            $("#DetailsID").val(id);
+            $("#Title").val(title);
+            $("#Venue").val(venue);
+            $("#TrainingCategory").val(trainingCategoryId);
+            $("#Date").val(time);
+            flatpickr("#Date", config = {
+                enableTime: true,
+                noCalendar: true,
+                dateFormat: "H:i",
+            });
+            $("#Trainer").val(trainer);
+            $("#Duration").val(duration);
+            $("#Stakeholder").val(stakeholder);
+            $("#TrainingType").val(type);
+            $("#btnClear").removeClass('d-none');
+            $("#btnSave").val('Update');
+
+        }
+    </script>
+

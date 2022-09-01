@@ -1,0 +1,200 @@
+﻿@model RG.Application.ViewModel.Embro.Setup.LoanType.LoanTypeCreateVM
+
+@{
+    ViewData[PageInfo.PageTitle] = "Create";
+    ViewData[PageInfo.PageHeader] = "LoanType Create";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<form asp-action="Create" asp-area="Embro" asp-controller="LoanType" method="post" id="FrmLoanType">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="form-group">
+                <input type="hidden" asp-for="ID" />
+                <label asp-for="LoanTypeName" class="required"></label>
+                <input asp-for="LoanTypeName" class="form-control form-control-sm" autocomplete="off" placeholder="Loan Type" />
+                <span asp-validation-for="LoanTypeName" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="form-group">
+                <label asp-for="LoanTypeShortName"></label>
+                <input asp-for="LoanTypeShortName" class="form-control form-control-sm" autocomplete="off" placeholder=" Short Loan Type " />
+                <span asp-validation-for="LoanTypeShortName" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <label class="">&nbsp;</label>
+            <div class="form-group mb-1">
+                <input type="button" class="btn btn-sm btn-success mr-2" value="Save" id="btnSave" />
+                <input type="button" class="btn btn-sm btn-warning d-none" value="Clear" id="btnClear" onclick="Clear()" />
+
+            </div>
+        </div>
+    </div>
+
+</form>
+<div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <div id="grid">
+        </div>
+    </div>
+</div>
+
+@section scripts{
+
+    <script type="text/javascript">
+        $(function () {
+            getAllGridData();
+            clearForm();
+            $("#btnSave").click(function () {
+                debugger
+                let id = $("#ID").val();
+                if ($("#FrmLoanType").valid()) {
+                    let loanTypeName = $("#LoanTypeName").val();
+                    let loanTypeShortName = $("#LoanTypeShortName").val();
+
+                    var Obj = {
+                        ID: id,
+                        LoanTypeName: loanTypeName,
+                        LoanTypeShortName: loanTypeShortName
+                    }
+                    if (Obj.ID > 0) {
+                        HttpRequest.Ajax("POST", '/Embro/LoanType/Update', { "model": Obj }, saveSuccess, null, true);
+                        Clear();
+
+                    } else {
+                        HttpRequest.Ajax("POST", '/Embro/LoanType/Create', { "model": Obj }, saveSuccess, null, true);
+                    }
+                    getAllGridData();
+                    clearForm();
+                }
+            });
+        })
+
+        function saveSuccess(data) {
+            if (data.result == 1) {
+                $.alert.open({
+                    type: 'Success',
+                    content: data.message,
+                    callback: function () {
+                    }
+                });
+            }
+            else {
+                $.alert.open("error", data.message);
+            }
+        }
+
+
+        function getAllGridData() {
+
+            var dataGrid = $("#grid").dxDataGrid({
+                height: 400,
+                remoteOperations: { paging: true, filtering: true, sorting: true, grouping: true, summary: true, groupPaging: true },
+                dataSource: DevExpress.data.AspNet.createStore({
+                    key: "ID",
+                    loadUrl: "/Embro/LoanType/GetListOfLoanType",
+                }),
+                hoverStateEnabled: true,
+                showBorders: true,
+                columnAutoWidth: true,
+                filterRow: { visible: true },
+                pager: { visible: true, showInfo: true, allowedPageSizes: [10, 20, 50], showPageSizeSelector: true, },
+                paging: { pageSize: 10 },
+                selection: { mode: 'single' },
+                export: {
+                    //   enabled: true
+                },
+                columns: [
+                    {
+                        width: "auto",
+                        caption: "SL #",
+                        alignment: 'center',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        },
+                        cellTemplate: function (container, e) {
+                            var index = dataGrid.pageIndex() * dataGrid.pageSize() + e.rowIndex + 1;
+                            container.text(index);
+                        }
+
+                    },
+                    {
+                        dataField: "ID",
+                        visible: false
+                    },
+                    {
+                        dataField: "LoanTypeName",
+                        alignment: 'center',
+                        caption: 'Loan Type Name',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+
+                    },
+                    {
+                        dataField: "LoanTypeShortName",
+                        alignment: 'center',
+                        caption: 'Loan Type Short Name',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+
+                    },
+                    {
+                        caption: 'Action',
+                        alignment: 'center',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        },
+                        cellTemplate: function (container, options) {
+
+                            var returnText = '<button class="btn btn-xs btn-warning"><i class="fa fa-edit"></i> Edit</button>';
+                            $(returnText).on('dxclick', function () {
+                                edit(options.data);
+                            }).appendTo(container);
+
+                            var returnText = '<span>&nbsp</span><button class="btn btn-xs btn-danger"><i class="fa fa-trash"></i> Delete</button>';
+                            returnText = returnText + '</div>';
+                            $(returnText).on('dxclick', function () {
+                                remove(options.data.ID);
+                            }).appendTo(container);
+                        }
+                    }
+                ]
+
+            }).dxDataGrid("instance");
+        }
+
+        const remove = (ID) => {
+            $.alert.open('confirm', 'Are you sure to delete this record?', function (button) {
+                if (button == 'yes') {
+                    HttpRequest.Ajax("POST", '/Embro/LoanType/Remove', { "id": ID }, saveSuccess, true);
+                    getAllGridData();
+
+                }
+            });
+        }
+        const edit = (data) => {
+            $("#ID").val(data.ID);
+            $("#LoanTypeName").val(data.LoanTypeName);
+            $("#LoanTypeShortName").val(data.LoanTypeShortName);
+            $("#btnSave").val("Update");
+            $("#btnClear").removeClass('d-none');
+        }
+
+        const clearForm = () => {
+            $("#ID").val("0");
+            $("#LoanTypeName").val("");
+            $("#LoanTypeShortName").val("");
+        }
+
+        const Clear = () => {
+            clearForm();
+            $("#btnSave").val("Save");
+            $("#btnClear").addClass('d-none');
+        }
+
+       
+    </script>
+}

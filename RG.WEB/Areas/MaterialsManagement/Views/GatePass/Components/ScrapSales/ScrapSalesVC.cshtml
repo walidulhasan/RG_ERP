@@ -1,0 +1,359 @@
+﻿@inject IAntiforgery antiForgeryToken
+@model RG.Application.ViewModel.MaterialsManagement.Business.GatePass.ScrapSalesVCVM
+@{
+    var token = antiForgeryToken.GetAndStoreTokens(Context);
+    string isSelfVehicle = Model.IsSelfVehicle == true ? "checked" : "";
+}
+
+
+<div class="row m-0">
+    <input type="hidden" id="hdnGatePassID" asp-for="GatePassID" />
+    <div class="col-sm-3 col-md-3 col-lg-3">
+        <div class="form-group">
+            <label class="col-form-label-sm m-0 required" asp-for="DepartmentID"></label>
+            <select asp-for="DepartmentID" asp-items="Model.DepartmentList" class="form-control form-control-sm"></select>
+            <span asp-validation-for="DepartmentID" class="span-form-validation"></span>
+        </div>
+    </div>
+    <div class="col-sm-5 col-md-5 col-lg-5">
+        <div class="form-group">
+            <label class="col-form-label-sm m-0 required" asp-for="CustomerID"></label>
+            <select asp-for="CustomerID" asp-items="Model.CustomerList" class="form-control form-control-sm"></select>
+            <span asp-validation-for="CustomerID" class="span-form-validation"></span>
+        </div>
+    </div>
+    <div class="col-sm-2 col-md-2 col-lg-2">
+        <div class="form-group">
+            <label class="col-form-label-sm m-0" asp-for="VehicleNo"></label>
+            <input type="text" class="form-control form-control-sm" asp-for="VehicleNo" placeholder="Vehicle No">
+            <span asp-validation-for="VehicleNo" class="span-form-validation"></span>
+        </div>
+    </div>
+    <div class="col-sm-2 col-md-2 col-lg-2">
+        <label class="col-form-label-sm m-0">&nbsp;</label>
+        <div class="form-group">
+            <input type="checkbox" id="IsOwnVehicle" @isSelfVehicle /> <span class="text-xs text-bold text-primary">Is customer's own vehicle</span>
+        </div>
+    </div>
+</div>
+
+<div class="row m-0">
+    <div class="col-sm-3 col-md-3 col-lg-3">
+        <div class="form-group">
+            <label class="col-form-label-sm m-0" asp-for="VehicleDriverMobileNo"></label>
+            <input type="text" class="form-control form-control-sm" asp-for="VehicleDriverMobileNo" onkeypress="return checkNumeric(event)" placeholder="Driver Mobile No">
+            <span asp-validation-for="VehicleDriverMobileNo" class="span-form-validation"></span>
+        </div>
+    </div>
+    <div class="col-sm-9 col-md-9 col-lg-9">
+        <div class="form-group">
+            <label class="col-form-label-sm m-0" asp-for="Description"></label>
+            <input type="text" class="form-control form-control-sm" asp-for="Description" placeholder="Description">
+            <span asp-validation-for="Description" class="span-form-validation"></span>
+        </div>
+    </div>
+</div>
+<div class="row m-0">
+    <div class="col-sm-12 col-md-12 col-lg-12 text-right">
+        <div class="form-group">
+            <input type="button" class="btn btn-xs btn-success" id="AddNewItem" value="Add New Item" data-toggle="modal" data-target="#itemModal" />
+        </div>
+    </div>
+</div>
+
+<div class="row m-0">
+    <div class="col-sm-12 col-md-12 col-lg-12">
+        <table class="table table-sm table-bordered table-striped text-center text-xs" id="tblItem">
+            <thead class="bg-dark">
+                <tr>
+                    <td>SL#</td>
+                    <td>Item Name</td>
+                    <td>UOM</td>
+                    <td>Quantity</td>
+                    <td>Rate</td>
+                    <td>Remarks</td>
+                    <td>Action</td>
+                </tr>
+            </thead>
+            <tbody class="ScrapSalesGatePassDetail">
+                @if (Model.GatePassID > 0)
+                {
+                    var sl = 1;
+                    foreach (var item in Model.ScrapSalesItem)
+                    {
+                        <tr data-id="@item.ID">
+                            <td class='trSerial'>@(sl++)</td>
+                            <td><input type="hidden" class="hdnItemName" value="@item.ItemName" />@item.ItemName</td>
+                            <td><input type="hidden" class="hdnUnitOfMeasurementID" value="@item.UnitID" />@item.UnitOfMeasurement</td>
+                            <td><input type="hidden" class="hdnQuantity" value="@item.Quantity" />@item.Quantity</td>
+                            <td><input type="hidden" class="hdnRate" value="@item.Rate" />@item.Rate</td>
+                            <td><input type="hidden" class="hdnRemarks" value="@item.Remarks" />@item.Remarks</td>
+                            <td>
+                                <button type="button" class="btn btn-xs btn-warning" onclick="FillupPopupData('@item.ID')" data-toggle="modal" data-target="#itemModal"><i class="fas fa-external-link-alt"></i></button>
+                                <button type="button" class="btn btn-xs btn-danger" onclick="RemoveRow(this,'@item.ID')"><i class="fa fa-trash" aria-hidden="true"></i></button>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+<div class="row m-0 text-center">
+    <div class="col-sm-12 col-md-12 col-lg-12">
+        <div class="form-group">
+            <input type="button" class="btn btn-sm btn-success" id="btnSave" value="Save">
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="itemModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-header p-2">
+                <h5 class="modal-title" id="exampleModalLabel">Scrap Sales Item</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="hdnGatePassDetailID" />
+                <div class="row m-0">
+                    <div class="col-sm-12 col-md-12 col-lg-12">
+                        <div class="form-group">
+                            <label class="col-form-label-sm m-0 required" asp-for="ItemName"></label>
+                            <input type="text" class="form-control form-control-sm" asp-for="ItemName" placeholder="Item Name">
+                            <span asp-validation-for="ItemName" class="span-form-validation"></span>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="row m-0">
+                    <div class="col-sm-3 col-md-3 col-lg-3">
+                        <div class="form-group">
+                            <label class="col-form-label-sm m-0 required" asp-for="UnitOfMeasurementID"></label>
+                            <br /><select asp-for="UnitOfMeasurementID" asp-items="Model.UnitOfMeasurementList" class="form-control form-control-sm select2" style="width: 100%"></select>
+                            <span asp-validation-for="UnitOfMeasurementID" class="span-form-validation"></span>
+                        </div>
+                    </div>
+                    <div class="col-sm-3 col-md-3 col-lg-3">
+                        <div class="input-group">
+                            <div class="col-sm-6 col-md-6 col-lg-6">
+                                <div class="form-group">
+                                    <label class="col-form-label-sm m-0 required" asp-for="Quantity"></label>
+                                    <input type="text" class="form-control form-control-sm txtQuantity" asp-for="Quantity" onkeypress="return checkDecimal(event)" placeholder="Quantity">
+                                    <span asp-validation-for="Quantity" class="span-form-validation"></span>
+                                </div>
+                            </div>
+                            <div class="col-sm-6 col-md-6 col-lg-6">
+                                <div class="form-group">
+                                    <label class="col-form-label-sm m-0 required" asp-for="Rate"></label>
+                                    <input type="text" class="form-control form-control-sm txtQuantity" asp-for="Rate" onkeypress="return checkDecimal(event)" placeholder="Rate">
+                                    <span asp-validation-for="Rate" class="span-form-validation"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-md-6 col-lg-6">
+                        <div class="form-group">
+                            <label class="col-form-label-sm m-0" asp-for="Remarks"></label>
+                            <input type="text" class="form-control form-control-sm" asp-for="Remarks" placeholder="Remarks">
+                            <span asp-validation-for="Remarks" class="span-form-validation"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer p-2 text-center">
+                <button type="button" class="btn btn-xs btn-danger" id="btnAddToListClose">Add To List & Close</button>
+                <button type="button" class="btn btn-xs btn-primary" id="btnAddToList">Add To List</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+        function AddItemToList() {
+            let itemName = $("#ItemName").val();
+            let gatePassDetailID = $("#hdnGatePassDetailID").val();
+            let unitOfMeasurement = $("#UnitOfMeasurementID option:selected").text();
+            let unitOfMeasurementID = $("#UnitOfMeasurementID").val();
+
+            let quantity = RtnFloatUpToPrecision($("#Quantity").val(), 2);
+            let rate = RtnFloatUpToPrecision($("#Rate").val(), 2);
+            let remarks = $("#Remarks").val();
+            if (quantity > 0 && rate > 0 && itemName != "") {
+
+                let currentRowSerial = ($("#tblItem tbody tr").length) + 1;
+                if (gatePassDetailID > 0) {
+                    let row = $('tr[data-id="' + gatePassDetailID + '"]');
+                    currentRowSerial = row.find('.trSerial').text();
+
+                }
+                let popupBtn = '';
+                if (gatePassDetailID > 0) {
+                    popupBtn = `<button type="button" class="btn btn-xs btn-warning" onclick="FillupPopupData(${gatePassDetailID})" data-toggle="modal" data-target="#itemModal"><i class="fas fa-external-link-alt"></i></button>&nbsp;`
+                }
+                let trTds = `<td class='trSerial'>${currentRowSerial}</td><td><input type="hidden" class="hdnItemName" value="${itemName}" />${itemName}</td>
+                        <td><input type="hidden" class="hdnUnitOfMeasurementID" value="${unitOfMeasurementID}" />${unitOfMeasurement}</td>
+                        <td><input type="hidden" class="hdnQuantity" value="${quantity}" />${quantity}</td>
+                        <td><input type="hidden" class="hdnRate" value="${rate}" />${rate}</td>
+                        <td><input type="hidden" class="hdnRemarks" value="${remarks}" />${remarks}</td>
+                        <td>${popupBtn}<button type="button"  class="btn btn-xs btn-danger" onclick="RemoveRow(this)"><i class="fa fa-trash" aria-hidden="true"></i></button></td>`
+
+
+                if (gatePassDetailID > 0) {
+                    let row = $('tr[data-id="' + gatePassDetailID + '"]');
+                    row.addClass('valueChanged')
+                    row.html(trTds);
+                } else {
+                    $("#tblItem tbody").append(
+                        `<tr class='valueChanged' data-id="0">${trTds}</tr>`
+                    );
+                }
+                
+
+            } else {
+                alert("Input Value is Required")
+            }
+        }
+    function saveSuccess(data) {
+        debugger
+        if (data.result == 1) {
+            $.alert.open({
+                type: 'Success',
+                content: data.message,
+                callback: function () {
+                    $("#VehicleNo").val('');
+                    $("#IsOwnVehicle").prop('checked', false);
+                    $("#VehicleDriverMobileNo").val('');
+                    $("#Description").val('');
+                    $("#tblItem tbody").html('');
+                }
+            });
+        }
+        else {
+            $.alert.open("error", data.message);
+        }
+    }
+    function updateSuccess(data) {
+        debugger
+        if (data.result == 1) {
+            $.alert.open({
+                type: 'Success',
+                content: data.message,
+                callback: function () {
+                }
+            });
+        } else if (data.result == 2) {
+            location.replace('/MaterialsManagement/GatePass/Index');
+        }
+        else {
+            $.alert.open("error", data.message);
+        }
+    }
+    function FillupPopupData(gatePassDetailId) {
+        debugger;
+        let itemList = @Html.Raw(Json.Serialize(Model.ScrapSalesItem));
+        let itemDetail = itemList.filter(x => x.ID == gatePassDetailId);
+         if (itemDetail.length > 0) {
+             debugger;
+             let item = itemDetail[0];
+             $("#hdnGatePassDetailID").val(item.ID);
+             $("#ItemName").val(item.ItemName);
+             $('#UnitOfMeasurementID').val(item.UnitID);
+             $('#Quantity').val(item.Quantity);
+             $('#Rate').val(item.Rate);
+            $('#Remarks').val(item.Remarks);
+        }
+        }
+        function getDDLCustomerList() {
+            let accCategoryID = ["2", '3', '4'];
+            HttpRequest.DropDownSelect2Group("Post", '/Embro/SupplierSetup/DDLSupplier', { CompanyID: 0, AccCategoryID: accCategoryID }, 'CustomerID', false);
+        }
+    function ClearItemModal() {
+
+        $("#ItemName").val('');
+        $("#hdnGatePassDetailID").val(0);
+        $("#UnitOfMeasurementID").val($("#UnitOfMeasurementID option:first").val());
+        $("#Quantity").val(0);
+        $("#Rate").val(0);
+        $("#Remarks").val('');
+    }
+    $(function () {
+        $('.select2').select2();//{ dropdownCssClass: "text-xs" }
+        $("#CustomerID").select2();
+        $('#itemModal').on('hidden.bs.modal', function () {
+            ClearItemModal();
+        });
+        getDDLCustomerList();
+        $("#btnAddToList").click(function () {            
+            AddItemToList();
+            ClearItemModal();
+        });
+        $("#btnAddToListClose").click(function () {
+            AddItemToList();
+            $('#itemModal').modal('toggle');
+        });
+
+        $("#btnSave").click(function () {
+            debugger
+            let categoryID = $("#CategoryID").val();
+            let gatePassID = $("#hdnGatePassID").val();
+            let departmentID = $("#DepartmentID").val();
+            let customerID = $("#CustomerID").val();
+            let vehicleNo = $("#VehicleNo").val();
+            let isOwnVehicle = $('#IsOwnVehicle').is(':checked');
+            let vehicleDriverMobileNo = $("#VehicleDriverMobileNo").val();
+            let description = $("#Description").val();
+
+            let ScrapSalesGatePassDetail = new Array();
+            $('#tblItem tbody tr').each(function () {
+                let thatTR = $(this);
+                let gatePassDetailId = thatTR.data("id");
+                let itemName = thatTR.find(".hdnItemName").val();
+                let quantity = thatTR.find(".hdnQuantity").val();
+                let rate = thatTR.find(".hdnRate").val();
+                let unitOfMeasurementID = thatTR.find(".hdnUnitOfMeasurementID").val();
+                let remarks = thatTR.find(".hdnRemarks").val();
+                let scrapSalesDetail = {
+                    ID: gatePassDetailId,
+                    ItemName: itemName,
+                    Quantity: quantity,
+                    Rate: rate,
+                    UnitID: unitOfMeasurementID,
+                    Remarks: remarks
+                }
+                ScrapSalesGatePassDetail.push(scrapSalesDetail);
+            })
+
+            let scrapSalesGatePassMaster = {
+                    GatePassID: gatePassID,
+                    ScrapCustomerID: customerID,
+                    DepartmentId: departmentID,
+                    VehicleDriverMobileNo: vehicleDriverMobileNo,
+                    IsSelfVehicle: isOwnVehicle,
+                    Description: description,
+                    IC_ScrapSalesGatePassDetail: ScrapSalesGatePassDetail
+                }
+
+                let scrapSalesGatePassDTM = {
+                    ID: gatePassID,
+                    CategoryID: categoryID,
+                    VehicleNo: vehicleNo,
+                    IC_ScrapSalesGatePassMaster: scrapSalesGatePassMaster
+                }
+
+            if (gatePassID == 0 && ScrapSalesGatePassDetail.length > 0) {
+                 HttpRequest.Ajax("POST", "/MaterialsManagement/GatePass/SaveScrapSalesGatePass", { scrapSalesDTM: scrapSalesGatePassDTM,'@token.HeaderName': '@token.RequestToken' }, saveSuccess)
+            } else {
+                HttpRequest.Ajax("POST", "/MaterialsManagement/GatePass/UpdateScrapSalesGatePass", { scrapSalesDTM: scrapSalesGatePassDTM,'@token.HeaderName': '@token.RequestToken'}, updateSuccess)
+            }
+
+        })
+
+    });
+
+
+</script>

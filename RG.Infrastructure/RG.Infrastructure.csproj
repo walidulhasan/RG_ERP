@@ -1,0 +1,38 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup Label="Globals">
+    <SccProjectName>SAK</SccProjectName>
+    <SccProvider>SAK</SccProvider>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccLocalPath>SAK</SccLocalPath>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="ImplementInterfaces\Repositories\FiniteScheduler\Business\ApprovalNotificationRepository.cs" />
+    <Compile Remove="ImplementInterfaces\Repositories\FiniteScheduler\Setup\ApprovalConfigMasterRepository.cs" />
+    <Compile Remove="ImplementInterfaces\Repositories\FiniteScheduler\Setup\ApprovalModulesRepository.cs" />
+    <Compile Remove="ImplementInterfaces\Services\FiniteScheduler\Business\ApprovalNotificationService.cs" />
+    <Compile Remove="ImplementInterfaces\Services\FiniteScheduler\Setup\ApprovalConfigMasterService.cs" />
+    <Compile Remove="ImplementInterfaces\Services\FiniteScheduler\Setup\ApprovalModulesService.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="DependencyInjection\" />
+    <Folder Include="Persistence\EMSDB\Configurations\Business\" />
+    <Folder Include="Persistence\MaxcoDB\Configurations\dbo\" />
+    <Folder Include="Persistence\UserAuthDB\Configurations\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="10.1.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\RG.Application\RG.Application.csproj" />
+  </ItemGroup>
+
+</Project>

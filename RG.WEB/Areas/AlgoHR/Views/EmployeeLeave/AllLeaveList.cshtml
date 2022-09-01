@@ -1,0 +1,106 @@
+﻿@model RG.Application.ViewModel.AlgoHR.Business.EmployeeAttendance.AttendanceInfoVM
+@{
+    ViewData[PageInfo.PageTitle] = "All Leave List";
+    ViewData[PageInfo.PageHeader] = "All Leave List";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<form class="">
+    <div class="card card-default">
+        <div class="card-body p-2">
+            <div class="row pt-0">
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <label asp-for="CompanyID"></label>
+                        <select class="form-control form-control-sm" asp-for="CompanyID" multiple="multiple">
+                        </select>
+                        <span asp-validation-for="CompanyID" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <label asp-for="DivisionID"></label>
+                        <select class="form-control form-control-sm" asp-for="DivisionID" multiple="multiple">
+                        </select>
+                        <span asp-validation-for="DivisionID" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <label asp-for="DepartmentID"></label>
+                        <select class="form-control form-control-sm" asp-for="DepartmentID" multiple="multiple">
+                        </select>
+                        <span asp-validation-for="DepartmentID" class="text-danger"></span>
+                    </div>
+                </div>
+
+
+            </div>
+            <div class="row pt-0">
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <label asp-for="SectionID"></label>
+                        <select class="form-control form-control-sm" asp-for="SectionID" multiple="multiple">
+                        </select>
+                        <span asp-validation-for="SectionID" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <label asp-for="DesignationID"></label>
+                        <select class="form-control form-control-sm" multiple="multiple" asp-for="DesignationID">
+                        </select>
+                        <span asp-validation-for="DesignationID" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <label asp-for="LocationID"></label>
+                        <select class="form-control form-control-sm" asp-for="LocationID" multiple="multiple">
+                        </select>
+                        <span asp-validation-for="LocationID" class="text-danger"></span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <div class="card-body p-2">
+            <div class="row pt-0">
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <label asp-for="Gender"></label>
+                        <select class="form-control form-control-sm" asp-for="Gender">
+                        </select>
+                        <span asp-validation-for="Gender" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-sm-2">
+                    <div class="form-group">
+                        <label >Leave Status</label>
+                        <select class="form-control form-control-sm" asp-for="AttendanceStatus">
+                        </select>
+                        <span asp-validation-for="AttendanceStatus" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-sm-5">
+                    <div class="form-group ">
+                        <label class=" ">Date Duration</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control form-control-sm dateField text-center readonlyNormal" readonly asp-for="DateFrom">
+                            <div class="input-group-addon">&nbsp;&nbsp; To &nbsp;&nbsp;</div>
+                            <input type="text" class="form-control form-control-sm dateField text-center readonlyNormal" readonly asp-for="DateTo">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row pt-1 pb-2 justify-content-center">
+            <button type="button" class="btn btn-sm btn-primary">Search</button>
+            @*&nbsp;&nbsp;&nbsp;&nbsp;
+            <button type="button" id="btnPDF" class="btn btn-sm btn-danger">PDF</button>
+            &nbsp;&nbsp;&nbsp;&nbsp;
+            <button type="button" class="btn btn-sm btn-warning">Excel</button>*@
+        </div>
+    </div>
+</form>

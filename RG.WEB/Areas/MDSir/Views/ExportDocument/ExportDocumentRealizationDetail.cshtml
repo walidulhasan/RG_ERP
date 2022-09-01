@@ -1,0 +1,88 @@
+﻿
+
+@model List<RG.Application.Contracts.EMS.Business.ExportDocuments.Queries.RequestResponseModel.ExportDocumentRealizationRM>
+@{
+    Layout = null;
+}
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Export Document Realization Detail</title>
+    <link href="~/AdminLTE-3.1.0/plugins/jquery-ui/jquery-ui.min.css" rel="stylesheet" />
+    <link href="~/lib/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <script src="~/AdminLTE-3.1.0/plugins/jquery/jquery.min.js"></script>
+    <script src="~/AdminLTE-3.1.0/plugins/jquery-ui/jquery-ui.min.js"></script>
+    <script src="~/AdminLTE-3.1.0/plugins/bootstrap/js/bootstrap.bundle.js"></script>
+
+
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.12/css/jquery.dataTables.min.css" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/1.2.2/css/buttons.dataTables.min.css" />
+    <script type="text/javascript" src="https://code.jquery.com/jquery-1.12.3.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.2.2/js/dataTables.buttons.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/2.5.0/jszip.min.js"></script>
+    <script type="text/javascript" src="https://cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/pdfmake.min.js"></script>
+    <script type="text/javascript" src="https://cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/vfs_fonts.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.2.2/js/buttons.html5.min.js"></script>
+
+    <style>
+        .header {
+            position: sticky;
+            top: 0;
+        }
+    </style>
+
+</head>
+<body>
+    <div class="row">
+        <div class="col-sm-12 col-md-12">
+            <div class="row">
+                <div class="col-md-12 text-center">
+                    <table class="table table-sm table-bordered table-striped" style="font-size:12px;">
+                        <thead class="bg-dark text-white">
+                            <tr>
+                                <th>SL #</th>
+                                <th>Invoice No</th>
+                                <th>Invoice Amount</th>
+                                <th>Realize Amount</th>
+                                <th>Balance</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{
+                                int sl = 1;
+                                foreach (var item in Model.OrderByDescending(x => x.EPIM_ID))
+                                {
+                                    <tr>
+                                        <td>@(sl++)</td>
+                                        <td>@Html.Raw(item.EPIM_INVOICENO)</td>
+                                        <td>@String.Format("{0:n2}", item.EPIM_AMOUNT)</td>
+                                        <td>@String.Format("{0:n2}", item.DollarAmt)</td>
+                                        <td>@String.Format("{0:n2}", item.Balance)</td>
+                                    </tr>
+                                }
+                                <tr class="bg-secondary text-white">
+                                    <td class="" colspan="2">Total</td>                                        
+                                    <td class="">@String.Format("{0:n2}", Model.Sum(x=>x.EPIM_AMOUNT))</td>
+                                    <td class="">@String.Format("{0:n2}", Model.Sum(x => x.DollarAmt))</td>
+                                    <td class="">@String.Format("{0:n2}", Model.Sum(x => x.Balance))</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+@section scripts{
+    <script type="text/javascript">
+
+        $(function () {
+        })
+    </script>
+
+}

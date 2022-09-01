@@ -1,0 +1,379 @@
+﻿@model RG.Application.ViewModel.AlgoHR.Business.Training.TrainingIndexVM
+@using RG.Application.Enums;
+@{
+    ViewData[PageInfo.PageTitle] = "Training List";
+    ViewData[PageInfo.PageHeader] = "Training List";
+    ViewData[PageInfo.btnText1] = "Create New";
+    ViewData[PageInfo.PageLink1] = "/AlgoHR/Training/Create";
+    ViewData[PageInfo.btnClass1] = "btn-success";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="row">
+    <div class="col-sm-12 col-md-12">
+        <div class="card card-dark">
+            <div class="card-header m-0 p-1">
+                <h5 class="card-title">Trainings</h5>
+            </div>
+            <div class="card-body p-2">
+                <div class="row">
+                    <div class="col-md-12 col-sm-12 col-xs-12">
+                        <div id="grid">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="modalTrainingDocs" class="modal fade" role="dialog">
+
+    <div class="modal-dialog modal-xl">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header p-2">
+                <h6 class="modal-title modTitle">Training Documents</h6>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body px-2 py-0 table-wrapper">
+                <table class="md-card-content col-12 table table-sm table-striped text-center" style="overflow: scroll;">
+                    <thead class="bg-dark">
+                        <tr>
+                            <td>SL#</td>
+                            <td>Doc Type</td>
+                            <td>File</td>
+                            <td>Title</td>
+                            <td>Feedback</td>
+                            <td title="Trainee Feedback Comment List">Comment</td>
+                        </tr>
+                    </thead>
+                    <tbody id="tbodyTrainingDocs">
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer p-1 d-flex justify-content-center">
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+
+<div id="modalFeedback" class="modal fade" role="dialog">
+    <input hidden asp-for="ID" />
+    <div class="modal-dialog modal-sm">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header p-2">
+                <h6 class="modal-title modTitle">Trainee Feedback</h6>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body px-2 py-0">
+                <div class="form-group">
+                    <label asp-for="Traineefeedback" class="label-ajt-sm required"></label>
+                    <select asp-for="Traineefeedback" asp-items="Model.DDLTraineefeedback" class="form-control form-control-sm "></select>
+                </div>
+                <div class="divTraineefeedback d-none mb-1">
+                    <label class="label-ajt-sm required">Your Comment</label>
+                    <input id="YourComment" type="text" autocomplete="off" placeholder="Your Feedback Please" class="form-control form-control-sm" />
+                </div>
+            </div>
+            <div class="modal-footer p-1 d-flex justify-content-center">
+                <button id="btnSend" class="btn btn-primary btn-xs">Send</button>
+            </div>
+        </div>
+
+    </div>
+</div>
+<!-- Modal-->
+<div id="modalForTraineeFeedbackShow" class="modal fade" role="dialog">
+    <div class="modal-dialog modal-lg">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header p-2" style="background-color: #003300;">
+                <h6 class="modal-title modTitle" style="color:white">Trainee Feedback List</h6>
+                <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body px-2 py-0">
+
+                <div class="row">
+                    <table id="tblTraineeFeedback" class="table table-sm table-striped table-bordered text-center text-xs  mt-1">
+
+                        <thead style="background-color:#001a00;">
+                            <tr style="color:white">
+                                <th>SL#</th>
+                                <th>Comment</th>
+                                @*<th>Action</th>*@
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyTraineeFeedback">
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+            @*<div class="modal-footer p-1  justify-content-center btnRemoveForDepriciation">
+                    <input type="button" class="btn btn-warning btn-sm" id="btnAssetAssign" value="Asset Assign to Employee" />
+                </div>*@
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script type="text/javascript">
+
+
+
+        const modfeedback = (e) => {
+            $("#ID").val(e);
+            $("#modalFeedback").modal("toggle");
+        }
+        $(function () {
+            $("#modalFeedback").on("hidden.bs.modal", function () {
+                $("#ID").val("");
+                $("#Traineefeedback").val("");
+                $("#YourComment").val("");
+            });
+            document.cookie = "SameSite=None secure";
+            GetTrainingInfoList();
+            $("#Traineefeedback").change(function () {
+
+                let option = $(this).val();
+                if (option === "Other") {
+                    $(".divTraineefeedback").removeClass('d-none');
+                } else {
+                    $(".divTraineefeedback").addClass('d-none');
+                }
+            })
+
+            $("#btnSend").click(function () {
+                let option = $('#Traineefeedback').val();
+                let comment = $('#YourComment').val();
+                let documentsID = $("#ID").val();
+                let obj = {
+                    DocumentsID: documentsID,
+                    Comments: option,
+                }
+
+                let ObjWithCom = {
+                    DocumentsID: documentsID,
+                    Comments: comment,
+                }
+                if (option === "Good" || option === "Understand") {
+                    HttpRequest.Ajax("POST", '/AlgoHR/Training/TrainingDocumentsCommentCreate', { "model": obj }, saveSuccess, true);
+                } else if (comment != "") {
+                    HttpRequest.Ajax("POST", '/AlgoHR/Training/TrainingDocumentsCommentCreate', { "model": ObjWithCom }, saveSuccess, true);
+                } else {
+                    $.alert.open("error", "Somthing is Error!");
+                }
+            })
+        });
+
+
+        function saveSuccess(data) {
+            if (data.result == 1) {
+                $.alert.open({
+                    type: 'Success',
+                    content: data.message,
+                    callback: function () {
+                        GetTrainingInfoList();
+                        $("#modalFeedback").modal('hide');
+                    }
+                });
+            }
+            else {
+                $.alert.open("error", data.message);
+            }
+        }
+        const TrainingDocuments = (trainingID) => {
+            if (trainingID > 0) {
+                let docs = HttpRequest.AjaxData('GET', '/AlgoHR/Training/GetTrainingDocumentsByTraining', { trainingID: trainingID });
+                if (docs != null) {
+                    let tr = ``;
+                    $.each(docs, function (i, v) {
+                        let fileUrl = ``;
+                        let fileExtension = v.FileExtension;
+                        let href = `/${decodeURI(v.FileUrl)}`;
+
+                        //class="col-1 col-sm-1 col-md-1"
+                        //class="col-2 col-sm-2 col-md-2"
+                        //class="col-3 col-sm-3 col-md-3"
+                        //class="col-7 col-sm-7 col-md-6"
+
+                        if (fileExtension === "pdf") {
+                            fileUrl = `<a title='View Pdf' href=${href} target="_blank"><i class="fas fa-file-pdf text-danger fa-2x"></i></a>`;
+                        } else if (fileExtension === "xls" || fileExtension === "xlsx") {
+                            fileUrl = `<a title='Download Excel' href=${href} target="_blank"><i class="fas fa-file-excel text-success fa-2x"></i></a>`;
+                        } else if (fileExtension === "doc" || fileExtension === "docx") {
+                            fileUrl = `<a title='Download Doc' href=${href} target="_blank"><i class="fas fa-file text-info fa-2x"></i></a>`;
+                        } else if (fileExtension === "jpg" || fileExtension === "jpeg" || fileExtension === "png") {
+                            fileUrl = `<a title='Download Image' href=${href} target="_blank"><i class="fa-solid fa-image text-success fa-2x"></i></i></a>`;
+                        } else if (fileExtension === "ppt" || fileExtension === "pptx") {
+                            fileUrl = `<a title='Download Powerpoint' href=${href} target="_blank"><i class="fas fa-file-powerpoint text-info fa-2x"></i></a>`;
+                        } else {
+                            fileUrl = v.FileUrl;
+
+                            if (window.matchMedia("(pointer:coarse)").matches && fileUrl.indexOf("iframe") >= 0) {
+                                fileUrl = fileUrl.replace(`width="560"`, `width="120"`).replace(`height="315"`, `height="80"`);
+                            }
+                        }
+                        /*if (window.matchMedia("(pointer:coarse)").matches) {*/
+                        tr += `<tr>
+                                                        <td class="col-1 col-sm-1 col-md-1">${v.FileSerial}</td>
+                                                        <td class="col-2 col-sm-2 col-md-2">${v.DocumentType}</td>
+                                                        <td class="col-3 col-sm-3 col-md-3">${v.FileTitle} </td>
+                                                        <td style="width: 20%;" class="col-6 col-sm-6 col-md-6">${fileUrl}</td>
+                                                        <td class="col-6 col-sm-6 col-md-6"><button onClick="modfeedback(${trainingID})" class="btn btn-success btn-xs"><i class="fas fa-comments fa-xs"></i></button></td>
+                                                        <td class="col-6 col-sm-6 col-md-6"><button onClick="modfeedbackList(${trainingID})" class="btn btn-warning btn-xs"><i class="fa fa-eye fa-sm"></i></button></td>
+                                                    </tr>`;
+                        //}
+                    });
+                    $("#tbodyTrainingDocs").html(tr);
+                }
+                $("#modalTrainingDocs").modal("toggle");
+            }
+        }
+        const modfeedbackList = (id) => {
+            TrainingDocumentsCommentsList(id);
+            $("#modalForTraineeFeedbackShow").modal("toggle");
+        }
+        const TrainingDocumentsCommentsList = (id) => {
+            var data = HttpRequest.AjaxData('POST', '/AlgoHR/Training/GetListTrainingDocumentsCommentsList', { id: id });
+            let rowTraineeFeedback = '';
+            $.each(data, function (d, e) {
+                rowTraineeFeedback += `<tr>
+
+                                    <td>${++d}</td>
+                                    <td  class="hdnEventDetailsID d-none">${e.DocumentsID}</td>
+                                    <td>${e.Comments}</td>
+
+                                    `
+                //< td ><a onClick="btnEditDepriciation(this)" title="Edit Depriciation" class="btn btn-primary btn-xs"> <i class="fas fa-edit fa-sm"></i></a><span> </span><a onClick="btnDeleteDepriciation(${AssetId},${e.ID})" title="Delete Depriciation" class="btn btn-danger btn-xs"><i class="fas fa-trash fa-sm"></i></a></td >
+                //        </tr >
+            });
+            $("#tbodyTraineeFeedback").html(rowTraineeFeedback);
+        }
+        const EditRow = (trainingID) => {
+            window.location.replace(`/AlgoHR/Training/Create?id=${trainingID}`);
+        }
+        const DeleteRow = (ID) => {
+
+            $.alert.open('confirm', 'Are you sure to delete this record?', function (button) {
+                if (button == 'yes') {
+                    HttpRequest.Ajax("GET", '/AlgoHR/Training/DeleteTraining', { "ID": ID }, saveSuccess, true);
+                } else {
+
+                }
+            });
+        }
+        const GetTrainingInfoList = () => {
+
+            var dataGrid = $("#grid").dxDataGrid({
+                height: 450,
+
+                remoteOperations: { paging: true, filtering: true, sorting: true, grouping: true, summary: true, groupPaging: true },
+                dataSource: DevExpress.data.AspNet.createStore({
+                    key: "ID",
+                    loadUrl: "/AlgoHR/Training/GetAllTrainingInfo",
+                    loadParams: {
+
+                    }
+                }),
+                hoverStateEnabled: true,
+                scrollbars: true,
+                showBorders: true,
+                columnAutoWidth: true,
+                filterRow: { visible: true },
+                pager: { visible: true, showInfo: true, allowedPageSizes: [10, 20, 50, 100, 500], showPageSizeSelector: true, },
+                paging: { pageSize: 10 },
+                selection: { mode: 'single' },
+                export: {
+                    //   enabled: true
+                },
+                columns: [
+                    {
+                        width: "auto",
+                        caption: "SL #",
+                        alignment: 'center',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        },
+                        cellTemplate: function (container, e) {
+                            var index = dataGrid.pageIndex() * dataGrid.pageSize() + e.rowIndex + 1;
+                            container.text(index);
+                        }
+                    },
+                    {
+                        dataField: "ID",
+                        visible: false,
+                    }, {
+                        dataField: "TrainingTypeName",
+                        alignment: 'center',
+                        caption: 'Type',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+                    },
+
+                    {
+                        dataField: "TrainingName",
+                        alignment: 'center',
+                        caption: 'Name',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+                    },
+                    {
+                        dataField: "TrainingDescription",
+                        alignment: 'center',
+                        caption: 'Description',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+                    },
+                    {
+
+                        // dataField: "NoOfDocuments",
+                        alignment: 'center',
+                        caption: 'Files',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        },
+                        cellTemplate: function (container, options) {
+                            var returnText = '<button title="Show Documents" class="btn btn-xs btn-success">' + options.data.NoOfDocuments + '</button>';
+                            returnText = returnText + '</div>';
+                            $(returnText).on('dxclick', function () {
+                                TrainingDocuments(options.data.ID);
+                            }).appendTo(container);
+                        }
+                    },
+
+                    {
+                        caption: 'Action',
+                        alignment: 'center',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        },
+                        cellTemplate: function (container, options) {
+                            var returnText = '<span>&nbsp</span><button title="Edit" class="btn btn-xs btn-warning"><i class="fa fa-edit"></i></button>';
+                            returnText = returnText + '</div>';
+                            $(returnText).on('dxclick', function () {
+                                EditRow(options.data.ID);
+                            }).appendTo(container);
+                            var returnText = '<span>&nbsp</span><button title="Delete" class="btn btn-xs btn-danger"><i class="fa fa-trash"></i></button>';
+                            returnText = returnText + '</div>';
+                            $(returnText).on('dxclick', function () {
+                                DeleteRow(options.data.ID);
+                            }).appendTo(container);
+                        }
+                    }
+                ]
+            }).dxDataGrid("instance");
+
+
+        }
+
+
+    </script>
+}

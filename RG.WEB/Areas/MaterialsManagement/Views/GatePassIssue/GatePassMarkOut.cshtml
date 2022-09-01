@@ -1,0 +1,240 @@
+﻿@using Microsoft.AspNetCore.Antiforgery
+@inject IAntiforgery antiForgeryToken
+@inject Wangkanai.Detection.Services.IDetectionService DetectionService
+@model RG.Application.ViewModel.MaterialsManagement.Business.GatePassIssue.GatePassMarkOutVM
+@{
+    var token = antiForgeryToken.GetAndStoreTokens(Context);
+    ViewData[PageInfo.PageHeader] = "Gate Pass Mark Out";
+    ViewData[PageInfo.PageTitle] = "Gate Pass Mark Out";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var deviceType = DetectionService.Device.Type.ToString();
+}
+<div class="card card-primary">
+    <div class="row m-0">
+        <div class="col-6 col-sm-3 col-md-3 col-lg-3">
+            <div class="form-group">
+                <label class="col-form-label-sm m-0 required" asp-for="CategoryID"></label>
+                <select asp-for="CategoryID" asp-items="Model.CategoryList" class="form-control form-control-sm"></select>
+                <span asp-validation-for="CategoryID" class="span-form-validation"></span>
+            </div>
+        </div>
+        <div class="col-6 col-sm-3 col-md-3 col-lg-3">
+            <div class="form-group">
+                <label class="col-form-label-sm m-0 required" asp-for="ApprovalType"></label>
+                <select asp-for="ApprovalType" asp-items="Model.ApprovalTypeList" class="form-control form-control-sm"></select>
+                <span asp-validation-for="ApprovalType" class="span-form-validation"></span>
+            </div>
+        </div>
+        <div class="col-12 col-sm-3 col-md-3 col-lg-3">
+            <div class="input-group">
+                <div class="col-6 col-sm-6 col-md-6 col-lg-6 p-0">
+                    <div class="form-group">
+                        <label class="col-form-label-sm m-0 required" asp-for="DateFrom"></label>
+                        <input type="text" class="form-control form-control-sm dateField" asp-for="DateFrom" placeholder="Date From" readonly>
+                        <span asp-validation-for="DateFrom" class="span-form-validation"></span>
+                    </div>
+                </div>
+                <div class="col-6 col-sm-6 col-md-6 col-lg-6 p-0 pl-2">
+                    <div class="form-group">
+                        <label class="col-form-label-sm m-0 required" asp-for="DateTo"></label>
+                        <input type="text" class="form-control form-control-sm dateField" asp-for="DateTo" placeholder="Date From" readonly>
+                        <span asp-validation-for="DateTo" class="span-form-validation"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-3 col-md-3 col-lg-3">
+            @if (deviceType != "Mobile")
+            {
+                <label class="col-form-label-sm m-0">&nbsp;</label>
+            }
+            <div class="form-group">
+                <input type="button" class="btn btn-sm btn-warning" value="Search" id="btnSearch" />
+            </div>
+        </div>
+    </div>
+    <div class="row m-0">
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            <div class="table-responsive-sm" id="grid">
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section scripts{
+    <script type="text/javascript">
+        $(function () {
+            GatePassList();
+            $("#btnSearch").click(function () {
+                GatePassList();
+            })
+        });
+        function saveSuccess(data) {
+            debugger
+            if (data.result == 1) {
+                $.alert.open({
+                    type: 'Success',
+                    content: data.message,
+                    callback: function () {
+                        GatePassAccountIssueList();
+                    }
+                });
+            }
+            else {
+                $.alert.open("error", data.message);
+            }
+        }
+        function ApproveGatePass(gatePassId) {
+            if (gatePassId > 0) {
+                $.alert.open('confirm', 'Are you sure to approve this record', function (button) {
+                    if (button == 'yes')
+                        HttpRequest.Ajax("Get", "/MaterialsManagement/GatePassIssue/AccountsApprove", { gatePassID: gatePassId }, saveSuccess);
+                });
+            }
+        }
+        //function RejectGatePass(gatePassId) {
+        //    if (gatePassId > 0) {
+        //        $.alert.open('confirm', 'Are you sure to remove this record', function (button) {
+        //            if (button == 'yes')
+        //                HttpRequest.Ajax("Get", "/MaterialsManagement/GatePassIssue/AccountsReject", { gatePassID: gatePassId }, saveSuccess);
+        //        });
+        //    }
+        //}
+        function GatePassList() {
+            debugger
+            var url = "/MaterialsManagement/GatePassIssue/GetGatePassMarkOutList";
+            let categoryID = RtnNumber($("#CategoryID").val());
+            let category = $("#CategoryID option:selected").text();
+            let approvalType = $("#ApprovalType").val();
+            let dateFrom = $("#DateFrom").val();
+            let dateTo = $("#DateTo").val();
+
+            var reqModel = {
+                CategoryID: categoryID,
+                Category: category,
+                ApprovalType: approvalType,
+                StartDate: dateFrom,
+                EndDate: dateTo,
+                isApproved: approvalType
+            }
+            $("#grid").dxDataGrid({
+
+                dataSource: DevExpress.data.AspNet.createStore({
+                    key: "GatePassID",
+                    loadUrl: url,
+                    loadParams: reqModel
+                }),
+
+                remoteOperations: {
+                    paging: true,
+                    sorting: true,
+                    filtering: true,
+                },
+                
+                paging: { pageSize: 20 },
+                pager: {
+                    showInfo: true,
+                    allowedPageSizes: [10, 20, 40, 100, 500],
+                    showPageSizeSelector: true,
+                },
+                loadingIndicator: {
+                    enabled: true
+                },
+                
+                selection: { mode: 'single' },
+                //headerFilter: { visible: true, allowSearch: true },
+                filterRow: { visible: true },
+                wordWrapEnabled: true,
+                columns: [
+                    {
+                        width: "5%",
+                        caption: "SL #",
+                        alignment: 'center',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        },
+                        cellTemplate: function (container, e) {
+
+                            var index = e.rowIndex + 1;
+                            container.text(index);
+                        }
+
+                    },
+                    {
+                        dataField: "GatePassID",
+                        visible: false,
+                    },
+                    {
+                        width: "15%",
+                        dataField: "CategoryName",
+                        alignment: 'center',
+                        caption: 'Category',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        },
+                        cellTemplate: function (container, options) {
+
+                            var url = `<a style="padding:0px;margin:0px;" title="Gate Pass" target="_blank" class="dx-link" href="/MaterialsManagement/GatePass/GatePassChallan?gatePassID=${options.data.GatePassID}&categoryID=${options.data.CategoryID}&reportType=1">${options.data.CategoryName}</a>`;
+                            container.append(url);
+
+                        }
+
+                    },
+                    {
+                        width: "15%",
+                        dataField: "Serial",
+                        alignment: 'center',
+                        caption: 'Serial No',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        },
+                        cellTemplate: function (container, options) {                         
+                            var url = `<a style="padding:0px;margin:0px;" title="Challan"  target="_blank" class="dx-link" href="/MaterialsManagement/GatePass/GatePassChallan?gatePassID=${options.data.GatePassID}&categoryID=${options.data.CategoryID}&reportType=2">${options.data.Serial}</a>`;
+                            container.append(url);
+
+                        }
+                    },
+                    {
+                        width: "15%",
+                        dataField: "Date",
+                        alignment: 'center',
+                        caption: 'Created Date',
+                        width: 150,
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+                    },
+                    {
+                        width: "10%",
+                        dataField: "Time",
+                        alignment: 'center',
+                        caption: 'Time',
+                        width: 150,
+                        hidingPriority: 0,
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+                    },
+                    {
+                        width: "20%",
+                        dataField: "DepartmentName",
+                        alignment: 'center',
+                        caption: 'Department',
+                        width: 150,
+                        hidingPriority: 1,
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+                    },
+
+
+                ],
+                height: 520,
+                showColumnLines: true,
+                showRowLines: true,
+                showBorders: true,
+            }).dxDataGrid("instance");
+        }
+    </script>
+}

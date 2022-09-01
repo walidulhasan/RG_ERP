@@ -1,0 +1,784 @@
+﻿@using RG.Application.Constants.Embro;
+@model RG.Application.ViewModel.Embro.Business.LoanMasters.LoanMasterCreateVM
+
+
+
+@inject RG.Application.Common.CommonInterfaces.ICurrentUserService _currentuserService;
+@{
+    ViewData[PageInfo.PageTitle] = "Create";
+    ViewData[PageInfo.PageHeader] = "Loan Create";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+}
+
+<form asp-action="Create" asp-area="Embro" asp-controller="Loan" method="post" id="frmLoan">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="form-group">
+                <label asp-for="BankID" class="required"></label>
+                <select asp-for="BankID" asp-items="Model.DDLBank" class="form-control form-control-sm"></select>
+                <span asp-validation-for="BankID" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="form-group">
+                <input type="hidden" asp-for="LoanID" />
+                <label asp-for="LoanTypeID" class="required"></label>
+                <select asp-for="LoanTypeID" class="form-control form-control-sm" asp-items="Model.DDLLoanTypeName"></select>
+                <span asp-validation-for="LoanTypeID" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="form-group">
+                <label asp-for="PaymentType" class="required"></label>
+                <select asp-for="PaymentType" class="form-control form-control-sm " asp-items="Model.DDLPaymentType"></select>
+                <span asp-validation-for="PaymentType" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="form-group">
+                <label asp-for="LoanCOAID" class="required"></label>
+                <select asp-for="LoanCOAID" asp-items="Model.DDLLoanNumber" class="form-control form-control-sm"></select>
+                <span asp-validation-for="LoanCOAID" class="text-danger"></span>
+            </div>
+        </div>
+
+    </div>
+    <div id="forPrincipalPT">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label asp-for="LoanAmount"></label>
+                    <input value="" type="number" asp-for="LoanAmount" class="form-control form-control-sm" autocomplete="off" placeholder="Enter Loan Amount" />
+                    <span asp-validation-for="LoanAmount" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label asp-for="InterestPercent"></label>
+                    <input value="" type="number" asp-for="InterestPercent" class="form-control form-control-sm" autocomplete="off" placeholder="Enter Interest Percent" />
+                    <span asp-validation-for="InterestPercent" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label asp-for="TotalInstallment"></label>
+                    <input value="" asp-for="TotalInstallment" class="form-control form-control-sm" autocomplete="off" placeholder="Enter Total Installment" />
+                    <span asp-validation-for="TotalInstallment" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label asp-for="LoanLimitAmount"></label>
+                    <input value="" asp-for="LoanLimitAmount" class="form-control form-control-sm" autocomplete="off" placeholder="Enter Total Installment" />
+                    <span asp-validation-for="LoanLimitAmount" class="text-danger"></span>
+                </div>
+            </div>
+            @*<div class="col-5 col-sm-2">
+                    <div class="form-check mb-2">
+                        <label>&nbsp;</label>
+                        <div class="input-group" title="If you check it so Loan will be Regenerate or Just Update ">
+                            <input type="checkbox" id="ChkRegenerate" class="form-check-input" />  <label asp-for="IsRegenerate"></label>
+                        </div>
+                    </div>
+                </div>*@
+        </div>
+
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label asp-for="PaymentPeriodInMonth"></label>
+                    <select asp-for="PaymentPeriodInMonth" asp-items="Model.DDLPaymentPeriodInDaysWiseMonth" class="form-control form-control-sm"></select>
+                    <span asp-validation-for="PaymentPeriodInMonth" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label asp-for="InstallmentAmount"></label>
+                    <input value="" asp-for="InstallmentAmount" class="form-control form-control-sm" autocomplete="off" placeholder="Enter Total Installment" />
+                    <span asp-validation-for="InstallmentAmount" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="form-group col-md-3">
+                <div class="form-group">
+                    <label asp-for="StartDate" class="label-ajt-sm"></label>
+                    <div class="input-group">
+                        <input required asp-for="StartDateStr" type="text" name="StartDate" readonly class="datepic readonlyNormal form-control form-control-sm dateField " />
+                        <div class="input-group-append">
+                            <span class="input-group-text"><i class="fa fa-calendar" aria-hidden="true"></i></span>
+                        </div>
+                    </div>
+                    <span asp-validation-for="StartDate"></span>
+                </div>
+            </div>
+            <div class="form-group col-md-3">
+                <div class="form-group">
+                    <label asp-for="EndDate" class="label-ajt-sm"></label>
+                    <div class="input-group">
+                        <input required asp-for="EndDateStr" type="text" name="EndDate" readonly class="datepic readonlyNormal form-control form-control-sm dateField " />
+                        <div class="input-group-append">
+                            <span class="input-group-text"><i class="fa fa-calendar" aria-hidden="true"></i></span>
+                        </div>
+                    </div>
+                    <span asp-validation-for="EndDate"></span>
+                </div>
+            </div>
+            @*<div class="col-5 col-sm-2">
+                    <div class="form-check mb-2">
+                        <label>&nbsp;</label>
+                        <div class="input-group" title="If you check it so Loan will be Regenerate or Just Update ">
+                            <input type="checkbox" id="ChkRegenerate" class="form-check-input" />  <label asp-for="IsRegenerate"></label>
+                        </div>
+                    </div>
+                </div>*@
+        </div>
+    </div>
+
+    <div id="notPrincipalPT" class="row d-none">
+        <div class="col-md-5">
+            <div class="form-group">
+                <label id="lblLoanChargeCOAID" asp-for="LoanChargeCOAID"></label>
+                <select asp-for="LoanChargeCOAID" asp-items="Model.DDLLoanNumber" class="form-control form-control-sm"></select>
+                <span asp-validation-for="LoanChargeCOAID" class="text-danger"></span>
+            </div>
+        </div>
+    </div>
+    @*<div class="card border-success mb-3">
+            <input type="hidden" class="hdnloanInstallmentID" asp-for="LoanInstallmentID" />
+            <div class="card-header bg-transparent">
+                <h5 class="float-left m-0 "><i class="fas fa-list fa-xs"></i> Loan Installment</h5>
+                <button type="button" id="addLoanInstallmentRow" class="btn btn-outline-secondary btn-xs float-right m-0"><span class="fa fa-plus fa-sm"></span></button>
+            </div>
+            <div id="tblMain" class="row m-0 mt-1">
+                <div class="col-sm-12 col-md-12 col-lg-12">
+
+                    <table class="table table-sm table-bordered table-striped  text-center text-xs" id="tblLoanInstallment">
+                        <thead class="bg-dark text-white">
+                            <tr>
+                                <td>SL#</td>
+                                <td>Installment No</td>
+                                <td>Installment Date</td>
+                                <td>Installment Amount</td>
+                                <td>Interest Amount</td>
+                                <td>Action</td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card-footer bg-transparent border-success">Footer</div>
+        </div>*@
+
+
+
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="form-group text-center">
+                <input type="button" class="btn btn-sm btn-success mr-2" value="Save" id="btnSave" />
+
+                <input type="button" class="btn btn-sm btn-warning" value="Clear" id="btnClear" onclick="Clear()" />
+                @*<button type="button" class="btn btn-sm btn-warning" id="btnClear" onclick="Clear()">
+                        <i class="fas fa-broom"></i> Clear
+                    </button>*@
+            </div>
+        </div>
+    </div>
+</form>
+
+<div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <div id="grid">
+        </div>
+    </div>
+</div>
+@section scripts{
+    <script src="~/lib/devExtreme/excelExport/polyfill.min.js"></script>
+    <script src="~/lib/devExtreme/excelExport/exceljs.min.js"></script>
+    <script src="~/lib/devExtreme/excelExport/FileSaver.min.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            GetLoanMasterGridList();
+            $("#LoanCOAID").select2();
+            $("#BankID").select2();
+            $("#LoanChargeCOAID").select2();
+            getChartOfAccounts();
+            getChartOfAccount();
+           //Clear();
+            $("#PaymentType").change(function () {
+                debugger
+                let paymentTypeValue = $("#PaymentType").val();
+                if (paymentTypeValue === "Principal") {
+                    $("#forPrincipalPT").removeClass("d-none")
+                    $("#notPrincipalPT").addClass("d-none");
+
+                    //$("#BankID").val("").trigger("change");
+                    //$("#LoanTypeID").val("");
+                } else if (paymentTypeValue == "") {
+                    Clear();
+                }
+                else {
+                    $("#lblLoanChargeCOAID").text(paymentTypeValue);
+                    $("#forPrincipalPT").addClass("d-none")
+                    $("#notPrincipalPT").removeClass("d-none");
+                }
+
+                GetLoanMasterGridList();
+            });
+
+            $("#BankID").change(function () {
+                GetLoanMasterGridList();
+            });
+            $("#LoanTypeID").change(function () {
+                GetLoanMasterGridList();
+            });
+             // #region This Method for Responsable for Change event with function call with Update Data
+            //$("#LoanCOAID").change(function () {
+            //    debugger;
+            //    let id = $("#LoanCOAID").val();
+            //    $("#btnSave").val("Update");
+
+            //    if (id > 0) {
+            //        let data = HttpRequest.AjaxData('GET', '/Embro/Loan/Edit', { id: id });
+            //        Clear();
+            //        if (data != null) {
+            //            $("#LoanID").val(data.LoanID);
+            //            $("#LoanTypeID").val(data.LoanTypeID);
+            //            $("#PaymentType").val(data.PaymentType);
+            //            $("#LoanCOAID").val(data.LoanCOAID);
+            //            $("#StartDateStr").val(data.StartDateStr);
+            //            $("#EndDateStr").val(data.EndDateStr);
+            //            $("#LoanAmount").val(data.LoanAmount);
+            //            $("#InterestPercent").val(data.InterestPercent);
+            //            $("#TotalInstallment").val(data.TotalInstallment);
+            //            $("#PaymentPeriodInMonth").val(data.PaymentPeriodInMonth);
+            //            $("#BankID").val(data.BankID).trigger("change");
+
+            //            $.each(data.LoanInstallment, function (i, v) {
+            //                let currentRowSerial = ($("#tblLoanInstallment tbody tr").length) + 1;
+            //                let trTds = `<tr data-id='0' data-serial=${currentRowSerial}>
+            //                        <td class="col-sm-1">
+            //                            <label class='trSerial'>${currentRowSerial}</label>
+            //                            <input type="hidden" class="hdnloanInstallmentID" value="${v.LoanInstallmentID}" />
+            //                        </td>
+            //                        <td class="col-sm-2"><input disabled placeholder="Installment No" type="number" class="hdnInstallmentNo form-control form-control-sm"   value="${v.InstallmentNo}" /></td>
+            //                        <td class="col-sm-2">
+            //                            <div class="input-group ">
+            //                                <input disabled value=" ${v.InstallmentDateStr}" required  type="text"  readonly class="hdnInstallmentDate readonlyNormal datepic form-control form-control-sm tdDateField " />
+            //                                <div class="input-group-append">
+            //                                    <span class="input-group-text"><i class="fa fa-calendar" aria-hidden="true"></i></span>
+            //                                </div>
+            //                            </div>
+            //                        </td>
+            //                        <td class="col-sm-2"><input disabled value="${v.InstallmentAmount}"  placeholder="Installment Amount" type="number" class="inputDisabled hdnInstallmentAmount form-control form-control-sm" /></td>
+            //                        <td class="col-sm-2"><input disabled value="${v.InterestAmount}"  placeholder="Interest Amount" type="number" class="hdnInterestAmount form-control form-control-sm" /></td>
+            //                        <td  class="col-sm-1">
+            //                            <button type="button" title="Edit" onclick="editBtn(this)" id="btnEdit" class="btn btn-outline-secondary btn-xs"><span class="fa fa-edit fa-xs"></span></button>
+            //                        </td>
+            //                    </tr>`;
+            //                $("#tblLoanInstallment tbody").append(trTds);
+            //            })
+
+            //                /*< button type = "button" title = "Delete" id = "btnDelete" class="btn btn-outline-danger btn-xs" onclick = "Delete(this)" > <span class="fa fa-trash fa-xs"></span></button >*/
+            //        } else {
+            //            //$.alert.open('error', "Record can't found!!", function (button) {
+            //            //    if (button == 'yes') {
+
+            //            //    } else {
+
+            //            //    }
+            //            //});
+            //            $("#btnSave").val("Save");
+            //        }
+
+            //    }
+            //    else {
+            //        $("#btnSave").val("Save");
+            //        Clear();
+            //        $("#BankID").val("").trigger("change");
+            //    }
+            //});
+
+            //$("#addLoanInstallmentRow").click(function () {
+            //    AddLoanInstallment();
+            //})
+            //#endregion
+
+                $("#btnSave").click(function () {
+
+                    //let isDataIncomplete = false;
+                    let loanID = $("#LoanID").val();
+                    if ($("#frmLoan").valid()) {
+                        let loanTypeID = $("#LoanTypeID").val();
+                        let loanCOAID = $("#LoanCOAID").val();
+                        let startDate = $("#StartDateStr").val();
+                        let paymentType = $("#PaymentType").val();
+                        let endDate = $("#EndDateStr").val();
+                        let loanAmount = $("#LoanAmount").val();
+                        let interestPercent = $("#InterestPercent").val();
+                        let totalInstallment = $("#TotalInstallment").val();
+                        let paymentPeriodInMonth = $("#PaymentPeriodInMonth").val();
+                        let bankID = $("#BankID").val();
+                        let installmentAmount = $("#InstallmentAmount").val()
+                        let loanLimitAmount = $("#LoanLimitAmount").val()
+                        let loanChargeCOAID = $("#LoanChargeCOAID").val()
+                        let isPrincipalValue = false;
+                        if (paymentType === "Principal") {
+                            isPrincipalValue = true;
+                        }
+
+
+                        //#region This is responsable for Multi data inserting into array
+                        //let regenerate = $("#ChkRegenerate").is(":checked");
+                        //let loanInstallments = Array();
+                        //$("#tblLoanInstallment tbody tr").each(function () {
+                        //    let thatTr = $(this);
+                        //    let loanInstallmentID = thatTr.find(".hdnloanInstallmentID").val();
+                        //    let installmentNo = thatTr.find(".hdnInstallmentNo").val();
+                        //    let installmentDate = thatTr.find(".hdnInstallmentDate").val();
+                        //    let installmentAmount = thatTr.find(".hdnInstallmentAmount").val();
+                        //    let interestAmount = thatTr.find(".hdnInterestAmount").val();
+                        //    if (installmentNo != "" && installmentDate != "" && installmentAmount != "" && interestAmount != "") {
+                        //        let loanInstallmentObj = {
+                        //            LoanInstallmentID: loanInstallmentID,
+                        //            LoanID: loanID,
+                        //            LoanCOAID: loanCOAID,
+                        //            InstallmentNo: installmentNo,
+                        //            InstallmentDate: installmentDate,
+                        //            InstallmentAmount: installmentAmount,
+                        //            InterestAmount: interestAmount
+                        //        }
+                        //        loanInstallments.push(loanInstallmentObj)
+                        //    } else {
+                        //        isDataIncomplete = true;
+                        //    }
+                        //});
+                        //#endregion
+
+                            let loanMaster = {
+                                LoanID: loanID,
+                                LoanTypeID: loanTypeID,
+                                PaymentType: paymentType,
+                                BankID: bankID,
+                                //IsRegenerate: regenerate,
+                                LoanCOAID: loanCOAID,
+                                StartDate: startDate,
+                                EndDate: endDate,
+                                LoanAmount: loanAmount,
+                                InterestPercent: interestPercent,
+                                TotalInstallment: totalInstallment,
+                                PaymentPeriodInMonth: paymentPeriodInMonth,
+                                InstallmentAmount: installmentAmount,
+                                LoanLimitAmount: loanLimitAmount,
+                                LoanChargeCOAID: loanChargeCOAID,
+                                IsPrincipleCOA: isPrincipalValue
+                                //LoanInstallment: loanInstallments
+                            }
+
+                            if (loanMaster.LoanID > 0) {
+                                HttpRequest.Ajax("POST", '/Embro/Loan/Update', { "loanMaster": loanMaster }, saveSuccess, null, true);
+
+                            } else {
+                                HttpRequest.Ajax("POST", '/Embro/Loan/Create', { "loanMastes": loanMaster }, saveSuccess, null, true);
+                            }
+                            GetLoanMasterGridList();
+                            Clear();
+                            $("#notPrincipalPT").addClass("d-none");
+                            $("#forPrincipalPT").removeClass("d-none");
+                            $("#PaymentType").removeAttr('disabled');
+
+                        /* $("#BankID").val("").trigger("change");*/
+
+                        //if (!isDataIncomplete) {
+                        //} else {
+                        //    alert("Loan Installment can't be empty!!");
+                        //}
+                    }
+
+                });
+
+            $(document).on('focus', '.tdDateField', function () {
+                var that = this;
+                var aa = $(that).parent();
+                var fieldTable = $(that).closest('table');
+                $(that).removeClass('hasDatepicker').datepicker({
+                    dateFormat: "dd-M-yy",
+                    showAnim: "scale",
+                    changeMonth: true,
+                    yearRange: "2000:2050",
+                    changeYear: true,
+                    /*
+                    onSelect: function (dateText) {
+                        $(that).val('');
+                        if (!CheckUniqueData(dateText, fieldTable)) {
+                            $.alert.open('warning', 'Date Already Exists');
+                        } else {
+                            $(that).val(dateText);
+                        }
+                    }*/
+                });
+            });
+        });
+
+        const GetLoanMasterGridList = () => {
+
+            const bankID = $("#BankID").val() == null ? 0 : $("#BankID").val()
+            const loanTypeID = $("#LoanTypeID").val() == null ? 0 : $("#LoanTypeID").val()
+            const paymentType = $("#PaymentType").val() == null ? null : $("#PaymentType").val()
+             
+            var dataGrid = $("#grid").dxDataGrid({
+                height: 450,
+                remoteOperations: { paging: true, filtering: true, sorting: true, grouping: true, summary: true, groupPaging: true },
+                dataSource: DevExpress.data.AspNet.createStore({
+                    key: "LoanID",
+                    loadUrl: "/Embro/Loan/GetLoanMasterGridDataList",
+                    loadParams: {
+                        BankID: bankID,
+                        LoanTypeID: loanTypeID,
+                        PaymentType: paymentType
+                    }
+                }),
+                hoverStateEnabled: true,
+
+                showBorders: true,
+                columnAutoWidth: true,
+                filterRow: { visible: true },
+                pager: { visible: true, showInfo: true, allowedPageSizes: [10, 20, 50, 100, 500], showPageSizeSelector: true, },
+                paging: { pageSize: 10 },
+                selection: { mode: 'single' },
+                wordWrapEnabled: true,
+                export: {
+                    enabled: true,
+                    allowExportSelectedData: true,
+                },
+                onExporting(e) {
+                    const workbook = new ExcelJS.Workbook();
+                    const worksheet = workbook.addWorksheet('CompanyLoanAccount');
+
+                    DevExpress.excelExporter.exportDataGrid({
+                        component: e.component,
+                        worksheet,
+                        autoFilterEnabled: true,
+                    }).then(() => {
+                        workbook.xlsx.writeBuffer().then((buffer) => {
+                            saveAs(new Blob([buffer], { type: 'application/octet-stream' }), 'CompanyLoanAccount.xlsx');
+                        });
+                    });
+                    e.cancel = true;
+                },
+                columns: [
+                    {
+                        width: "auto",
+                        caption: "SL #",
+                        alignment: 'center',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        },
+                        cellTemplate: function (container, e) {
+                            var index = dataGrid.pageIndex() * dataGrid.pageSize() + e.rowIndex + 1;
+                            container.text(index);
+                        }
+
+                    },
+                    {
+                        dataField: "LoanID",
+                        visible: false,
+
+                    },
+                    {
+                        dataField: "BankName",
+                        alignment: 'center',
+                        caption: 'Bank',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                      }
+
+                    },
+                    {
+                        dataField: "LoanType",
+                        alignment: 'center',
+                        caption: 'Loan Type',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+
+                    },
+                    {
+                        dataField: "PaymentType",
+                        alignment: 'center',
+                        caption: 'Payment Type',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+
+                    },
+                    {
+                        dataField: "LoanNumber",
+                        width: 150,
+                        alignment: 'center',
+                        caption: 'Loan Number',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+
+                    },
+                    {
+                        dataField: "LoanChargeAccount",
+                        width:150,
+                        alignment: 'center',
+                        caption: 'Charge ACC',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+
+                    },  {
+                        dataField: "StartDateStr",
+                        alignment: 'center',
+                        caption: 'Start Date',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+                    }, {
+                        dataField: "EndDateStr",
+                        alignment: 'center',
+                        caption: 'End Date',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+                    },
+                    {
+                        caption: 'Action',
+                        alignment: 'center',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        },
+                        cellTemplate: function (container, options) {
+
+                            var returnText = '<button class="btn btn-xs btn-warning" title="Edit"><i class="fa fa-edit"></i></button>';
+                            //$(returnText).appendTo(container);
+                            $(returnText).on('dxclick', function () {
+                                getDataForEditLoanMaster(options.data);
+                            }).appendTo(container);
+
+                            var returnText = '<span>&nbsp</span><button class="btn btn-xs btn-danger" title="Delete"><i class="fa fa-trash"></i></button>';
+                            returnText = returnText + '</div>';
+                            $(returnText).on('dxclick', function () {
+                                DeleteRow(options.data.LoanID);
+
+                            }).appendTo(container);
+                        }
+                    }
+                ]
+
+            }).dxDataGrid("instance");
+        }
+        const DeleteRow = (LoanID)=>{
+            $.alert.open('confirm', 'Are you sure to delete this record?', function (button) {
+                if (button == 'yes') {
+                    HttpRequest.Ajax("GET", '/Embro/Loan/Remove', { "ID": LoanID }, saveSuccess, true);
+                    GetLoanMasterGridList();
+                }
+
+            });
+        }
+
+        const getDataForEditLoanMaster = (data) => {
+            debugger;
+            if (data.PaymentType == "Principal") {
+
+                $("#forPrincipalPT").removeClass("d-none")
+                $("#notPrincipalPT").addClass("d-none");
+                var bankid=data.BankID;
+                $("#BankID").val(bankid).trigger("change");
+                $("#LoanID").val(data.LoanID);
+                //var newOption = new Option(data.BankName, data.BankID, false, true);
+                //$('#BankID').append(newOption).trigger('change');
+                
+                $("#LoanTypeID").val(data.LoanTypeID);
+                $("#PaymentType").val(data.PaymentType);
+                var newOption = new Option(data.LoanNumber, data.LoanCOAID, false, true);
+                $('#LoanCOAID').append(newOption).trigger('change');
+                //$("#LoanCOAID").val(data.loanCOAID).trigger("change");
+                $("#LoanLimitAmount").val(data.LoanLimitAmount);
+                $("#LoanAmount").val(data.LoanAmount);
+                $("#InterestPercent").val(data.InterestPercent);
+                $("#TotalInstallment").val(data.TotalInstallment);
+                $("#InstallmentAmount").val(data.InstallmentAmount);
+                $("#PaymentPeriodInMonth").val(data.PaymentPeriodInMonth);
+                $("#StartDateStr").val(data.StartDateStr);
+                $("#EndDateStr").val(data.EndDateStr);
+                $("#PaymentType").attr('disabled','disabled');
+
+            } else {
+                $("#forPrincipalPT").addClass("d-none")
+                $("#notPrincipalPT").removeClass("d-none");
+                $("#LoanID").val(data.LoanID);
+                $("#BankID").val(data.BankID).trigger("change");
+                $("#LoanTypeID").val(data.LoanTypeID);
+                $("#PaymentType").val(data.PaymentType);
+                //$("#LoanCOAID").val(data.LoanCOAID).trigger("change");
+                var loanCoaId = new Option(data.LoanNumber, data.LoanCOAID, false, true);
+                $('#LoanCOAID').append(loanCoaId).trigger('change');
+                //$("#LoanChargeCOAID").val(data.LoanChargeCOAID).trigger("change");
+                var loanChargeCoaId = new Option(data.LoanChargeAccount, data.LoanChargeCOAID, false, true);
+                $('#LoanChargeCOAID').append(loanChargeCoaId).trigger('change');
+                $("#PaymentType").attr('disabled', 'disabled');
+                /*$("#LoanCOAID").val("").trigger("change");*/
+            }
+            $("#btnSave").val("Update");
+        }
+
+        function saveSuccess(data) {
+            if (data.result == 1) {
+                $.alert.open({
+                    type: 'Success',
+                    content: data.message,
+                    callback: function () {
+                    }
+                });
+            }
+            else {
+                $.alert.open("error", data.message);
+            }
+        }
+
+        //#region This Method for Generat Daynamic Row in Html Table
+
+        @*const AddLoanInstallment=()=>{
+            debugger;
+            let currentRowSerial = ($("#tblLoanInstallment tbody tr").length) + 1;
+                    let trTds = `<tr data-id='0' data-serial=${currentRowSerial}>
+                                    <td class="col-sm-1">
+                                        <label class='trSerial'>${currentRowSerial}</label>
+                                        <input type="hidden" class="hdnloanInstallmentID" asp-for="LoanInstallmentID" />
+                                    </td>
+                                    <td class="col-sm-2"><input placeholder="Installment No" type="number" class="hdnInstallmentNo form-control form-control-sm" /></td>
+                                    <td class="col-sm-2">
+                                        <div class="input-group ">
+                                            <input required  type="text"  readonly class="hdnInstallmentDate readonlyNormal datepic form-control form-control-sm tdDateField " />
+                                            <div class="input-group-append">
+                                                <span class="input-group-text"><i class="fa fa-calendar" aria-hidden="true"></i></span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="col-sm-2"><input placeholder="Installment Amount" type="number" class="hdnInstallmentAmount form-control form-control-sm" /></td>
+                                    <td class="col-sm-2"><input placeholder="Interest Amount" type="number" class="hdnInterestAmount form-control form-control-sm" /></td>
+                                    <td  class="col-sm-1">
+                                        <button type="button" id="btnDelete" class="btn btn-outline-danger btn-xs" onclick="Delete(this)"><span class="fa fa-trash fa-xs"></span></button>
+
+                                    </td>
+                                </tr>`;
+            $("#tblLoanInstallment tbody").append(trTds);
+           $(".tdDateField").val("@DateTime.Now.ToString("dd-MMM-yyyy")");
+        }*@
+        //#endregion
+
+        const Clear = () => {
+
+            $("#LoanID").val("0");
+            //$("#LoanTypeID").val("");
+            //$("#LoanCOAID").val("");
+            $("#StartDateStr").val("@DateTime.Now.ToString("dd-MMM-yyyy")");
+            $("#EndDateStr").val("@DateTime.Now.ToString("dd-MMM-yyyy")");
+            $("#LoanAmount").val("");
+            $("#InterestPercent").val("");
+            $("#TotalInstallment").val("");
+            $("#PaymentPeriodInMonth").val("");
+            //$(".hdnInterestAmount").val("");
+            //$(".hdnInstallmentAmount").val("");
+            //$(".hdnInstallmentNo").val("");
+            //$(".hdnInstallmentDate").val("@DateTime.Now.ToString("dd-MMM-yyyy")");
+            //$(".hdnloanInstallmentID").val("0");
+            //$("#ChkRegenerate").prop("checked", false);
+            //$("#tblLoanInstallment tbody").html('');
+            $("#LoanTypeID").val("");
+            $("#BankID").val("").trigger("change");
+            $("#LoanLimitAmount").val("");
+            $("#InstallmentAmount").val("");
+            $("#LoanChargeCOAID").val("").trigger("change");
+            $("#PaymentType").val($("#PaymentType option:first").val());
+            $("#btnSave").val("Save");
+            $("#notPrincipalPT").addClass("d-none");
+            $("#forPrincipalPT").removeClass("d-none");
+            $("#PaymentType").removeAttr('disabled');
+            $("#LoanCOAID").val("").trigger("change");
+            GetLoanMasterGridList();
+
+        }
+
+        //#region This Method For Deleting for Data
+        //const Delete = (that) => {
+        //    debugger;
+        //    let id = $(that).parent().parent().data("id");
+        //    if (id == 0) {
+        //        let a = typeof this;
+        //        let b = a.toString();
+        //        if (b == 'object') {
+        //            $.alert.open('confirm', 'Are you sure to delete this record?', function (button) {
+        //                if (button == 'yes') {
+        //                    let tr = $(that).parent().parent();
+        //                    tr.remove();
+        //                    $('.trSerial').each(function (i, v) {
+        //                        let thatSerial = $(this);
+        //                        thatSerial.text(++i);
+        //                    });
+        //                } else {
+
+        //                }
+
+        //            });
+        //        } else {
+        //            alert("Your Action Can't Approved")
+        //        }
+
+        //    } else if (id > 0) {
+        //        let a = typeof this;
+        //        let b = a.toString();
+        //        if (b == 'object') {
+        //            $.alert.open('confirm', 'Are you sure to delete this record?', function (button) {
+        //                if (button == 'yes') {
+        //                    let tr = $(that).parent().parent();
+        //                    tr.remove();
+        //                    $('.trSerial').each(function (i, v) {
+        //                        let thatSerial = $(this);
+        //                        thatSerial.text(++i);
+        //                    });
+        //                } else {
+
+        //                }
+        //            });
+        //        } else {
+        //            alert("Your Action Can't Approved")
+        //        }
+        //    } else {
+        //        alert("ID maybe Null");
+        //    };
+        //}
+
+        //function editBtn(that) {
+        //    debugger;
+        //    $(that).parent().parent().find('input').removeAttr("disabled");
+        //}
+        //#endregion
+
+      const getChartOfAccounts = () =>
+        {
+            HttpRequest.DropDownSelect2Group("Get", '/Embro/BasicCOA/GetDDLChartOfAccountsCategoryQuery', { CompanyID:@_currentuserService.CompanyID, LevelID: 14, Category: '@ChartOfAccountsConst.Liabilities,@ChartOfAccountsConst.Expenditure' }, 'LoanCOAID');
+        }
+
+      const getChartOfAccount = () =>
+        {
+             HttpRequest.DropDownSelect2Group("Get", '/Embro/BasicCOA/GetDDLChartOfAccountsCategoryQuery', { CompanyID:@_currentuserService.CompanyID, LevelID: 14, Category: '@ChartOfAccountsConst.Liabilities,@ChartOfAccountsConst.Expenditure' }, 'LoanChargeCOAID');
+        }
+
+
+        @*const getChartOfAccount = () =>
+        {
+            HttpRequest.DropDownSelect2Group("Get", '/Embro/BasicCOA/GetDDLChartOfAccountsCategoryQuery', { CompanyID:@_currentuserService.CompanyID, LevelID: 14, Category: '@ChartOfAccountsConst.Liabilities' }, 'BankID');
+        }*@
+
+    </script>
+}

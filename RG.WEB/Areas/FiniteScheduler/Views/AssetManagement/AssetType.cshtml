@@ -1,0 +1,225 @@
+﻿@model RG.Application.ViewModel.FiniteScheduler.Setup.AssetType.AssetTypeVM
+@{
+    ViewData[PageInfo.PageTitle] = "Create";
+    ViewData[PageInfo.PageHeader] = "Asset Type";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row">
+    <div class="form-group col-md-3">
+        <input asp-for="AssetTypeID" type="hidden" />
+        <div class="form-group">
+            <input asp-for="AssetTypeID" hidden/>
+            <label asp-for="TypeName" class="label-ajt-sm required"></label>
+            <div class="input-group">
+                <input placeholder="Type Name" asp-for="TypeName" type="text" class="form-control form-control-sm" />
+            </div>
+            <span asp-validation-for="TypeName"></span>
+        </div>
+    </div>
+
+    <div class="col-3">
+        <div class="form-group">
+            <label asp-for="Code" class="label-ajt-sm required"></label>
+            <input placeholder="Code" maxlength="3" value="" asp-for="Code" class="form-control form-control-sm" type="text" />
+            <span class="text-danger" asp-validation-for="Code"></span>
+        </div>
+    </div>
+    <div class="col-3">
+        <div class="form-group">
+            <label asp-for="Description" class="label-ajt-sm "></label>
+            <input placeholder="Description" value="" asp-for="Description" class="form-control form-control-sm " type="text" />
+            <span class="text-danger" asp-validation-for="Description"></span>
+        </div>
+    </div>
+    <div class="col-3">
+        <label>&nbsp;</label>
+        <div class="form-group">
+            <input type="button" class="btn btn-sm btn-success mr-2" value="Save" id="btnSave" />
+            @*<input type="button" class="btn btn-sm btn-warning d-none" value="Clear" id="btnClear" onclick="Clear()" />*@
+        </div>
+    </div>
+
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div id="grid">
+
+        </div>
+    </div>
+</div>
+@section scripts{
+    <script type="text/javascript">
+        $(function () {
+            GetAssetTypeList();
+            $("#btnSave").click(function () {
+                debugger
+                let assetTypeID = $("#AssetTypeID").val();
+                let typeName = $("#TypeName").val();
+                let code = $("#Code").val();
+                let description = $("#Description").val();
+
+                if (typeName != "" && code != "") {
+                    var Obj = {
+                        AssetTypeID: assetTypeID,
+                        TypeName: typeName,
+                        Code: code,
+                        Description: description
+                    }
+                    if (Obj.AssetTypeID > 0) {
+                        HttpRequest.Ajax("POST", '/FiniteScheduler/AssetManagement/AssetTypeUpdate', { "assetTypeDTM": Obj }, saveSuccess, true);
+                    } else {
+                        HttpRequest.Ajax("POST", '/FiniteScheduler/AssetManagement/AssetType', { "assetType": Obj }, saveSuccess, true);
+                    }
+                } else {
+                    $.alert.open('warning', "Something is Error");
+
+                    return false;
+                }
+                Clear();
+                GetAssetTypeList();
+            });
+            
+        });
+        const Clear = () => {
+            $("#AssetTypeID").val("0");
+            $("#TypeName").val("");
+            $("#Code").val("");
+            $("#Description").val("");
+            $("#btnSave").val("Save");
+        }
+      
+        const GetAssetTypeList = () => {
+            debugger
+            var dataGrid = $("#grid").dxDataGrid({
+                height: 450,
+                remoteOperations: { paging: true, filtering: true, sorting: true, grouping: true, summary: true, groupPaging: true },
+                dataSource: DevExpress.data.AspNet.createStore({
+                    key: "AssetTypeID",
+                    loadUrl: "/FiniteScheduler/AssetManagement/GetAllAssetType",
+                    loadParams: {
+
+                    }
+                }),
+                hoverStateEnabled: true,
+
+                showBorders: true,
+                columnAutoWidth: true,
+                filterRow: { visible: true },
+                pager: { visible: true, showInfo: true, allowedPageSizes: [10, 20, 50, 100, 500], showPageSizeSelector: true, },
+                paging: { pageSize: 10 },
+                selection: { mode: 'single' },
+                export: {
+                    //   enabled: true
+                },
+                columns: [
+                    {
+                        width: "auto",
+                        caption: "SL #",
+                        alignment: 'center',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        },
+                        cellTemplate: function (container, e) {
+                            var index = dataGrid.pageIndex() * dataGrid.pageSize() + e.rowIndex + 1;
+                            container.text(index);
+                        }
+                    },
+                    {
+                        dataField: "AssetTypeID",
+                        visible: false,
+                    }, {
+                        dataField: "TypeName",
+                        alignment: 'center',
+                        caption: 'Asset Type',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+                    },
+                    {
+                        dataField: "Code",
+                        alignment: 'center',
+                        caption: 'Code',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+                    }, {
+                        dataField: "Description",
+                        alignment: 'center',
+                        caption: 'Description',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+                    },
+                    {
+                        dataField: "Serial",
+                        alignment: 'center',
+                        caption: 'Serial',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+                    },
+                    {
+                        caption: 'Action',
+                        alignment: 'center',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        },
+                        cellTemplate: function (container, options) {
+
+                            var returnText = '<button class="btn btn-xs btn-warning"><i class="fa fa-edit"></i> Edit</button>';
+                            $(returnText).on('dxclick', function () {
+                                Edit(options.data);
+                            }).appendTo(container);
+
+                            var returnText = '<span>&nbsp</span><button title="Delete" class="btn btn-xs btn-danger"><i class="fa fa-trash"></i>Delete</button>';
+                            returnText = returnText + '</div>';
+                            $(returnText).on('dxclick', function () {
+                                DeleteRow(options.data.AssetTypeID);
+                            }).appendTo(container);
+                        }
+                    }
+                ]
+            }).dxDataGrid("instance");
+
+            const Edit = (data) => {
+                $("#AssetTypeID").val(data.AssetTypeID);
+                $("#TypeName").val(data.TypeName);
+                $("#Description").val(data.Description);
+                $("#Code").val(data.Code);
+                $("#btnSave").val("Update");
+            }
+            const DeleteRow = (AssetTypeID) => {
+                debugger
+                $.alert.open('confirm', 'Are you sure to delete this record?', function (button) {
+                    if (button == 'yes') {
+                        HttpRequest.Ajax("POST", '/FiniteScheduler/AssetManagement/AssetTypeRemove', { "assetTypeID": AssetTypeID }, saveSuccess, true);
+                    } else {
+                        
+                    }
+                });
+            }
+
+            
+        }
+        function saveSuccess(data) {
+            debugger;
+            if (data.result == 1) {
+                $.alert.open({
+                    type: 'Success',
+                    content: data.message,
+                    callback: function () {
+                        Clear();
+                        GetAssetTypeList();
+                    }
+                });
+            }
+            else {
+                $.alert.open("error", data.message);
+            }
+        }
+
+
+    </script>
+}

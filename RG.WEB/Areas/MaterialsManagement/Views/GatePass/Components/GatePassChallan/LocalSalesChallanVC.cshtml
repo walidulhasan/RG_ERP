@@ -1,0 +1,368 @@
+﻿@using Microsoft.AspNetCore.Antiforgery
+@inject IAntiforgery antiForgeryToken
+
+@model RG.Application.ViewModel.MaterialsManagement.Business.GatePass.GatePassChallanMasterVM
+@{
+    var token = antiForgeryToken.GetAndStoreTokens(Context);
+    var sl = 1; decimal totalQuantity = 0; decimal tgrossWeight = 0; decimal tNetWeight = 0;
+    Layout = null;
+
+    var claims = User.Claims.ToList();
+    var initialApprovalPower = claims?.FirstOrDefault(x => x.Type.Equals(UserClaimsCC.GatePassInitialApproval, StringComparison.OrdinalIgnoreCase))?.Value;
+
+    var accountsCashApproval = claims?.FirstOrDefault(x => x.Type.Equals(UserClaimsCC.GatePassAccountsCashApproval, StringComparison.OrdinalIgnoreCase))?.Value;
+    var accountsChequeApproval = claims?.FirstOrDefault(x => x.Type.Equals(UserClaimsCC.GatePassAccountsChequeApproval, StringComparison.OrdinalIgnoreCase))?.Value;
+    var accountsLCApproval = claims?.FirstOrDefault(x => x.Type.Equals(UserClaimsCC.GatePassAccountsLCApproval, StringComparison.OrdinalIgnoreCase))?.Value;
+
+    var rejectGatePass = claims?.FirstOrDefault(x => x.Type.Equals(UserClaimsCC.GatePassReject, StringComparison.OrdinalIgnoreCase))?.Value;
+
+    var markedOutPower = claims?.FirstOrDefault(x => x.Type.Equals(UserClaimsCC.GatePassMarkedOut, StringComparison.OrdinalIgnoreCase))?.Value;
+    var reportTitle = "Gate Pass";
+    if (Model.ReportType == 2)
+    {
+        reportTitle = "Challan";
+    }
+}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="Robintex comptex">
+    <meta name="generator" content="Jekyll v3.8.6">
+    <title></title>
+
+
+    <meta name="theme-color" content="#563d7c">
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+
+    <style>
+        .bd-placeholder-img {
+            font-size: 1.125rem;
+            text-anchor: middle;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        table thead {
+            text-align: center;
+        }
+
+        table {
+            background: inherit;
+            table-layout: fixed;
+        }
+
+        td {
+            word-wrap: break-word
+        }
+
+        table.table-bordered {
+            border: 1px solid #000;
+            margin-top: 20px;
+        }
+
+            table.table-bordered > thead > tr > th {
+                border: 1px solid #000;
+            }
+
+            table.table-bordered > tbody > tr > td {
+                border: 1px solid #000;
+            }
+
+            table.table-bordered > tbody > tr > th {
+                border: 1px solid #000;
+            }
+
+            table.table-bordered > tfoot > tr > th {
+                border: 1px solid #000;
+            }
+    </style>
+
+</head>
+<body class="d-print-none">
+
+    <div class="container-fluid printArea">
+        <main role="main" class="col-md-12 ml-sm-auto col-lg-12 px-4">
+            <div class="row">
+                <div class="col-md-12" style="text-align:center;">
+                    <span class="col-md-12" style="text-align:center;font-weight:bold;">@Model.CompanyName</span>
+                    <br />
+                    <span class="col-md-12" style="text-align:center;font-weight:bold;">@Model.CompanyAddress</span>
+                    <br />
+                    <span class="col-md-12" style="text-align:center;font-weight:bold;">@reportTitle</span>
+
+                </div>
+            </div>
+            <br />
+            <div class="row" style="font-size:12px;">
+                <input type="hidden" asp-for="GatePassID" />
+                <div class="col-md-12">
+                    <table class="table table-striped  table-sm text-center" id="">
+
+                        <tbody>
+                            <tr>
+
+                                @if (Model.ReportType == 2)
+                                {
+                                <td colspan="6" style="text-align:left"><b>Challan No # :</b> @Model.Serial</td>
+                                }
+                                else
+                                {
+                            <td colspan="6" style="text-align:left"><b>GP # :</b> @Model.Serial</td>
+                                }
+                                
+                            <td colspan="6" style="text-align:left"><b>Delivery Date & Time : </b>@Model.DateTimeStamp</td>
+                                
+                            </tr>
+
+                            <tr>
+                                <td colspan="6" style="text-align:left"><b>Customer's Name :</b> @Model.CustomerName</td>                                
+                                <td colspan="6" style="text-align:left"><b>Customer's Challan No :</b> @Model.CustomerChallanNo</td>                                
+                            </tr>
+                            <tr>
+                                <td colspan="12" style="text-align:left"><b>Customer's Address : </b>@Model.CustomerAddress</td>
+                                
+                            </tr>
+                            <tr>
+                                <td colspan="6" style="text-align:left"><b>Vehicle No :</b> @Model.VehicleNo</td>                               
+                                <td colspan="6" style="text-align:left"><b>Category Name : </b>@Model.CategoryName</td>
+                            </tr>                    
+                            <tr>
+                                <td colspan="12">
+                                    <table class="table table-striped table-bordered table-sm mdReport text-center" id="">
+                                        <thead>
+
+                                            <tr>
+                                                <th style="width:5%">SL</th>
+                                                <th style="width:20%">Item Name</th>
+                                                <th style="width:5%">W. Order</th>
+                                                <th style="width:5%">R. Width</th>
+                                                <th style="width:5%">F. Width</th>
+                                                <th style="width:5%">Roll No</th>
+                                                <th style="width:5%">Gross Qty.</th>
+                                                <th style="width:5%">Finish Qty.</th>
+                                                <th style="width:5%">Unit</th>
+                                                <th style="width:5%">Rate</th>
+                                                <th style="width:8%">Payment</th>
+                                                <th style="width:15%">Remarks</th>
+                                            </tr>
+
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var details in Model.GatePassChallanDetails)
+                                            {
+                                            <tr>
+                                                <td style="vertical-align:middle;">@sl</td>
+                                                <td style="vertical-align:middle;">@details.ItemName</td>
+                                                <td style="vertical-align:middle;">@details.OrderNo</td>
+                                                <td style="vertical-align:middle;">@details.GreigeWidth</td>
+                                                <td style="vertical-align:middle;">@details.FinishedWidth</td>
+                                                <td style="vertical-align:middle;">@details.Roll</td>
+                                                <td style="vertical-align:middle;">@String.Format("{0:n2}", details.GrossWeight)</td>
+                                                <td style="vertical-align:middle;">@String.Format("{0:n2}", details.NetWeight )</td>
+                                                <td style="vertical-align:middle;">@details.UnitName</td>
+                                                <td style="vertical-align:middle;">@details.Rate</td>
+                                                <td style="vertical-align:middle;">@String.Format("{0:n2}", (details.IsCalculationWithGray==1?details.GrossWeight : details.NetWeight) * details.Rate)</td>
+                                                <td style="vertical-align:middle;">@details.Remarks</td>
+                                            </tr>
+                                                sl++;
+                                                totalQuantity += details.Quantity;
+                                                //  totalRate += details.CartonQty;
+                                                tgrossWeight += details.GrossWeight;
+                                                tNetWeight += details.NetWeight;
+                                            }
+                                            @*<tr>
+                                                    <td colspan="4" style="vertical-align:middle;">Total :</td>
+
+                                                    <td>@totalQuantity</td>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td>@tgrossWeight</td>
+                                                    <td>@tNetWeight</td>
+                                                    <td></td>
+                                                </tr>*@
+                                        </tbody>
+                                    </table>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <br />
+                <div class="row col-md-12">
+                    <div class="col-md-3 col-sm-3 col-lg-3">
+                        <p class="mb-1">@Model.PreparedByUser</p><hr class="m-1" /><p><b>Prepared By</b></p>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-lg-3">
+                        @{
+                            var accApproveby = Model.AccountsApprovedBy > 0 ? Model.AccountsApprovedUser : "Not Approved";
+                        }
+                        <p class="mb-1">@accApproveby</p><hr class="m-1" /><p><b>Acc. Approved By</b></p>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-lg-3">
+                        @{
+                            var approveby = Model.ApprovedBy > 0 ? Model.ApprovedUser : "Not Approved";
+                        }
+                        <p class="mb-1">@approveby</p><hr class="m-1" /><p><b>Approved By</b></p>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-lg-3">
+                        <p class="mb-1">&nbsp;</p><hr class="m-1" /><p><b>Gate Office Stamp & Sign</b></p>
+                    </div>
+                    @*<div class="col-md-3 col-sm-3 col-lg-3">
+            <p>&nbsp;</p><hr /><p>Receive Sign & Name</p>
+        </div>*@
+
+                </div>
+            </div>
+            <script>
+
+            </script>
+        </main>
+    </div>
+    <div class="row noprint no-print">
+        <div class="col-6 col-md-6 col-sm-6 text-right">
+            @if ((accountsCashApproval == Model.PaymentMode.ToString() || accountsLCApproval == Model.PaymentMode.ToString()) && Model.IsApproved == false && Model.IsApprovedByAccounts == null)@*Model.ApprovedBy == null*@
+            {
+                <input type="button" id="btnAccountApprove" class="btn btn-sm btn-success" value="Accounts Approval">
+            }
+            @if (initialApprovalPower == "1" && Model.IsApproved == false && Model.IsApprovedByAccounts == true)
+            {
+                <input type="button" id="btnInitialApprove" class="btn btn-sm btn-success" value="Initial Approval">
+            }
+
+            @if (markedOutPower == "1" && Model.IsApproved == true && Model.isMarkedOut == false)
+            {
+                <input type="button" id="btnMarkedOut" class="btn btn-sm btn-warning" value="Mark Out">
+            }
+            <input type="button" class="btn btn-sm btn-primary" id="btnPdf" value="Print">
+            @*<input type="button" class="btn btn-sm btn-danger" value="Print" onClick="window.print()">*@
+        </div>
+        <div class="col-6 col-md-6 col-sm-6 text-center">
+            @if (rejectGatePass == "1" && Model.IsApproved == false)
+            {
+                <input type="button" id="btnReject" class="btn btn-sm btn-danger text-right" value="Reject">
+            }
+
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+</body>
+</html>
+<script src="~/AdminLTE-3.1.0/plugins/jquery/jquery.min.js"></script>
+<script src="~/js/customScripts/GenericHTTPRequest.js"></script>
+<link href="~/lib/jquery-alert/css/alert.css" rel="stylesheet" />
+<link href="~/lib/jquery-alert/themes/default/theme.css" rel="stylesheet" />
+<!--signalR Notification-->
+<script src="~/js/signalr/dist/browser/signalr.js"></script>
+<script src="~/js/notification.js"></script>
+<!-- alert js -->
+<script src="~/lib/jquery-alert/js/alert.js"></script>
+<script type="text/javascript">
+    $(function () {
+        $("#btnInitialApprove").click(function () {
+            debugger
+            let gatePassID = $("#GatePassID").val();
+            if (gatePassID > 0) {
+                $.alert.open('confirm', 'Are you sure to approve this record', function (button) {
+                    if (button == 'yes')
+                        HttpRequest.Ajax("POST", "/MaterialsManagement/GatePass/ApprovedGatePass", { gatePassId: gatePassID, '@token.HeaderName': '@token.RequestToken' }, saveSuccess);
+                });
+            }
+        });
+        $("#btnAccountApprove").click(function () {
+            debugger
+            let gatePassID = $("#GatePassID").val();
+            if (gatePassID>0) {
+                $.alert.open('confirm', 'Are you sure to approve this gate pass', function (button) {
+                    if (button == 'yes')
+                        HttpRequest.Ajax("POST", "/MaterialsManagement/GatePassIssue/AccountsApprove", { gatePassID: gatePassID,'@token.HeaderName': '@token.RequestToken' }, saveSuccess);
+                });
+            }
+        });
+
+        $("#btnMarkedOut").click(function () {
+            debugger
+            let gatePassID = $("#GatePassID").val();
+            if (gatePassID > 0) {
+                $.alert.open('confirm', 'Are you sure to mark out this gate pass', function (button) {
+                    if (button == 'yes')
+                        HttpRequest.Ajax("POST", "/MaterialsManagement/GatePass/MarkOutGatePass", { gatePassId: gatePassID, '@token.HeaderName': '@token.RequestToken' }, saveSuccessMarkedOut)
+                });
+            }
+        });
+        $("#btnPdf").click(function () {
+            debugger;
+             let gatePassID = $("#GatePassID").val();
+             let categoryID = '@Model.CategoryID';
+             let reportType = '@Model.ReportType';
+            let reportFormat = ("@RG.Application.Constants.ReportExportFormat.PdfFormat.ToString()");
+             var url = `/MaterialsManagement/GatePass/ShowGatePassReports?GatePassID=${gatePassID}&CategoryID=${categoryID}&ReportType=${reportType}&ReportFormat=${reportFormat}`
+            window.open(url, "_blank", "toolbar=no,scrollbars=yes,resizable=yes,top=150,left=50,width=1000,height=800");
+        });
+           $("#btnReject").click(function () {
+            debugger
+            let gatePassID = $("#GatePassID").val();
+            if (gatePassID > 0) {
+                 $.alert.open('confirm', 'Are you sure to Reject this record', function (button) {
+            if (button == 'yes')
+                HttpRequest.Ajax("POST", "/MaterialsManagement/GatePass/RemoveGatePass", { gatePassID: gatePassID, '@token.HeaderName': '@token.RequestToken' }, rejectSuccess)
+            });
+            }
+        });
+    })
+    function saveSuccessMarkedOut(data) {
+        debugger
+        if (data.result == 1) {
+            $.alert.open({
+                type: 'Success',
+                content: data.message,
+                callback: function () {
+                    window.location.reload();
+                }
+            });
+        }
+        else {
+            $.alert.open("error", data.message);
+        }
+    }
+    function saveSuccess(data) {
+        debugger
+        if (data.result == 1) {
+            $.alert.open({
+                type: 'success',
+                content: data.message,
+                callback: function () {
+                    SendNotification();
+                    window.location.reload();
+                }
+            });
+        }
+        else {
+            $.alert.open("error", data.message);
+        }
+    } function rejectSuccess(data) {
+        debugger
+        if (data.result == 1) {
+            $.alert.open({
+                type: 'Success',
+                content: data.message,
+                callback: function () {
+                    //$("input[type^=button]").each(function (index) {
+                    //    $(this).hide();
+                    //});
+                    window.close();
+                }
+            });
+        }
+        else {
+            $.alert.open("error", data.message);
+        }
+    }
+</script>

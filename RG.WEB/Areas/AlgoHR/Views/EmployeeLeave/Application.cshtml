@@ -1,0 +1,692 @@
+﻿@model RG.Application.ViewModel.AlgoHR.Business.EmployeeLeave.ApplicationVM
+@{
+    ViewData[PageInfo.PageTitle] = "Leave Applicaion";
+    ViewData[PageInfo.PageHeader] = "Leave Applicaion";
+    //ViewData[PageInfo.btnText1] = "Back to List";
+    //ViewData[PageInfo.PageLink1] = "/FiniteScheduler/MachineMaintenance/Index";
+    //ViewData[PageInfo.btnClass1] = "btn-warning";
+
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    DateTime? datePickerStartDate = Model.LastSalaryDate != null ? Model.LastSalaryDate.Value.AddDays(1) : null;
+}
+<head>
+    <script src="~/AdminLTE-3.1.0/plugins/moment/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.39.0/js/tempusdominus-bootstrap-4.min.js" integrity="sha512-k6/Bkb8Fxf/c1Tkyl39yJwcOZ1P4cRrJu77p83zJjN2Z55prbFHxPs9vN7q3l3+tSMGPDdoH51AEU8Vgo1cgAA==" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.39.0/css/tempusdominus-bootstrap-4.min.css" integrity="sha512-3JRrEUwaCkFUBLK1N8HehwQgu8e23jTH4np5NHOmQOobuC4ROQxFwFgBLTnhcnQRMs84muMh0PnnwXlPq5MGjg==" crossorigin="anonymous" />
+
+</head>
+<div class="row">
+    <div class="col-sm-12 col-md-12">
+        <div class="card card-dark">
+            <div class="card-header m-0 p-1">
+                <h5 class="card-title">Leave Information</h5>
+                <div class="text-right"><button class="btn btn-xs btn-warning p-0" id="btnBlankAppliation">Blank Application</button></div>
+            </div>
+            <div class="card-body p-2">
+                <input type="hidden" asp-for="EmployeeID" />
+                @if (Model.CanApplyForOthers)
+                {
+                    <div class="row">
+                        <div class="col-6 col-sm-3">
+                            <div class="form-group mb-2">
+                                <label asp-for="EmployeeCode" class="required"></label>
+                                <select asp-for="EmployeeCode" asp-items="Model.DDLEmployee" class="form-control form-control-sm"></select>
+                                <span asp-validation-for="EmployeeCode" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                }
+                <div class="row">
+                    <div class="col-6 col-sm-3">
+                        <div class="form-group mb-2">
+                            <label asp-for="EmployeeCode" class=""></label>
+                            <input type="text" asp-for="EmployeeCode" id="EmpCode" class="form-control form-control-sm" readonly />
+                        </div>
+                    </div>
+                    <div class="col-6 col-sm-3">
+                        <div class="form-group mb-2">
+                            <label asp-for="EmployeeName" class=""></label>
+                            <input type="text" asp-for="EmployeeName" class="form-control form-control-sm" readonly />
+                        </div>
+                    </div>
+                    <div class="col-6 col-sm-3">
+                        <div class="form-group mb-2">
+                            <label asp-for="CompanyName" class=""></label>
+                            <input type="text" asp-for="CompanyName" class="form-control form-control-sm" readonly />
+                        </div>
+                    </div>
+                    <div class=" col-6 col-sm-3">
+                        <div class="form-group mb-2">
+                            <label asp-for="DivisionName" class=""></label>
+                            <input type="text" asp-for="DivisionName" class="form-control form-control-sm" readonly />
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-6 col-sm-3">
+                        <div class="form-group mb-2">
+                            <label asp-for="DepartmentName" class=""></label>
+                            <input type="text" asp-for="DepartmentName" class="form-control form-control-sm" readonly />
+                        </div>
+                    </div>
+                    <div class="col-6 col-sm-3">
+                        <div class="form-group mb-2">
+                            <label asp-for="SectionName" class=""></label>
+                            <input type="text" asp-for="SectionName" class="form-control form-control-sm" readonly />
+                        </div>
+                    </div>
+                    <div class="col-6 col-sm-3">
+                        <div class="form-group mb-2">
+                            <label asp-for="Designation" class=""></label>
+                            <input type="text" asp-for="Designation" class="form-control form-control-sm" readonly />
+                        </div>
+                    </div>
+                    <div class="col-6 col-sm-3">
+                        <div class="form-group mb-2">
+                            <label asp-for="AppointmentDate" class=""></label>
+                            <input type="text" asp-for="AppointmentDate" class="form-control form-control-sm" readonly />
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-3">
+                        <div class="form-group mb-2">
+                            <label asp-for="LeaveID" class="required"></label>
+                            <select asp-for="LeaveID" asp-items="Model.DDLLeaves" class="form-control form-control-sm border border-danger"></select>
+                            <span asp-validation-for="LeaveID" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-sm-9" id="divLeaveInfo">
+                        <label class="">&nbsp;</label>
+                        <table class="table table-sm table-striped table-bordered text-xs mb-0">
+                            <thead class="bg-dark">
+                                <tr>
+                                    <th>Total No of Leave : <span id="totalNoOfLeave">0</span></th>
+                                    <th>Total Availed : <span id="totalAvailed">0</span></th>
+                                    <th>Remaining Leave : <span id="totalRemaining">0</span></th>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
+                    <div class="col-sm-5 d-none" id="divForComplimentaryLeave">
+                        <div class="form-group mb-2">
+                            <label class="required">Compensatory Leave</label>
+                            <select  id="ComplimentaryLeave" asp-items="Model.DDLLeaves"  class="form-control form-control-sm "></select>
+                            <span class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row" id="divLeaveDetail">
+                    <div class="col-5 col-sm-3">
+                        <div class="form-group mb-2">
+                            <label asp-for="DateFrom" class="required"></label>
+                            <div class="input-group">
+                                <input  type="text" asp-for="DateFrom" class="form-control form-control-sm readonlyNormal" readonly />
+                                <div class="input-group-append">
+                                    <span class="input-group-text"><i class="fa fa-calendar" aria-hidden="true"></i></span>
+                                </div>
+                            </div>
+                            <span asp-validation-for="DateFrom" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-5 col-sm-3">
+                        <div class="form-group mb-2">
+                            <label asp-for="DateTo" class="required"></label>
+                            <div class="input-group">
+                                <input type="text" asp-for="DateTo" class="form-control form-control-sm readonlyNormal" readonly />
+                                <div class="input-group-append">
+                                    <span class="input-group-text"><i class="fa fa-calendar" aria-hidden="true"></i></span>
+                                </div>
+                            </div>
+                            <span asp-validation-for="DateTo" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-2 col-sm-3">
+                        <div class="form-group mb-2">
+                            <label asp-for="TotalDay" class=""></label>
+                            <input type="text" asp-for="TotalDay" class="form-control form-control-sm" readonly />
+                        </div>
+                    </div>
+                </div>
+                <div class="row d-none" id="divShortLeaveDetail">
+                    <div class="col-12 col-sm-3">
+                        <div class="form-group mb-2">
+                            <label asp-for="ShortLeaveDate" class="required"></label>
+                            <div class="input-group">
+                                <input type="text" asp-for="ShortLeaveDate" class="form-control form-control-sm readonlyNormal" readonly />
+                                <div class="input-group-append">
+                                    <span class="input-group-text"><i class="fa fa-calendar" aria-hidden="true"></i></span>
+                                </div>
+                            </div>
+                            <span asp-validation-for="ShortLeaveDate" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-12 col-sm-3 col-md-3 col-lg-3">
+                        <div class="input-group">
+                            <div class="col-6 col-sm-6 col-md-6 col-lg-6 pl-0">
+                                <div class="form-group">
+                                    <label asp-for="TimeFrom" class="required"></label>
+                                    <div class="input-group date" id="TimeFromPicker" data-target-input="nearest">
+                                        <input type="text" asp-for="TimeFrom" class="form-control form-control-sm datetimepicker-input" data-target="#TimeFromPicker" data-toggle="datetimepicker" />
+                                        <div class="input-group-append" data-target="#TimeFromPicker" data-toggle="datetimepicker">
+                                            <span class="input-group-text"><i class="fa fa-clock" aria-hidden="true"></i></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-6 col-sm-6 col-md-6 col-lg-6 pl-0">
+                                <div class="form-group">
+                                    <label asp-for="TimeTo" class="required"></label>
+                                    <div class="input-group date" id="TimeToPicker" data-target-input="nearest">
+                                        <input type="text" asp-for="TimeTo" class="form-control form-control-sm datetimepicker-input" data-target="#TimeToPicker" data-toggle="datetimepicker" />
+                                        <div class="input-group-append" data-target="#TimeToPicker" data-toggle="datetimepicker">
+                                            <span class="input-group-text"><i class="fa fa-clock" aria-hidden="true"></i></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-5 col-sm-3">
+                        <div class="form-check mb-2">
+                            <label>&nbsp;</label>
+                            <div class="input-group">
+                                <input type="checkbox" id="ChkReturnable" class="form-check-input" />  <label asp-for="Returnable"></label>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="row">
+                    <div class="col-12 col-sm-6">
+                        <div class="form-group mb-2">
+                            <label asp-for="LeaveReason" class="required"></label>
+                            <textarea asp-for="LeaveReason" class="form-control form-control-sm"></textarea>
+                            <span asp-validation-for="LeaveReason" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-12 col-sm-6">
+                        <div class="form-group mb-2">
+                            <label asp-for="LeaveAddress" class="required"></label>
+                            <textarea asp-for="LeaveAddress" class="form-control form-control-sm"></textarea>
+                            <span asp-validation-for="LeaveAddress" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="row d-none" id="divLeaveAttachment">
+                    <div class="col-sm-3">
+                        <div class="form-group mb-2">
+                            <label asp-for="DocumentType" class=""></label>
+                            <select asp-for="DocumentType" asp-items="Model.DDLDocumentType" class="form-control form-control-sm"></select>
+                            <span asp-validation-for="DocumentType" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div id="root" class="col-sm-9">
+                        <label>Upload Image</label>
+                        <input id="img-input" type="file" accept="image/*" style="display:block" />
+                        <br />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12 col-md-12 text-center">
+                        <div class="form-group">
+                            <button type="button" class="btn btn-sm btn-success" id="btnSave">Submit</button>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section scripts{
+
+    <script type="text/javascript">
+        function ClearForm() {
+            $("#divShortLeaveDetail").addClass('d-none');
+            $("#divLeaveDetail,#divLeaveInfo").removeClass('d-none');
+            $("#LeaveID").val("").trigger('change');
+            $("#DateFrom").val('');
+            $("#DateTo").val('');
+            $("#TotalDay").val('');
+            $("#LeaveReason").val('');
+            $("#LeaveAddress").val('');
+
+            $("#ShortLeaveDate").val('');
+            $("#TimeFrom").val('');
+            $("#TimeTo").val('');
+            $("#ChkReturnable").prop("checked", false);
+            $("#root div").each(function () {
+               $(this).remove();
+            });
+        }
+        @*function GetDDLComplimentaryLeave() {
+            const empID =@Model.EmployeeCode;
+            HttpRequest.DropDown('GET', '/AlgoHR/EmployeeLeave/GetDDLComplimentaryLeave', { "empID":empID }, 'ComplimentaryLeave', true);
+        }*@
+        function LeaveApplicationFormReport(applicationID) {
+
+            let reportFormat = "@ReportExportFormat.PdfFormat";
+            window.open("/AlgoHR/EmployeeLeave/LeaveApplicationFormReport?applicationID=" + applicationID + "&ReportFormat=" + reportFormat, "Leave Application Form", "status=1,toolbar=0");
+            return false;
+        }
+        function saveSuccess(data) {
+            if (data.result == 1) {
+                $.alert.open({
+                    type: 'Success',
+                    content: data.message,
+                    callback: function () {
+                        let leaveID = $("#LeaveID").val();
+                        if (leaveID!="SL") {
+                            LeaveApplicationFormReport(data.longId);
+                        }
+
+                        ClearForm();
+                    }
+                });
+            }
+            else {
+                $.alert.open("error", data.message);
+            }
+        }
+        function GetEmployeeList() {
+            HttpRequest.DropDownSelect2Group('GET', '/AlgoHR/UserDepartmentAccess/GetDDLUserSectionEmployee', { predict: $("#EmployeeCode").val() }, 'EmployeeCode');
+        }
+        function GetEmployeeShortInfo() {
+
+            let employeeCode = '0';
+            let employeeID = 0;
+            if (!RtnBoolToLower('@Model.CanApplyForOthers'))
+                employeeCode = '@Model.EmployeeCode';
+            else {
+                employeeID = $("#EmployeeCode").val();
+                employeeCode = '';
+            }
+
+
+           /* if (employeeCode != "") {*/
+                let empInfo = HttpRequest.AjaxData('GET', '/AlgoHR/EmployeeLeave/GetEmployeeShortInfo', { employeeCode: employeeCode, employeeID: employeeID });
+                let empCode = empInfo.EmployeeID;
+
+                if (empInfo != null) {
+                    $("#EmployeeID").val(empInfo.EmployeeID);
+                    $("#EmpCode").val(empInfo.EmployeeCode);
+                    $("#EmployeeName").val(empInfo.EmployeeName);
+                    $("#CompanyName").val(empInfo.CompanyName);
+                    $("#DivisionName").val(empInfo.DivisionName);
+
+                    $("#DepartmentName").val(empInfo.DepartmentName);
+                    $("#SectionName").val(empInfo.SectionName);
+                    $("#Designation").val(empInfo.DesignationName);
+                    $("#AppointmentDate").val(empInfo.Emp_Appointment);
+
+                    HttpRequest.DropDownCustom('GET', '/AlgoHR/EmployeeLeave/GetDDLCustomEmpLeaves', { employeeID: empInfo.EmployeeID, employeeCode: employeeCode }, 'LeaveID');
+                   
+                }
+            /*}*/
+        }
+        function ShowImageUploader() {
+
+            let dateFrom = $("#DateFrom").val();
+            let dateTo = $("#DateTo").val();
+            if (dateFrom != "" && dateTo != "") {
+                let totalDays = GetDayDifference(dateFrom, dateTo, true);
+
+                let isDocRequired = RtnBoolToLower($("#LeaveID").find(':selected').attr('data-custom2'));
+                let docRequiredForMoreThanDays = RtnNumber($("#LeaveID").find(':selected').attr('data-custom3'));
+                if (isDocRequired && totalDays > docRequiredForMoreThanDays) {
+                    $("#divLeaveAttachment").removeClass("d-none");
+                } else {
+                    $("#divLeaveAttachment").addClass("d-none");
+                    $("#root div").remove();
+                }
+            } else {
+                $("#divLeaveAttachment").addClass("d-none");
+                $("#root div").remove();
+            }
+        }
+        $(function () {
+
+            let datePickerStartDate = '-1M';
+            if ('@datePickerStartDate' != null ) {
+
+                datePickerStartDate = new Date('@datePickerStartDate.Value.Year', '@(datePickerStartDate.Value.Month-1)', '@datePickerStartDate.Value.Day')
+            }
+
+
+            $("#DateFrom,#DateTo").datepicker({
+                dateFormat: 'dd-M-yy',
+                minDate: datePickerStartDate,
+                maxDate: '+6M',
+                onClose: function (selectedDate) {
+
+                    let dateFrom = $("#DateFrom").val();
+                    let dateTo = $("#DateTo").val();
+                    if (dateFrom != "" && dateTo != "") {
+                        let fromYear = parseInt(dateFrom.split('-')[2]);
+                        let toYear = parseInt(dateTo.split('-')[2]);
+                        if (fromYear != toYear) {
+                            $.alert.open('warning', `Leave must be in same year`);
+                            $("#DateFrom").val('');
+                            $("#DateTo").val('');
+                        } else {
+                            let remainingLeaveDays = 0;
+                            let totalDays = 0;
+                            let leaveID = $("#LeaveID").val();
+                            if (leaveID == 14) {//For complimentary Leave
+                                debugger
+                                let comLeave = $("#ComplimentaryLeave").val();
+                                if (comLeave == "") {
+                                    $.alert.open("warning", "Please Select Complimentary Leave");
+                                    $("#DateTo").val('');
+                                    $("#TotalDay").val('');
+                                } else {
+                                    remainingLeaveDays = 1;
+                                    totalDays = GetDayDifference(dateFrom, dateTo, true);
+                                }
+                                
+                            } else {
+                                let totalLeaveDays = RtnNumber($("#LeaveID").find(':selected').attr('data-custom1'));
+                                let availedLeaveDays = RtnNumber($("#LeaveID").find(':selected').attr('data-custom4'));
+                                 remainingLeaveDays = totalLeaveDays - availedLeaveDays;
+
+                                 totalDays = GetDayDifference(dateFrom, dateTo, true);
+                            }
+
+
+                            if (totalDays > remainingLeaveDays) {
+                                $("#DateTo").val('');
+                                $("#TotalDay").val(0);
+                                $.alert.open('warning', `Can't apply for more than remaining ${remainingLeaveDays} day(s)`);
+                            } else {
+                                $("#TotalDay").val(totalDays);
+                                ShowImageUploader();
+                            }
+                        }
+
+                    }
+                }
+            });
+            $("#ShortLeaveDate").datepicker({
+                dateFormat: 'dd-M-yy',
+                minDate: datePickerStartDate,//"-1M",
+                maxDate: '+0D',
+            });
+
+
+            $('#TimeFromPicker,#TimeToPicker').datetimepicker({
+                format: 'LT'
+            });
+            $("#EmployeeCode").select2();
+            //GetEmployeeList();
+            $("#EmployeeCode").change(function () {
+                GetEmployeeShortInfo();
+            });
+
+            if (!RtnBoolToLower('@Model.CanApplyForOthers')) {
+                GetEmployeeShortInfo();
+            } else {
+                GetEmployeeList();
+            }
+            $("#btnBlankAppliation").click(function () {
+                LeaveApplicationFormReport(0);
+            });
+            $("#LeaveID").change(function () {
+                debugger
+                let leaveID = $("#LeaveID").val();
+                if (leaveID != "") {
+                    if (leaveID == 'SL') {//For Short Leave
+                        $("#divLeaveDetail,#divLeaveInfo").addClass('d-none');
+                        $("#divShortLeaveDetail").removeClass('d-none');
+                        $("#divForComplimentaryLeave").addClass('d-none');
+                    } else if (leaveID === '14') {
+                        $("#DateFrom,#DateTo,#TotalDay").val("");
+                        let empID = $("#EmployeeID").val();
+                        HttpRequest.DropDown('GET', '/AlgoHR/EmployeeLeave/GetDDLComplimentaryLeave', { "empID": empID }, 'ComplimentaryLeave');
+                        $("#divForComplimentaryLeave").removeClass('d-none');
+                        $("#divLeaveInfo").addClass('d-none');
+                        $("#divShortLeaveDetail").addClass('d-none');
+                        $("#divLeaveDetail").removeClass('d-none');
+                        $("#ShortLeaveDate,#TimeFrom,#TimeTo").val("");
+                    } else {
+                        $("#DateFrom,#DateTo,#TotalDay").val("");
+                        $("#divForComplimentaryLeave").addClass('d-none');
+                        $("#divShortLeaveDetail").addClass('d-none');
+                        $("#divLeaveDetail,#divLeaveInfo").removeClass('d-none');
+                        let totalLeaveDays = RtnNumber($("#LeaveID").find(':selected').attr('data-custom1'));
+                        let availedLeaveDays = RtnNumber($("#LeaveID").find(':selected').attr('data-custom4'));
+                        let remainingLeaveDays = totalLeaveDays - availedLeaveDays;
+                        $("#totalNoOfLeave").text(totalLeaveDays);
+                        $("#totalAvailed").text(availedLeaveDays);
+                        $("#totalRemaining").text(remainingLeaveDays);
+                        $("#DateFrom,#DateTo").prop('disabled', false);
+                        $("#ShortLeaveDate,#TimeFrom,#TimeTo").val("");
+                    }
+                    $("#LeaveID").removeClass('border border-danger');
+
+                } else {
+                   
+                    $("#LeaveID").addClass('border border-danger');
+                    $("#totalNoOfLeave").text(0);
+                    $("#totalAvailed").text(0);
+                    $("#totalRemaining").text(0);
+                    $("#divLeaveInfo").removeClass('d-none');
+                    $("#divForComplimentaryLeave").addClass('d-none');
+                    $("#divShortLeaveDetail").addClass('d-none');
+                    $("#divLeaveDetail").removeClass('d-none');
+                    $("#DateFrom,#DateTo,#TotalDay").val("");
+                    $("#ShortLeaveDate,#TimeFrom,#TimeTo").val("");
+
+                }
+                ShowImageUploader();
+            });
+
+
+            $("#btnSave").click(function () {
+                debugger
+                let employeeID= $("#EmployeeID").val();
+                let employeeCode = $("#EmpCode").val();
+                let leaveID = $("#LeaveID").val();
+                let leaveFrom = $("#DateFrom").val();
+                let leaveTo = $("#DateTo").val();
+                let leaveReason = $("#LeaveReason").val();
+                let leaveAddress = $("#LeaveAddress").val();
+                let totalDay = $("#TotalDay").val();
+                let ComplimentaryLeave = $("#ComplimentaryLeave").val();
+                let shortLeaveDate = $("#ShortLeaveDate").val();
+                let timeFrom = $("#TimeFrom").val();
+                let timeTo = $("#TimeTo").val();
+                let returnable = $("#ChkReturnable").is(":checked");
+
+                let isDocRequired = RtnBoolToLower($("#LeaveID").find(':selected').attr('data-custom2'));
+                let docRequiredForMoreThanDays = RtnNumber($("#LeaveID").find(':selected').attr('data-custom3'));
+                debugger;
+                if (employeeID > 0 && leaveID != "") {
+                    let images = GetImagesToUpload();
+                    if (leaveID != "SL" && leaveID > 0 && leaveFrom != "" && leaveTo != "" && totalDay > 0) {
+                        if (isDocRequired && totalDay >= docRequiredForMoreThanDays && totalDay!='1' && (images == null || images.length == 0)) {
+                            $.alert.open('warning', 'Please provide attachment');
+                        } else {
+                            let empLeave = {
+                                Leave_Emp: employeeID,
+                                Leave_EmpCD: employeeCode,
+                                Leave_ID: leaveID,
+                                Leave_From: leaveFrom,
+                                Leave_To: leaveTo,
+                                Leave_Reason: leaveReason,
+                                Leave_Address: leaveAddress,
+                                Complimentary_LeaveDate: ComplimentaryLeave,
+                                UploadedImages: images
+                            }
+                            HttpRequest.Ajax("POST", "/AlgoHR/EmployeeLeave/Application", { 'empLeave': empLeave }, saveSuccess);
+                            $("#divForComplimentaryLeave").addClass('d-none');
+                            ClearForm()
+                        }
+                    } else if (leaveID === "SL" && shortLeaveDate != "" && timeFrom != "" && timeTo != "") {
+                        let empLeave = {
+                            EmployeeID: employeeID,
+                            EmployeeCode: employeeCode,
+                            Returnable: returnable,
+                            LeaveDate: shortLeaveDate,
+                            LeaveTimeFrom: timeFrom,
+                            LeaveTimeTo: timeTo,
+                            LeaveReason: leaveReason,
+                            LeaveAddress: leaveAddress
+                        }
+                        HttpRequest.Ajax("POST", "/AlgoHR/EmployeeShortLeave/Create", { 'empLeave': empLeave }, saveSuccess);
+                    } else {
+                        $.alert.open('warning', 'Please provide all required data');
+                    }
+                } else {
+                    $.alert.open('warning', 'Please provide all required data');
+                }
+            });
+
+        });
+
+        //Upload Image
+
+        function GetImagesToUpload() {
+
+            let imageList = new Array();
+            $("#root div").each(function () {
+
+                let imgDiv = $(this);
+                let imageCanvas = imgDiv.find('canvas');
+                let imgData = imageCanvas[0].toDataURL("image/png");
+                let imgDocTypeID = imgDiv.find('.hdnDocumentTypeID').val();
+                let imgDocType = imgDiv.find('p').text();
+
+                let img = {
+                    ImageBase64String: imgData,
+                    ImageType: imgDocType,
+                    DocumentTypeID: imgDocTypeID
+                };
+                imageList.push(img);
+            });
+            return imageList;
+
+        }
+
+        const width = document.documentElement.clientWidth * 0.8;
+        const height = document.documentElement.clientHeight * 0.8;
+
+        const MAX_WIDTH = width > 650 ? 650 : width;
+        const MAX_HEIGHT = height > 650 ? 650 : height;
+        const MIME_TYPE = "image/png";
+        const QUALITY = 0.7;
+
+        const input = document.getElementById("img-input");
+        input.onchange = function (ev) {
+
+            const file = ev.target.files[0]; // get the file
+            const blobURL = URL.createObjectURL(file);
+            const img = new Image();
+            img.src = blobURL;
+            img.onerror = function () {
+                URL.revokeObjectURL(this.src);
+                // Handle the failure properly
+                console.log("Cannot load image");
+            };
+            img.onload = function () {
+
+                URL.revokeObjectURL(this.src);
+                let documentType = $("#DocumentType").val();
+                let documentTypeName = $("#DocumentType option:selected").text();
+                if (documentTypeName!="") {
+
+
+                    const [newWidth, newHeight] = calculateSize(img, MAX_WIDTH, MAX_HEIGHT);
+                    const div = document.createElement("div");
+                    div.style.width = `${newWidth}px`;
+                const canvas = document.createElement("canvas");
+                canvas.width = newWidth;
+                canvas.height = newHeight;
+
+                    const ctx = canvas.getContext("2d");
+
+                ctx.drawImage(img, 0, 0, newWidth, newHeight);
+                canvas.toBlob(
+                    blob => {
+                        // Handle the compressed image. es. upload or save in local state
+                        //displayInfo(documentTypeName);
+                        //displayInfo('Compressed file', blob);
+                    },
+                    MIME_TYPE,
+                    QUALITY);
+
+                    const p = document.createElement('p');
+                    p.className = 'documentTypeName float-left mb-0';
+                    p.style = "width:40%";
+                    p.innerText = `${documentTypeName}`;
+
+                    const btnP = document.createElement('p');
+                    btnP.className = 'documentTypeName float-right mb-0 text-right';
+                    btnP.style = "width:60%";
+
+                    var btn = document.createElement("button");
+                    btn.className = "btn btn-xs btn-danger";
+                    btn.innerHTML = "Delete"
+                    btn.onclick = function () { 
+                        this.parentElement.parentElement.remove();
+                    }
+                    btnP.appendChild(btn);
+
+                    var input = document.createElement("input");
+                    input.setAttribute("type", "hidden");
+                    input.setAttribute("class", "hdnDocumentTypeID");
+                    input.setAttribute("value", documentType);
+                    p.appendChild(input);
+
+                    div.append(p);
+                    div.append(btnP);
+
+                    div.append(canvas);
+
+
+                    document.getElementById("root").append(div);
+                    document.getElementById("root").append('  ');
+                }
+
+                $("#img-input").val('');
+            };
+        };
+
+        function calculateSize(img, maxWidth, maxHeight) {
+            let width = img.width;
+            let height = img.height;
+
+            // calculate the width and height, constraining the proportions
+            if (width > height) {
+                if (width > maxWidth) {
+                    height = Math.round(height * maxWidth / width);
+                    width = maxWidth;
+                }
+            } else {
+                if (height > maxHeight) {
+                    width = Math.round(width * maxHeight / height);
+                    height = maxHeight;
+                }
+            }
+            return [width, height];
+        }
+
+        // Utility functions for demo purpose
+
+        //function displayInfo(label) {
+        //    const p = document.createElement('p');
+        //    p.innerText = `${label} }`;
+        //    document.getElementById('root').append(p);
+        //}
+
+        //function readableBytes(bytes) {
+        //    const i = Math.floor(Math.log(bytes) / Math.log(1024)),
+        //        sizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+
+        //    return (bytes / Math.pow(1024, i)).toFixed(2) + ' ' + sizes[i];
+        //}
+    </script>
+}
+@*<script src="~/js/customScripts/ImageCompression.js"></script>*@

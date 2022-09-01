@@ -1,0 +1,726 @@
+﻿@model RG.Application.ViewModel.FiniteScheduler.Setup.AssetIndexs.AssetIndexVM
+@using RG.Application.Enums;
+@{
+    ViewData[PageInfo.PageTitle] = "Asset All Information";
+    ViewData[PageInfo.PageHeader] = "All Asset Information List";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="row">
+    <div class="col-sm-12 col-md-12">
+        <div class="card card-dark">
+            <div class="card-header m-0 p-1">
+                <h5 class="card-title">Searching </h5>
+            </div>
+
+            <div class="card-body p-2">
+                <div class="row">
+                    <div class="col-6 col-md-2 col-2 col-sm-2 col-lg-2">
+                        <div class="form-group">
+                            <label class="col-form-label-sm  m-0">Searching Type</label>
+                            <select asp-for="SearchingType" asp-items="Model.DDLSearchingType" class="form-control form-control-sm"></select>
+                        </div>
+                    </div>
+                </div>
+                <div class="row assetinfos">
+                    <div class="col-6 col-md-2 col-2 col-sm-2 col-lg-2">
+                        <div class="form-group">
+                            <label class="col-form-label-sm  m-0" asp-for="AssetAssignedType"></label>
+                            <select asp-for="AssetAssignedType" asp-items="Model.DDLAssetAssignedType" class="form-control form-control-sm"></select>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-2 col-2 col-sm-2 col-lg-2">
+                        <div class="form-group mb-2">
+                            <label asp-for="AssetTypeName" class=""></label>
+                            <select asp-for="AssetTypeName" asp-items="Model.DDLAssetTypeName" class="form-control form-control-sm"></select>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-2 col-2 col-sm-2 col-lg-2">
+                        <div class="form-group mb-2">
+                            <label asp-for="AssetSubTypeID" class=""></label>
+                            <select asp-for="AssetSubTypeID" asp-items="Model.DDLAssetSubTypeName" class="form-control form-control-sm"></select>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-2 col-2 col-sm-2 col-lg-2">
+                        <div class="form-group mb-2">
+                            <label asp-for="AssetName" class=""></label>
+                            <select asp-for="AssetName" asp-items="Model.DDLAssetName" class="form-control form-control-sm"></select>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-2 col-2 col-sm-2 col-lg-2">
+                        <div class="form-group">
+                            <label asp-for="DateFrom" class="label-ajt-sm "></label>
+                            <div class="input-group">
+                                <input autocomplete="off" value="" asp-for="DateFrom" required type="text" name="FormDate" readonly class="datepic form-control form-control-sm dateField text-center" />
+                                <div class="input-group-append">
+                                    <span class="input-group-text"><i class="fa fa-calendar" aria-hidden="true"></i></span>
+                                </div>
+                            </div>
+                            <span class="text-danger" asp-validation-for="PurchaseDate"></span>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-2 col-2 col-sm-2 col-lg-2">
+                        <div class="form-group">
+                            <label asp-for="DateTo" class="label-ajt-sm "></label>
+                            <div class="input-group">
+                                <input autocomplete="off" value="" asp-for="DateTo" required type="text" name="FormDate" readonly class="datepic form-control form-control-sm dateField text-center" />
+                                <div class="input-group-append">
+                                    <span class="input-group-text"><i class="fa fa-calendar" aria-hidden="true"></i></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="row">
+                    @*<div class="col-md-6 col-2 col-sm-2 col-lg-2 assetinfos">
+                            <div class="form-group">
+                                <label asp-for="PurchaseValue" class="label-ajt-sm"></label>
+                                <input value="" placeholder="Purchase Value" autocomplete="off" asp-for="PurchaseValue" class="form-control form-control-sm " type="number" />
+                                <span class="text-danger" asp-validation-for="PurchaseValue"></span>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-2 col-2 col-sm-2 col-lg-2 assetinfos">
+                            <div class="form-group">
+                                <label asp-for="ValueAfterDeprication" class="label-ajt-sm"></label>
+                                <input value="" placeholder="Purchase Value" autocomplete="off" asp-for="ValueAfterDeprication" class="form-control form-control-sm " type="number" />
+                                <span class="text-danger" asp-validation-for="ValueAfterDeprication"></span>
+                            </div>
+                        </div>*@
+                    <div class="col-6 col-md-2 col-2 col-sm-2 col-lg-2 assetinfos">
+                        <div class="form-group">
+                            <label asp-for="Code" class="label-ajt-sm "></label>
+                            <input placeholder="Code" max="15" maxlength="15" autocomplete="off" asp-for="Code" class="form-control form-control-sm" type="text" />
+                            <span class="text-danger" asp-validation-for="Code"></span>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-2 col-2 col-sm-2 col-lg-2">
+                        <label class="col-form-label-sm  m-0" asp-for="CompanyID"></label>
+                        <select asp-for="CompanyID" asp-items="Model.DDLCompany" class="form-control form-control-sm"></select>
+                        <span asp-validation-for="CompanyID" class="span-form-validation"></span>
+                    </div>
+                    <div id="FiscalYears" class="col-6 col-md-2 col-2 col-sm-2 col-lg-2 d-none">
+                        <label class="col-form-label-sm  m-0" asp-for="FiscalYear"></label>
+                        <select asp-for="FiscalYear" asp-items="Model.DDLYear" class="form-control form-control-sm"></select>
+                    </div>
+                    <div class="col-6 col-md-2 col-2 col-sm-2 col-lg-2 assetinfos">
+                        <label class="col-form-label-sm  m-0 " asp-for="DivisionID"></label>
+                        <select asp-for="DivisionID" asp-items="Model.DDLDevision" class="form-control form-control-sm"></select>
+                        <span asp-validation-for="DivisionID" class="span-form-validation"></span>
+                    </div>
+                    <div class="col-6 col-md-2 col-2 col-sm-2 col-lg-2 assetinfos">
+                        <label class="col-form-label-sm m-0" asp-for="DepartmentID"></label>
+                        <select asp-for="DepartmentID" asp-items="Model.DDLDepartment" class="form-control required form-control-sm"></select>
+                        <span asp-validation-for="DepartmentID" class="span-form-validation"></span>
+                    </div>
+                    <div class="col-6 col-md-2 col-2 col-sm-2 col-lg-2 assetinfos">
+
+                        <label class="col-form-label-sm m-0" asp-for="BuildingID"></label>
+                        <select asp-for="BuildingID" asp-items="Model.DDLBuilding" class="form-control form-control-sm required"></select>
+                        <span asp-validation-for="BuildingID" class="span-form-validation"></span>
+                    </div>
+                    <div class="col-6 col-md-2 col-2 col-sm-2 col-lg-2 assetinfos">
+                        <label class="col-form-label-sm  m-0" asp-for="FloorID"></label>
+                        <select asp-for="FloorID" asp-items="Model.DDLLBuildingFloor" class="form-control form-control-sm"></select>
+                        <span asp-validation-for="FloorID" class="span-form-validation"></span>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-6 col-md-2 col-2 col-sm-2 col-lg-2 mt-4">
+                        <div class="form-group">
+                            <button type="button" class="btn btn-sm btn-success" id="btnSearch">Search</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="row">
+                <div class="col-12 col-md-12 col-12 col-sm-12 col-lg-12">
+                    <div id="gridForAsset" class="">
+                    </div>
+                    <div id="gridForDeprication" class="d-none">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <div id="grid">
+        </div>
+    </div>
+</div>
+<!-- Modal for Assign Asset-->
+<div id="modalForDepricationHistoryDetails" class="modal fade" role="dialog">
+    <input hidden asp-for="AssetID" />
+    <div class="modal-dialog modal-lg">
+        <!-- Modal content-->
+        <div class="modal-content">
+
+            <div class="modal-header p-2 bg-dark">
+                <h6 class="modal-title modTitle">Deprication History Details</h6>
+                <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body px-2 py-0">
+
+                <div class="row">
+                    <table id="tblDepriciationHistoryDetail" class="table table-sm table-striped table-bordered text-center text-xs  mt-1">
+
+                        <thead class="bg-dark">
+                            <tr>
+                                <th>SL#</th>
+                                <th>Asset Name</th>
+                                <th>Date From</th>
+                                <th>Date To</th>
+                                <th>Rate</th>
+                                <th>Deprication Value</th>
+                                <th>Value After Deprication</th>
+                                @*<th>Action</th>*@
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyDepriciationHistory">
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+            @*<div class="modal-footer p-1  justify-content-center btnRemoveForDepriciation">
+                    <input type="button" class="btn btn-warning btn-sm" id="btnAssetAssign" value="Asset Assign to Employee" />
+                </div>*@
+
+        </div>
+
+    </div>
+</div>
+
+@section scripts{
+    <script src="~/lib/devExtreme/excelExport/polyfill.min.js"></script>
+    <script src="~/lib/devExtreme/excelExport/exceljs.min.js"></script>
+    <script src="~/lib/devExtreme/excelExport/FileSaver.min.js"></script>
+    <script type="text/javascript">
+        $(() => {
+            GetAllAssetAndRelationalInfoList();
+
+            $("#BuildingID").change(function () {
+                BuildingWiseFloor();
+            });
+            $("#AssetTypeName").change(function () {
+                AssetTypeWiseAssetSubType();
+            });
+            $("#AssetSubTypeID").change(function () {
+                AssetSubTypeWiseAssetName();
+            });
+            $("#CompanyID").change(function () {
+                ComapnyWiseDivision();
+            });
+            $("#DivisionID").change(function () {
+                DivisionWiseDepartment();
+            });
+            $("#SearchingType").change(function () {
+                let type = $("#SearchingType").val();
+                if (type == 1) {
+                    $(".assetinfos").removeClass('d-none');
+                    $("#FiscalYears").addClass('d-none');
+                    $("#gridForAsset").removeClass('d-none');
+                    $("#gridForDeprication").addClass('d-none');
+
+                } else if (type == 2) {
+                    GetAllAssetAndDepricationList();
+                    $(".assetinfos").addClass('d-none');
+                    $("#CompanyID").removeClass('d-none');
+                    $("#FiscalYears").removeClass('d-none');
+                    $("#gridForAsset").addClass('d-none');
+                    $("#gridForDeprication").removeClass('d-none');
+
+                }
+            })
+
+            $("#btnSearch").click(function () {
+                let type = $("#SearchingType").val();
+                if (type == 1) {
+                    GetAllAssetAndRelationalInfoList();
+                } else if (type == 2) {
+                    GetAllAssetAndDepricationList();
+                }
+
+            });
+        })
+
+
+        const BuildingWiseFloor = () => {
+            let building = $("#BuildingID").val();
+            if (building != "") {
+                HttpRequest.DropDown("Get", "/MaterialsManagement/BuildingFloorInfo/GetDDLBuildingFloor", { Building: building, FloorType:@((int)enum_FloorType.Asset) }, 'FloorID', true);
+            } else {
+                HttpRequest.DropDownDefault("FloorID");
+            }
+        }
+        const AssetTypeWiseAssetSubType = () => {
+            debugger
+            let AssetTypeID = $("#AssetTypeName").val();
+            if (AssetTypeID != "") {
+                HttpRequest.DropDown("Get", "/FiniteScheduler/AssetManagement/GetDDLAssetSubType", { AssetTypeID: AssetTypeID }, 'AssetSubTypeID', true);
+            } else {
+                HttpRequest.DropDownDefault("AssetSubTypeID");
+            }
+        }
+        const AssetSubTypeWiseAssetName = () => {
+            let assetSubTypeID = $("#AssetSubTypeID").val();
+            if (assetSubTypeID != "") {
+                HttpRequest.DropDown("Get", "/FiniteScheduler/AssetManagement/GetDDLAssetNameViaAssetSubType", { assetSubTypeID: assetSubTypeID }, 'AssetName', true);
+            } else {
+                HttpRequest.DropDownDefault("AssetName");
+            }
+        }
+        const ComapnyWiseDivision=()=>{
+            let companyID = $("#CompanyID").val();
+            if (companyID != "") {
+                HttpRequest.DropDown("POST", "/AlgoHR/CommonDropDown/GetDDLDivisionListByEmbroCompany", { embroCompanyID: companyID }, 'DivisionID', true);
+            } else {
+                HttpRequest.DropDownDefault("DivisionID");
+            }
+        }
+        const DivisionWiseDepartment = () => {
+
+            let divisionID = $("#DivisionID").val();
+            if (divisionID != "") {
+                HttpRequest.DropDown("Get", "/AlgoHR/CommonDropDown/GetDDLDeptList", { divisionID: divisionID }, 'DepartmentID', true);
+            } else {
+                HttpRequest.DropDownDefault("DepartmentID");
+            }
+        }
+        const GetAllAssetAndRelationalInfoList = () => {
+            let assetAssignedType = $("#AssetAssignedType").val()
+            let assetTypeName = $("#AssetTypeName").val()
+            let assetSubTypeID = $("#AssetSubTypeID").val()
+            let dateFrom = $("#DateFrom").val()
+            let dateTo = $("#DateTo").val()
+            let assetID = $("#AssetID").val()
+            let code = $("#Code").val()
+            let companyID = $("#CompanyID").val()
+            let departmentID = $("#DepartmentID").val()
+            let buildingID = $("#BuildingID").val()
+            let floorID = $("#FloorID").val()
+            var dataGrid = $("#gridForAsset").dxDataGrid({
+                height: 450,
+                remoteOperations: { paging: true, filtering: true, sorting: true, grouping: true, summary: true, groupPaging: true },
+                dataSource: DevExpress.data.AspNet.createStore({
+                    key: "AssetID",
+                    loadUrl: "/FiniteScheduler/AssetManagement/GetAllAssetAndRelationalInfo",
+                    loadParams: {
+                        AssetAssignedType: assetAssignedType,
+                        AssetTypeName: assetTypeName,
+                        AssetSubTypeID: assetSubTypeID,
+                        AssetID: assetID,
+                        DateFrom: dateFrom,
+                        DateTo:dateTo,
+                        Code: code,
+                        CompanyID: companyID,
+                        DepartmentID: departmentID,
+                        BuildingID: buildingID,
+                        FloorID: floorID
+
+                    }
+                }),
+                hoverStateEnabled: true,
+
+                showBorders: true,
+                columnAutoWidth: true,
+                filterRow: { visible: true },
+                pager: { visible: true, showInfo: true, allowedPageSizes: [10, 20, 50, 100, 500], showPageSizeSelector: true, },
+                paging: { pageSize: 10 },
+                selection: { mode: 'single' },
+                wordWrapEnabled: true,
+                export: {
+                    enabled: true,
+                    allowExportSelectedData: true,
+                },
+                onExporting(e) {
+                    const workbook = new ExcelJS.Workbook();
+                    const worksheet = workbook.addWorksheet('AssetInformation');
+
+                    DevExpress.excelExporter.exportDataGrid({
+                        component: e.component,
+                        worksheet,
+                        autoFilterEnabled: true,
+                    }).then(() => {
+                        workbook.xlsx.writeBuffer().then((buffer) => {
+                            saveAs(new Blob([buffer], { type: 'application/octet-stream' }), 'AssetInformation.xlsx');
+                        });
+                    });
+                    e.cancel = true;
+                },
+                columns: [
+                    {
+                        width: "auto",
+                        caption: "SL #",
+                        alignment: 'center',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        },
+                        cellTemplate: function (container, e) {
+                            var index = dataGrid.pageIndex() * dataGrid.pageSize() + e.rowIndex + 1;
+                            container.text(index);
+                        }
+                    },
+                    {
+                        dataField: "AssetID",
+                        visible: false,
+                    },
+
+                    {
+
+                        dataField: "AssetTypeName",
+                        alignment: 'center',
+                        caption: 'Type',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+                    },
+                    {
+                        dataField: "AssetSubTypeName",
+                        alignment: 'center',
+                        caption: 'Sub Type',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+                    },
+                    {
+                        dataField: "AssetName",
+                        alignment: 'center',
+                        caption: 'Asset',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        },
+                        cellTemplate: function (container, options) {
+                            debugger
+                            let returnText = ``;
+                            if (options.data.ValueAfterDeprication <= 1) {
+                                returnText = `<span title="Asset Depreciation complete" class="bg-danger py-1 px-2 text-sm ">${options.data.AssetName}</span>`
+                            } else {
+                                returnText = `<span>${options.data.AssetName}</span>`
+                            }
+                            returnText = returnText + '</div>';
+                            $(returnText).appendTo(container)
+                        }
+                    },
+                    {
+                        dataField: "AssetAssignedType",
+                        alignment: 'center',
+                        caption: 'Assigned Type',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+                    },
+                    {
+                        width:"15%",
+                        dataField: "Code",
+                        alignment: 'center',
+                        caption: 'Code',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+                    },
+                    {
+                        dataField: "PurchaseDateMsg",
+                        alignment: 'center',
+                        caption: 'Pur. Date',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+                    },
+                    {
+                        dataField: "PurchaseValue",
+                        alignment: 'center',
+                        caption: 'Pur. Value',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+                    },
+                    {
+                        dataField: "ValueAfterDeprication",
+                        alignment: 'center',
+                        caption: 'Value After Dep.',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        },
+                        cellTemplate: function (container, options) {
+                            var returnText = `<span>&nbsp</span><button title="Deprication History" class="btn btn-xs btn-success">${options.data.ValueAfterDeprication}</button>`;
+                            returnText = returnText + '</div>';
+                            $(returnText).on('dxclick', function () {
+                                let assetid = options.data.AssetID
+                                DepricationHistoryDetails(assetid)
+                            }).appendTo(container);
+                        }
+                    },
+                    {
+                        width:"5%",
+                        dataField: "DepriciationPercent",
+                        alignment: 'center',
+                        caption: 'Dep. %',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+                    },
+                    {
+                        width:"8%",
+                        dataField: "DapricationDateFrom",
+                        alignment: 'center',
+                        caption: 'Dap. DateFrom',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+                    },
+                    {
+                        width: "8%",
+                        dataField: "DapricationDateTo",
+                        alignment: 'center',
+                        caption: 'Dap. DateTo',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+                    }
+                    //{
+                    //    caption: 'Action',
+                    //    alignment: 'center',
+                    //    headerCellTemplate: function (header, info) {
+                    //        $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                    //    },
+                    //    cellTemplate: function (container, options) {
+
+                    //        var returnText = '<button title="Edit" class="btn btn-xs btn-warning"><i class="fa fa-edit"></i></button>';
+                    //        $(returnText).on('dxclick', function () {
+                    //            AssetEdit(options.data.AssetID);
+                    //        }).appendTo(container);
+
+                    //        var returnText = '<span>&nbsp</span><button title="Delete" class="btn btn-xs btn-danger"><i class="fa fa-trash"></i></button>';
+                    //        returnText = returnText + '</div>';
+                    //        $(returnText).on('dxclick', function () {
+                    //            DeleteRow(options.data.AssetID);
+                    //        }).appendTo(container);
+                    //    }
+                    //}
+                ]
+            }).dxDataGrid("instance");
+        }
+
+        const GetAllAssetAndDepricationList = () => {
+            let companyID = $("#CompanyID").val();
+            let fiscalYear = $("#FiscalYear").val();
+            var dataGrid = $("#gridForDeprication").dxDataGrid({
+                height: 450,
+                remoteOperations: { paging: true, filtering: true, sorting: true, grouping: true, summary: true, groupPaging: true },
+                dataSource: DevExpress.data.AspNet.createStore({
+                    key: "AssetID",
+                    loadUrl: "/FiniteScheduler/AssetManagement/GetAllAssetAndDepricationInfo",
+                    loadParams: {
+                        CompanyID: companyID,
+                        FiscalYear: fiscalYear
+
+                    }
+                }),
+
+
+                showBorders: true,
+                columnAutoWidth: true,
+                filterRow: { visible: true },
+                pager: { visible: true, showInfo: true, allowedPageSizes: [10, 20, 50, 100, 500], showPageSizeSelector: true, },
+                paging: { pageSize: 10 },
+                selection: { mode: 'single' },
+                wordWrapEnabled: true,
+                export: {
+                    enabled: true,
+                    allowExportSelectedData: true,
+                },
+                onExporting(e) {
+                    const workbook = new ExcelJS.Workbook();
+                    const worksheet = workbook.addWorksheet('AssetDepricationInfo');
+
+                    DevExpress.excelExporter.exportDataGrid({
+                        component: e.component,
+                        worksheet,
+                        autoFilterEnabled: true,
+                    }).then(() => {
+                        workbook.xlsx.writeBuffer().then((buffer) => {
+                            saveAs(new Blob([buffer], { type: 'application/octet-stream' }), 'AssetDepricationInfo.xlsx');
+                        });
+                    });
+                    e.cancel = true;
+                },
+                columns: [
+                    {
+                        width: "3%",
+                        caption: "SL #",
+                        alignment: 'center',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        },
+                        cellTemplate: function (container, e) {
+                            var index = dataGrid.pageIndex() * dataGrid.pageSize() + e.rowIndex + 1;
+                            container.text(index);
+                        }
+                    },
+                    {
+                        dataField: "AssetID",
+                        visible: false,
+                    },
+                    {
+                        width:'15%',
+                        dataField: "AssetName",
+                        alignment: 'center',
+                        caption: 'Name',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        },
+                        cellTemplate: function (container, options) {
+                            debugger
+                            let returnText = ``;
+                            if (options.data.ValueAfterDeprication <= 1) {
+                                returnText = `<span title="Asset Depreciation complete" class="bg-danger py-1 px-2 text-sm ">${options.data.AssetName}</span>`
+                            } else {
+                                returnText = `<span>${options.data.AssetName}</span>`
+                            }
+                            returnText = returnText + '</div>';
+                            $(returnText).appendTo(container)
+                        }
+                    },
+                    {
+                        width: '15%',
+                        dataField: "Code",
+                        alignment: 'center',
+                        caption: 'Code',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+                    },
+                    {
+                        width: '8%',
+                        dataField: "PurchaseDateMsg",
+                        alignment: 'center',
+                        caption: 'Pur. Date',
+                        headerCellTemplate: function (header, info) {
+
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+                    },
+                    {
+                        dataField: "PurchaseValue",
+                        alignment: 'center',
+                        caption: 'Pur. Value',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+                    },
+                    {
+                        dataField: "ValueAfterDeprication",
+                        alignment: 'center',
+                        caption: 'After Dep.',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        },
+                        cellTemplate: function (container, options) {
+                            var returnText = `<span>&nbsp</span><button title="Deprication History" class="btn btn-xs btn-success">${options.data.ValueAfterDeprication}</button>`;
+                            returnText = returnText + '</div>';
+                            $(returnText).on('dxclick', function () {
+                                let assetid = options.data.AssetID
+                                DepricationHistoryDetails(assetid)
+                            }).appendTo(container);
+                        }
+                    },
+                    {
+                        width:'5%',
+                        dataField: "Rate",
+                        alignment: 'center',
+                        caption: 'Dep. %',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+                    },
+                    {
+                        dataField: "DepricationValue",
+                        alignment: 'center',
+                        caption: 'Dep. Value',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+                    },
+                    {
+                        width: '8%',
+                        dataField: "DapricationDateFrom",
+                        alignment: 'center',
+                        caption: 'Dap. DateFrom',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+                    },
+                    {
+                        width: '8%',
+                        dataField: "DapricationDateTo",
+                        alignment: 'center',
+                        caption: 'Dap. DateTo',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+                    },
+                    {
+                        width: "5%",
+                        dataField: "FiscalYear",
+                        alignment: 'center',
+                        caption: 'Fis. Year',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+                    }
+                    //{
+                    //    caption: 'Action',
+                    //    alignment: 'center',
+                    //    headerCellTemplate: function (header, info) {
+                    //        $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                    //    },
+                    //    cellTemplate: function (container, options) {
+
+                    //        var returnText = '<button title="Edit" class="btn btn-xs btn-warning"><i class="fa fa-edit"></i></button>';
+                    //        $(returnText).on('dxclick', function () {
+                    //            AssetEdit(options.data.AssetID);
+                    //        }).appendTo(container);
+
+                    //        var returnText = '<span>&nbsp</span><button title="Delete" class="btn btn-xs btn-danger"><i class="fa fa-trash"></i></button>';
+                    //        returnText = returnText + '</div>';
+                    //        $(returnText).on('dxclick', function () {
+                    //            DeleteRow(options.data.AssetID);
+                    //        }).appendTo(container);
+                    //    }
+                    //}
+                ]
+            }).dxDataGrid("instance");
+        }
+
+        const DepricationHistoryDetails = (assetID) => {
+            GetDepriciationHistoryDetail(assetID)
+            $('#modalForDepricationHistoryDetails').modal('toggle');
+        }
+        const GetDepriciationHistoryDetail = (AssetId) => {
+            var data = HttpRequest.AjaxData('POST', '/FiniteScheduler/AssetManagement/GetListAssetDepriciationHistory', { id: AssetId });
+            let rowDepriciationHistory = '';
+            $.each(data, function (d, e) {
+                rowDepriciationHistory += `<tr>
+
+                            <td>${++d}</td>
+                            <td  class="hdnID d-none">${e.ID}</td>
+                            <td>${e.AssetName}</td>
+                            <td class="hdnDateFrom" >${e.DateFromMsg}</td>
+                            <td class="hdnDateTo" >${e.DateTo}</td>
+                            <td class="hdnRate" >${e.Rate}</td>
+                            <td class="hdnRate" >${e.DepricationValue}</td>
+                            <td class="hdnValueFaterDeprication" >${e.ValueAfterDeprication}</td>
+                            `
+                //< td ><a onClick="btnEditDepriciation(this)" title="Edit Depriciation" class="btn btn-primary btn-xs"> <i class="fas fa-edit fa-sm"></i></a><span> </span><a onClick="btnDeleteDepriciation(${AssetId},${e.ID})" title="Delete Depriciation" class="btn btn-danger btn-xs"><i class="fas fa-trash fa-sm"></i></a></td >
+                //        </tr >
+            });
+
+            $("#tbodyDepriciationHistory").html(rowDepriciationHistory);
+        }
+
+    </script>
+}

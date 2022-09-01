@@ -1,0 +1,363 @@
+﻿@model RG.Application.ViewModel.AlgoHR.Business.EmployeeAttendance.LateVM
+@{
+    ViewData[PageInfo.PageTitle] = "Late Employees";
+    ViewData[PageInfo.PageHeader] = "Late Employees";
+    //ViewData[PageInfo.btnText1] = "Back to List";
+    //ViewData[PageInfo.PageLink1] = "/FiniteScheduler/MachineMaintenance/Index";
+    //ViewData[PageInfo.btnClass1] = "btn-warning";
+
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="row">
+    <div class="col-sm-12 col-md-12">
+        <div class="card card-dark">
+            <div class="card-header m-0 p-1">
+                <h5 class="card-title">Late Employees</h5>
+            </div>
+            <div class="card-body p-2">
+                <div class="row">
+                    <div class="col-sm-3">
+                        <div class="form-group mb-2">
+                            <label asp-for="CompanyID" class="required"></label>
+                            <select asp-for="CompanyID" asp-items="Model.DDLCompany" class="form-control form-control-sm"></select>
+                            <span asp-validation-for="CompanyID" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="form-group mb-2">
+                            <label asp-for="OfficeDivisionID" class=""></label>
+                            <select asp-for="OfficeDivisionID" asp-items="Model.DDLOfficeDivision" class="form-control form-control-sm"></select>
+                            <span asp-validation-for="OfficeDivisionID" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="form-group mb-2">
+                            <label asp-for="DepartmentID" class=""></label>
+                            <select asp-for="DepartmentID" asp-items="Model.DDLDepartment" class="form-control form-control-sm"></select>
+                            <span asp-validation-for="DepartmentID" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="form-group mb-2">
+                            <label asp-for="SectionID" class=""></label>
+                            <select asp-for="SectionID" asp-items="Model.DDLSection" class="form-control form-control-sm"></select>
+                            <span asp-validation-for="SectionID" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-3">
+                        <div class="form-group mb-2">
+                            <label asp-for="Year" class="required"></label>
+                            <select asp-for="Year" asp-items="Model.DDLYear" class="form-control form-control-sm"></select>
+                            <span asp-validation-for="Year" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="form-group mb-2">
+                            <label asp-for="Month" class="required"></label>
+                            <select asp-for="Month" asp-items="Model.DDLMonth" class="form-control form-control-sm"></select>
+                            <span asp-validation-for="Month" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <label>&nbsp;</label>
+                        <div class="form-group">
+                            <button type="button" class="btn btn-sm btn-warning" id="btnSearch">Search</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12 col-sm-12 col-xs-12">
+                        <div id="grid">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Modal -->
+<div id="modalLateHistory" class="modal fade" role="dialog">
+    <div class="modal-dialog modal-lg">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header p-2">
+                <h6 class="modal-title">Employee Late History</h6>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body p-1">
+                <table class="table table-sm table-borderd table-striped text-sm text-center mb-0">
+                    <thead class="bg-dark">
+                        <tr>
+                            <td>SL #</td>
+                            <td>Attendance Date</td>
+                            <td>Shift In Time</td>
+                            <td>Attendance In Time</td>
+                            <td>Late Time<br>HH : MM</td>
+                        </tr>
+                    </thead>
+                    <tbody id="tbodyLateHistory">
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer p-1">
+                <div class="mr-auto" id="tfootLateWarningLetter">
+
+                </div>
+                <button type="button" class="btn btn-danger btn-sm" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+
+    </div>
+</div>
+@section scripts{
+    <script type="text/javascript">
+
+        function LateWarmingLetterReport(letterID,type) {
+            debugger;
+            let reportFormat = "@ReportExportFormat.PdfFormat";            
+            window.open("/AlgoHR/EmployeeAttendance/WarningLetterPrint?letterMasterID=" + letterID + "&type=" + type + "&ReportFormat=" + reportFormat, "Late warning letter", "status=1,toolbar=0");
+            return false;
+        }
+
+
+        function saveSuccess(data) {
+            if (data.result == 1) {
+                $.alert.open({
+                    type: 'Success',
+                    content: data.message,
+                    callback: function () {
+                        if (data.statusCode>0) {
+                            LateWarmingLetterReport(data.statusCode, 'BN');
+                            GetLateEmployeesList();
+                        }
+                    }
+                });
+            }
+            else {
+                $.alert.open("error", data.message);
+            }
+        }
+        function IssueWarningLetter(data) {
+            HttpRequest.Ajax("Get", '/AlgoHR/EmployeeAttendance/IssueWarningLetter', { 'employeeID': data.EmployeeID, 'year': data.SearchYear, 'month': data.SearchMonth }, saveSuccess);
+        }
+        function GetDetailLateHistory(data) {
+            
+            let dataHistory = HttpRequest.AjaxData("Get", '/AlgoHR/EmployeeAttendance/GetEmployeeLateHistory', { 'employeeID': data.EmployeeID, 'year': data.SearchYear, 'month': data.SearchMonth });
+            if (dataHistory.History.length > 0) {
+                let tr = ``;
+                $.each(dataHistory.History, function (i, v) {
+                    tr = tr + `<tr>
+                            <td>${++i}</td>
+                            <td>${v.AttendanceDateMsg}</td>
+                            <td>${v.ShiftInTimeMsg}</td>
+                            <td>${v.AttendanceInTimeMsg}</td>
+                            <td>${v.LateTime}</td>
+                        </tr>`;
+                });
+                let warningLetters = ``;
+                $.each(dataHistory.WarningLetter, function (i, v) {
+                    //warningLetters = warningLetters + `<button type="button" class="btn btn-warning btn-sm" onclick="LateWarmingLetterReport(${v.LetterMasterID})"><i class="fa fa-pdf"></i> Letter- ${++i}</button> &nbsp;&nbsp;`;
+                    warningLetters = warningLetters + `<div class="btn-group border border-info text-center" role="group" aria-label="Basic example">
+                                                        <lable>Letter- ${++i}</label><br/>
+                                                        <button type="button" class="btn btn-xs btn-warning" onclick="LateWarmingLetterReport(${v.LetterMasterID},'BN')"><i class="fas fa-file-pdf text-red"></i> BN</button>&nbsp;
+                                                        <button type="button" class="btn btn-xs btn-warning" onclick="LateWarmingLetterReport(${v.LetterMasterID},'EN')"><i class="fas fa-file-pdf"></i> EN</button>
+                                                     </div>&nbsp;&nbsp;`;
+                });
+                $("#tbodyLateHistory").html(tr);
+                $("#tfootLateWarningLetter").html(warningLetters);
+                $("#modalLateHistory").modal('toggle');
+            }
+        }
+        function GetLateEmployeesList() {
+            let companyID = $("#CompanyID").val();
+            let officeDivisionID = $("#OfficeDivisionID").val();
+            let departmentID = $("#DepartmentID").val();
+            let sectionID = $("#SectionID").val();
+            let year = $("#Year").val();
+            let month = $("#Month").val();
+
+            var dataGrid = $("#grid").dxDataGrid({
+                height: 450,
+                remoteOperations: { paging: true, filtering: true, sorting: true, grouping: true, summary: true, groupPaging: true },
+                dataSource: DevExpress.data.AspNet.createStore({
+                    key: "EmployeeID",
+                    loadUrl: "/AlgoHR/EmployeeAttendance/GetLateEmployeesList",
+                    loadParams: {
+                        companyID: companyID,
+                        divisionID: officeDivisionID,
+                        departmentID: departmentID,
+                        sectionID: sectionID,
+                        year: year,
+                        month: month
+                    }
+                }),
+                hoverStateEnabled: true,
+                showBorders: true,
+                columnAutoWidth: true,
+                filterRow: { visible: true },
+                pager: { visible: true, showInfo: true, allowedPageSizes: [10, 20, 50, 100, 500], showPageSizeSelector: true, },
+                paging: { pageSize: 20 },
+                selection: { mode: 'single' },
+                export: {
+                    //   enabled: true
+                },
+                sorting: {
+                    mode: "multiple"
+                },
+                columns: [
+                    {
+                        width: "auto",
+                        caption: "SL #",
+                        alignment: 'center',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        },
+                        cellTemplate: function (container, e) {
+                            var index = dataGrid.pageIndex() * dataGrid.pageSize() + e.rowIndex + 1;
+                            container.text(index);
+                        }
+
+                    },
+                    {
+                        dataField: "EmployeeID",
+                        visible: false,
+                        sortIndex: 1,
+                        sortOrder: "asc"
+                    },
+                    {
+                        dataField: "IssuedLateCount",
+                        visible: false,
+                        sortIndex: 0,
+                        sortOrder: "asc"
+                    },
+
+                    {
+                        dataField: "EmployeeCode",
+                        alignment: 'center',
+                        caption: 'Code',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+
+                    }, {
+                        dataField: "EmployeeName",
+                        alignment: 'center',
+                        caption: 'Name',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+
+                    },
+                    {
+                        dataField: "DivisionName",
+                        alignment: 'center',
+                        caption: 'Division',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+
+                    },
+                    {
+                        dataField: "DepartmentName",
+                        alignment: 'center',
+                        caption: 'Department',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+
+                    },
+                    {
+                        dataField: "SectionName",
+                        alignment: 'center',
+                        caption: 'Section',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+
+                    },
+                    {
+                        dataField: "DesignationName",
+                        alignment: 'center',
+                        caption: 'Designation',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+
+                    },
+                    {
+                        dataField: "LateCount",
+                        alignment: 'center',
+                        caption: 'Late Count',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }, cellTemplate: function (container, options) {
+
+                            var returnText = '<button class="btn btn-xs btn-info"> ' + options.data.LateCount + '</button>';
+                            $(returnText).on('dxclick', function () {
+                                GetDetailLateHistory(options.data);
+                            }).appendTo(container);
+                        }
+
+                    },
+
+                    {
+                        caption: 'Action',
+                        alignment: 'center',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        },
+                        cellTemplate: function (container, options) {
+                            if (options.data.LateCount != options.data.IssuedLateCount) {
+                                var returnText = '<button class="btn btn-xs btn-danger"><i class="fa fa-check"></i> Letter Issue</button>';
+                                $(returnText).on('dxclick', function () {
+                                    IssueWarningLetter(options.data);
+                                }).appendTo(container);
+                            } else {
+                                var returnText = '<h6><span class="badge badge-warning">Lette Issued</span></h6>';
+                                $(returnText).appendTo(container);
+                            }
+                        }
+                    }
+                ]
+
+            }).dxDataGrid("instance");
+        }
+
+        $(function () {
+
+            $("#DepartmentID").change(function () {
+                let depID = $("#DepartmentID").val();
+                if (depID != "") {
+                    HttpRequest.DropDown("Get", "/AlgoHR/CommonDropDown/GetDDLSectionList", { deptID: depID }, 'SectionID', true);
+                } else {
+                    HttpRequest.DropDownDefault("SectionID");
+                }
+            });
+            $("#OfficeDivisionID").change(function () {
+              
+                let officeDivisionID = $("#OfficeDivisionID").val();
+                if (officeDivisionID != "") {
+                    
+                    HttpRequest.DropDown("Get", "/AlgoHR/CommonDropDown/GetDDLDeptList", { divisionID: officeDivisionID}, 'DepartmentID', true);
+                    $("#DepartmentID").trigger('change');
+                }
+            });
+            $("#CompanyID").change(function () {               
+                let compID = $("#CompanyID").val();
+                if (compID!="") {
+                    let exceptDivision = [9, 10, 12];
+                    HttpRequest.DropDown("POST", "/AlgoHR/CommonDropDown/GetDDLDivisionListByEmbroCompany", { embroCompanyID: compID, exceptDivision: exceptDivision }, 'OfficeDivisionID', true);
+                    $("#OfficeDivisionID").trigger('change');
+                } else {
+                    HttpRequest.DropDownDefault("OfficeDivisionID");
+                }
+            });
+            $("#btnSearch").click(function () {
+                GetLateEmployeesList();
+            });
+        });
+    </script>
+
+}

@@ -1,0 +1,78 @@
+﻿@model RG.Application.ViewModel.FiniteScheduler.Setup.Machine.IndexVM
+@{
+    ViewData[PageInfo.PageTitle] = "Machine";
+    ViewData[PageInfo.PageHeader] = "Machine";
+    //ViewData[PageInfo.btnText1] = "Back to List";
+    //ViewData[PageInfo.PageLink1] = "/FiniteScheduler/MachineMaintenance/Index";
+    //ViewData[PageInfo.btnClass1] = "btn-warning";
+
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+}
+<div class="row">
+    <div class="col-sm-12 col-md-12">
+        <div class="card card-dark">
+            <div class="card-header m-0 p-1">
+                <h5 class="card-title">Machine Information</h5>
+            </div>
+            <div class="card-body mb-0">
+                <div class="row">
+                    <div class="col-sm-3">
+                        <div class="form-group">
+                            <label asp-for="CompanyID" class="col-form-label-sm required"></label>
+                            <select asp-for="CompanyID" asp-items="Model.DDLCompany" class="form-control form-control-sm"></select>
+                            <span asp-validation-for="CompanyID" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="form-group">
+                            <label asp-for="LocationID" class="col-form-label-sm required"></label>
+                            <select asp-for="LocationID" asp-items="Model.DDLLocation" class="form-control form-control-sm"></select>
+                            <span asp-validation-for="LocationID" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="col-form-label-sm">&nbsp;</label>
+                        <div class="form-group">
+                            @*<button type="button" class="btn btn-sm btn-success" id="btnShow">Show</button>*@
+                            <button type="button" class="btn btn-sm btn-danger" id="btnPDF">PDF</button>
+                            <button type="button" class="btn btn-sm btn-warning" id="btnExcel">Excel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script type="text/javascript">
+
+        function LocationWiseMachineReport (reportFormat) {
+            debugger;
+            let companyID = $("#CompanyID").val();
+            let locationID = $("#LocationID").val();
+            window.open("/FiniteScheduler/Machine/LocationWiseMachineReport?companyID=" + companyID + "&locationID=" + locationID + "&ReportFormat=" + reportFormat, "Location wise machine Report", "status=1,toolbar=0");
+
+            return false;
+        }
+        $(function () {
+            $("#CompanyID").change(function () {
+                let companyID = $("#CompanyID").val();
+                if (companyID != "") {
+                    HttpRequest.DropDown("GET", "/FiniteScheduler/CommonDropDown/GetDDLCompanyWiseLocation", { "companyID": companyID }, "LocationID", "");
+                } else {
+                    HttpRequest.DropDownDefault('LocationID');
+                }
+            });
+
+            $("#btnPDF").click(function () {
+               LocationWiseMachineReport("@ReportExportFormat.PdfFormat");
+           });
+            $("#btnExcel").click(function () {
+                LocationWiseMachineReport("@ReportExportFormat.ExcelFormat");
+            });
+        });
+    </script>
+}
+

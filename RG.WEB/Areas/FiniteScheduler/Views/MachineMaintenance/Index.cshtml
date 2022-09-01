@@ -1,0 +1,174 @@
+﻿@model RG.Application.ViewModel.FiniteScheduler.Business.MachineMaintenance.MachineMaintenanceIndexVM
+@{
+    ViewData[PageInfo.PageTitle] = "Machine Maintenance";
+    ViewData[PageInfo.PageHeader] = "Machine Maintenance List";
+    ViewData[PageInfo.btnText1] = "Create New";
+    ViewData[PageInfo.PageLink1] = "/FiniteScheduler/MachineMaintenance/Create";
+    ViewData[PageInfo.btnClass1] = "btn-success";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="row">
+    <div class="col-sm-12 col-md-12">
+        <div class="card card-dark">
+            <div class="card-header m-0 p-1">
+                <h5 class="card-title">Machine Information</h5>
+            </div>
+            <div class="card-body mb-0">
+                <div class="row">
+                    <div class="col-sm-4">
+                        <div class="form-group">
+                            <label asp-for="CompanyID" class="label-ajt-sm required"></label>
+                            <select asp-for="CompanyID" asp-items="Model.DDLCompany" class="form-control form-control-sm"></select>
+                            <span asp-validation-for="CompanyID" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <div class="form-group">
+                            <label asp-for="LocationID" class="label-ajt-sm required"></label>
+                            <select asp-for="LocationID" asp-items="Model.DDLLocation" class="form-control form-control-sm"></select>
+                            <span asp-validation-for="LocationID" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <div class="form-group">
+                            <label asp-for="MachineID" class="label-ajt-sm required"></label>
+                            <select asp-for="MachineID" asp-items="Model.DDLMachine" class="form-control form-control-sm"></select>
+                            <span asp-validation-for="MachineID" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="row">
+                    <div class="col-sm-3">
+                        <div class="form-group">
+                            <label asp-for="DateFrom" class="label-ajt-sm required"></label>
+                            <input type="text" name="DateFrom" asp-for="DateFrom" readonly class="form-control form-control-sm dateField" />
+                            <span asp-validation-for="DateFrom" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="form-group">
+                            <label asp-for="DateTo" class="label-ajt-sm required"></label>
+                            <input type="text" name="DateTo" asp-for="DateTo" readonly class="form-control form-control-sm dateField" />
+                            <span asp-validation-for="DateTo" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <label>&nbsp;</label>
+                        <div class="form-group">
+                            <button type="button" class="btn btn-sm btn-success" id="btnSearch">Search</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-12 col-md-12">
+        <div class="card card-gray-dark">
+            <div class="card-header m-0 p-1">
+                <h4 class="card-title">Machine Information List</h4>
+            </div>
+            <div class="card-body m-0 p-0">
+                <table class="table table-sm table-bordered table-striped table text-sm table-hover" id="tblDivisionNotSelected">
+                    <thead class="bg-dark text-center">
+                        <tr>
+                            <td>SL</td>
+                            <td>Location</td>
+                            <td>Machine</td>
+                            <td>Schedule Date </td>
+                            <td>CheekDate </td>
+                            <td class="">Day Diff</td>
+                            <td>Status</td>
+                            <td>Task Completed By </td> 
+                            <td>Supervisiors</td>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tblMaintenanceItemList" class=" text-center">
+                    </tbody>
+
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+@section scripts{
+    <script type="text/javascript">
+        function GetMachineAndMaintenanceItem() {
+            $("#tblMaintenanceItemList").html("");
+            let machineID = RtnNumber($("#MachineID").val());
+            let dateFrom = $("#DateFrom").val();
+            let dateTo = $("#DateTo").val();
+            var data = HttpRequest.AjaxData("GET", "/FiniteScheduler/MachineMaintenance/GetMachineAndMaintenanceCheckList", { "machineID": machineID, 'dateFrom': dateFrom, 'dateTo': dateTo });
+            if (data.length > 0) {
+                debugger
+                let maintenanceItem = '';
+                let tdColour;
+
+                $.each(data, function (i, v) {
+                    debugger
+                    if (v.DayDifference > 0) {
+                        tdColour = 'bg-success text-white';
+
+                    } else if (v.DayDifference == 0) {
+                        tdColour = '';
+                    } else {
+                        tdColour = 'bg-danger text-white';
+                    }
+
+                    maintenanceItem = maintenanceItem + `<tr>
+                                <td>${i + 1}<input type="hidden" class="hdnID" value="${v.ID}"/></td>
+                                <td>${v.LocationName}</td>
+                                <td>${v.MachineName}</td>
+                                <td>${v.ScheduleDate}</td>
+                                <td>${v.CheckedDate}</td>
+                                <td class="${tdColour}">${v.DayDifference}</td>
+                                <td>${v.StatusName}</td>
+                                <td>${v.ElectricalTaskCompletedByName}, ${v.MechanicalTaskCompletedByName}</td>
+                                <td>${v.ElectricalTaskSupervisorName}, ${v.MechanicalTaskSupervisorName}</td>
+                                
+                                <td> <a href="/FiniteScheduler/MachineMaintenance/Edit?Id=${v.ID}" class="btn btn-xs btn-warning">Edit</a>
+                                || <input type="button" onclick="GetGetMTMachineAndMaintenanceCheckReport(${v.ID})" class="btn btn-xs btn-info" value="Report" id=""/></td>
+                            </tr>`
+                });
+                //  $("#tblDivisionNotSelected tbody").html(allItem);
+                $("#tblMaintenanceItemList").html(maintenanceItem);
+                //  $("#tfootBtn").show();
+            }
+        }
+        $(function () {
+            GetMachineAndMaintenanceItem();
+            $("#CompanyID").change(function () {
+                debugger
+                let companyID = $("#CompanyID").val();
+                if (companyID != "") {
+                    HttpRequest.DropDown("GET", "/FiniteScheduler/CommonDropDown/GetDDLCompanyWiseLocation", { "companyID": companyID }, "LocationID", "");
+                }
+
+            });
+            $("#LocationID").change(function () {
+                let locationID = $("#LocationID").val();
+                if (locationID != "") {
+                    HttpRequest.DropDown("GET", "/FiniteScheduler/CommonDropDown/GetDDLLocationWiseMachine", { "locationID": locationID }, "MachineID", "");
+                }
+
+            });
+            $("#MachineID").change(function () {
+                GetMachineAndMaintenanceItem();
+            });
+            $("#btnSearch").click(function () {
+                GetMachineAndMaintenanceItem();
+            });
+        })
+
+        function GetGetMTMachineAndMaintenanceCheckReport(id) {
+            let reportFormat = "PDF";
+            let Id = id;
+            window.open("/FiniteScheduler/MachineMaintenance/MachineAndMaintenanceCheckReport?id=" + Id + "&ReportFormat=" + reportFormat, "Maintenance Check Report", "status=1,toolbar=0");
+
+        }
+
+    </script>
+}

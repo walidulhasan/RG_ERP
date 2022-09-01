@@ -1,0 +1,441 @@
+﻿@model RG.Application.ViewModel.MaterialsManagement.Business.YarnIssuanceToKnitter.IssueVM
+
+@{
+    ViewData[PageInfo.PageTitle] = "Yarn Issue";
+    ViewData[PageInfo.PageHeader] = "Yarn Isuue";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<form asp-action="Create" asp-area="Embro" asp-controller="Loan" method="post" id="frmLoan">
+    <div class="row">
+        <div class="col-md-3">
+            <div class="form-group">
+                <label asp-for="OrderID" class=""></label>
+                <select asp-for="OrderID" asp-items="Model.DDLOrder" class="form-control form-control-sm"></select>
+                <span asp-validation-for="OrderID" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="form-group">
+                <label asp-for="KRSID" class=""></label>
+                <select asp-for="KRSID" class="form-control form-control-sm" asp-items="Model.DDLKRS"></select>
+                <span asp-validation-for="KRSID" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="form-group">
+                <label asp-for="YKNCID" class="required"></label>
+                <select asp-for="YKNCID" class="form-control form-control-sm" asp-items="Model.DDLYKNC"></select>
+                <span asp-validation-for="YKNCID" class="text-danger"></span>
+            </div>
+        </div>
+
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="form-group text-center">
+                <input type="button" class="btn btn-sm btn-warning mr-2" value="Search" id="btnSearch" />
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            <table class="table table-sm table-stripprd table-bordered text-xs text-center" id="tblYKNCInfo">
+                <thead class="bg-dark">
+                    <tr>
+                        <td>Knitter Name</td>
+                        <td>YKNC No</td>
+                        <td>YKNC Date</td>
+                        <td>Fabric Composition</td>
+                        <td>Total Qty</td>
+                        <td>Allocated</td>
+                        <td>Yarn Count</td>
+                        <td>Yarn Composition</td>
+                        <td>Quality</td>
+                        <td title="Allocated Quantity">Alloc. Qty</td>
+                        <td>Issued Qty</td>
+                        <td>Alloc. Bal.</td>
+                        <td title="Total Allocated Balance">Alloc. Bal.</td>
+                    </tr>
+                </thead>
+                <tbody id="tbodyYKNCInfo">
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            <table class="table table-sm table-stripprd table-bordered text-xs text-center" id="tblLotInfo">
+                <thead class="bg-dark">
+                    <tr>
+                        <td>SL#</td>
+                        <td>Yarn Type</td>
+                        <td>Count</td>
+                        <td>Composition</td>
+                        <td>Quality</td>
+                        <td>Color</td>
+                        @*<td>Lot No</td>
+                            <td>Available Qty.</td>
+                            <td>YKNC Alloc.</td>
+                            <td>YKNC Issue</td>
+                            <td>Unit</td>
+                            <td>Location</td>*@
+                        @*<td>Alloc. Bal.</td>
+                            <td>Total Alloc. Bal.</td>*@
+                    </tr>
+                </thead>
+                <tbody id="tbodyYarnInfo">
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="form-group text-center">
+                <input type="button" class="btn btn-sm btn-success mr-2" value="Save" id="btnSave" />
+            </div>
+        </div>
+    </div>
+</form>
+@section scripts{
+    <script type="text/javascript">
+        const GetDDL_Order_WaitingForYarnIssue = () => {
+            HttpRequest.DropDownSelect2("Get", '/MaterialsManagement/YarnIssuanceToKnitter/GetDDL_Order_WaitingForYarnIssue', { predict: $("#OrderID").val() }, 'OrderID');
+        }
+        const GetDDL_KRS_WaitingForYarnIssue = () => {
+            
+            let orderID = $("#OrderID").val();
+            HttpRequest.DropDownSelect2("Get", '/MaterialsManagement/YarnIssuanceToKnitter/GetDDL_KRS_WaitingForYarnIssue', { orderID: orderID, predict: $("#KRSID").val() }, 'KRSID');
+        }
+        const GetDDL_YKNC_WaitingForYarnIssue = () => {
+            let orderID = $("#OrderID").val();
+            let krsID = $("#KRSID").val();
+
+            HttpRequest.DropDownSelect2("Get", '/MaterialsManagement/YarnIssuanceToKnitter/GetDDL_YKNC_WaitingForYarnIssue', { orderID: orderID, krsID: krsID, predict: $("#YKNCID").val() }, 'YKNCID');
+        }
+        const CheckAvailableAllocatedQty = (that, lotNo, rackBalanceQty, lotAvailableQty, AllocatedBalance) => {
+           debugger
+            let currentaAlloc = parseFloat( $(that).val());
+            if (currentaAlloc > rackBalanceQty) {
+                $.alert.open('warning', `Can't allocate more that balance quantity`);
+                $(that).val('0');
+            } else {
+                let totalCurrentLotAllocation = 0;
+                $(`#YarnRackIssue_${lotNo} tbody tr`).each(function () {
+                    totalCurrentLotAllocation += parseFloat($(this).find('.txtCurrAllocationQty').val());
+                });
+                if (totalCurrentLotAllocation > AllocatedBalance) {
+                    $.alert.open('warning', `Can't issue more that allocated YKNC quantity`);
+                    $(that).val('0');
+                }
+                if (totalCurrentLotAllocation > lotAvailableQty) {
+                    $.alert.open('warning', `Can't allocate more that lot available quantity`);
+                    $(that).val('0');
+                }
+            }
+        }
+        const HideShowLotDetail = (that, lotNo) => {
+           
+            if ($(that).is(':checked')) {
+                $(`#LotDetail_${lotNo}`).removeClass('d-none');
+            } else {
+                $(`#LotDetail_${lotNo}`).addClass('d-none');
+            }
+        }
+
+        const GetYarnLotForIssuance = () => {
+            let ykncID = $("#YKNCID").val();
+            if (ykncID > 0) {
+                let data = HttpRequest.AjaxData('GET', '/MaterialsManagement/YarnIssuanceToKnitter/GetYarnLotForIssuance', { ykncID: ykncID });
+                
+                if (data.YKNCMasterDetailInfo != null) {
+                    let ykncTr = ``;
+                    let yarnInfoTr = ``;
+
+                    let ykncMasterDetailInfo = data.YKNCMasterDetailInfo;
+                    $.each(ykncMasterDetailInfo.YKNCDetailInfo, function (i, v) {
+                        let allocatedBalance = v.AllocatedQty - v.IssuedQty;
+                        let allocatedColor = v.AllocatedQty > 0 ? 'bg-success' : 'bg-warning';
+                        if (i == 0) {
+                            let detailRowCount = ykncMasterDetailInfo.YKNCDetailInfo.length;
+                          
+                            ykncTr += `<tr style=''>
+                            <td class='align-middle font-weight-bold' rowspan=${detailRowCount}>${ykncMasterDetailInfo.YKNCMasterInfo.KnitterName}</td>
+                            <td class='align-middle font-weight-bold' rowspan=${detailRowCount}>${ykncMasterDetailInfo.YKNCMasterInfo.ContractName}</td>
+                            <td class='align-middle font-weight-bold' rowspan=${detailRowCount}>${ykncMasterDetailInfo.YKNCMasterInfo.ContractDateMsg}</td>
+                            <td class='align-middle font-weight-bold' rowspan=${detailRowCount}>${ykncMasterDetailInfo.YKNCMasterInfo.FabricComposition}</td>
+                            <td class='align-middle font-weight-bold' rowspan=${detailRowCount}>${ykncMasterDetailInfo.YKNCMasterInfo.TotalQty.toLocaleString(2)}</td>
+                            <td class='align-middle font-weight-bold bg-success' rowspan=${detailRowCount}>${ykncMasterDetailInfo.YKNCMasterInfo.AllocatedQuantity.toLocaleString(2)}</td>
+                            <td>${v.YarnCount}</td>
+                            <td>${v.YarnComposition}</td>
+                            <td>${v.YarnQuality}</td>
+                     
+                            <td class='${allocatedColor} font-weight-bold'>${v.AllocatedQty.toLocaleString(2)}</td>
+                            <td class='font-weight-bold'>${v.IssuedQty.toLocaleString(2)}</td>
+                            <td class='font-weight-bold'>${allocatedBalance.toLocaleString(2)}</td>
+                            <td class='align-middle' rowspan=${detailRowCount}>${0}</td>
+                            </tr>`;
+                        } else {
+                            ykncTr += `<tr>
+
+                            <td>${v.YarnCount}</td>
+                            <td>${v.YarnComposition}</td>
+                            <td>${v.YarnQuality}</td>
+                            <td class='${allocatedColor} font-weight-bold'>${v.AllocatedQty}</td>
+                            <td class='font-weight-bold'>${v.IssuedQty}</td>
+                            <td class='font-weight-bold'>${allocatedBalance}</td>
+
+                            </tr>`;
+                        }
+
+                    });
+                    $("#tbodyYKNCInfo").html(ykncTr);
+                    $.each(data.YarnAttributeInfo, function (i, v) {
+
+                        let lotInfo = ``;
+                        
+                        $.each(v.YKNCLotMasterDetailInfo, function (k, l) {
+                            let trRackInfo = ``;
+                            $.each(l.YKNCLotDetailInfo, function (m,n) {
+                                trRackInfo += `<tr class='yarnRackIssue'>
+                                            <td>${n.BuildingName}</td>
+                                            <td>${n.FloorName}</td>
+                                            <td>${n.RackName}</td>
+                                            <td><input type='hidden' class='hdnRackAllocationID' value='${n.RackAllocationID}'/>
+                                                <input type='hidden' class='hdnSubRackID' value='${n.SubRackID}'/>${n.SubRackName}</td>
+                                            <td>${n.BalanceQuantity}</td>
+                                            <td class='col-sm-2 p-0'>
+                                            <input type='hidden' class='hdnRackBalanceQuantity' value='${n.BalanceQuantity}'/>
+                                            <input type='text' style='font-size:11px;' class='form-control form-control-sm txtCurrAllocationQty'  onkeypress="return checkDecimal(event)" onkeyup="CheckAvailableAllocatedQty(this,'${l.LotNo}',${n.BalanceQuantity},${l.TransactionQty},${l.AllocatedBalance})" value='0'/></td>
+                                        </tr>`;
+                            });
+
+                            lotInfo += `<tr>
+                                            <td class='align-middle'><input type='checkbox' class='chkLotInfo'onchange='HideShowLotDetail(this,"${l.LotNo}")'/><span class='ml-1 font-weight-bold'>${k+1}</span></td>
+                                            <td class='lotNo'>${l.LotNo}</td>
+                                            <td>${l.TransactionQty}</td>
+                                            <td>${l.AllocatedQty}</td>
+                                            <td>${l.IssuedQty}</td>
+                                            <td>${l.UnitName}</td>
+                                            <td>${l.LocationName}
+                                                <input type='hidden' class='hdnMRPItemCode' value='${l.MRPItemCode}'/>
+                                                <input type='hidden' class='hdnAttributeInstanceID' value='${l.AttributeInstanceID}'/>
+                                                <input type='hidden' class='hdnYarnAttributeInstanceID' value='${l.YarnAttributeInstanceID}'/>
+                                                <input type='hidden' class='hdnSupplierID' value='${l.SupplierID}'/>
+                                                <input type='hidden' class='hdnBrandID' value='${l.BrandID}'/>
+                                                <input type='hidden' class='hdnPackagingID' value='${l.PackagingID}'/>
+                                                <input type='hidden' class='hdnConesPerProcurementUnit' value='${l.ConesPerProcurementUnit}'/>
+                                                <input type='hidden' class='hdnUnitID' value='${l.UnitID}'/>
+                                                <input type='hidden' class='hdnUnit' value='${l.UnitName}'/>
+                                                <input type='hidden' class='hdnLocationID' value='${l.StoreLocationID}'/>
+                                                <input type='hidden' class='hdnLoaction' value='${l.LocationName}'/>
+                                                <input type='hidden' class='hdnrate' value='${l.Rate}'/>
+                                                <input type='hidden' class='hdnrateUnitID' value='${l.RateUnitID}'/>
+                                                <input type='hidden' class='hdnMovingAverage' value='${l.MovingAverage}'/>
+                                                <input type='hidden' class='hdnTransactionQty' value='${l.TransactionQty}'/>
+                                                <input type='hidden' class='hdnProgramTypeID' value='${l.ProgramTypeID}'/>
+                                                <input type='hidden' class='hdnLotNo' value='${l.LotNo}'/>
+                                                <input type='hidden' class='hdnStatus' value='${l.Status}'/>
+                                                <input type='hidden' class='hdnRateWRTBaseUnit' value='${l.RateWRTBaseUnit}'/>
+                                                <input type='hidden' class='hdnSupplierName' value='${l.SupplierName}'/>
+                                                <input type='hidden' class='hdnYarnKnittingContractID' value='${l.YKNCID}'/>
+
+                                                <input type='hidden' class='hdnAllocatedQty' value='${l.AllocatedQty}'/>
+                                                
+                                                <input type='hidden' class='hdnCompanyID' value='${l.CompanyID}'/>
+                                                <input type='hidden' class='hdnBusinessID' value='${l.BusinessID}'/>                                                
+                                                <input type='hidden' class='hdnIssuedQty' value='${l.IssuedQty}'/>
+                                 
+                                                <input type='hidden' class='hdnIssuingUnitID' value='${l.UnitID}'/>
+                                            </td>
+                                        </tr>
+                                        <tr id=LotDetail_${l.LotNo} class='d-none'>
+                                            <td></td>
+                                            <td colspan='5'>
+                                            <table id='YarnRackIssue_${l.LotNo}' class='table table-sm table-stripprd table-bordered text-xs text-center mb-0'>
+                                                <thead class='bg-dark'>
+                                                <tr>
+                                                <td>Building</td>
+                                                <td>Floor</td>
+                                                <td>Rack</td>
+                                                <td>Sub Rack</td>
+                                                <td>Balance</td>
+                                                <td>Current Alloc.</td>
+                                                </tr>
+                                                </thead>
+                                                <tbody class='tbodyRackInfo'>${trRackInfo}</tbody>
+                                            </table>
+                                            </td>
+                                           
+                                        </tr>`;
+                        });
+
+                        yarnInfoTr += `<tr>
+                                            <td>${i + 1}</td>
+                                            <td>${v.YarnType}</td>
+                                            <td>${v.YarnCount}</td>
+                                            <td>${v.YarnComposition}</td>
+                                            <td>${v.YarnQuality}</td>
+                                            <td>${v.YarnColor}</td>
+                                        </tr>
+                                        <tr>
+                                            <td></td>
+                                            <td colspan='5'>
+                                            <table class='table table-sm table-stripprd table-bordered text-xs text-center mb-0'>
+                                                <thead class='bg-dark'>
+                                                <tr>
+                                                <td>SL#</td>
+                                                <td>Lot No</td>
+                                                <td>Available Qty.</td>
+                                                <td>YKNC Alloc</td>
+                                                <td>YKNC Issued</td>
+                                                <td>Unit</td>
+                                                <td>Location</td>                                                
+                                                </tr>
+                                                </thead>
+                                                <tbody class='tbodyLootInfo'>${lotInfo}</tbody>
+                                            </table>
+                                            </td>
+                                        </tr>`;
+                    });
+                    $("#tbodyYarnInfo").html(yarnInfoTr);
+                }
+            } else {
+                $.alert.open('Error', 'YKNC Not Found');
+            }
+
+        }
+        const saveSuccess = (data) => {
+            if (data.result == 1) {
+                $.alert.open({
+                    type: 'Success',
+                    content: data.message,
+                    callback: function () {
+                        GetYarnLotForIssuance();
+                    }
+                });
+            }
+            else {
+                $.alert.open("error", data.message);
+            }
+        }
+
+        $(function () {
+            $('#OrderID').select2();
+            $('#KRSID').select2();
+            $('#YKNCID').select2();
+            GetDDL_Order_WaitingForYarnIssue();
+            GetDDL_YKNC_WaitingForYarnIssue();
+            $('#OrderID').change(function () {
+                GetDDL_KRS_WaitingForYarnIssue();
+                GetDDL_YKNC_WaitingForYarnIssue();
+            });
+            $('#KRSID').change(function () {
+                GetDDL_YKNC_WaitingForYarnIssue();
+            });
+
+            $('#btnSearch').click(function () {
+                GetYarnLotForIssuance();
+            });
+
+            $('#btnSave').click(function () {
+                debugger;
+                let objBatchList = new Array();
+                $('.chkLotInfo:checkbox:checked').each(function () {
+                    let thatTr = $(this).parent().parent();
+                    let lotNo = thatTr.find('.lotNo').text();
+
+                    let allocatedQuantityList = new Array();
+
+                    $(`#YarnRackIssue_${lotNo} tbody tr .txtCurrAllocationQty`).each(function () {
+                        allocQty = parseFloat( $(this).val());
+                        if (allocQty > 0) {
+                            let thatTr = $(this).parent().parent();
+                            let rackAllocationID = thatTr.find('.hdnRackAllocationID').val();
+                            let currAllocationQty = thatTr.find('.txtCurrAllocationQty').val();
+                            let objBatch = {
+                                RackAllocationID: rackAllocationID,
+                                IssuedQuantity: currAllocationQty
+                            }
+                            allocatedQuantityList.push(objBatch)
+                        }
+                    });
+                    let objBatch = {
+                        MRPItemCode: thatTr.find('.hdnMRPItemCode').val(),
+                        AttributeInstanceID: thatTr.find('.hdnAttributeInstanceID').val(),
+                        YarnAttributeInstanceID: thatTr.find('.hdnYarnAttributeInstanceID').val(),
+                        SupplierID: thatTr.find('.hdnSupplierID').val(),
+                        BrandID: thatTr.find('.hdnBrandID').val(),
+                        PackagingID: thatTr.find('.hdnPackagingID').val(),
+                        ConesPerProcurementUnit: thatTr.find('.hdnConesPerProcurementUnit').val(),
+                        UnitID: thatTr.find('.hdnUnitID').val(),
+                        UnitName: thatTr.find('.hdnUnit').val(),
+                        LocationID: thatTr.find('.hdnLocationID').val(),
+                        Loaction: thatTr.find('.hdnLoaction').val(),
+                        Rate: thatTr.find('.hdnrate').val(),
+                        RateUnitID: thatTr.find('.hdnrateUnitID').val(),
+                        MovingAverage: thatTr.find('.hdnMovingAverage').val(),
+                        TransactionQty: thatTr.find('.hdnTransactionQty').val(),
+                        ProgramTypeID: thatTr.find('.hdnProgramTypeID').val(),
+                        LotNo: thatTr.find('.hdnLotNo').val(),
+                        Status: thatTr.find('.hdnStatus').val(),
+                        RateWRTBaseUnit: thatTr.find('.hdnRateWRTBaseUnit').val(),
+                        
+                        YarnKnittingContractID: thatTr.find('.hdnYarnKnittingContractID').val(),
+                       
+                        AllocatedQty: thatTr.find('.hdnAllocatedQty').val(),
+                        
+                        CompanyID: thatTr.find('.hdnCompanyID').val(),
+                        BusinessID: thatTr.find('.hdnBusinessID').val(),
+                        
+                        IssuedQty: thatTr.find('.hdnIssuedQty').val(),
+                       /* IssuedAgainst: thatTr.find('.hdnIssuedAgainst').val(),*/
+                        IssuingUnitID: thatTr.find('.hdnIssuingUnitID').val(),
+                        AllocatedYarnIssueFromRack: allocatedQuantityList
+                    }
+                    objBatchList.push(objBatch);
+
+                });
+                
+
+                let ykncID = $("#YKNCID").val();
+                let objYKNC = {
+                    ID: ykncID,
+                    //GreigeAttributeInstanceID:,
+                    //ContractStatus:,
+                    //KnitterID:,
+                    //CompanyID:,
+                    //ContractName:,
+                    //ProgramTypeID:,
+                    //OrderID:,
+                    //OrderNo:,
+                    //IsClosed:,
+                    //NoOfDays:,
+                    //PaymentTerm:,
+                    //FabricTypeID:,
+                    //FabricType:,
+                    //QualityID:,
+                    //Quality:,
+                    //GSM:,
+                    //MachineType:,
+                    //Width:,
+                    //TotalQty:,
+                    //BalanceQty:,
+                    //ContractDate:,
+                    //ProgramType:,
+                    //ContractTypeID:,
+                    //UserID:,
+                    //UserName:,
+                    //BusinessID:,
+                    YKNCBatch: objBatchList
+                }
+                if (ykncID > 0 && objBatchList.length > 0 && allocatedQuantityList, length > 0) {
+
+                    HttpRequest.AjaxAsync("POST", "/MaterialsManagement/YarnIssuanceToKnitter/Issue", { 'allocatedYarnIssue': objYKNC }, saveSuccess, '#btnSave', null);
+                } else {
+                    $.alert.open('error', 'No data found to save');
+                }
+            });
+        });
+    </script>
+
+}

@@ -1,0 +1,259 @@
+﻿@model List<RG.Application.Contracts.AlgoHR.Business.CompanyMonthlySalarys.Queries.RequestResponseModel.CompanyMonthlySalaryRM>
+@{
+    Layout = null;
+    
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Company Monthly Salary</title>
+    <link href="~/AdminLTE-3.1.0/plugins/jquery-ui/jquery-ui.min.css" rel="stylesheet" />
+    <link href="~/lib/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <script src="~/AdminLTE-3.1.0/plugins/jquery/jquery.min.js"></script>
+    <script src="~/AdminLTE-3.1.0/plugins/jquery-ui/jquery-ui.min.js"></script>
+    <script src="~/AdminLTE-3.1.0/plugins/bootstrap/js/bootstrap.bundle.js"></script>
+
+
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.12/css/jquery.dataTables.min.css" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/1.2.2/css/buttons.dataTables.min.css" />
+    <script type="text/javascript" src="https://code.jquery.com/jquery-1.12.3.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.2.2/js/dataTables.buttons.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/2.5.0/jszip.min.js"></script>
+    <script type="text/javascript" src="https://cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/pdfmake.min.js"></script>
+    <script type="text/javascript" src="https://cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/vfs_fonts.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.2.2/js/buttons.html5.min.js"></script>
+
+    <style>
+        .header {
+            position: sticky;
+            top: 0;
+        }
+    </style>
+
+</head>
+<body>
+
+    @{
+        if (Model.Count > 0)
+        {
+            <div class="row">
+                    <div class="col-md-12 text-center">
+                        <h5 class="m-0">@Model[0].CompanyName</h5>
+                        <h6 class="m-0">@Model[0].DivisionName Monthly Salary Report</h6>
+                        <h6 class="m-0">For the month of: @Model[0].SalaryMonthName , @Model[0].SalaryYear</h6>
+
+                    </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12 col-md-12">
+                    <div class="row">
+                        <div class="col-md-12 text-center">
+                            @{
+                                var distinctMonths = Model.Select(x => new
+                                {
+                                    x.SalaryMonth,
+                                    x.SalaryMonthName,
+                                    x.SalaryYear
+                                }).Distinct();
+
+                                foreach (var month in distinctMonths.OrderBy(x => x.SalaryMonth))
+                                {
+                                    <br />
+                                    <table class="table table-sm text-sm table-bordered table-striped" style="font-size:11px;" id="tblCompanyMonthlySalary">
+                                        <thead class="bg-dark text-white header">                                            
+                                            <tr style="background-color: #00001a;color:white">
+                                                <th style="vertical-align:middle">Division</th>
+                                                <th style="vertical-align:middle">Department</th>
+                                                <th style="vertical-align:middle">Employee</th>
+                                                <th style="vertical-align:middle">Gross Salary</th>
+                                                <th style="vertical-align:middle">Paid Salary</th>
+                                                <th style="vertical-align:middle">General OT</th>
+                                                <th style="vertical-align:middle">Ext-OT</th>
+                                                <th style="vertical-align:middle">Total Salary</th>
+                                                <th style="vertical-align:middle">Mob & Int Allow.</th>
+                                                <th style="vertical-align:middle">Food & Tran Allow.</th>
+                                                <th style="vertical-align:middle">Car Allow.</th>
+                                                <th style="vertical-align:middle">Friday Allow.</th>
+                                                <th style="vertical-align:middle">Production Allow.</th>
+                                                <th style="vertical-align:middle">Double Machine Bonous</th>
+                                                <th style="vertical-align:middle">Earn Leave</th>
+                                                <th style="vertical-align:middle">Maternity Leave</th>
+                                                <th style="vertical-align:middle">Service Benefit</th>
+                                                <th style="vertical-align:middle">Holiday Allow.</th>
+                                                <th style="vertical-align:middle">Arrear Allow.</th>
+                                                <th style="vertical-align:middle">Extra Allow.</th>
+                                                <th style="vertical-align:middle">Total Allowance</th>
+                                                <th style="vertical-align:middle">Total Payment Required</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @{
+
+                                                string prevDivision = "";
+                                                int prevDivisionID = 0;
+                                                int companyDepartmentCount = 0;
+
+
+
+                                                var data = Model.Where(x => x.SalaryMonth == month.SalaryMonth).OrderBy(x => x.CompanyID);
+                                                foreach (var item in data)
+                                                {
+                                                    if (prevDivision != "" && prevDivision != item.DivisionName)
+                                                    {
+                                                        var currentCompanyData = data.Where(x => x.DivisionID == prevDivisionID);
+                                                        <tr class="bg-info font-weight-bold">
+                                                            <td colspan="2">@prevDivision Total</td>
+                                                            <td>@String.Format("{0:n0}", currentCompanyData.Sum(x => x.NoOfEmployee))</td>
+                                                            <td>@String.Format("{0:n2}", currentCompanyData.Sum(x => x.GrossSalary))</td>
+                                                            <td>@String.Format("{0:n2}", currentCompanyData.Sum(x => x.PaidSalary))</td>
+                                                            <td>@String.Format("{0:n2}", currentCompanyData.Sum(x => x.GeneralOT))</td>
+                                                            <td>@String.Format("{0:n2}", currentCompanyData.Sum(x => x.ExtOT))</td>
+                                                            <td>@String.Format("{0:n2}", currentCompanyData.Sum(x => x.TotalSalary))</td>
+                                                            <td>@String.Format("{0:n2}", currentCompanyData.Sum(x => x.MobileInternetAllowance))</td>
+                                                            <td>@String.Format("{0:n2}", currentCompanyData.Sum(x => x.FoodTransportAllowance))</td>
+                                                            <td>@String.Format("{0:n2}", currentCompanyData.Sum(x => x.CarAllowance))</td>
+                                                            <td>@String.Format("{0:n2}", currentCompanyData.Sum(x => x.FridayAllowance))</td>
+                                                            <td>@String.Format("{0:n2}", currentCompanyData.Sum(x => x.ProductionBonus))</td>
+                                                            <td>@String.Format("{0:n2}", currentCompanyData.Sum(x => x.DoubleMachineBonous))</td>
+                                                            <td>@String.Format("{0:n2}", currentCompanyData.Sum(x => x.EarnLeave))</td>
+                                                            <td>@String.Format("{0:n2}", currentCompanyData.Sum(x => x.MaternityLeave))</td>
+                                                            <td>@String.Format("{0:n2}", currentCompanyData.Sum(x => x.ServiceBenefit))</td>
+                                                            <td>@String.Format("{0:n2}", currentCompanyData.Sum(x => x.HolidayAllowance))</td>
+                                                            <td>@String.Format("{0:n2}", currentCompanyData.Sum(x => x.ArrearAllowance))</td>
+                                                            <td>@String.Format("{0:n2}", currentCompanyData.Sum(x => x.ExtraAllowance))</td>
+                                                            <td>@String.Format("{0:n2}", currentCompanyData.Sum(x => x.TotalAllowance))</td>
+                                                            <td>@String.Format("{0:n2}", currentCompanyData.Sum(x => x.TotalPaymentRequired))</td>
+                                                        </tr>
+                                                    }
+
+                                                    <tr>
+                                                        @if (prevDivision == "" || prevDivision != item.DivisionName)
+                                                        {
+                                                            prevDivision = item.DivisionName;
+                                                            companyDepartmentCount = data.Where(x => x.DivisionID == item.DivisionID).Count();
+                                                            <td class="bg-warning font-weight-bold" style="vertical-align:middle" rowspan="@companyDepartmentCount">@prevDivision</td>
+                                                        }
+                                                        <td>@item.DepartmentName</td>
+                                                        <td>@String.Format("{0:n0}", item.NoOfEmployee)</td>
+                                                        <td>@String.Format("{0:n0}", item.GrossSalary)</td>
+                                                        <td>@String.Format("{0:n0}", item.PaidSalary)</td>
+                                                        <td>@String.Format("{0:n0}", item.GeneralOT)</td>
+                                                        <td>@String.Format("{0:n0}", item.ExtOT)</td>
+                                                        <td>@String.Format("{0:n0}", item.TotalSalary)</td>
+                                                        <td>@String.Format("{0:n0}", item.MobileInternetAllowance)</td>
+                                                        <td>@String.Format("{0:n0}", item.FoodTransportAllowance)</td>
+                                                        <td>@String.Format("{0:n0}", item.CarAllowance)</td>
+                                                        <td>@String.Format("{0:n0}", item.FridayAllowance)</td>
+                                                        <td>@String.Format("{0:n0}", item.ProductionBonus)</td>
+                                                        <td>@String.Format("{0:n0}", item.DoubleMachineBonous)</td>
+                                                        <td>@String.Format("{0:n0}", item.EarnLeave)</td>
+                                                        <td>@String.Format("{0:n0}", item.MaternityLeave)</td>
+                                                        <td>@String.Format("{0:n0}", item.ServiceBenefit)</td>
+                                                        <td>@String.Format("{0:n0}", item.HolidayAllowance)</td>
+                                                        <td>@String.Format("{0:n0}", item.ArrearAllowance)</td>
+                                                        <td>@String.Format("{0:n0}", item.ExtraAllowance)</td>
+                                                        <td>@String.Format("{0:n0}", item.TotalAllowance)</td>
+                                                        <td>@String.Format("{0:n0}", item.TotalPaymentRequired)</td>
+                                                    </tr>
+                                                    prevDivisionID = item.DivisionID;
+                                                    prevDivision = item.DivisionName;
+                                                    if (data.Last() == item)
+                                                    {
+                                                        var currentCompanyData = data.Where(x => x.DivisionID == item.DivisionID);
+                                                        <tr class="bg-info font-weight-bold">
+                                                            <td colspan="2">@prevDivision Total</td>
+
+                                                            <td>@String.Format("{0:n0}", currentCompanyData.Sum(x => x.NoOfEmployee))</td>
+                                                            <td>@String.Format("{0:n2}", currentCompanyData.Sum(x => x.GrossSalary))</td>
+                                                            <td>@String.Format("{0:n2}", currentCompanyData.Sum(x => x.PaidSalary))</td>
+                                                            <td>@String.Format("{0:n2}", currentCompanyData.Sum(x => x.GeneralOT))</td>
+                                                            <td>@String.Format("{0:n2}", currentCompanyData.Sum(x => x.ExtOT))</td>
+                                                            <td>@String.Format("{0:n2}", currentCompanyData.Sum(x => x.TotalSalary))</td>
+                                                            <td>@String.Format("{0:n2}", currentCompanyData.Sum(x => x.MobileInternetAllowance))</td>
+                                                            <td>@String.Format("{0:n2}", currentCompanyData.Sum(x => x.FoodTransportAllowance))</td>
+                                                            <td>@String.Format("{0:n2}", currentCompanyData.Sum(x => x.CarAllowance))</td>
+                                                            <td>@String.Format("{0:n2}", currentCompanyData.Sum(x => x.FridayAllowance))</td>
+                                                            <td>@String.Format("{0:n2}", currentCompanyData.Sum(x => x.ProductionBonus))</td>
+                                                            <td>@String.Format("{0:n2}", currentCompanyData.Sum(x => x.DoubleMachineBonous))</td>
+                                                            <td>@String.Format("{0:n2}", currentCompanyData.Sum(x => x.EarnLeave))</td>
+                                                            <td>@String.Format("{0:n2}", currentCompanyData.Sum(x => x.MaternityLeave))</td>
+                                                            <td>@String.Format("{0:n2}", currentCompanyData.Sum(x => x.ServiceBenefit))</td>
+                                                            <td>@String.Format("{0:n2}", currentCompanyData.Sum(x => x.HolidayAllowance))</td>
+                                                            <td>@String.Format("{0:n2}", currentCompanyData.Sum(x => x.ArrearAllowance))</td>
+                                                            <td>@String.Format("{0:n2}", currentCompanyData.Sum(x => x.ExtraAllowance))</td>
+                                                            <td>@String.Format("{0:n2}", currentCompanyData.Sum(x => x.TotalAllowance))</td>
+                                                            <td>@String.Format("{0:n2}", currentCompanyData.Sum(x => x.TotalPaymentRequired))</td>
+                                                        </tr>
+                                                    }
+                                                }
+                                                <tr class="bg-primary text-white font-weight-bold">
+                                                    <td colspan="2">Grand Total</td>
+                                                    <td>@String.Format("{0:n0}", Model.Sum(x => x.NoOfEmployee))</td>
+                                                    <td>@String.Format("{0:n0}", Model.Sum(x => x.GrossSalary))</td>
+                                                    <td>@String.Format("{0:n2}", Model.Sum(x => x.PaidSalary))</td>
+                                                    <td>@String.Format("{0:n2}", Model.Sum(x => x.GeneralOT))</td>
+                                                    <td>@String.Format("{0:n2}", Model.Sum(x => x.ExtOT))</td>
+                                                    <td>@String.Format("{0:n2}", Model.Sum(x => x.TotalSalary))</td>
+                                                    <td>@String.Format("{0:n2}", Model.Sum(x => x.MobileInternetAllowance))</td>
+                                                    <td>@String.Format("{0:n2}", Model.Sum(x => x.FoodTransportAllowance))</td>
+                                                    <td>@String.Format("{0:n2}", Model.Sum(x => x.CarAllowance))</td>
+                                                    <td>@String.Format("{0:n2}", Model.Sum(x => x.FridayAllowance))</td>
+                                                    <td>@String.Format("{0:n2}", Model.Sum(x => x.ProductionBonus))</td>
+                                                    <td>@String.Format("{0:n2}", Model.Sum(x => x.DoubleMachineBonous))</td>
+                                                    <td>@String.Format("{0:n2}", Model.Sum(x => x.EarnLeave))</td>
+                                                    <td>@String.Format("{0:n2}", Model.Sum(x => x.MaternityLeave))</td>
+                                                    <td>@String.Format("{0:n2}", Model.Sum(x => x.ServiceBenefit))</td>
+                                                    <td>@String.Format("{0:n2}", Model.Sum(x => x.HolidayAllowance))</td>
+                                                    <td>@String.Format("{0:n2}", Model.Sum(x => x.ArrearAllowance))</td>
+                                                    <td>@String.Format("{0:n2}", Model.Sum(x => x.ExtraAllowance))</td>
+                                                    <td>@String.Format("{0:n2}", Model.Sum(x => x.TotalAllowance))</td>
+                                                    <td>@String.Format("{0:n2}", Model.Sum(x => x.TotalPaymentRequired))</td>
+                                                </tr>
+
+                                            }
+                                        </tbody>
+                                    </table>
+                                }
+                            }
+                        </div>
+                    </div>
+                    <div class="text-center">
+                        <input type="button" class="btn btn-sm btn-success" value="Excel" id="btnExcel" onclick="exportToExcel()" />
+                    </div>
+                </div>
+
+            </div>
+        }}
+</body>
+</html>
+<script type="text/javascript">
+    function exportToExcel() {
+        debugger;
+        var htmls = "";
+        var uri = 'data:application/vnd.ms-excel;base64,';
+        var template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>';
+        var base64 = function (s) {
+            return window.btoa(unescape(encodeURIComponent(s)))
+        };
+
+        var format = function (s, c) {
+            return s.replace(/{(\w+)}/g, function (m, p) {
+                return c[p];
+            })
+        };
+
+        htmls = document.getElementById("tblCompanyMonthlySalary").innerHTML;
+
+        var ctx = {
+            worksheet: 'Worksheet',
+            table: htmls
+        }
+        var link = document.createElement("a");
+        link.download = "CompanyDivisionWiseMonthlySalary.xls";
+        link.href = uri + base64(format(template, ctx));
+        link.click();
+    }
+
+</script>

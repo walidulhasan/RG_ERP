@@ -1,0 +1,272 @@
+﻿@using Microsoft.AspNetCore.Antiforgery
+@inject IAntiforgery antiForgeryToken
+@model RG.Application.ViewModel.MaterialsManagement.Business.GatePass.GatePassChallanMasterVM
+@{
+    var token = antiForgeryToken.GetAndStoreTokens(Context);
+    Layout = null;
+    var sl = 1;
+    decimal totalQuantity = 0;
+    // var totalRate = 0.0;
+    decimal tgrossWeight = 0;
+    decimal tNetWeight = 0;
+}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="Robintex comptex">
+    <meta name="generator" content="Jekyll v3.8.6">
+    <title></title>
+
+
+    <meta name="theme-color" content="#563d7c">
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+
+    <style>
+        .bd-placeholder-img {
+            font-size: 1.125rem;
+            text-anchor: middle;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        table thead {
+            text-align: center;
+        }
+
+        table {
+            table-layout: fixed;
+        }
+
+        td {
+            word-wrap: break-word
+        }
+
+        table.table-bordered {
+            border: 1px solid #000;
+            margin-top: 20px;
+        }
+
+            table.table-bordered > thead > tr > th {
+                border: 1px solid #000;
+            }
+
+            table.table-bordered > tbody > tr > td {
+                border: 1px solid #000;
+            }
+
+            table.table-bordered > tbody > tr > th {
+                border: 1px solid #000;
+            }
+
+            table.table-bordered > tfoot > tr > th {
+                border: 1px solid #000;
+            }
+    </style>
+    <!-- Custom styles for this template -->
+    <link href="~/css/BatchReportCss.css" rel="stylesheet" />
+    <link href="~/css/landscapePrint.css" rel="stylesheet" />
+    <link href="~/css/printCommon.css" rel="stylesheet" />
+
+</head>
+<body>
+
+
+    <nav class="navbar navbar-dark fixed-top bg-dark flex-md-nowrap p-0 shadow noprint">
+        @* <div class="navbar-brand col-sm-12 col-md-12 mr-0"> Robintex (Bangladesh) LIMITED</div>*@
+    </nav>
+
+    <style type="text/css" media="print">
+        .table {
+            background: inherit;
+        }
+    </style>
+    <div class="container-fluid printArea">
+        <main role="main" class="col-md-12 ml-sm-auto col-lg-12 px-4">
+            <div class="row">
+                <div class="col-md-12" style="text-align:center;">
+                    <span class="col-md-12" style="text-align:center;font-weight:bold;">@Model.CompanyName</span>
+                    <br />
+                    <span class="col-md-12" style="text-align:center;font-weight:bold;">Delivery Challan</span>
+                    <br />
+
+                    @*<span class="col-md-12" style="text-align:center;font-weight:bold;"></span>
+                        <br />
+                        <span class="col-md-12" style="text-align:center;font-weight:bold;">Doller Rate($) :BDT</span>*@
+                </div>
+            </div>
+
+            <div class="row" style="font-size:12px;">
+                <input type="hidden" asp-for="GatePassID" />
+                <div class="col-md-12">
+                    <table class="table table-striped  table-sm text-center" id="">
+
+                        <tbody>
+                            <tr>
+                                <td colspan="3" style="text-align:left">Issued To :</td>
+                                <td colspan="2" style="text-align:left">@Model.CustomerName</td>
+                                <td colspan="2" style="text-align:left">GP # :</td>
+                                <td colspan="5" style="text-align:left">	@Model.Serial</td>
+                            </tr>
+                            <tr style="vertical-align:middle;">
+                                <td colspan="3" style="text-align:left">Purpose :</td>
+                                <td colspan="2" style="text-align:left">@Model.Purpose</td>
+                                <td colspan="2" style="text-align:left">	Date & Time : </td>
+                                <td colspan="5" style="text-align:left">@Model.DateTimeStamp </td>
+
+                            </tr>
+                            <tr style="vertical-align:middle;">
+                                <td colspan="3" style="text-align:left">	Vehicle No :</td>
+                                <td colspan="2" style="text-align:left">	@Model.VehicleNo</td>
+                                <td colspan="2" style="text-align:left">Department :</td>
+                                <td colspan="5" style="text-align:left">	@Model.DepartmentName</td>
+
+
+                            </tr>
+                            <tr style="vertical-align:middle;">
+                                <td colspan="3" style="text-align:left">	Category Name :</td>
+                                <td colspan="2" style="text-align:left">	@Model.CategoryName</td>
+                                <td colspan="7" style="text-align:left"></td>
+
+
+                            </tr>
+
+                            <tr>
+                                <td colspan="12">
+                                    <table class="table table-striped table-bordered table-sm mdReport text-center" id="">
+                                        <thead>
+
+                                            <tr style="vertical-align:middle;">
+                                                <th>SL</th>
+                                                <th>Item Name</th>
+                                                <th>Order No</th>
+                                                <th> Process Code</th>
+                                                <th>Qty</th>
+                                                <th>Unit</th>
+                                                <th>Rate</th>
+                                                <th>Gross Weight </th>
+                                                <th>Net Weight</th>
+                                                <th>Remarks</th>
+                                            </tr>
+
+                                        </thead>
+                                        <tbody>
+
+
+                                            @foreach (var details in Model.GatePassChallanDetails)
+                                            {
+                                                <tr style="vertical-align:middle;">
+                                                    <td>@sl</td>
+                                                    <td>@details.ItemName</td>
+                                                    <td>@details.OrderNo</td>
+                                                    <td>@details.ProcessCodeID</td>
+
+                                                    <td>@details.Quantity</td>
+                                                    <td>@details.UnitName</td>
+                                                    <td>@details.CartonQty</td>
+                                                    <td>@details.GrossWeight </td>
+                                                    <td>@details.NetWeight</td>
+                                                    <td>@details.Remarks</td>
+                                                </tr>
+                                                sl++;
+                                                totalQuantity += details.Quantity;
+                                                //  totalRate += details.CartonQty;
+                                                tgrossWeight += details.GrossWeight;
+                                                tNetWeight += details.NetWeight;
+                                            }
+                                            <tr>
+                                                <td colspan="4" style="vertical-align:middle;">Total :</td>
+
+                                                <td>@totalQuantity</td>
+                                                <td></td>
+                                                <td></td>
+                                                <td>@tgrossWeight</td>
+                                                <td>@tNetWeight</td>
+                                                <td></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <br />
+                <div class="row col-md-12">
+                    <div class="col-md-3 col-sm-3 col-lg-3">
+                        <p>Rubel</p><hr /><p>Prepared By</p>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-lg-3">
+                        @{
+                            var approveby = Model.ApprovedBy > 0 ? Model.ApprovedUser : "Not Approved";
+                        }
+                        <p>@approveby</p><hr /><p>Approved By</p>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-lg-3">
+                        <p>&nbsp;</p><hr /><p>Gate Office Stamp & Sign</p>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-lg-3">
+                        <p>&nbsp;</p><hr /><p>Receive Sign & Name</p>
+                    </div>
+
+                </div>
+            </div>
+            <script>
+
+            </script>
+        </main>
+    </div>
+    <div class="row noprint no-print text-center">
+        <div class="col-md-12">
+            @if (Model.ApprovedBy == null)
+            {
+                <input type="button" id="btnApprove" class="btn btn-sm btn-primary" value="Approve">
+            }
+            <input type="button" class="btn btn-sm btn-danger" value="Print" onClick="window.print()">
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+</body>
+</html>
+<script src="~/AdminLTE-3.1.0/plugins/jquery/jquery.min.js"></script>
+<script src="~/js/customScripts/GenericHTTPRequest.js"></script>
+<link href="~/lib/jquery-alert/css/alert.css" rel="stylesheet" />
+<link href="~/lib/jquery-alert/themes/default/theme.css" rel="stylesheet" />
+<!-- alert js -->
+<script src="~/lib/jquery-alert/js/alert.js"></script>
+<script type="text/javascript">
+    $(function () {
+        $("#btnApprove").click(function () {
+            debugger
+            let gatePassID = $("#GatePassID").val();
+            if (gatePassID != null || gatePassID != "") {
+                    HttpRequest.Ajax("POST", "/MaterialsManagement/GatePass/ApprovedGatePass", { gatePassId: gatePassID, '@token.HeaderName': '@token.RequestToken' }, ApproveSuccess)
+
+            }
+
+        })
+    })
+    function ApproveSuccess(data) {
+        debugger
+        if (data.result == 1) {
+            $.alert.open({
+                type: 'Success',
+                content: data.message,
+                callback: function () {
+
+                }
+            });
+        }
+        else {
+            $.alert.open("error", data.message);
+        }
+    }
+</script>
+

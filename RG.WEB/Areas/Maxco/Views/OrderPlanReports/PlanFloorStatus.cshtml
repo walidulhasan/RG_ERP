@@ -1,0 +1,191 @@
+﻿@model List<RG.Application.Contracts.Maxco.Buisness.OrderPlanReports.Queries.RequestResponseModel.FabricFloorStatusRM>
+
+@{ 
+    Layout = null;
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Floor Status Reports</title>
+    <link href="~/AdminLTE-3.1.0/plugins/jquery-ui/jquery-ui.min.css" rel="stylesheet" />
+    <link href="~/lib/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <script src="~/AdminLTE-3.1.0/plugins/jquery/jquery.min.js"></script>
+    <script src="~/AdminLTE-3.1.0/plugins/jquery-ui/jquery-ui.min.js"></script>
+    <script src="~/AdminLTE-3.1.0/plugins/bootstrap/js/bootstrap.bundle.js"></script>
+
+
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.12/css/jquery.dataTables.min.css" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/1.2.2/css/buttons.dataTables.min.css" />
+    <script type="text/javascript" src="https://code.jquery.com/jquery-1.12.3.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.2.2/js/dataTables.buttons.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/2.5.0/jszip.min.js"></script>
+    <script type="text/javascript" src="https://cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/pdfmake.min.js"></script>
+    <script type="text/javascript" src="https://cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/vfs_fonts.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.2.2/js/buttons.html5.min.js"></script>
+
+    <style>
+        .header {
+            position: sticky;
+            top: 0;
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <div class="container-fluid">
+        <div class="row" style="height:50px;">
+            <div class="col-12 text-center">
+                <h5 class="mb-0">Robintex Group Bangladesh</h5>
+                <h6>Floor Status Reports</h6>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <table class="table table-sm table-bordered table-striped text-sm text-center display nowrap" id="tblWeeklySummary" style="font-size:12px;">
+                    <thead class="bg-dark text-white header">
+                        <tr>
+                            <th>SL#</th>
+                            <th>Grey Received DT</th>
+                            <th>Buyer Name</th>
+                            <th>Order No</th>
+                            <th>Lot</th>
+
+                            <th>Color</th>
+                            <th>F/ Type</th>
+                            <th>Dia</th>
+                            <th>GSM</th>
+                            <th>Qty(Kg)</th>
+                            <th>Position</th>
+                            <th>Dyeing DT</th>
+                            <th>Print DT</th>
+                            <th>Finished DT</th>
+                            <th>Remarks</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @{
+                            int sl = 0;
+                            long prevousOrderID = 0;
+                            var loopList = Model.OrderBy(b => b.OrderID).ThenBy(o => o.ProcessDate).ToList();
+                            var lastRow = loopList.Last();
+                            foreach (var item in loopList)
+                            {
+                                if (prevousOrderID > 0 && item.OrderID != prevousOrderID)
+                                {
+                                    <tr class="font-weight-bold">
+                                        <td colspan="9" class="text-right">Total </td>
+                                        <td>@String.Format("{0:n2}", Model.Where(w => w.OrderID == prevousOrderID).Sum(s => s.BatchQty))</td>
+                                        <td> </td>
+                                        <td></td>
+                                        <td></td>
+                                        <td> </td>
+                                        <td> </td>
+                                        @*<td>@string.Format("{0:n2}", row.FinishFabricBalance)</td>*@
+                                    </tr>
+                                }
+
+                                <tr>
+                                    <td>@(++sl)</td>
+                                    <td>@item.ProcessDateMsg</td>
+                                    <td>@item.BuyerName</td>
+                                    <td>@item.OrderNo</td>
+                                    <td class="font-weight-bold">@item.LotNo</td>
+                                    <td>@item.PantoneNo</td>
+                                    <td>@item.FabricQuality</td>
+                                    <td>@item.FinishedWidth</td>
+                                    <td>@item.GSM</td>
+                                    <td>@item.BatchQty</td>
+                                    <td> </td>
+                                    <td></td>
+                                    <td></td>
+                                    <td> </td>
+                                    <td> </td>
+                                    @*<td>@string.Format("{0:n2}", row.FinishFabricBalance)</td>*@
+                                </tr>
+
+                                if (prevousOrderID > 0 && (item == lastRow))
+                                {
+                                    <tr class="font-weight-bold">
+                                        <td colspan="9" class="text-right">Total </td>
+                                        <td>@String.Format("{0:n2}", Model.Where(w => w.OrderID == lastRow.OrderID).Sum(s => s.BatchQty))</td>
+                                        <td> </td>
+                                        <td></td>
+                                        <td></td>
+                                        <td> </td>
+                                        <td> </td>
+                                        @*<td>@string.Format("{0:n2}", row.FinishFabricBalance)</td>*@
+                                    </tr>
+                                }
+                                prevousOrderID = item.OrderID;
+
+                            }
+                            <tr>
+
+                                <td colspan="9" class="text-right"><b>Grand Total</b></td>
+                                <td><b>@Model.Sum(s => s.BatchQty)</b></td>
+                                <td> </td>
+                                <td></td>
+                                <td></td>
+                                <td> </td>
+                                <td> </td>
+                                @*<td>@string.Format("{0:n2}", row.FinishFabricBalance)</td>*@
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+                <div class="text-center">
+                    <input type="button" class="btn btn-sm btn-success" value="Excel" id="btnPdf" onclick="exportToExcel()" />
+                </div>
+                <br />
+            </div>
+
+        </div>
+    </div>
+
+    <script type="text/javascript">
+
+        function bodyOnload() {
+            setTimeout(function () {
+                $("body").removeClass("loading");
+            }, 1000)
+
+        }
+        function exportToExcel() {
+            var htmls = "";
+            var uri = 'data:application/vnd.ms-excel;base64,';
+            var template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>';
+            var base64 = function (s) {
+                return window.btoa(unescape(encodeURIComponent(s)))
+            };
+
+            var format = function (s, c) {
+                return s.replace(/{(\w+)}/g, function (m, p) {
+                    return c[p];
+                })
+            };
+
+            htmls = document.getElementById("tblWeeklySummary").innerHTML;
+
+            var ctx = {
+                worksheet: 'Worksheet',
+                table: htmls
+            }
+            var link = document.createElement("a");
+            link.download = "FloorStatus.xls";
+            link.href = uri + base64(format(template, ctx));
+            link.click();
+        }
+        $(function () {
+            $(document).ready(function () {
+
+                $("body").addClass("loading");
+
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,255 @@
+﻿@model RG.Application.ViewModel.AlgoHR.Setup.UserDepartmentAccess.UserDepartmentAccessVM
+@{
+    ViewData[PageInfo.PageTitle] = "User Department & Section";
+    ViewData[PageInfo.PageHeader] = "User Department & Section";
+
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row">
+    <div class="col-md-12 col-sm-12 col-lg-12">
+        <div class="card mb-0">
+            <div class="card-body  p-2">
+                <div class="row">
+                    <div class="col-sm-4">
+                        <div class="form-group mb-0">
+                            <label class="col-form-label" asp-for="CA_UserID"></label>
+                            <select asp-for="CA_UserID" asp-items="Model.DDLUser" class="form-control form-control-sm"></select>
+                            <span asp-validation-for="CA_UserID" class="text-danger"></span>
+                        </div>
+
+                    </div>
+                    <div class="col-sm-4">
+
+                    </div>
+                    <div class="col-sm-4" style="float:right;">
+                        <label class="col-form-label"> Total Selected : </label>
+                        <label id="assignedDepartment">0</label>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <div id="grid">
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <label>&nbsp;</label>
+        <div class="form-group text-center">
+            <button type="button" class="btn btn-sm btn-warning" style="display:none;" id="btnSave">Save</button>
+        </div>
+    </div>
+</div>
+@section scripts{
+
+    <script type="text/javascript">
+        let dataGrid;
+        function saveSuccess(data) {
+            $("#btnSave").attr("disabled", false);
+            if (data.result == 1) {
+                let dataGrid = $("#grid").dxDataGrid("instance");
+                dataGrid.refresh()
+                $.alert.open({
+                    type: 'Success',
+                    content: data.message,
+                    callback: function () {
+                        //$("#hdnNotificationID").val('');
+                        //$('#notificationDetailModal').modal('hide');
+                        //NotificationList();
+                    }
+                });
+            }
+            else {
+                $.alert.open("error", data.message);
+
+            }
+        }
+
+        function getUserEmployee() {
+            HttpRequest.DropDownSelect2Group("Get", "/AlgoHR/UserDepartmentAccess/GetDDLUserEmployee", {}, 'CA_UserID', false);
+        }
+      
+        function GetUserSection(userID) {
+        
+            $("#grid").dxDataGrid({
+                height: 700,
+                remoteOperations: { paging: true, filtering: true, sorting: true, grouping: false, summary: false, groupPaging: false },
+                dataSource: DevExpress.data.AspNet.createStore({
+                    key: "SectionID",
+                    loadUrl: "/AlgoHR/UserDepartmentAccess/GetUserDepartmentAccessList",
+                    loadParams: {
+                        userID: userID
+                    }
+                }),
+                selection: {
+                    mode: "multiple",
+                    deferred: true
+                },
+                pager: { visible: true, showInfo: true, allowedPageSizes: [500], showPageSizeSelector: true, },
+                paging: { pageSize: 1000 },
+                filterRow: {
+                    visible: true
+                },
+                onInitialized: function (e) {
+                    assignedGrid = e.component;
+                    calculateStatistics();
+                },
+                selectionFilter: ["ID", ">", "0"],
+                showBorders: true,
+                columns: [
+                    {
+                        width: "auto",
+                        caption: "SL #",
+                        alignment: 'center',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        },
+                        cellTemplate: function (container, e) {
+                            var index = e.rowIndex + 1;
+                            container.text(index);
+                        }
+
+                    },
+                    {
+                        dataField: "SectionID",
+                        visible: false,
+
+                    },
+                    {
+                        dataField: "CompanyName",
+                        alignment: 'center',
+                        caption: 'Company',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+                    },
+                    {
+                        dataField: "DivisionName",
+                        alignment: 'center',
+                        caption: 'Division',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+                    },
+                    {
+                        dataField: "DepartmentName",
+                        alignment: 'center',
+                        caption: 'Department',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+                    },
+                    {
+                        dataField: "SectionName",
+                        alignment: 'center',
+                        caption: 'Section',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+                    },
+                    {
+                        dataField: "isSelected",
+                        alignment: 'center',
+                        caption: 'Selected',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+                    }
+                ]
+            }).dxDataGrid("instance");
+
+
+        }
+
+        function calculateStatistics() {
+            var _AssigneddataGrid = $("#grid").dxDataGrid("instance");
+            let assignedRows = 0;
+            _AssigneddataGrid.getSelectedRowsData().then(function (selectedRowsData) { 
+                selectedRowsData.map(function (sec) {
+                    assignedRows = assignedRows + 1;
+                });
+               
+            });
+            $("#assignedDepartment").text(assignedRows);
+        }
+
+        $(function () {
+            let assignedGrid;
+            $("#CA_UserID").select2({ theme: 'bootstrap4' });
+            getUserEmployee();
+
+            $("#CA_UserID").change(function () {
+                $("#btnSave").show();
+                let userID = $("#CA_UserID").val();
+                if (userID != "" && userID > 0) {
+                    //  GetAllDivisionDepartmentSection(userID);
+                    GetUserSection(userID);
+                }
+                var _AssigneddataGrid = $("#grid").dxDataGrid("instance");
+             // ===== or when deferred selection is used =====
+                
+                _AssigneddataGrid.getSelectedRowsData().then(function (selectedRowsData) {
+                    let assignedRows = 0;
+                    selectedRowsData.map(function (sec) {
+                        assignedRows = assignedRows + 1;
+                    });
+                    $("#assignedDepartment").text(assignedRows);
+
+                }); 
+
+                /*
+                let assignedRows = 0;
+                var selectedRowsData = _AssigneddataGrid.getSelectedRowsData();
+                $.map(selectedRowsData, function (d, i) {
+                    assignedRows = assignedRows + 1;
+                })
+                $("#assignedDepartment").text(assignedRows);
+     */
+
+            });
+
+            $("#btnSave").click(function () {
+                $("#btnSave").attr("disabled", true);
+                debugger;
+                /*
+                let userID = $("#CA_UserID").val();
+                var dataGrid = $("#grid").dxDataGrid("instance");
+                var selectedRowsData = dataGrid.getSelectedRowsData();
+                let selectedData = new Array();
+                $.each(selectedRowsData, function (i, v) {
+                    if (userID != "") {
+                        let data = { CA_UserID: userID, Embro_CompanyID: v.CompanyID, DivisionID: v.DivisionID, DepartmentID: v.DepartmentID, SectionID: v.SectionID };
+                        selectedData.push(data);
+                    }
+                });
+                if (selectedData.length > 0) {
+                    HttpRequest.Ajax("POST", '/AlgoHR/UserDepartmentAccess/Create', { "selectedData": selectedData }, saveSuccess, true);
+                }
+                */
+
+                
+                let selectedData = new Array();
+                let userID = $("#CA_UserID").val();
+                var _dataGrid = $("#grid").dxDataGrid("instance");
+                _dataGrid.getSelectedRowsData().then(function (selectedRowsData) {
+              
+                    selectedRowsData.map(function (sec) {
+                        let data = { CA_UserID: userID, Embro_CompanyID: sec.CompanyID, DivisionID: sec.DivisionID, DepartmentID: sec.DepartmentID, SectionID: sec.SectionID };
+                        selectedData.push(data);
+                    });
+
+                    if (userID && selectedData.length > 0) {
+                        HttpRequest.Ajax("POST", '/AlgoHR/UserDepartmentAccess/Create', { "selectedData": selectedData }, saveSuccess, true);
+                    }
+                });
+
+            });
+        });
+    </script>
+}

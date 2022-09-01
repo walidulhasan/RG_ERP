@@ -1,0 +1,272 @@
+﻿@model RG.Application.ViewModel.AlgoHR.Business.Training.TrainingScheduleVM
+
+@{
+    ViewData[PageInfo.PageTitle] = "Asset All Information";
+    ViewData[PageInfo.PageHeader] = "All Asset Information List";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="row">
+    <div class="col-sm-12 col-md-12">
+        <div class="card card-dark">
+            <div class="card-header m-0 p-1">
+                <h5 class="card-title">Training Schedule List</h5>
+            </div>
+            <div class="card-body p-2">
+                <div class="row">
+                    <div class="col-6 col-md-2 col-2 col-sm-2 col-lg-2">
+                        <div class="form-group">
+                            <label asp-for="TrainingCategoryID" class="col-form-label-sm  m-0"></label>
+                            <select asp-for="TrainingCategoryID" asp-items="Model.DDLTrainingCategory" class="form-control form-control-sm"></select>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-2 col-2 col-sm-2 col-lg-2">
+                        <div class="form-group">
+                            <label class="col-form-label-sm  m-0" asp-for="Year"></label>
+                            <select asp-for="Year" asp-items="Model.DDLYear" class="form-control form-control-sm"></select>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-2 col-2 col-sm-2 col-lg-2">
+                        <div class="form-group mb-2">
+                            <label asp-for="Month" class=""></label>
+                            <select asp-for="Month" asp-items="Model.DDLMonth" class="form-control form-control-sm"></select>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-2 col-2 col-sm-2 col-lg-2">
+                        <label>&nbsp;</label>
+                        <div class="form-group">
+
+                            <button type="button" class="btn btn-sm btn-success" id="btnSearch">Search</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="row">
+                <div class="col-12 col-md-12 col-12 col-sm-12 col-lg-12">
+                    <div id="gridForEventDetails">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Modal for Assign Asset-->
+<div id="modalForTraineeFeedbackShow" class="modal fade" role="dialog">
+    <div class="modal-dialog modal-lg">
+        <!-- Modal content-->
+        <div class="modal-content">
+
+            <div class="modal-header p-2 bg-dark">
+                <h6 class="modal-title modTitle">Trainee Feedback</h6>
+                <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body px-2 py-0">
+
+                <div class="row">
+                    <table id="tblTraineeFeedback" class="table table-sm table-striped table-bordered text-center text-xs  mt-1">
+
+                        <thead class="bg-dark">
+                            <tr>
+                                <th>SL#</th>
+                                <th>Comment</th>
+                                @*<th>Action</th>*@
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyTraineeFeedback">
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+            @*<div class="modal-footer p-1  justify-content-center btnRemoveForDepriciation">
+                    <input type="button" class="btn btn-warning btn-sm" id="btnAssetAssign" value="Asset Assign to Employee" />
+                </div>*@
+
+        </div>
+
+    </div>
+</div>
+
+
+
+@section scripts{
+    <script src="~/lib/devExtreme/excelExport/polyfill.min.js"></script>
+    <script src="~/lib/devExtreme/excelExport/exceljs.min.js"></script>
+    <script src="~/lib/devExtreme/excelExport/FileSaver.min.js"></script>
+    <script type="text/javascript">
+        $(() => {
+            GetAllCalenderEventDetailsList();
+            $("#btnSearch").click(function () {
+                GetAllCalenderEventDetailsList();
+            });
+        })
+
+        const GetAllCalenderEventDetailsList = () => {
+            let trainingCategoryID = $("#TrainingCategoryID").val();
+            let month = $("#Month").val();
+            let year = $("#Year").val();
+            var dataGrid = $("#gridForEventDetails").dxDataGrid({
+                height: 450,
+                remoteOperations: { paging: true, filtering: true, sorting: true, grouping: true, summary: true, groupPaging: true },
+                dataSource: DevExpress.data.AspNet.createStore({
+                    key: "ID",
+                    loadUrl: "/AlgoHR/Training/GetAllCalenderEventDetails",
+                    loadParams: {
+                        TrainingCategoryID: trainingCategoryID,
+                        Year: year,
+                        Month: month
+                    }
+                }),
+                hoverStateEnabled: true,
+
+                showBorders: true,
+                columnAutoWidth: true,
+                filterRow: { visible: true },
+                //pager: { visible: true, showInfo: true, allowedPageSizes: [10, 20, 50, 100, 500], showPageSizeSelector: true, },
+                //paging: { pageSize: 10 },
+                selection: { mode: 'single' },
+                wordWrapEnabled: true,
+                export: {
+                    enabled: true,
+                    allowExportSelectedData: true,
+                },
+                onExporting(e) {
+                    const workbook = new ExcelJS.Workbook();
+                    const worksheet = workbook.addWorksheet('CalenderEventDetails');
+
+                    DevExpress.excelExporter.exportDataGrid({
+                        component: e.component,
+                        worksheet,
+                        autoFilterEnabled: true,
+                    }).then(() => {
+                        workbook.xlsx.writeBuffer().then((buffer) => {
+                            saveAs(new Blob([buffer], { type: 'application/octet-stream' }), 'CalenderEventDetails.xlsx');
+                        });
+                    });
+                    e.cancel = true;
+                },
+                columns: [
+                    {
+                        width: "auto",
+                        caption: "SL #",
+                        alignment: 'center',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        },
+                        cellTemplate: function (container, e) {
+                            var index = dataGrid.pageIndex() * dataGrid.pageSize() + e.rowIndex + 1;
+                            container.text(index);
+                        }
+                    },
+                    {
+                        dataField: "ID",
+                        visible: false,
+                    },
+                    {
+
+                        dataField: "EventTitle",
+                        alignment: 'center',
+                        caption: 'Title',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+                    },
+                    {
+
+                        dataField: "EventVenue",
+                        alignment: 'center',
+                        caption: 'Event Venue',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+                    },
+                    {
+
+                        dataField: "TrainingCategory",
+                        alignment: 'center',
+                        caption: 'Category',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+                    },
+                    {
+
+                        dataField: "EventDateTime",
+                        alignment: 'center',
+                        caption: 'Date Time',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+                    },
+                    {
+
+                        dataField: "EventTrainer",
+                        alignment: 'center',
+                        caption: 'Trainer',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+                    },
+                    {
+
+                        dataField: "EventDuration",
+                        alignment: 'center',
+                        caption: 'Duration',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+                    },
+                    {
+
+                        dataField: "TrainingType",
+                        alignment: 'center',
+                        caption: 'Type',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+                    },
+                    {
+                        caption: 'Feedback',
+                        alignment: 'center',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        },
+                        cellTemplate: function (container, options) {
+                            var returnText = '<button title="View Trainee Feedback" class="btn btn-xs btn-warning"><i class="fa fa-eye fa-sm"></i></button>';
+                            $(returnText).on('dxclick', function () {
+                                TraineeFeedbackShow(options.data.ID);
+                            }).appendTo(container);
+
+                            //var returnText = '<span>&nbsp</span><button title="Delete" class="btn btn-xs btn-danger"><i class="fa fa-trash"></i></button>';
+                            //returnText = returnText + '</div>';
+                            //$(returnText).on('dxclick', function () {
+                            //    DeleteRow(options.data.AssetID);
+                            //}).appendTo(container);
+                        }
+                    }
+                ]
+            }).dxDataGrid("instance");
+        }
+        const TraineeFeedbackShow = (id) => {
+             GetTraineeFeedbackShow(id)
+            $('#modalForTraineeFeedbackShow').modal('toggle');
+        }
+
+        const GetTraineeFeedbackShow = (id) => {
+            var data = HttpRequest.AjaxData('POST', '/AlgoHR/Training/GetListTraineeFeedbackByEventDetailsid', { id: id });
+            let rowTraineeFeedback = '';
+            $.each(data, function (d, e) {
+                rowTraineeFeedback += `<tr>
+
+                                <td>${++d}</td>
+                                <td  class="hdnEventDetailsID d-none">${e.EventDetailsID}</td>
+                                <td>${e.Comments}</td>
+
+                                `
+                //< td ><a onClick="btnEditDepriciation(this)" title="Edit Depriciation" class="btn btn-primary btn-xs"> <i class="fas fa-edit fa-sm"></i></a><span> </span><a onClick="btnDeleteDepriciation(${AssetId},${e.ID})" title="Delete Depriciation" class="btn btn-danger btn-xs"><i class="fas fa-trash fa-sm"></i></a></td >
+                //        </tr >
+            });
+            $("#tbodyTraineeFeedback").html(rowTraineeFeedback);
+        }
+    </script>
+}

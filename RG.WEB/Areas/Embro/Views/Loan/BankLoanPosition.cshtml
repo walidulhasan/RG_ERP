@@ -1,0 +1,373 @@
+﻿@using RG.Application.Constants.Embro;
+@model RG.Application.Contracts.Embro.Business.LoanMasters.Queries.RequestResponseModel.BankLoanPositionRM;
+
+@inject RG.Application.Common.CommonInterfaces.ICurrentUserService _currentuserService;
+@{
+    ViewData[PageInfo.PageTitle] = "Bank Liability Position";
+    ViewData[PageInfo.PageHeader] = "Bank Liability Position";
+    Layout = null;
+
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Bank Liability Position</title>
+    <link href="~/AdminLTE-3.1.0/plugins/jquery-ui/jquery-ui.min.css" rel="stylesheet" />
+    <link href="~/lib/bootstrap-5.0.2/css/bootstrap.min.css" rel="stylesheet" />
+    <script src="~/AdminLTE-3.1.0/plugins/jquery/jquery.min.js"></script>
+    <script src="~/AdminLTE-3.1.0/plugins/jquery-ui/jquery-ui.min.js"></script>
+    <script src="~/lib/bootstrap-5.0.2/js/bootstrap.bundle.min.js"></script>
+
+
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.12/css/jquery.dataTables.min.css" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/1.2.2/css/buttons.dataTables.min.css" />
+    <script type="text/javascript" src="https://code.jquery.com/jquery-1.12.3.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.2.2/js/dataTables.buttons.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/2.5.0/jszip.min.js"></script>
+    <script type="text/javascript" src="https://cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/pdfmake.min.js"></script>
+    <script type="text/javascript" src="https://cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/vfs_fonts.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.2.2/js/buttons.html5.min.js"></script>
+
+    <style>
+        .header {
+            position: sticky;
+            top: 0;
+        }
+    </style>
+
+</head>
+
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12 text-center">
+                <h5 class="mb-0">Robintex Group Bangladesh</h5>
+                <h6 class="mb-0">Bank Liability Position</h6>
+                <h6>For The Period (@Model.DateFrom To @Model.DateTo)</h6>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12 text-center font-wt-bold">
+                <h6><span class="badge bg-danger">&nbsp;&nbsp;</span> Exceeded Maturity Date  &nbsp;<span class="badge bg-warning">&nbsp;&nbsp;</span> Exceeded Loan Limit</h6>
+                @*<h6><span class="badge bg-warning">&nbsp;&nbsp;</span> Exceeded Loan Limit</h6>*@
+            </div>
+        </div>
+        <div id="tblBankLoanStatus">
+            @if (Model.BankLoanPositionData.Where(x => x.IsForeignLoan == false).ToList().Count > 0)
+            {
+                int sl = 1;
+                string previousCompany = "";
+                <div class="row">
+                    <div class="col-12 text-center">
+
+                        <h6>Domestic Loan in BDT.</h6>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <table class="table table-sm table-bordered">
+                            <thead class="table-dark header" style="vertical-align:middle">
+                                <tr class="text-center" style="font-size:12px;">
+                                    <th style="width:3%">SL#</th>
+                                    <th style="width:7%">Category</th>
+                                    <th style="width:20%">Loan No</th>
+                                    <th style="width:6%">Limit</th>
+                                    <th style="width:7%">Opening <br />@Model.DateFrom</th>
+                                    <th style="width:7%">Current <br />Disbursement</th>
+                                    <th style="width:7%">Interest</th>
+                                    <th style="width:5%">Bank Charge</th>
+                                    <th style="width:7%">Repayment</th>
+                                    <th style="width:8%">Closing <br />@Model.DateTo</th>
+                                    <th style="width:3%" title="Installment Size">Inst. <br /> Size</th>
+                                    <th style="width:3%">Due<br />Inst.</th>
+                                    <th style="width:7%" title="Disbursement Date">Disb.<br />Date</th>
+                                    <th style="width:7%">Maturity<br /> Date </th>
+                                </tr>
+
+                            </thead>
+                            <tbody>
+                                @foreach (var loan in Model.BankLoanPositionData.Where(x => x.IsForeignLoan == false).OrderBy(b => b.CompanyID).ToList())
+                                {
+                                    var bgCssClass = "";
+                                    var toolTip = "";
+                                    if ((loan.EndDate.Value.Date < DateTime.Now.Date) && loan.ClosingBalance > 0)
+                                    {
+                                        bgCssClass = "text-white bg-danger";
+                                        toolTip = "Exceeded Maturity Date";
+                                    }
+                                    else if (loan.LoanLimitAmount < loan.ClosingBalance)
+                                    {
+                                        bgCssClass = "bg-warning";
+                                        toolTip = "Exceeded Loan Limit";
+                                    }
+                                    else
+                                    {
+                                        bgCssClass = "";
+                                        toolTip = "";
+                                    }
+                                    if (sl > 1 && previousCompany != loan.CompanyName)
+                                    {
+                                        var preData = Model.BankLoanPositionData.Where(b => b.CompanyName == previousCompany && b.IsForeignLoan == false).ToList();
+                                        <tr class="fw-bold" style="font-size:10px;vertical-align:middle">
+                                            <td class="text-end" colspan="3"><h6>@previousCompany Total</h6></td>
+                                            <td class="text-end">@String.Format("{0:n0}", preData.Sum(s => s.LoanLimitAmount))</td>
+                                            <td class="text-end">@String.Format("{0:n0}", preData.Sum(s => s.OpeningLoanAmount))</td>
+                                            <td class="text-end">@String.Format("{0:n2}", preData.Sum(s => s.CurrentDisbursementAmount))</td>
+                                            <td class="text-end">@String.Format("{0:n2}", preData.Sum(s => s.CurrentInterestAmount))</td>
+                                            <td class="text-end">@String.Format("{0:n2}", preData.Sum(s => s.BankCharge))</td>
+                                            <td class="text-end">@String.Format("{0:n2}", preData.Sum(s => s.CurrentRepaymentAmount))</td>
+                                            <td class="text-end">@string.Format("{0:n2}", preData.Sum(s => s.ClosingBalance))</td>
+                                            <td class="text-end">@String.Format("{0:n0}", preData.Sum(s => s.InstallmentAmount))</td>
+                                            <td class="text-center fw-bold" colspan="3"></td>
+                                        </tr>
+                                    }
+
+                                    if (loan.CompanyName != previousCompany)
+                                    {
+                                        <tr class="table-primary fw-bold">
+                                            <td class="text-start" colspan="14">@loan.CompanyName</td>
+
+                                        </tr>
+                                        previousCompany = loan.CompanyName;
+                                    }
+
+                                    <tr class="@bgCssClass" title="@toolTip" style="font-size:10px;">
+                                        <td class="text-center fw-bold">@sl</td>
+                                        <td class="fw-bold">@loan.LoanTypeName</td>
+                                        <td class="fw-bold">@loan.AccountName</td>
+                                        <td class="text-end">@String.Format("{0:n0}", loan.LoanLimitAmount)</td>
+                                        <td class="text-end">@String.Format("{0:n0}", loan.OpeningLoanAmount)</td>
+                                        <td class="text-end">@String.Format("{0:n2}", loan.CurrentDisbursementAmount)</td>
+                                        <td class="text-end">@String.Format("{0:n2}", loan.CurrentInterestAmount)</td>
+                                        <td class="text-end">@String.Format("{0:n2}", loan.BankCharge)</td>
+                                        <td class="text-end">@String.Format("{0:n2}", loan.CurrentRepaymentAmount)</td>
+                                        <td class="text-end">@string.Format("{0:n2}", loan.ClosingBalance)</td>
+                                        <td class="text-end">@String.Format("{0:n0}", loan.InstallmentAmount)</td>
+                                        <td class="text-end">@String.Format("{0:n0}", loan.DueInstallmentAmount)</td>
+                                        <td class="text-center" title="Disbursement Date">@loan.StartDateSTR</td>
+                                        <td class='text-center' style="font-size:9px;" title="Maturity Date">@loan.EndDateSTR</td>
+                                    </tr>
+
+
+                                    sl = sl + 1;
+                                }
+
+                                @{
+                                    var lasGroupData = Model.BankLoanPositionData.Where(b => b.CompanyName == previousCompany && b.IsForeignLoan == false).ToList();
+                                    <tr class="fw-bold table-primary" style="font-size:10px;vertical-align:middle">
+                                        <td class="text-end" colspan="3">@previousCompany Total</td>
+                                        <td class="text-end">@String.Format("{0:n0}", lasGroupData.Sum(s => s.LoanLimitAmount))</td>
+                                        <td class="text-end">@String.Format("{0:n0}", lasGroupData.Sum(s => s.OpeningLoanAmount))</td>
+                                        <td class="text-end">@String.Format("{0:n2}", lasGroupData.Sum(s => s.CurrentDisbursementAmount))</td>
+                                        <td class="text-end">@String.Format("{0:n2}", lasGroupData.Sum(s => s.CurrentInterestAmount))</td>
+                                        <td class="text-end">@String.Format("{0:n2}", lasGroupData.Sum(s => s.BankCharge))</td>
+                                        <td class="text-end">@String.Format("{0:n2}", lasGroupData.Sum(s => s.CurrentRepaymentAmount))</td>
+                                        <td class="text-end">@string.Format("{0:n2}", lasGroupData.Sum(s => s.ClosingBalance))</td>
+                                        <td class="text-end">@String.Format("{0:n0}", lasGroupData.Sum(s => s.InstallmentAmount))</td>
+                                        <td class="text-center fw-bold" colspan="3"></td>
+                                    </tr>
+
+                                }
+
+                                <tr class="fw-bold table-success" style="font-size:10px;vertical-align:middle">
+                                    <td class="text-end" colspan="3">Total</td>
+                                    <td class="text-end">@String.Format("{0:n0}", Model.BankLoanPositionData.Sum(s => s.LoanLimitAmount))</td>
+                                    <td class="text-end">@String.Format("{0:n0}", Model.BankLoanPositionData.Sum(s => s.OpeningLoanAmount))</td>
+                                    <td class="text-end">@String.Format("{0:n2}", Model.BankLoanPositionData.Sum(s => s.CurrentDisbursementAmount))</td>
+                                    <td class="text-end">@String.Format("{0:n2}", Model.BankLoanPositionData.Sum(s => s.CurrentInterestAmount))</td>
+                                    <td class="text-end">@String.Format("{0:n2}", Model.BankLoanPositionData.Sum(s => s.BankCharge))</td>
+                                    <td class="text-end">@String.Format("{0:n2}", Model.BankLoanPositionData.Sum(s => s.CurrentRepaymentAmount))</td>
+                                    <td class="text-end">@string.Format("{0:n2}", Model.BankLoanPositionData.Sum(s => s.ClosingBalance))</td>
+                                    <td class="text-end">@String.Format("{0:n0}", Model.BankLoanPositionData.Sum(s => s.InstallmentAmount))</td>
+                                    <td class="text-center fw-bold" colspan="3"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                @*<div class="text-center">
+                        <input type="button" class="btn btn-sm btn-success" value="Excel" id="btnPdf" onclick="exportToExcel()" />
+                    </div>*@
+
+            }
+            @if (Model.BankLoanPositionData.Where(x => x.IsForeignLoan == true).ToList().Count > 0)
+            {
+                int sl = 1;
+                string previousCompany = "";
+                <div class="row">
+                    <div class="col-12 text-center">
+
+                        <h6>Foreign Loan in USD.</h6>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <table class="table table-sm table-bordered">
+                            <thead class="table-dark header" style="vertical-align:middle">
+                                <tr class="text-center" style="font-size:12px;">
+                                    <th style="width:3%">SL#</th>
+                                    <th style="width:7%">Category</th>
+                                    <th style="width:20%">Loan No</th>
+                                    <th style="width:6%">Limit</th>
+                                    <th style="width:7%">Opening <br />@Model.DateFrom</th>
+                                    <th style="width:7%">Current <br />Disbursement</th>
+                                    <th style="width:7%">Interest</th>
+                                    <th style="width:5%">Bank Charge</th>
+                                    <th style="width:7%">Repayment</th>
+                                    <th style="width:8%">Closing <br />@Model.DateTo</th>
+                                    <th style="width:3%" title="Installment Size">Inst. <br /> Size</th>
+                                    <th style="width:3%">Due<br />Inst.</th>
+                                    <th style="width:7%" title="Disbursement Date">Disb.<br />Date</th>
+                                    <th style="width:7%">Maturity<br /> Date </th>
+                                </tr>
+
+                            </thead>
+                            <tbody>
+                                @foreach (var loan in Model.BankLoanPositionData.Where(x => x.IsForeignLoan == true).OrderBy(b => b.CompanyID).ToList())
+                                {
+                                    var bgCssClass = "";
+                                    var toolTip = "";
+                                    if ((loan.EndDate.Value.Date < DateTime.Now.Date) && loan.ClosingBalance > 0)
+                                    {
+                                        bgCssClass = "text-white bg-danger";
+                                        toolTip = "Exceeded Maturity Date";
+                                    }
+                                    else if (loan.LoanLimitAmount < loan.ClosingBalance)
+                                    {
+                                        bgCssClass = "bg-warning";
+                                        toolTip = "Exceeded Loan Limit";
+                                    }
+                                    else
+                                    {
+                                        bgCssClass = "";
+                                        toolTip = "";
+                                    }
+
+                                    if (sl > 1 && previousCompany != loan.CompanyName)
+                                    {
+                                        var preData = Model.BankLoanPositionData.Where(b => b.CompanyName == previousCompany && b.IsForeignLoan == true).ToList();
+                                        <tr class="fw-bold" style="font-size:10px;vertical-align:middle">
+                                            <td class="text-end" colspan="3"><h6>@previousCompany Total</h6></td>
+                                            <td class="text-end">@String.Format("{0:n0}", preData.Sum(s => s.LoanLimitAmount))</td>
+                                            <td class="text-end">@String.Format("{0:n0}", preData.Sum(s => s.OpeningLoanAmountUSD))</td>
+                                            <td class="text-end">@String.Format("{0:n2}", preData.Sum(s => s.CurrentDisbursementAmountUSD))</td>
+                                            <td class="text-end">@String.Format("{0:n2}", preData.Sum(s => s.CurrentInterestAmountUSD))</td>
+                                            <td class="text-end">@String.Format("{0:n2}", preData.Sum(s => s.BankChargeUSD))</td>
+                                            <td class="text-end">@String.Format("{0:n2}", preData.Sum(s => s.CurrentRepaymentAmountUSD))</td>
+                                            <td class="text-end">@String.Format("{0:n2}", preData.Sum(s => s.ClosingBalanceUSD))</td>
+                                            <td class="text-end">@String.Format("{0:n0}", preData.Sum(s => s.InstallmentAmount))</td>
+                                            <td class="text-center fw-bold" colspan="3"></td>
+                                        </tr>
+                                    }
+
+                                    if (loan.CompanyName != previousCompany)
+                                    {
+                                        <tr class="table-primary fw-bold">
+                                            <td class="text-start" colspan="14">@loan.CompanyName</td>
+
+                                        </tr>
+                                        previousCompany = loan.CompanyName;
+                                    }
+                                    <tr class="@bgCssClass" title="@toolTip" style="font-size:10px;">
+                                        <td class="text-center fw-bold">@sl</td>
+                                        <td class="fw-bold">@loan.LoanTypeName</td>
+                                        <td class="fw-bold">@loan.AccountName</td>
+                                        <td class="text-end">@String.Format("{0:n2}", loan.LoanLimitAmount)</td>
+                                        <td class="text-end">@String.Format("{0:n2}", loan.OpeningLoanAmountUSD)</td>
+                                        <td class="text-end">@String.Format("{0:n2}", loan.CurrentDisbursementAmountUSD)</td>
+                                        <td class="text-end">@String.Format("{0:n2}", loan.CurrentInterestAmountUSD)</td>
+                                        <td class="text-end">@String.Format("{0:n2}", loan.BankChargeUSD)</td>
+                                        <td class="text-end">@String.Format("{0:n2}", loan.CurrentRepaymentAmountUSD)</td>
+                                        <td class="text-end">@String.Format("{0:n2}", loan.ClosingBalanceUSD)</td>
+                                        <td class="text-end">@String.Format("{0:n2}", loan.InstallmentAmount)</td>
+                                        <td class="text-end">@String.Format("{0:n2}", loan.DueInstallmentAmount)</td>
+                                        <td class="text-center" title="Disbursement Date">@loan.StartDateSTR</td>
+                                        <td class='text-center' title="Maturity Date">@loan.EndDateSTR</td>
+                                    </tr>
+
+
+                                    sl = sl + 1;
+                                }
+
+                                @{
+                                    var lasGroupData = Model.BankLoanPositionData.Where(b => b.CompanyName == previousCompany && b.IsForeignLoan == true).ToList();
+                                    <tr class="fw-bold table-primary" style="font-size:10px;vertical-align:middle">
+                                        <td class="text-end" colspan="3">@previousCompany Total</td>
+                                        <td class="text-end">@String.Format("{0:n2}", lasGroupData.Sum(s => s.LoanLimitAmount))</td>
+                                        <td class="text-end">@String.Format("{0:n2}", lasGroupData.Sum(s => s.OpeningLoanAmountUSD))</td>
+                                        <td class="text-end">@String.Format("{0:n2}", lasGroupData.Sum(s => s.CurrentDisbursementAmountUSD))</td>
+                                        <td class="text-end">@String.Format("{0:n2}", lasGroupData.Sum(s => s.CurrentInterestAmountUSD))</td>
+                                        <td class="text-end">@String.Format("{0:n2}", lasGroupData.Sum(s => s.BankChargeUSD))</td>
+                                        <td class="text-end">@String.Format("{0:n2}", lasGroupData.Sum(s => s.CurrentRepaymentAmountUSD))</td>
+                                        <td class="text-end">@String.Format("{0:n2}", lasGroupData.Sum(s => s.ClosingBalanceUSD))</td>
+                                        <td class="text-end">@String.Format("{0:n2}", lasGroupData.Sum(s => s.InstallmentAmount))</td>
+                                        <td class="text-center fw-bold" colspan="3"></td>
+                                    </tr>
+
+                                }
+
+                                <tr class="fw-bold table-success" style="font-size:10px;vertical-align:middle">
+                                    <td class="text-end" colspan="3">Total</td>
+                                    <td class="text-end">@String.Format("{0:n2}", Model.BankLoanPositionData.Where(x => x.IsForeignLoan == true).Sum(s => s.LoanLimitAmount))</td>
+                                    <td class="text-end">@String.Format("{0:n2}", Model.BankLoanPositionData.Where(x => x.IsForeignLoan == true).Sum(s => s.OpeningLoanAmountUSD))</td>
+                                    <td class="text-end">@String.Format("{0:n2}", Model.BankLoanPositionData.Where(x => x.IsForeignLoan == true).Sum(s => s.CurrentDisbursementAmountUSD))</td>
+                                    <td class="text-end">@String.Format("{0:n2}", Model.BankLoanPositionData.Where(x => x.IsForeignLoan == true).Sum(s => s.CurrentInterestAmountUSD))</td>
+                                    <td class="text-end">@String.Format("{0:n2}", Model.BankLoanPositionData.Where(x => x.IsForeignLoan == true).Sum(s => s.BankChargeUSD))</td>
+                                    <td class="text-end">@String.Format("{0:n2}", Model.BankLoanPositionData.Where(x => x.IsForeignLoan == true).Sum(s => s.CurrentRepaymentAmountUSD))</td>
+                                    <td class="text-end">@String.Format("{0:n2}", Model.BankLoanPositionData.Where(x => x.IsForeignLoan == true).Sum(s => s.ClosingBalanceUSD))</td>
+                                    <td class="text-end">@String.Format("{0:n2}", Model.BankLoanPositionData.Where(x => x.IsForeignLoan == true).Sum(s => s.InstallmentAmount))</td>
+                                    <td class="text-center fw-bold" colspan="3"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+
+
+            }
+            @if (Model.BankLoanPositionData.Count == 0)
+            {
+                <p class="text-danger justify-content-center">No Data Found.</p>
+            }
+        </div>
+        <div class="text-center">
+            <input type="button" class="btn btn-sm btn-success" value="Excel" id="btnPdf" onclick="exportToExcel()" />
+        </div>
+    </div>
+</body>
+
+
+
+</html>
+
+<script type="text/javascript">
+    function exportToExcel() {
+        var htmls = "";
+        var uri = 'data:application/vnd.ms-excel;base64,';
+        var template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>';
+        var base64 = function (s) {
+            return window.btoa(unescape(encodeURIComponent(s)))
+        };
+
+        var format = function (s, c) {
+            return s.replace(/{(\w+)}/g, function (m, p) {
+                return c[p];
+            })
+        };
+
+        htmls = document.getElementById("tblBankLoanStatus").innerHTML;
+
+        var ctx = {
+            worksheet: 'Worksheet',
+            table: htmls
+        }
+        var link = document.createElement("a");
+        link.download = "BankLiabilityPosition.xls";
+        link.href = uri + base64(format(template, ctx));
+        link.click();
+    }
+</script>

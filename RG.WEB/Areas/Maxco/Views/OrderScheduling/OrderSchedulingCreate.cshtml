@@ -1,0 +1,1002 @@
+﻿@model RG.Application.ViewModel.Maxco.Business.OrderScheduling.OrderSchedulingMasterVM
+@{
+    ViewData[PageInfo.PageTitle] = "Order Pre plan";
+    ViewData[PageInfo.PageHeader] = "Order Pre plan";
+    //ViewData[PageInfo.btnText1] = "Back to List";
+    //ViewData[PageInfo.PageLink1] = "/FiniteScheduler/MachineMaintenance/Index";
+    //ViewData[PageInfo.btnClass1] = "btn-warning";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="row">
+    <div class="col-sm-12 col-md-12">
+        <div class="card card-dark">
+            <div class="card-body p-2">
+                <input type="hidden" />
+                <div class="row">
+                    <div class="col-sm-3">
+                        <div class="form-group mb-2">
+                            <label asp-for="OrderID" class="required"></label>
+                            <select asp-for="OrderID" asp-items="Model.DDLOrders" class="form-control form-control-sm"></select>
+                            <span asp-validation-for="OrderID" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-6 col-sm-3 col-md-3 col-lg-3">
+                        <label class="col-form-label-sm m-0">&nbsp;</label>
+                        <div class="form-group">
+                            <input type="button" class="btn btn-sm btn-success" id="btnSearch" value="Show Full Plan">
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+            <div class="row d-none" id="divOrderSchedulingInfo">
+                <div class="col-sm-12">
+                    <div class="card card-dark">
+
+                        <div class="card-body p-2">
+                            <div id="divOrderKnittingPlan" class="text-center"></div>
+                        </div>
+                        <div class="card-body p-2">
+                            <div id="divDyeingFinishFabric" class="text-center"></div>
+                        </div>
+                        <div class="card-body p-2">
+                            <div id="divCuttingPcs" class="text-center"></div>
+                        </div>
+                        <div class="card-body p-2">
+                            <div id="divSewingScheduling" class="text-center"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="modalOrderSheduling" class="modal fade" role="dialog">
+    <div class="modal-dialog modal-lg">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <form id="frmmodal">
+                <div class="modal-header p-2 bg-dark">
+                    <h6 class="modal-title modTitle">Order Knitting Plan</h6>
+                    <input hidden asp-for="FlgForAction" />
+                    <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body px-2 py-0">
+                    <div id="modalForOrderKnittingPlan">
+                        <div id="frmmodalbehidden">
+                            <div class="form-group row">
+                                <label class="col-sm-2 col-form-label">Target Quantity :</label>
+                                <div class="col-sm-2">
+                                    <input id="targetKnittingQuantity" class="form-control form-control-sm mt-1" type="text" readonly />
+                                    <input hidden type="number" id="hdnKrsID" />
+                                    <input hidden type="number" id="hdnFabID" />
+                                    <input hidden type="number" id="hdnOrderID" />
+                                    <input hidden type="number" id="hdnGSM" />
+                                    <input hidden type="number" id="hdnQualityID" />
+                                    <input hidden type="text" id="hdnComposition" />
+                                    <input hidden type="text" id="hdnPantoneNo" />
+                                    <input hidden type="number" id="hdnFinishedWidth" />
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-4 col-4 col-sm-4 col-lg-4 ">
+                                    <div class="form-group">
+                                        <label asp-for="ScheduleDate" class="label-ajt-sm required"></label>
+                                        <div class="input-group">
+                                            <input asp-for="ScheduleDate" required type="text" readonly class="datepic form-control form-control-sm dateField text-center" />
+                                            <div class="input-group-append">
+                                                <span class="input-group-text"><i class="fa fa-calendar" aria-hidden="true"></i></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4 col-4 col-sm-4 col-lg-4">
+                                    <div class="form-group mb-2">
+                                        <label asp-for="Quantity" class="label-ajt-sm required"></label>
+                                        <input type="number" value="" asp-for="Quantity" class="form-control form-control-sm" />
+                                        <span asp-validation-for="Quantity" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-3 col-sm-3 col-md-3 col-lg-3">
+                                    <label class="col-form-label-sm m-0">&nbsp;</label>
+                                    <div class="form-group">
+                                        <input type="button" class="btn btn-sm btn-success" id="btnSave" value="Save">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row m-0">
+                            <div class="col-sm-12 col-md-12 col-lg-12">
+                                <table class="table table-sm table-bordered table-striped  text-center text-xs" id="tblKnittingQuantityToList">
+                                    <thead class="bg-dark text-white">
+                                        <tr>
+                                            <td>SL#</td>
+                                            <td>Schedule Date</td>
+                                            <td>Quantity</td>
+                                            <td>Action</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    </tbody>
+                                    <tfoot>
+                                        <tr style="background-color: floralwhite;">
+                                            <td colspan="2">Total Quantity </td>
+                                            <td colspan="2" id="sumOfQuantity" style="color:black;">0</td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="row m-0 ">
+                            <div class="col-sm-12 col-md-12 col-lg-12">
+                                <div id="quantityOrderName" class="row justify-content-between m-0 d-none">
+                                    <label class="col-form-label">Order Name : <input id="orderName" style="border: 0px solid;" type="text" value="sa-2323" readonly /></label>
+                                    <label class="col-form-label">Target Quantity : <input id="targetQuantity" type="text" style="border: 0px solid;" value="12" readonly /></label>
+                                </div>
+                                <table class="table table-sm table-bordered table-striped  text-center text-xs d-none" id="tblKnittingQuantityToListView">
+                                    <thead class="bg-dark text-white">
+                                        <tr>
+                                            <td>SL#</td>
+                                            <td>Fab. Type</td>
+                                            <td>Fab. Quality</td>
+                                            <td>Fab. Composition</td>
+                                            <td>GSM</td>
+                                            <td>Finishe dWidth</td>
+                                            <td>Schedule Date</td>
+                                            <td>Schedule Quantity</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    </tbody>
+                                    <tfoot>
+                                        <tr style="background-color: floralwhite;">
+                                            <td colspan="7"><b>Total Schedule Quantity</b></td>
+                                            <td id="sumOfKnittingQuantity" style="color:black;">0</td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+
+                                <table class="table table-sm table-bordered table-striped  text-center text-xs d-none" id="tblOrderDyeingSchedulingView">
+                                    <thead class="bg-dark text-white">
+                                        <tr>
+                                            <td>SL#</td>
+                                            <td>Fab. Quality</td>
+                                            <td>Fab. Type</td>
+                                            <td>Fab. Composition</td>
+                                            <td>GSM</td>
+                                            <td>Finished Width</td>
+                                            <td>Pantone</td>
+                                            <td>Schedule Date</td>
+                                            <td>Schedule Quantity</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    </tbody>
+                                    <tfoot>
+                                        <tr style="background-color: floralwhite;">
+                                            <td colspan="8"><b>Total Schedule Quantity</b></td>
+                                            <td id="sumOfDyeingQuantity" style="color:black;">0</td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                                <table class="table table-sm table-bordered table-striped  text-center text-xs d-none" id="tblOrderCuttingSchedulingView">
+                                    <thead class="bg-dark text-white">
+                                        <tr>
+                                            <td>SL#</td>
+                                            <td>Fab. Quality</td>
+                                            <td>Fab. Type</td>
+                                            <td>Fab. Composition</td>
+                                            <td>GSM</td>
+                                            <td>Finished Width</td>
+                                            <td>Pantone</td>
+                                            <td>Schedule Date</td>
+                                            <td>Schedule Quantity</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    </tbody>
+                                    <tfoot>
+                                        <tr style="background-color: floralwhite;">
+                                            <td colspan="8"><b>Total Schedule Quantity</b> </td>
+                                            <td id="sumOfCuttingQuantity" style="color:black;">0</td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                                <table class="table table-sm table-bordered table-striped  text-center text-xs d-none" id="tblOrderSewingSchedulingView">
+                                    <thead class="bg-dark text-white">
+                                        <tr>
+                                            <td>SL#</td>
+                                            <td>Fab. Quality</td>
+                                            <td>Fab. Type</td>
+                                            <td>Fab. Composition</td>
+                                            <td>GSM</td>
+                                            <td>Finished Width</td>
+                                            <td>Pantone</td>
+                                            <td>Schedule Date</td>
+                                            <td>Schedule Quantity</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    </tbody>
+                                    <tfoot>
+                                        <tr style="background-color: floralwhite;">
+                                            <td colspan="8"><b>Total Schedule Quantity</b> </td>
+                                            <td id="sumOfSewingQuantity" style="color:black;">0</td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @*<div class="modal-footer p-1  justify-content-center">
+                        <input type="button" class="btn btn-warning btn-sm" id="modalBtnSave" value="Save" />
+                    </div>*@
+            </form>
+        </div>
+    </div>
+</div>
+@section scripts{
+    <script type="text/javascript">
+        const GetOrderSchedulingInfo = (orderID) => {
+            debugger
+            let data = HttpRequest.AjaxData('GET', '/Maxco/OrderScheduling/GetOrderSchedulingInfo', { orderID: orderID });
+            console.log(data.KnittingScheduling);
+            let orderKnittingPlan = ``;
+            let dyeingFinishFabric = ``;
+            let cuttingScheduling = ``;
+            let sewingScheduling = ``;
+            if (orderID != "") {
+                if (data.KnittingScheduling.length > 0) {
+                    let knittingSchedulingTable = `<table class="table table-sm table-striped table-bordered text-xs col-sm-12 tableMain">
+                                                     <b class='text-left'>Order Knitting Plan</b>
+                                                    <thead class="bg-dark">
+                                                        <tr>
+                                                            <th>SL#</th>
+                                                            <th>Fab. Type</th>
+                                                            <th>Fab. Quality</th>
+                                                            <th>Composition</th>
+                                                            <th>GSM</th>
+                                                            <th>Finish Width</th>
+                                                            <th>Quantity</th>
+                                                            <th>Was. Quantity</th>
+                                                            <th>Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>`;
+
+                    $.each(data.KnittingScheduling, function (i, v) {
+                        orderKnittingPlan += `<tr>
+                                                           <td>${++i}</td>
+                                                           <td>${v.FabricType}</td>
+                                                           <td>${v.FabricQuality}</td>
+                                                           <td>${v.FabricComposition}</td>
+                                                           <td>${v.GSM}</td>
+                                                           <td>${v.FinishedWidth}</td>
+                                                           <td>${v.KnittingQuantity}</td>
+                                                           <td>${v.KnittingQuantityWithWastage}</td>
+                                                           <td>
+                                                                <a onclick="addKnittingScheduling(${v.KnittingQuantityWithWastage},${v.FabID},${v.KrsID},${v.OrderID})" title="Add Plan" class='btn btn-info btn-xs'>Add</a>
+                                                                <a title="Show Plan" class='btn btn-success btn-xs' onclick="KnittingSchedulingShow(${v.KrsID},${v.FabID},${v.KnittingQuantityWithWastage})">Show</a>
+                                                                <a title="Plan Achive"  class='btn btn-danger btn-xs' onclick="KnittingSchedulingAchive(${v.KrsID},${v.FabID},${v.KnittingQuantityWithWastage})">Achive</a>
+                                                           </td>
+                                                        </tr>`;
+
+                    });
+                    knittingSchedulingTable = `${knittingSchedulingTable}${orderKnittingPlan} </tbody> </table>`;
+                    $("#divOrderKnittingPlan").html(knittingSchedulingTable);
+                }
+
+                if (data.DyeingScheduling.length > 0) {
+                    let dyeingSchedulingTable = `<table class="table table-sm table-striped table-bordered text-xs col-sm-12 tableMain">
+                                                     <b class='text-left'>Dyeing Finish Fabric</b>
+                                                    <thead class="bg-dark">
+                                                        <tr>
+                                                            <th>SL#</th>
+                                                            <th>Fab. Type</th>
+                                                            <th>Fab. Quality</th>
+                                                            <th>Composition</th>
+                                                            <th>GSM</th>
+                                                            <th>Finish Width</th>
+                                                            <th>Pantone</th>
+                                                            <th>Quantity</th>
+                                                            <th>Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>`;
+
+                    $.each(data.DyeingScheduling, function (n, v) {
+                        dyeingFinishFabric += `<tr>
+                                                           <td>${++n}</td>
+                                                           <td>${v.FabricType}</td>
+                                                           <td>${v.FabricQuality}</td>
+                                                           <td>${v.FabricComposition}</td>
+                                                           <td>${v.GSM}</td>
+                                                           <td>${v.FinishedWidth}</td>
+                                                           <td>${v.PantoneNo}</td>
+                                                           <td>${v.FinishFabricQty}</td>
+                                                           <td>
+                                                                <a onclick="addDyeingScheduling(${v.FinishFabricQty},${v.GSM},${v.FabricQualityID},'${v.FabricComposition}','${v.PantoneNo}',${v.FinishedWidth})" title="Add Plan" class='btn btn-info btn-xs'>Add</a>
+                                                                <a title="Show Plan" onclick="btnShowDyeingScheduling(${v.GSM},${v.FabricQualityID},'${v.FabricComposition}','${v.PantoneNo}',${v.FinishedWidth},${v.FinishFabricQty})"  class='btn btn-success btn-xs'>Show</a>
+                                                                <a title="Plan Achive" onclick="btnAchiveDyeingScheduling(${v.GSM},${v.FabricQualityID},'${v.FabricComposition}','${v.PantoneNo}',${v.FinishedWidth},${v.FinishFabricQty})" class='btn btn-danger btn-xs'>Achive</a>
+                                                           </td>
+                                                        </tr>`;
+
+                    });
+                    dyeingSchedulingTable = `${dyeingSchedulingTable}${dyeingFinishFabric}</table>`;
+                    $("#divDyeingFinishFabric").html(dyeingSchedulingTable);
+                }
+                if (data.CuttingScheduling.length > 0) {
+                    let cuttingSchedulingTable = `<table class="table table-sm table-striped table-bordered text-xs col-sm-12 tableMain">
+                                                     <b class='text-left'>Cutting Scheduling</b>
+                                                    <thead class="bg-dark">
+                                                        <tr>
+                                                            <th>SL#</th>
+                                                            <th>Fab. Type</th>
+                                                            <th>Fab. Quality</th>
+                                                            <th>Composition</th>
+                                                            <th>GSM</th>
+                                                            <th>Finish Width</th>
+                                                            <th>Pantone</th>
+                                                            <th>Garments</th>
+                                                            <th>Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>`;
+                    $.each(data.CuttingScheduling,function (l, d) {
+                        cuttingScheduling += `<tr>
+                                                           <td>${++l}</td>
+                                                           <td>${d.FabricType}</td>
+                                                           <td>${d.FabricQuality}</td>
+                                                           <td>${d.FabricComposition}</td>
+                                                           <td>${d.GSM}</td>
+                                                           <td>${d.FinishedWidth}</td>
+                                                           <td>${d.PantoneNo}</td>
+                                                           <td>${d.NumberOfGarments}</td>
+                                                           <td>
+                                                                <a onclick="addCuttingScheduling(${d.NumberOfGarments},${d.GSM},${d.FabricQualityID},'${d.FabricComposition}','${d.PantoneNo}',${d.FinishedWidth})" title="Add Plan" class='btn btn-info btn-xs'>Add</a>
+                                                                <a title="Show Plan" onclick="btnShowCuttingScheduling(${d.GSM},${d.FabricQualityID},'${d.FabricComposition}','${d.PantoneNo}',${d.FinishedWidth},${d.NumberOfGarments})"  class='btn btn-success btn-xs'>Show</a>
+                                                                <a title="Plan Achive" onclick="btnAchiveCuttingScheduling(${d.GSM},${d.FabricQualityID},'${d.FabricComposition}','${d.PantoneNo}',${d.FinishedWidth},${d.NumberOfGarments})" class='btn btn-danger btn-xs'>Achive</a>
+                                                           </td>
+                                                        </tr>`;
+
+                    });
+                    cuttingSchedulingTable = `${cuttingSchedulingTable}${cuttingScheduling} </table>`
+                    $("#divCuttingPcs").html(cuttingSchedulingTable);
+                }
+                if (data.SewingScheduling.length > 0) {
+                    let sewingSchedulingTable = `<table class="table table-sm table-striped table-bordered text-xs col-sm-12 tableMain">
+                                                     <b class='text-left'>Sewing Scheduling</b>
+                                                    <thead class="bg-dark">
+                                                        <tr>
+                                                            <th>SL#</th>
+                                                            <th>Fab. Type</th>
+                                                            <th>Fab. Quality</th>
+                                                            <th>Composition</th>
+                                                            <th>GSM</th>
+                                                            <th>Finish Width</th>
+                                                            <th>Pantone</th>
+                                                            <th>Garments</th>
+                                                            <th>Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>`;
+                    $.each(data.SewingScheduling, function (l, d) {
+                        sewingScheduling += `<tr>
+                                                           <td>${++l}</td>
+                                                           <td>${d.FabricType}</td>
+                                                           <td>${d.FabricQuality}</td>
+                                                           <td>${d.FabricComposition}</td>
+                                                           <td>${d.GSM}</td>
+                                                           <td>${d.FinishedWidth}</td>
+                                                           <td>${d.PantoneNo}</td>
+                                                           <td>${d.NumberOfGarments}</td>
+                                                           <td>
+                                                                <a onclick="addSewingScheduling(${d.NumberOfGarments},${d.GSM},${d.FabricQualityID},'${d.FabricComposition}','${d.PantoneNo}',${d.FinishedWidth})" title="Add Plan" class='btn btn-info btn-xs'>Add</a>
+                                                                <a title="Show Plan" onclick="btnShowSewingScheduling(${d.GSM},${d.FabricQualityID},'${d.FabricComposition}','${d.PantoneNo}',${d.FinishedWidth},${d.NumberOfGarments})"  class='btn btn-success btn-xs'>Show</a>
+                                                                <a title="Plan Achive" onclick="btnAchiveSewingScheduling(${d.GSM},${d.FabricQualityID},'${d.FabricComposition}','${d.PantoneNo}',${d.FinishedWidth},${d.NumberOfGarments})" class='btn btn-danger btn-xs'>Achive</a>
+                                                           </td>
+                                                        </tr>`;
+
+                    });
+                    sewingSchedulingTable = `${sewingSchedulingTable}${sewingScheduling} </table>`
+                    $("#divSewingScheduling").html(sewingSchedulingTable);
+                }
+                $("#divOrderSchedulingInfo").removeClass('d-none');
+                $("#divButton").removeClass('d-none');
+            }
+        }
+
+        const addKnittingScheduling = (targetKnittingQuantity, fabid, krsid, orderid) => {
+            debugger
+            $("#targetKnittingQuantity").val(targetKnittingQuantity);
+            $("#hdnKrsID").val(krsid);
+            $("#hdnFabID").val(fabid);
+            $("#hdnOrderID").val(orderid);
+            $('#FlgForAction').val('Knitting');
+            GetOrderKnittingSchedulingDetail(krsid, fabid);
+            $('#modalOrderSheduling').modal('toggle');
+
+        }
+        const addDyeingScheduling = (finishFabQty, gsms, fabQtyID, fabCom, panNo, finishWid) => {
+            debugger
+            $("#hdnGSM").val(gsms);
+            $("#hdnQualityID").val(fabQtyID);
+            $("#hdnComposition").val(fabCom);
+            $("#hdnPantoneNo").val(panNo);
+            $("#hdnFinishedWidth").val(finishWid);
+            $("#targetKnittingQuantity").val(finishFabQty);
+            GetListDyeingFinishFabricDetail(gsms, fabQtyID, fabCom, panNo, finishWid);
+            $('.modTitle').html('Dyeing Finish Fabric');
+            $('#FlgForAction').val('Dyeing');
+            $('#modalOrderSheduling').modal('toggle');
+
+        }
+        const addCuttingScheduling = (numOfGar, gsms, fabQtyID, fabCom, panNo, finishWid) => {
+            debugger
+            $("#hdnGSM").val(gsms);
+            $("#hdnQualityID").val(fabQtyID);
+            $("#hdnComposition").val(fabCom);
+            $("#hdnPantoneNo").val(panNo);
+            $("#hdnFinishedWidth").val(finishWid);
+            $("#targetKnittingQuantity").val(numOfGar);
+            GetListOrderCuttingScheduling(gsms, fabQtyID, fabCom, panNo, finishWid);
+            $("#tblOrderCuttingSchedulingView").addClass('d-none');
+            $('.modTitle').html('Cutting Scheduling');
+            $('#FlgForAction').val('Cutting');
+            $('#modalOrderSheduling').modal('toggle');
+        }
+        const addSewingScheduling = (numOfGar, gsms, fabQtyID, fabCom, panNo, finishWid) => {
+            $("#hdnGSM").val(gsms);
+            $("#hdnQualityID").val(fabQtyID);
+            $("#hdnComposition").val(fabCom);
+            $("#hdnPantoneNo").val(panNo);
+            $("#hdnFinishedWidth").val(finishWid);
+            $("#targetKnittingQuantity").val(numOfGar);
+            GetListSewingScheduling(gsms, fabQtyID, fabCom, panNo, finishWid);
+            $("#tblOrderCuttingSchedulingView").addClass('d-none');
+            $('.modTitle').html('Cutting Scheduling');
+            $('#FlgForAction').val('Sewing');
+            $('#modalOrderSheduling').modal('toggle');
+        }
+
+
+        const AddKnittingQuanityToList = () => {
+
+            let scheduleDate = $("#ScheduleDate").val();
+            let quantity = $("#Quantity").val();
+
+            let trTds = ``;
+            if (quantity != "" && scheduleDate != "" ) {
+                let currentRowSerial = ($("#tblKnittingQuantityToList tbody tr").length) + 1;
+                let totalQuan = $("#sumOfQuantity").text();
+                let takeQuantity = $("#Quantity").val();
+                let totalSum = parseFloat(totalQuan) + parseFloat(takeQuantity);
+                let actualQuantity = parseFloat($("#targetKnittingQuantity").val());
+                if (totalSum <= actualQuantity) {
+                    trTds = `<tr data-id='0' data-serial=${currentRowSerial}>
+                                            <td>${currentRowSerial}</td>
+                                            <td class="tdScheduleDate">${scheduleDate}</td>
+                                            <td class="tdknittingQuantity">${quantity}</td>
+                                            <td ><button type="button" class="btn btn-xs btn-danger" onclick="removeRow(this)" ><i class="fas fa-trash" aria-hidden="true"></i></button></td>
+                                        </tr>`;
+
+                    $("#tblKnittingQuantityToList tbody").append(trTds);
+                    SumQuantity();
+                } else {
+                    $.alert.open('error', 'Quantity is overflow!!')
+                }
+
+            } else {
+                alert("Shipping Item and Description is Required");
+            }
+
+            modalClear();
+        }
+
+        const SumQuantity = () => {
+            debugger
+            var totalQuantity = 0;
+            $('#tblKnittingQuantityToList tbody tr').each(function () {
+                let Tr = $(this);
+                let tableRowValue = Tr.find('.tdknittingQuantity').text();
+                totalQuantity += parseFloat(tableRowValue);
+            });
+            $("#sumOfQuantity").text(totalQuantity);
+        }
+        const SumOfQuantity = () => {
+            var totalQuantity = 0;
+            let flgForAction = $('#FlgForAction').val();
+            if (flgForAction === "Knitting") {
+                $('#tblKnittingQuantityToListView tbody tr').each(function () {
+                    let Tr = $(this);
+                    let tableRowValue = Tr.find('.knittingQuantity').text();
+                    totalQuantity += parseFloat(tableRowValue);
+                });
+                $("#sumOfKnittingQuantity").text(totalQuantity);
+            } else if (flgForAction === "Cutting") {
+                $('#tblOrderCuttingSchedulingView tbody tr').each(function () {
+                    let Tr = $(this);
+                    let tableRowValue = Tr.find('.tdCuttingQuantity').text();
+                    totalQuantity += parseFloat(tableRowValue);
+                });
+                $("#sumOfCuttingQuantity").text(totalQuantity);
+            } else if (flgForAction === "Dyeing") {
+                $('#tblOrderDyeingSchedulingView tbody tr').each(function () {
+                    let Tr = $(this);
+                    let tableRowValue = Tr.find('.tdDyeingQuantity').text();
+                    totalQuantity += parseFloat(tableRowValue);
+                });
+                $("#sumOfDyeingQuantity").text(totalQuantity);
+            } else if (flgForAction === "Sewing") {
+                $('#tblOrderSewingSchedulingView tbody tr').each(function () {
+                    let Tr = $(this);
+                    let tableRowValue = Tr.find('.tdSewingQuantity').text();
+                    totalQuantity += parseFloat(tableRowValue);
+                });
+                $("#sumOfSewingQuantity").text(totalQuantity);
+            } else {
+                return false;
+            }
+        }
+
+        const KnittingSchedulingAchive = (krsid, fabid, wasQuantity) => {
+            KnittingSchedulingShow(krsid, fabid, wasQuantity);
+        }
+
+
+        const KnittingSchedulingShow = (krsid, fabid, wasQuantity) => {
+            debugger
+            let orderID =$("#OrderID option:selected").text();
+            $("#quantityOrderName").removeClass('d-none');
+            $("#orderName").val(orderID);
+            $("#targetQuantity").val(wasQuantity);
+
+            $('.modTitle').html('Knitting Plan List');
+            GetAllOrderKnittingSchedulingDetail(krsid, fabid);
+            $("#frmmodalbehidden").addClass('d-none');
+            $("#tblKnittingQuantityToList").addClass('d-none');
+            $("#tblKnittingQuantityToListView").removeClass('d-none');
+            $('#modalOrderSheduling').modal('toggle');
+        }
+
+        const btnShowDyeingScheduling = (gsms, fabQtyID, fabCom, panNo, finishWid, FinFabQty) => {
+            let orderID = $("#OrderID option:selected").text();
+            $("#quantityOrderName").removeClass('d-none');
+            $("#orderName").val(orderID);
+            $("#targetQuantity").val(FinFabQty);
+
+            $('.modTitle').html('Dyeing Finish Fabric List');
+            GetAllShowDyeingScheduling( gsms, fabQtyID, fabCom, panNo, finishWid);
+            $("#frmmodalbehidden").addClass('d-none');
+            $("#tblKnittingQuantityToList").addClass('d-none');
+            $("#tblOrderDyeingSchedulingView").removeClass('d-none');
+            $('#modalOrderSheduling').modal('toggle');
+        }
+        const btnAchiveDyeingScheduling = (gsms, fabQtyID, fabCom, panNo, finishWid, FinFabQty) => {
+            btnShowDyeingScheduling(gsms, fabQtyID, fabCom, panNo, finishWid, FinFabQty);
+        }
+        const btnShowCuttingScheduling = (gsms, fabQtyID, fabCom, panNo, finishWid, NumOfGarments) => {
+            let orderID = $("#OrderID option:selected").text();
+            $("#quantityOrderName").removeClass('d-none');
+            $("#orderName").val(orderID);
+            $("#targetQuantity").val(NumOfGarments);
+
+            $('.modTitle').html('Cutting List');
+            $("#tblOrderCuttingSchedulingView").removeClass('d-none');
+            $("#tblKnittingQuantityToList").addClass('d-none');
+            GetAllShowCuttingScheduling(gsms, fabQtyID, fabCom, panNo, finishWid);
+            $("#frmmodalbehidden").addClass('d-none');
+            $('#modalOrderSheduling').modal('toggle');
+        }
+        const btnShowSewingScheduling = (gsms, fabQtyID, fabCom, panNo, finishWid, NumOfGarments) => {
+            let orderID = $("#OrderID option:selected").text();
+            $("#quantityOrderName").removeClass('d-none');
+            $("#orderName").val(orderID);
+            $("#targetQuantity").val(NumOfGarments);
+
+            $('.modTitle').html('sewing List');
+            $("#tblOrderSewingSchedulingView").removeClass('d-none');
+            $("#tblKnittingQuantityToList").addClass('d-none');
+            GetAllShowSewingScheduling(gsms, fabQtyID, fabCom, panNo, finishWid);
+            $("#frmmodalbehidden").addClass('d-none');
+            $('#modalOrderSheduling').modal('toggle');
+        }
+        const btnAchiveSewingScheduling = (gsms, fabQtyID, fabCom, panNo, finishWid, NumOfGarments) => {
+            btnShowSewingScheduling(gsms, fabQtyID, fabCom, panNo, finishWid, NumOfGarments);
+        }
+        const btnAchiveCuttingScheduling = (gsms, fabQtyID, fabCom, panNo, finishWid, NumOfGarments) => {
+            btnShowCuttingScheduling(gsms, fabQtyID, fabCom, panNo, finishWid, NumOfGarments)
+        }
+        const GetAllShowCuttingScheduling = (gsms, fabQtyID, fabCom, panNo, finishWid) => {
+            debugger
+            let flgForAction = $('#FlgForAction').val('Cutting');
+            let orderID = $("#OrderID").val();
+            var data = HttpRequest.AjaxData('POST', '/Maxco/OrderScheduling/GetListOrderCuttingScheduling', { OrderId: orderID, GSM: gsms, FabricQualityID: fabQtyID, FabricComposition: fabCom, PantoneNo: panNo, FinishedWidth: finishWid });
+            let rowAllCuttingScheduling = '';
+            $.each(data, function (d, e) {
+                rowAllCuttingScheduling += `<tr>
+                            <td>${++d}</td>
+                            <td>${e.FabricQualityDescription}</td>
+                            <td>${e.FabricTypeDescription}</td>
+                            <td>${e.FabricComposition}</td>
+                            <td>${e.GSM}</td>
+                            <td>${e.FinishedWidth}</td>
+                            <td>${e.PantoneNo}</td>
+                            <td>${e.ScheduleDateMsg}</td>
+                            <td class="tdCuttingQuantity" >${e.Quantity}</td>
+                            `
+            });
+            $("#tblOrderCuttingSchedulingView tbody").html(rowAllCuttingScheduling);
+            SumOfQuantity(flgForAction);
+        }
+        const GetAllShowSewingScheduling = (gsms, fabQtyID, fabCom, panNo, finishWid) => {
+            let flgForAction = $('#FlgForAction').val('Sewing');
+            let orderID = $("#OrderID").val();
+            var data = HttpRequest.AjaxData('GET', '/Maxco/OrderScheduling/GetListSewingScheduling', { OrderId: orderID, GSM: gsms, FabricQualityID: fabQtyID, FabricComposition: fabCom, PantoneNo: panNo, FinishedWidth: finishWid });
+            let rowAllSewingScheduling = '';
+            $.each(data, function (d, e) {
+                rowAllSewingScheduling += `<tr>
+                            <td>${++d}</td>
+                            <td>${e.FabricQualityDescription}</td>
+                            <td>${e.FabricTypeDescription}</td>
+                            <td>${e.FabricComposition}</td>
+                            <td>${e.GSM}</td>
+                            <td>${e.FinishedWidth}</td>
+                            <td>${e.PantoneNo}</td>
+                            <td>${e.ScheduleDateMsg}</td>
+                            <td class="tdSewingQuantity" >${e.Quantity}</td>
+                            `
+            });
+            $("#tblOrderSewingSchedulingView tbody").html(rowAllSewingScheduling);
+            SumOfQuantity(flgForAction);
+        }
+        const GetAllShowDyeingScheduling = (gsms, fabQtyID, fabCom, panNo, finishWid) => {
+            let flgForAction = $('#FlgForAction').val('Dyeing');
+            let orderID = $("#OrderID").val();
+            var data = HttpRequest.AjaxData('POST', '/Maxco/OrderScheduling/GetListDyeingFinishFabric', { OrderId: orderID, GSM: gsms, FabricQualityID: fabQtyID, FabricComposition: fabCom, PantoneNo: panNo, FinishedWidth: finishWid });
+            let rowAllDyeingFinishFabric = '';
+            $.each(data, function (d, e) {
+                rowAllDyeingFinishFabric += `<tr>
+
+                            <td>${++d}</td>
+                            <td>${e.FabricQualityDescription}</td>
+                            <td>${e.FabricTypeDescription}</td>
+                            <td>${e.FabricComposition}</td>
+                            <td>${e.GSM}</td>
+                            <td>${e.FinishedWidth}</td>
+                            <td>${e.PantoneNo}</td>
+                            <td>${e.ScheduleDateMsg}</td>
+                            <td class="tdDyeingQuantity" >${e.Quantity}</td>
+                            `
+            });
+            $("#tblOrderDyeingSchedulingView tbody").html(rowAllDyeingFinishFabric);
+            SumOfQuantity(flgForAction);
+        }
+
+        const GetAllOrderKnittingSchedulingDetail = (krsid, fabid) => {
+            debugger
+            let flgForAction = $('#FlgForAction').val('Knitting');
+            var data = HttpRequest.AjaxData('GET', '/Maxco/OrderScheduling/GetListOrderKnittingScheduling', { fabid: fabid, krsid: krsid });
+            let rowAllOrderKnittingScheduling = '';
+            $.each(data, function (d, e) {
+                rowAllOrderKnittingScheduling += `<tr>
+                            <td>${++d}</td>
+                            <td>${e.FabricType}</td>
+                            <td>${e.FabricQuality}</td>
+                            <td>${e.FabricComposition}</td>
+                            <td>${e.GSM}</td>
+                            <td>${e.FinishedWidth}</td>
+                            <td>${e.ScheduleDateMsg}</td>
+                            <td class="knittingQuantity" >${e.Quantity}</td>
+                            `
+            });
+            $("#tblKnittingQuantityToListView tbody").html(rowAllOrderKnittingScheduling);
+            SumOfQuantity(flgForAction);
+        }
+
+        const GetOrderKnittingSchedulingDetail = (krsid, fabid) => {
+            debugger
+            var data = HttpRequest.AjaxData('GET', '/Maxco/OrderScheduling/GetListOrderKnittingScheduling', { fabid:fabid, krsid:krsid});
+            let rowOrderKnittingScheduling = '';
+            $.each(data, function (d, e) {
+                rowOrderKnittingScheduling += `<tr>
+
+                            <td>${++d}</td>
+                            <td>${e.ScheduleDateMsg}</td>
+                            <td class="tdknittingQuantity" >${e.Quantity}</td>
+                            <td><button type="button" class="btn btn-xs btn-danger" onclick="btnOrderKnittingScheduling(${e.KnittingScheduleID})" ><i class="fas fa-trash" aria-hidden="true"></i></button></td>
+                            `
+            });
+            $("#tblKnittingQuantityToList tbody").html(rowOrderKnittingScheduling);
+            SumQuantity();
+        }
+        const GetListDyeingFinishFabricDetail = (gsms, fabQtyID, fabCom, panNo, finishWid) => {
+            debugger
+            let orderID = $("#OrderID").val();
+            var data = HttpRequest.AjaxData('POST', '/Maxco/OrderScheduling/GetListDyeingFinishFabric', { OrderId: orderID, GSM: gsms, FabricQualityID: fabQtyID, FabricComposition: fabCom, PantoneNo: panNo, FinishedWidth: finishWid});
+            let rowDyeingFinishFabric = '';
+            $.each(data, function (d, e) {
+                rowDyeingFinishFabric += `<tr>
+
+                            <td>${++d}</td>
+                            <td>${e.ScheduleDateMsg}</td>
+                            <td class="tdknittingQuantity" >${e.Quantity}</td>
+                            <td><button type="button" class="btn btn-xs btn-danger" onclick="btnDeleteDyeingFinishFabric(${e.DyeingScheduleID})" ><i class="fas fa-trash" aria-hidden="true"></i></button></td>
+                            `
+            });
+            $("#tblKnittingQuantityToList tbody").html(rowDyeingFinishFabric);
+            SumQuantity();
+        }
+        const GetListOrderCuttingScheduling = (gsms, fabQtyID, fabCom, panNo, finishWid) => {
+            debugger
+            let orderID = $("#OrderID").val();
+            var data = HttpRequest.AjaxData('POST', '/Maxco/OrderScheduling/GetListOrderCuttingScheduling', { OrderId: orderID, GSM: gsms, FabricQualityID: fabQtyID, FabricComposition: fabCom, PantoneNo: panNo, FinishedWidth: finishWid });
+            let rowCuttingScheduling = '';
+            $.each(data, function (d, e) {
+                rowCuttingScheduling += `<tr>
+
+                            <td>${++d}</td>
+                            <td>${e.ScheduleDateMsg}</td>
+                            <td class="tdknittingQuantity" >${e.Quantity}</td>
+                            <td><button type="button" class="btn btn-xs btn-danger" onclick="btnDeleteCuttingScheduling(${e.CuttingScheduleID})" ><i class="fas fa-trash" aria-hidden="true"></i></button></td>
+                            `
+            });
+            $("#tblKnittingQuantityToList tbody").html(rowCuttingScheduling);
+            SumQuantity();
+        }
+        const GetListSewingScheduling = (gsms, fabQtyID, fabCom, panNo, finishWid) => {
+            debugger
+            let orderID = $("#OrderID").val();
+            var data = HttpRequest.AjaxData('GET', '/Maxco/OrderScheduling/GetListSewingScheduling', { OrderId: orderID, GSM: gsms, FabricQualityID: fabQtyID, FabricComposition: fabCom, PantoneNo: panNo, FinishedWidth: finishWid });
+            let rowCuttingScheduling = '';
+            $.each(data, function (d, e) {
+                rowCuttingScheduling += `<tr>
+
+                            <td>${++d}</td>
+                            <td>${e.ScheduleDateMsg}</td>
+                            <td class="tdknittingQuantity" >${e.Quantity}</td>
+                            <td><button type="button" class="btn btn-xs btn-danger" onclick="btnDeleteSewingScheduling(${e.SewingScheduleID})" ><i class="fas fa-trash" aria-hidden="true"></i></button></td>
+                            `
+            });
+            $("#tblKnittingQuantityToList tbody").html(rowCuttingScheduling);
+            SumQuantity();
+        }
+
+
+        const btnOrderKnittingScheduling = (id) => {
+            $.alert.open('confirm', 'Are you sure to delete this record?', function (button) {
+                if (button == 'yes') {
+                    HttpRequest.Ajax("POST", '/Maxco/OrderScheduling/DeleteOrderKnittingScheduling', { "id": id }, saveSuccess, true);
+
+                } else {
+                    return false;
+                }
+            });
+        }
+        const btnDeleteDyeingFinishFabric = (id) => {
+            debugger
+            $.alert.open('confirm', 'Are you sure to delete this record?', function (button) {
+                if (button == 'yes') {
+                    HttpRequest.Ajax("POST", '/Maxco/OrderScheduling/DeleteDyeingFinishFabric', { "id": id }, saveSuccess, true);
+
+                } else {
+                    return false;
+                }
+            });
+        }
+        const btnDeleteCuttingScheduling = (id) => {
+            debugger
+            $.alert.open('confirm', 'Are you sure to delete this record?', function (button) {
+                if (button == 'yes') {
+                    HttpRequest.Ajax("POST", '/Maxco/OrderScheduling/DeleteCuttingScheduling', { "id": id }, saveSuccess, true);
+
+                } else {
+                    return false;
+                }
+            });
+        }
+        const btnDeleteSewingScheduling = (id) => {
+            debugger
+            $.alert.open('confirm', 'Are you sure to delete this record?', function (button) {
+                if (button == 'yes') {
+                    HttpRequest.Ajax("POST", '/Maxco/OrderScheduling/DeleteSewingScheduling', { "id": id }, saveSuccess, true);
+                } else {
+                    return false;
+                }
+            });
+        }
+       
+
+        $(function () {
+            $("#OrderID").select2();
+
+            $("#OrderID").change(function () {
+                debugger
+                let orderID = $("#OrderID").val();
+                if (orderID != "") {
+                    GetOrderSchedulingInfo(orderID);
+                }
+            });
+
+            $("#modalOrderSheduling").on("hidden.bs.modal", function () {
+                debugger
+                modalClear();
+                $("#hdnKrsID").val('');
+                $("#hdnFabID").val('');
+                $("#hdnOrderID").val('');
+                $("#tblKnittingQuantityToList tbody tr").html('');
+                $("#sumOfQuantity").text('0');
+                $("#frmmodalbehidden").removeClass('d-none');
+                $('.modTitle').html('Order Knitting Plan');
+                $('#FlgForAction').val('');
+
+                $("#hdnGSM").val('');
+                $("#hdnQualityID").val('');
+                $("#hdnComposition").val('');
+                $("#hdnPantoneNo").val('');
+                $("#hdnFinishedWidth").val('');
+                $("#targetKnittingQuantity").val('');
+                $("#tblKnittingQuantityToList").removeClass('d-none');
+                $("#tblKnittingQuantityToListView").addClass('d-none');
+                $("#tblOrderDyeingSchedulingView").addClass('d-none');
+                $("#tblOrderCuttingSchedulingView").addClass('d-none');
+                $("#tblOrderSewingSchedulingView").addClass('d-none');
+                $("#quantityOrderName").addClass('d-none');
+                $("#orderName").text('');
+                $("#targetQuantity").val('');
+
+
+
+            });
+
+            $(".dateField").datepicker(
+                {
+                    dateFormat: "dd-M-yy",
+                    showAnim: "scale",
+                    changeMonth: true,
+                    yearRange: "2000:2050",
+                    changeYear: true
+                }).css('z-index', 99999);
+            $('[data-toggle="tooltip"]').tooltip({
+                html: true
+            });
+
+            $("#btnSaves").click(function () {
+                AddKnittingQuanityToList();
+            });
+
+
+            $("#btnSave").click(function (e) {
+                debugger
+                e.preventDefault()
+                if ($("#frmmodal").valid()) {
+                    let gsm =  $("#hdnGSM").val();
+                    let fabricQualityID = $("#hdnQualityID").val();
+                    let fabricComposition = $("#hdnComposition").val();
+                    let pantoneNo=$("#hdnPantoneNo").val();
+                    let finishedWidth=$("#hdnFinishedWidth").val();
+                    let krsId=$("#hdnKrsID").val();
+                    let fabid=$("#hdnFabID").val();
+                    let orderid = $("#OrderID").val();
+                    let scheduleDate = $("#ScheduleDate").val();
+                    let quantity = $("#Quantity").val();
+                    let flgForAction = $('#FlgForAction').val();
+                    let totalQuan = $("#sumOfQuantity").text();
+                    let takeQuantity = $("#Quantity").val();
+                    let totalSum = parseFloat(totalQuan) + parseFloat(takeQuantity);
+                    let actualQuantity = parseFloat($("#targetKnittingQuantity").val());
+                    let OrderKnittingScheduling;
+                    let DyeingFinishFabric;
+                    let CuttingScheduling;
+                    let SewingScheduling;
+                    if (totalSum <= actualQuantity) {
+                        if (flgForAction === 'Knitting') {
+                            OrderKnittingScheduling = {
+                                KRSID: krsId,
+                                FabID: fabid,
+                                ScheduleDate: scheduleDate,
+                                Quantity: quantity,
+                            }
+                        } else if (flgForAction === 'Dyeing') {
+                            DyeingFinishFabric = {
+                                ScheduleDate: scheduleDate,
+                                FabricQualityID: fabricQualityID,
+                                FabricComposition: fabricComposition,
+                                GSM: gsm,
+                                FinishedWidth: finishedWidth,
+                                PantoneNo: pantoneNo,
+                                Quantity: quantity
+                            }
+                        } else if (flgForAction === 'Cutting') {
+                            CuttingScheduling = {
+                                ScheduleDate: scheduleDate,
+                                FabricQualityID: fabricQualityID,
+                                FabricComposition: fabricComposition,
+                                GSM: gsm,
+                                FinishedWidth: finishedWidth,
+                                PantoneNo: pantoneNo,
+                                Quantity: quantity
+                            }
+                        } else if (flgForAction === 'Sewing') {
+                            SewingScheduling = {
+                                ScheduleDate: scheduleDate,
+                                FabricQualityID: fabricQualityID,
+                                FabricComposition: fabricComposition,
+                                GSM: gsm,
+                                FinishedWidth: finishedWidth,
+                                PantoneNo: pantoneNo,
+                                Quantity: quantity
+                            }
+                        }
+                        let OrderSchedulingMasterAdd = {
+                            OrderID: orderid,
+                            FlgForAction: flgForAction,
+                            OrderKnittingScheduling: OrderKnittingScheduling,
+                            OrderDyeingScheduling: DyeingFinishFabric,
+                            OrderCuttingScheduling: CuttingScheduling,
+                            OrderSewingScheduling: SewingScheduling
+                        }
+
+                        if (flgForAction!="") {
+                           HttpRequest.Ajax("POST", '/Maxco/OrderScheduling/OrderSchedulingCreate', { "OrderSchedulingMasters": OrderSchedulingMasterAdd }, saveSuccess, true);
+                        } else {
+                            $.alert.open('warning', "Something is Error");
+                            return false;
+                        }
+                    } else {
+                        $.alert.open('error', 'Quantity is overflow!!')
+                        return false;
+                    }
+                } else {
+                    $.alert.open('warning', "Need to filup All requried Field!!");
+                }
+
+            });
+
+        });
+        function saveSuccess(data) {
+            debugger
+            let krsid=  $("#hdnKrsID").val();
+            let fabid = $("#hdnFabID").val();
+            let gsms = $("#hdnGSM").val();
+            let fabQtyID = $("#hdnQualityID").val();
+            let fabCom = $("#hdnComposition").val();
+            let panNo = $("#hdnPantoneNo").val();
+            let finishWid = parseFloat($("#hdnFinishedWidth").val());
+            let flgForAction = $('#FlgForAction').val();
+            if (data.result == 1) {
+                //$.alert.open({
+                //    type: 'Success',
+                //    content: data.message,
+                //    callback: function () {
+                //    }
+                //});
+                modalClear();
+                if (flgForAction === 'Knitting') {
+                    GetOrderKnittingSchedulingDetail(krsid, fabid);
+                } else if (flgForAction === 'Dyeing') {
+                    GetListDyeingFinishFabricDetail(gsms, fabQtyID, fabCom, panNo, finishWid);
+                } else if (flgForAction === 'Cutting') {
+                    GetListOrderCuttingScheduling(gsms, fabQtyID, fabCom, panNo, finishWid)
+                }
+                else if (flgForAction === 'Sewing') {
+                    GetListSewingScheduling(gsms, fabQtyID, fabCom, panNo, finishWid);
+                } else {
+                    return false;
+                }
+            }
+            else {
+                $.alert.open("error", data.message);
+            }
+        }
+
+        const modalClear = () => {
+            $("#ScheduleDate").val('@DateTime.Now.ToString("dd-MMM-yyyy")');
+            $("#Quantity").val('');
+        }
+    </script>
+}

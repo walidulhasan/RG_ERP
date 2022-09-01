@@ -1,0 +1,418 @@
+﻿@using Microsoft.AspNetCore.Antiforgery
+@inject IAntiforgery antiForgeryToken
+@inject Wangkanai.Detection.Services.IDetectionService DetectionService
+@model RG.Application.ViewModel.MaterialsManagement.Business.GatePassIssue.GatePassReceivableVM
+@{
+    var token = antiForgeryToken.GetAndStoreTokens(Context);
+    ViewData[PageInfo.PageHeader] = "Gate Pass Receive";
+    ViewData[PageInfo.PageTitle] = "Gate Pass Receive";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var deviceType = DetectionService.Device.Type.ToString();
+}
+<div class="card card-primary">
+    <div class="row m-0">
+        @*<div class="col-sm-3 col-md-3 col-lg-3">
+                <div class="form-group">
+                    <label class="col-form-label-sm m-0 required" asp-for="CategoryID"></label>
+                    <select asp-for="CategoryID" asp-items="Model.CategoryList" class="form-control form-control-sm"></select>
+                    <span asp-validation-for="CategoryID" class="span-form-validation"></span>
+                </div>
+            </div>*@
+        <div class="col-12 col-sm-3 col-md-3 col-lg-3">
+            <div class="form-group">
+                <label class="col-form-label-sm m-0 required" asp-for="ApprovalType"></label>
+                <select asp-for="ApprovalType" asp-items="Model.ApprovalTypeList" class="form-control form-control-sm"></select>
+                <span asp-validation-for="ApprovalType" class="span-form-validation"></span>
+            </div>
+        </div>
+        <div class="col-12 col-sm-3 col-md-3 col-lg-3">
+            <div class="input-group">
+                <div class="col-6 col-sm-6 col-md-6 col-lg-6 p-0">
+                    <div class="form-group">
+                        <label class="col-form-label-sm m-0 required" asp-for="DateFrom"></label>
+                        <input type="text" class="form-control form-control-sm dateField" asp-for="DateFrom" placeholder="Date From" readonly>
+                        <span asp-validation-for="DateFrom" class="span-form-validation"></span>
+                    </div>
+                </div>
+                <div class="col-6 col-sm-6 col-md-6 col-lg-6 p-0 pl-2">
+                    <div class="form-group">
+                        <label class="col-form-label-sm m-0 required" asp-for="DateTo"></label>
+                        <input type="text" class="form-control form-control-sm dateField" asp-for="DateTo" placeholder="Date From" readonly>
+                        <span asp-validation-for="DateTo" class="span-form-validation"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-3 col-md-3 col-lg-3">
+            @if (deviceType != "Mobile")
+            {
+                <label class="col-form-label-sm m-0">&nbsp;</label>
+            }
+            <div class="form-group">
+                <input type="button" class="btn btn-sm btn-warning" value="Search" id="btnSearch" />
+
+            </div>
+        </div>
+    </div>
+    <div class="row m-0">
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            <div class="table-responsive-sm" id="grid">
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="itemModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-header p-2">
+                <h5 class="modal-title" id="exampleModalLabel">Receive Items</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="col-md-12">
+                    <table class="table table-striped  table-sm text-center text-xs" id="">
+
+                        <tbody>
+                            <tr>
+                                <td colspan="2" class='text-bold' style="text-align:left">Issued To :</td>
+                                <td colspan="4" style="text-align:left" id="IssuedTo"></td>
+                                <td colspan="2" class='text-bold' style="text-align:left">GP # :</td>
+                                <td colspan="2" style="text-align:left" id="SerialNo"></td>
+                            </tr>
+                            <tr style="vertical-align:middle;">
+                                <td colspan="2" class='text-bold' style="text-align:left">Representative :</td>
+                                <td colspan="4" style="text-align:left" id="Representative"></td>
+                                <td colspan="2" class='text-bold' style="text-align:left">	Date & Time : </td>
+                                <td colspan="2" style="text-align:left" id="DateTime"></td>
+
+                            </tr>
+                            <tr style="vertical-align:middle;">
+                                <td colspan="2" class='text-bold' style="text-align:left">Representative Contact :</td>
+                                <td colspan="4" style="text-align:left" id="RepresentativeContact"></td>
+                                <td colspan="2" class='text-bold' style="text-align:left">Vehicle No :</td>
+                                <td colspan="2" style="text-align:left" id="VehicleNo"></td>
+                            </tr>
+                            <tr style="vertical-align:middle;">
+                                <td colspan="2" class='text-bold' style="text-align:left">	Category Name :</td>
+                                <td colspan="4" style="text-align:left" id="CategoryName"></td>
+                                <td colspan="2" class='text-bold' style="text-align:left">	Job Description :</td>
+                                <td colspan="2" style="text-align:left" id="Description">	</td>
+                            </tr>
+
+                            <tr>
+                                <td colspan="12">
+                                    <table class="table table-striped table-bordered table-sm text-center" id="tblItemDetail">
+                                        <thead class="bg-dark">
+                                            <tr>
+                                                <th style="width:5%">SL</th>
+                                                <th style="width:20%">Item Description</th>
+                                                <th style="width:10%">Issued Qty</th>
+                                                <th style="width:10%">Received Qty</th>
+                                                <th style="width:10%">Receiving Qty</th>
+                                                <th style="width:10%">Wastage Qty</th>
+                                                <th style="width:10%">Balance Qty</th>
+                                                @*<th style="width:10%">Gross Weight </th>*@
+                                                <th style="width:5%">Unit</th>
+                                                <th style="width:10%">Return Date</th>
+                                                @*<th style="width:15%">Remarks</th>*@
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                        </tbody>
+                                    </table>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer p-2">
+                <button type="button" class="btn btn-xs btn-success" id="btnReceiveItem">Receive</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+@section scripts{
+    <script type="text/javascript">
+        $(function () {
+            GatePassList();
+            $("#btnSearch").click(function () {
+                GatePassList();
+            });
+             $("#btnReceiveItem").click(function () {
+            debugger
+            let receivedDetail = new Array();
+            $("#tblItemDetail tbody tr").each(function () {
+                let that = $(this);
+                let receivedQty = parseFloat(that.find('.receivingQty').val());
+                let wastageQty = parseFloat(that.find('.wastageQty').val());
+                if (receivedQty > 0 || wastageQty>0 ) {
+                    let quantity = that.find('.hdnQuantity').val();
+                    let unitID = that.find('.hdnUnitID').val();
+                    //let grossWeight = that.find('.hdnGrossWeight').val();
+                    let returnableDetailID = that.find('.hdnReturnableDetailID').val();
+
+                    let itemReceive = {
+                        Quantity: quantity,
+                        UnitID: unitID,
+                        GrossWeight: quantity,
+                        ReturnableGatePassItemID: returnableDetailID,
+                        RecieveQuantity: receivedQty,
+                        WastageQuantity: wastageQty,
+                        RecieveDate: '@DateTime.Now'
+                    }
+                    receivedDetail.push(itemReceive);
+                }
+
+            });
+            if (receivedDetail.length > 0) {
+                HttpRequest.Ajax("POST", "/MaterialsManagement/GatePass/ReturnableRecieveGatePassDetailSave", { model: receivedDetail, '@token.HeaderName': '@token.RequestToken' }, saveSuccess);
+                $('#itemModal').modal('toggle');
+            }
+        });
+        });
+        function saveSuccess(data) {
+            debugger
+            if (data.result == 1) {
+                $.alert.open({
+                    type: 'Success',
+                    content: data.message,
+                    callback: function () {
+                        GatePassAccountIssueList();
+                    }
+                });
+            }
+            else {
+                $.alert.open("error", data.message);
+            }
+        }
+        function ApproveGatePass(gatePassId) {
+            if (gatePassId > 0) {
+                $.alert.open('confirm', 'Are you sure to approve this record', function (button) {
+                    if (button == 'yes')
+                        HttpRequest.Ajax("Get", "/MaterialsManagement/GatePassIssue/AccountsApprove", { gatePassID: gatePassId }, saveSuccess);
+                });
+            }
+        }
+        //function RejectGatePass(gatePassId) {
+        //    if (gatePassId > 0) {
+        //        $.alert.open('confirm', 'Are you sure to remove this record', function (button) {
+        //            if (button == 'yes')
+        //                HttpRequest.Ajax("Get", "/MaterialsManagement/GatePassIssue/AccountsReject", { gatePassID: gatePassId }, saveSuccess);
+        //        });
+        //    }
+        //}
+        function CheckReceiveQuantity(that) { 
+            let thatTr = $(that).parent().parent();
+            let rcvQty = RtnFloat(thatTr.find('.receivingQty').val());
+            let wastQty = RtnFloat(thatTr.find('.wastageQty').val());
+            let balanQty = RtnFloat(thatTr.find('.balanceQty').val());
+            if ((rcvQty + wastQty) > balanQty) {
+                thatTr.find('.receivingQty').val('');
+                thatTr.find('.wastageQty').val('');
+                var unitName = thatTr.find('.td-unit').text();
+                //  alert(`Quantity can't be more than balance`);
+                $.alert.open("warning", `Quantity should be less than or equal <b class="text-danger">${balanQty} ${unitName}</b> .`);
+                thatTr.find(`#${that.id}`).focus();
+                return false;
+            }
+
+        }
+        function ReturnableGatePassInfo(gatePassID, categoryID) {
+
+            if (gatePassID > 0) {
+                var data = HttpRequest.AjaxData("GET", `/MaterialsManagement/GatePass/GetGatePassChallanInfo`, { gatePassID: gatePassID })
+                if (data != null) {
+                    $("#tblItemDetail tbody").text('');
+                    $("#IssuedTo").text(data.CustomerName);
+                    $("#SerialNo").text(data.Serial);
+                    $("#Representative").text(data.Representative);
+                    $("#DateTime").text(data.DateTimeStamp);
+                    $("#RepresentativeContact").text(data.RepresentativeContact);
+                    $("#VehicleNo").text(data.VehicleNo);
+                    $("#CategoryName").text(data.CategoryName);
+                    $("#Description").text(data.Description);
+                    let totalQuantity = 0.0;
+                    let receivedQty = 0.0;
+
+                    $.each(data.GatePassChallanDetails, function (i, v) {
+                        totalQuantity += v.QuantityOrGrossWeight;
+                        receivedQty += v.RecieveQuantity + v.WastageQuantity;
+
+                        $("#tblItemDetail tbody").append(
+                            `<tr>
+                            <td><input type="hidden" class="hdnReturnableDetailID" value="${v.ID}" />${++i}</td>
+                            <td>${v.ItemName}</td>
+                            <td><input type="hidden" class="hdnQuantity" value="${v.QuantityOrGrossWeight}" />${v.QuantityOrGrossWeight}</td>
+                            <td><input type="hidden" class="hdnIssuedQuantity" value="${v.RecieveQuantity + v.WastageQuantity}" />${v.RecieveQuantity + v.WastageQuantity}</td>
+                            <td> <input type='text' id="gate-rcv-${v.ID}" style="width:80px" class='receivingQty text-center' onkeypress='return checkNumeric(event)' onkeyup='CheckReceiveQuantity(this)'></td>
+                            <td><input type='text' id="gate-wst-${v.ID}" style="width:80px" class='wastageQty text-center' onkeypress='return checkNumeric(event)' onkeyup='CheckReceiveQuantity(this)'></td>
+                            <td><input type='text'  style="width:80px" class='balanceQty text-center' disabled value=${(v.QuantityOrGrossWeight - v.RecieveQuantity - v.WastageQuantity).toFixed(4)}></td>
+
+                            <td class='td-unit'><input type="hidden" class="hdnUnitID" value="${v.UnitID}" />${v.UnitName}</td>
+                            <td>${v.ExpectedReturnDate}</td>
+
+                        </tr>`
+                        )
+                    });
+                    $('#itemModal').modal('toggle');
+                }
+            }
+        }
+        function GatePassList() {
+            
+            var url = "/MaterialsManagement/GatePassIssue/GetGatePassReceivableList";
+            //let categoryID = RtnNumber($("#CategoryID").val());
+            //let category = $("#CategoryID option:selected").text();
+            let approvalType = $("#ApprovalType").val();
+            let dateFrom = $("#DateFrom").val();
+            let dateTo = $("#DateTo").val();
+
+            var reqModel = {
+                //CategoryID: categoryID,
+                //Category: category,
+                ApprovalType: approvalType,
+                StartDate: dateFrom,
+                EndDate: dateTo,
+                IsApproved: approvalType
+            }
+            $("#grid").dxDataGrid({
+
+                dataSource: DevExpress.data.AspNet.createStore({
+                    key: "GatePassID",
+                    loadUrl: url,
+                    loadParams: reqModel
+                }),
+
+                remoteOperations: {
+                    paging: true,
+                    sorting: true,
+                    filtering: true,
+                },
+                showColumnLines: true,
+                showRowLines: true,
+                showBorders: true,
+                pager: {
+                    showInfo: true,
+                    allowedPageSizes: [10, 20, 40, 100, 500],
+                    showPageSizeSelector: true,
+                },
+                loadingIndicator: {
+                    enabled: true
+                },
+                paging: { pageSize: 10 },
+                //headerFilter: { visible: false, allowSearch: true },
+                selection: { mode: 'single' },
+                filterRow: { visible: true },
+                wordWrapEnabled: true,
+                columns: [
+                    {
+                        width: "5%",
+                        caption: "SL #",
+                        alignment: 'center',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        },
+                        cellTemplate: function (container, e) {
+
+                            var index = e.rowIndex + 1;
+                            container.text(index);
+                        }
+
+                    },
+                    {
+                        dataField: "GatePassID",
+                        visible: false,
+                    },
+                    {
+                        width: "15%",
+                        dataField: "CategoryName",
+                        alignment: 'center',
+                        caption: 'Category',                        
+                        cellTemplate: function (cellElement, options) {
+                            var url = `<a style="padding:0px;margin:0px;" title="Gate Pass" target="_blank" class="dx-link" href="/MaterialsManagement/GatePass/GatePassChallan?gatePassID=${options.data.GatePassID}&categoryID=${options.data.CategoryID}&reportType=1">${options.data.CategoryName}</a>`;
+                            cellElement.append(url);
+                        }
+                    },
+                    {
+                        width: "15%",
+                        dataField: "Serial",
+                        alignment: 'center',
+                        caption: 'Serial No',
+                      
+                        cellTemplate: function (cellElement, options) {
+                            var url = `<a style="padding:0px;margin:0px;" title="Challan"  target="_blank" class="dx-link" href="/MaterialsManagement/GatePass/GatePassChallan?gatePassID=${options.data.GatePassID}&categoryID=${options.data.CategoryID}&reportType=2">${options.data.Serial}</a>`;
+                            cellElement.append(url);
+                        }
+                    },
+                    {
+                        width: "15%",
+                        dataField: "Date",
+                        alignment: 'center',
+                        caption: 'Created Date',
+                        width: 150,
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+                    },
+                    {
+                        width: "10%",
+                        dataField: "Time",
+                        alignment: 'center',
+                        caption: 'Time',
+                        width: 150,
+                        hidingPriority: 0,
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+                    },
+                    {
+                        width: "35%",
+                        dataField: "DepartmentName",
+                        alignment: 'center',
+                        caption: 'Department',
+                        width: 150,
+                        hidingPriority: 1,
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+                    },
+                    {
+                        width: "5%",
+                        caption: "Action",
+                        alignment: 'center',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        },
+                        cellTemplate: function (container, options) {
+                            if (!options.data.IsSatisfied) {
+                                var returnText = `<span>&nbsp</span><button class="btn btn-xs btn-success" > <i class="fa fa-reply"></i></button>`;
+                                returnText = returnText + '</div>';
+                                $(returnText).on('dxclick', function () {
+                                    ReturnableGatePassInfo(options.data.GatePassID, options.data.CategoryID);
+                                }).appendTo(container);
+                            }
+                        }
+                    }
+
+
+                ],
+
+                //headerFilter: {
+                //    visible: true
+                //},
+
+                //scrolling: {
+                //    mode: "virtual"
+                //},
+                // width:1000,
+                height: 520,
+               // showBorders: true,
+            }).dxDataGrid("instance");
+        }
+    </script>
+}

@@ -1,0 +1,113 @@
+﻿@model RG.Application.ViewModel.MDSir.ExportDocument.LCMaturityRealizationVM
+@{
+    ViewData[PageInfo.PageTitle] = "LC Maturity Realization";
+    ViewData[PageInfo.PageHeader] = "LC Maturity Realization";
+    Layout = "~/Views/Shared/_LayoutMDSir.cshtml";
+}
+<form id="AspNetRolesCreate" method="post">
+    <div class="row">
+        <div class="col-sm-4">
+            <div class="form-group">
+                <label asp-for="CompanyID" class="label-ajt-sm"></label>
+                <select asp-for="CompanyID" asp-items="Model.DDLCompany" class="form-control form-control-sm"></select>
+                <span asp-validation-for="CompanyID" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="form-group">
+                <label asp-for="FundTypeID" class="label-ajt-sm"></label>
+                <select asp-for="FundTypeID" asp-items="Model.DDLFundType" class="form-control form-control-sm"></select>
+                <span asp-validation-for="FundTypeID" class="text-danger"></span>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-4">
+            <div class="form-group">
+                <label asp-for="FilterTypeID" class="label-ajt-sm required"></label>
+                <select asp-for="FilterTypeID" asp-items="Model.DDLFilterType" class="form-control form-control-sm"></select>
+                <span asp-validation-for="FilterTypeID" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-md-4 clsDate">
+            <div class="input-group">
+                <div class="col-6 col-sm-6 col-md-6 col-lg-6 pl-0">
+                    <div class="form-group">
+                        <label asp-for="DateFrom" class="required"></label>
+                        <div class="input-group">
+                            <input type="text" asp-for="DateFrom" class="form-control form-control-sm dateField readonlyNormal" readonly />
+                            <div class="input-group-append">
+                                <span class="input-group-text"><i class="fa fa-calendar" aria-hidden="true"></i></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-sm-6 col-md-6 col-lg-6 pl-0">
+                    <div class="form-group">
+                        <label asp-for="DateTo" class="required"></label>
+                        <div class="input-group">
+                            <input type="text" asp-for="DateTo" class="form-control form-control-sm dateField readonlyNormal" readonly />
+                            <div class="input-group-append">
+                                <span class="input-group-text"><i class="fa fa-calendar" aria-hidden="true"></i></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2 clsMonth">
+            <div class="form-group">
+                <label asp-for="Month" class="label-ajt-sm required"></label>
+                <select asp-for="Month" asp-items="Model.DDLMonth" class="form-control form-control-sm"></select>
+                <span asp-validation-for="Month" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-md-2 clsMonth clsYear">
+            <div class="form-group">
+                <label asp-for="Year" class="label-ajt-sm required"></label>
+                <select asp-for="Year" asp-items="Model.DDLYear" class="form-control form-control-sm"></select>
+                <span asp-validation-for="Year" class="text-danger"></span>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-4">
+            <div class="form-group">
+                <button type="button" class="btn btn-sm btn-success" id="btnShow">Show</button>
+            </div>
+        </div>
+    </div>
+</form>
+@section scripts{
+    <script type="text/javascript">
+        $(function () {
+            $('#FilterTypeID').change(function () {
+                let filterType = $('#FilterTypeID').val();
+                $('.clsDate,.clsMonth,.clsYear').addClass('d-none');
+                if (filterType == 1) {
+                    $('.clsDate').removeClass('d-none');
+                }
+                else if (filterType == 2) {
+                    $('.clsMonth').removeClass('d-none');
+                }
+                else if (filterType == 3) {
+                    $('.clsYear').removeClass('d-none');
+                }
+            });
+            $('#FilterTypeID').trigger('change');
+
+            $('#btnShow').click(function () {
+                let companyID = $('#CompanyID').val();
+                let fundTypeID = $('#FundTypeID').val();
+                let filterTypeID = $('#FilterTypeID').val();
+                let dateFrom = $('#DateFrom').val();
+                let dateTo = $('#DateTo').val();
+                let month = $('#Month').val();
+                let year = $('#Year').val();
+
+                let action = `/MDSir/ExportDocument/LCMaturityRealizationReport?FilterTypeId=${filterTypeID}&DateFrom=${dateFrom}&DateTo=${dateTo}&Month=${month}&Year=${year}&CompanyId=${companyID}&FundTypeID=${fundTypeID}`;
+                newWindow(action, "Export Document Realization Detail");
+            });
+        })
+    </script>
+}

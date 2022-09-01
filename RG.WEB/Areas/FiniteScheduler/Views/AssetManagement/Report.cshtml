@@ -1,0 +1,137 @@
+﻿@model List<RG.Application.ViewModel.FiniteScheduler.Setup.AssetInfo.ReportDataVM>
+@{
+
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Asset Report</title>
+    <link href="~/AdminLTE-3.1.0/plugins/jquery-ui/jquery-ui.min.css" rel="stylesheet" />
+    <link href="~/lib/bootstrap-5.0.2/css/bootstrap.min.css" rel="stylesheet" />
+    <script src="~/AdminLTE-3.1.0/plugins/jquery/jquery.min.js"></script>
+    <script src="~/AdminLTE-3.1.0/plugins/jquery-ui/jquery-ui.min.js"></script>
+    <script src="~/lib/bootstrap-5.0.2/js/bootstrap.bundle.min.js"></script>
+
+
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.12/css/jquery.dataTables.min.css" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/1.2.2/css/buttons.dataTables.min.css" />
+    <script type="text/javascript" src="https://code.jquery.com/jquery-1.12.3.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.2.2/js/dataTables.buttons.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/2.5.0/jszip.min.js"></script>
+    <script type="text/javascript" src="https://cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/pdfmake.min.js"></script>
+    <script type="text/javascript" src="https://cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/vfs_fonts.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.2.2/js/buttons.html5.min.js"></script>
+
+    <style>
+        .header {
+            position: sticky;
+            top: 0;
+        }
+    </style>
+
+</head>
+
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12 text-center">
+                <h5 class="mb-0">Robintex (Bangladesh) Limited</h5>
+                <h6>Bhulta,Rupganj,Narayanganj</h6>
+                <h6>Asset Report</h6>
+            </div>
+        </div>
+        <table class="table table-sm table-bordered table-striped text-sm text-center display nowrap" id="tblAsset" style="font-size:11px;">
+            <thead class="bg-dark text-white header font-weight-bold">
+                <tr style="vertical-align:middle">
+                    <th>Sl#</th>
+                    <th>Name</th>
+                    <th>Company</th>
+                    <th>Code</th>
+                    <th>Description</th>
+                    <th>Brand</th>
+                    <th>Model No</th>
+                    <th>Capacity</th>
+                    <th>Type</th>
+                    <th>Sub Type</th>
+                    <th>Status</th>
+                    <th>LC No</th>
+                    <th>Pur. Date</th>
+                    <th>Pur. Value</th>
+                    <th>Dep. Percent</th>
+                    <th>Acc. Deprication</th>
+                    <th>Current Value</th>
+                    <th>Location</th>
+                    <th>Division</th>
+                    <th>Department</th>
+                    <th>Remarks</th>
+                </tr>
+            </thead>
+            <tbody>
+                @{ var sl = 0;
+                    foreach (var item in Model)
+                    {
+                        sl++;
+                                <tr>
+                                    <td>@sl</td>
+                                    <td>@item.AssetName</td>
+                                    <td>@item.CompanyName</td>
+                                    <td><b>@item.Code</b></td>
+                                    <td>@item.Description</td>
+                                    <td>@item.BrandName</td>
+                                    <td>@item.ModelNo</td>
+                                    <td>@item.Capacity @item.CapacityUnit</td>
+                                    <td>@item.AssetTypeName</td>
+                                    <td>@item.AssetSubTypeName</td>
+                                    <td>@item.FunctionalStatus</td>
+                                    <td>@item.LCNo</td>
+                                    <td>@item.PurchaseDateMsg</td>
+                                    <td class="text-end">@(String.Format("{0:n2}", item.PurchaseValue))</td>
+                                    <td>@item.DepriciationPercent %</td>
+                                    <td class="text-end">@(String.Format("{0:n2}", item.AccumulatedDeprication))</td>
+                                    <td class="text-end">@(String.Format("{0:n2}", item.ValueAfterDeprication))</td>
+                                    <td>@item.Location</td>
+                                    <td>@item.Division</td>
+                                    <td>@item.Department</td>
+                                    <td>@item.Remarks</td>
+                                </tr>
+                    }
+                }
+            </tbody>
+        </table>
+        <div class="text-center">
+            <input type="button" class="btn btn-sm btn-success" value="Excel" id="btnExcel" onclick="exportToExcel()" />
+        </div>
+    </div>
+</body>
+</html>
+
+<script type="text/javascript">
+    function exportToExcel() {
+        var htmls = "";
+        var uri = 'data:application/vnd.ms-excel;base64,';
+        var template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>';
+        var base64 = function (s) {
+            return window.btoa(unescape(encodeURIComponent(s)))
+        };
+
+        var format = function (s, c) {
+            return s.replace(/{(\w+)}/g, function (m, p) {
+                return c[p];
+            })
+        };
+
+        htmls = document.getElementById("tblAsset").innerHTML;
+
+        var ctx = {
+            worksheet: 'Worksheet',
+            table: htmls
+        }
+        var link = document.createElement("a");
+        link.download = "AssetReport.xls";
+        link.href = uri + base64(format(template, ctx));
+        link.click();
+    }
+</script>

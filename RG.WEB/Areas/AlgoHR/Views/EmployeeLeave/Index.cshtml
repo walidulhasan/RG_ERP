@@ -1,0 +1,757 @@
+﻿@using RG.Application.Common.CommonInterfaces;
+
+@model RG.Application.ViewModel.AlgoHR.Business.EmployeeLeave.IndexLeaveListVM
+@inject ICurrentUserService _currentUserService;
+@{
+    ViewData[PageInfo.PageTitle] = "Leave Applicaions";
+    ViewData[PageInfo.PageHeader] = "Leave Applicaions";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var isSuperAdmin = _currentUserService.IsSuperAdminRole == true ? 1 : 0;
+    var IsLeaveSpecialApprove = User.FindFirst(UserClaimsCC.LeaveSpecialApprove)?.Value ?? "0";
+    var IsLeaveSpecialCancel = User.FindFirst(UserClaimsCC.LeaveSpecialCancel)?.Value ?? "0";
+    var LeaveAdjustmentPower = User.FindFirst(UserClaimsCC.LeaveAdjustmentPower)?.Value ?? "0";
+   
+
+}
+
+<div class="row">
+    <div class="col-sm-12 col-md-12">
+        <div class="card card-dark">
+            <div class="card-header m-0 p-1">
+                <h5 class="card-title">Leave Applications</h5>
+
+            </div>
+            <div class="card-body p-2">
+                <div class="row">
+                    <div class="col-6 col-sm-3">
+                        <div class="form-group mb-2">
+                            <label asp-for="LeaveID" class=""></label>
+                            <select asp-for="LeaveID" asp-items="Model.DDLLeaves" class="form-control form-control-sm"></select>
+                        </div>
+                    </div>
+                    <div class="col-6 col-sm-3">
+                        <div class="form-group mb-2">
+                            <label asp-for="LeaveStatus" class=""></label>
+                            <select asp-for="LeaveStatus" asp-items="Model.DDLLeaveStatus" class="form-control form-control-sm"></select>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-3">
+                        <div class="form-group mb-2">
+                            <label asp-for="CompanyID" class="required"></label>
+                            <select asp-for="CompanyID" asp-items="Model.DDLCompany" class="form-control form-control-sm"></select>
+                            <span asp-validation-for="CompanyID" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="form-group mb-2">
+                            <label asp-for="OfficeDivisionID" class=""></label>
+                            <select asp-for="OfficeDivisionID" asp-items="Model.DDLOfficeDivision" class="form-control form-control-sm"></select>
+                            <span asp-validation-for="OfficeDivisionID" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-sm-2">
+                        <div class="form-group mb-2">
+                            <label asp-for="DepartmentID" class=""></label>
+                            <select asp-for="DepartmentID" asp-items="Model.DDLDepartment" class="form-control form-control-sm"></select>
+                            <span asp-validation-for="DepartmentID" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-12 col-sm-4 col-md-4 col-lg-4">
+                        <div class="input-group">
+                            <div class="col-6 col-sm-6 col-md-6 col-lg-6 pl-0">
+                                <div class="form-group">
+                                    <label asp-for="DateFrom" class=""></label>
+                                    <div class="input-group">
+                                        <input type="text" asp-for="DateFrom" class="form-control form-control-sm dateField readonlyNormal" readonly />
+                                        <div class="input-group-append">
+                                            <span class="input-group-text"><i class="fa fa-calendar" aria-hidden="true"></i></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-6 col-sm-6 col-md-6 col-lg-6 pl-0">
+                                <div class="form-group">
+                                    <label asp-for="DateTo" class=""></label>
+                                    <div class="input-group">
+                                        <input type="text" asp-for="DateTo" class="form-control form-control-sm dateField readonlyNormal" readonly />
+                                        <div class="input-group-append">
+                                            <span class="input-group-text"><i class="fa fa-calendar" aria-hidden="true"></i></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12 col-md-12 text-center">
+                        <div class="form-group">
+                            <button type="button" class="btn btn-sm btn-success" id="btnSearch">Search</button>
+
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12 col-sm-12 col-xs-12">
+                        <div id="grid">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div id="modalEmployeeLeaveInfo" class="modal fade" role="dialog">
+    <div class="modal-dialog modal-lg">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header p-2 bg-dark">
+                <h6 class="modal-title modTitle"> </h6>
+                <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body px-2 py-0">
+                <div id="divEmpLeave">
+
+                </div>
+            </div>
+            <div class="modal-footer p-1 d-flex justify-content-center">
+                <input type="button" class="btn btn-warning btn-sm" id="btnEmpLevStatus" value="Cancel" />
+                @*<button type="button" class="btn btn-danger btn-sm" data-dismiss="modal">Close</button>*@
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Modal -->
+<div id="notificationDetailModal" class="modal fade" role="dialog" style="z-index:1050">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header p-2">
+                <h5 class="modal-title">Leave Document Detail</h5>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <table id="tblNotificationDetail">
+                    <thead class="bg-dark">
+                    </thead>
+                    <tbody id="tbodyNotificationDetail">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</div>
+<!-- The Modal -->
+<div id="imgModal" class="modal fade" role="dialog" style="z-index:1500">
+    <div class="modal-dialog modal-lg">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header p-2">
+                <h6 class="modal-title" id="caption"></h6>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <img class="modal-content" id="largeImg">
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+
+@section scripts{
+    <script type="text/javascript">
+        $(function () {
+
+            $("#OfficeDivisionID").change(function () {
+
+                let officeDivisionID = $("#OfficeDivisionID").val();
+                if (officeDivisionID != "") {
+
+                    HttpRequest.DropDown("Get", "/AlgoHR/CommonDropDown/GetDDLDeptList", { divisionID: officeDivisionID }, 'DepartmentID', true);
+
+                }
+            });
+            $("#CompanyID").change(function () {
+                let compID = $("#CompanyID").val();
+                if (compID != "") {
+                    //let exceptDivision = [9, 10, 12];
+                    HttpRequest.DropDown("POST", "/AlgoHR/CommonDropDown/GetDDLDivisionListByEmbroCompany", { embroCompanyID: compID }, 'OfficeDivisionID', true);
+                    $("#OfficeDivisionID").trigger('change');
+                } else {
+                    HttpRequest.DropDownDefault("OfficeDivisionID");
+                }
+            });
+            $("#btnSearch").click(function () {
+                debugger;
+
+                let leaveID = $("#LeaveID").val();
+                let leaveStatus = $("#LeaveStatus").val();
+                let dateFrom = $("#DateFrom").val();
+                let dateTo = $("#DateTo").val();
+                let companyID = $("#CompanyID").val();
+                let divisionID = $("#OfficeDivisionID").val();
+                let departmentID = $("#DepartmentID").val();
+                leaveStatus = leaveStatus;// != "" ? leaveStatus == "1" ? true : false : null;
+                //let empInfo = HttpRequest.AjaxData('GET', '/AlgoHR/EmployeeLeave/SearchedLeaveList', { leaveID: leaveID, leaveStatus: leaveStatus, dateFrom: dateFrom, dateTo: dateTo });
+
+                var dataGrid = $("#grid").dxDataGrid({
+                    height: 450,
+                    remoteOperations: { paging: true, filtering: true, sorting: true },
+                    dataSource: DevExpress.data.AspNet.createStore({
+                        key: "LeaveApplicationID",
+                        loadUrl: "/AlgoHR/EmployeeLeave/SearchedLeaveList",
+                        loadParams: {
+                            leaveID: leaveID,
+                            leaveStatus: leaveStatus,
+                            dateFrom: dateFrom,
+                            dateTo: dateTo,
+                            companyID: companyID,
+                            divisionID: divisionID,
+                            departmentID: departmentID
+                        }
+                    }),
+                    hoverStateEnabled: true,
+                    showBorders: true,
+                    columnAutoWidth: true,
+                    filterRow: { visible: true },
+                    pager: { visible: true, showInfo: true, allowedPageSizes: [10, 20, 50, 100, 500], showPageSizeSelector: true, },
+                    paging: { pageSize: 20 },
+                    selection: { mode: 'single' },
+                    export: {
+                        //   enabled: true
+                    },
+                    sorting: {
+                        mode: "multiple"
+                    },
+                    columns: [
+                        {
+                            width: "auto",
+                            caption: "SL #",
+                            alignment: 'center',
+                            headerCellTemplate: function (header, info) {
+                                $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                            },
+                            cellTemplate: function (container, e) {
+                                var index = dataGrid.pageIndex() * dataGrid.pageSize() + e.rowIndex + 1;
+                                container.text(index);
+                            }
+
+                        },
+                        {
+                            dataField: "EmployeeID",
+                            visible: false
+
+                        },
+
+                        {
+                            dataField: "EmployeeCode",
+                            alignment: 'center',
+                            caption: 'Code',
+                            headerCellTemplate: function (header, info) {
+                                $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                            }
+
+
+                        },
+                        {
+                            dataField: "EmployeeName",
+                            alignment: 'center',
+                            caption: 'Name',
+                            headerCellTemplate: function (header, info) {
+                                $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                            }
+
+                        },
+                        {
+                            dataField: "DivisionName",
+                            alignment: 'center',
+                            caption: 'Division',
+                            headerCellTemplate: function (header, info) {
+                                $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                            }
+
+                        },
+                        {
+                            dataField: "DepartmentName",
+                            alignment: 'center',
+                            caption: 'Department',
+                            headerCellTemplate: function (header, info) {
+                                $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                            }
+
+                        },
+                        {
+                            dataField: "Designation",
+                            alignment: 'center',
+                            caption: 'Designation',
+                            headerCellTemplate: function (header, info) {
+                                $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                            }
+
+                        },
+                        {
+                            dataField: "LeaveType",
+                            alignment: 'center',
+                            caption: 'Leave Type',
+                            headerCellTemplate: function (header, info) {
+                                $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                            }
+
+                        },
+                        {
+                            dataField: "LeaveFrom",
+                            alignment: 'center',
+                            caption: 'From',
+                            headerCellTemplate: function (header, info) {
+                                $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                            }
+
+                        },
+                        {
+                            dataField: "LeaveTo",
+                            alignment: 'center',
+                            caption: 'To',
+                            headerCellTemplate: function (header, info) {
+                                $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                                
+
+                            }
+
+                        },
+                        {
+                            dataField: "LeaveStatus",
+                            alignment: 'center',
+                            caption: 'Status',
+                            headerCellTemplate: function (header, info) {
+                                console.log(info)
+                                console.log(header)
+                                $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                            }/*,
+                                                cellTemplate: function (container, options) {
+                                                    var returnText = '<button class="btn btn-xs"> ' + options.data.LeaveStatus + '</button>';
+                                                    $(returnText).on('dxclick', function () {
+                                                        GetDetailEmployeeLeave(options.data);
+                                                    }).appendTo(container);
+                                                }*/
+
+                        },
+
+                        {
+                            dataField: "FirstApprover",
+                            alignment: 'center',
+                            caption: '1st Approver',
+                            headerCellTemplate: function (header, info) {
+                                $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                            },
+                            cellTemplate: function (container, options) {
+                                let returnText = ``;
+                                if (options.data.FirstApproverIsChecked != null) {
+
+                                    if (options.data.FirstApproverIsChecked) {
+                                        returnText = `<span class="badge badge-success">${options.data.FirstApprover}</span>`;
+                                    } else {
+                                        returnText = `<span class="badge badge-danger">${options.data.FirstApprover}</span>`;
+                                    }
+                                } else {
+                                    if (options.data.FirstApprover != null) {
+                                        returnText = `<span class="badge">${options.data.FirstApprover}</span>`;
+                                    } else {
+                                        returnText = ``;
+                                    }
+                                }
+                                $(returnText).appendTo(container);
+                            }
+
+                        },
+                        {
+                            dataField: "SecondApprover",
+                            alignment: 'center',
+                            caption: '2nd Approver',
+                            headerCellTemplate: function (header, info) {
+                                $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                            },
+                            cellTemplate: function (container, options) {
+                                let returnText = ``;
+                                if (options.data.SecondApproverIsChecked != null) {
+
+                                    if (options.data.SecondApproverIsChecked) {
+                                        returnText = `<span class="badge badge-success">${options.data.SecondApprover}</span>`;
+                                    } else {
+                                        returnText = `<span class="badge badge-danger">${options.data.SecondApprover}</span>`;
+                                    }
+                                } else {
+                                    if (options.data.SecondApprover != null) {
+                                        returnText = `<span class="badge">${options.data.SecondApprover}</span>`;
+                                    } else {
+                                        returnText = ``;
+                                    }
+                                }
+                                $(returnText).appendTo(container);
+                            }
+
+                        },
+                        {
+                            dataField: "ThirdApprover",
+                            alignment: 'center',
+                            caption: '3rd Approver',
+                            headerCellTemplate: function (header, info) {
+                                $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                            },
+                            cellTemplate: function (container, options) {
+                                let returnText = ``;
+                                if (options.data.ThirdApproverIsChecked != null) {
+
+                                    if (options.data.ThirdApproverIsChecked) {
+                                        returnText = `<span class="badge badge-success">${options.data.ThirdApprover}</span>`;
+                                    } else {
+                                        returnText = `<span class="badge badge-danger">${options.data.ThirdApprover}</span>`;
+                                    }
+                                } else {
+                                    if (options.data.ThirdApprover != null) {
+                                        returnText = `<span class="badge">${options.data.ThirdApprover}</span>`;
+                                    } else {
+                                        returnText = ``;
+                                    }
+                                }
+                                $(returnText).appendTo(container);
+                            }
+
+                        },
+                        {
+                            dataField: "FourthApprover",
+                            alignment: 'center',
+                            caption: '4th approver',
+                            headerCellTemplate: function (header, info) {
+                                $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                            },
+                            cellTemplate: function (container, options) {
+                                let returnText = ``;
+                                if (options.data.FourthApproverIsChecked != null) {
+
+                                    if (options.data.FourthApproverIsChecked) {
+                                        returnText = `<span class="badge badge-success">${options.data.FourthApprover}</span>`;
+                                    } else {
+                                        returnText = `<span class="badge badge-danger">${options.data.FourthApprover}</span>`;
+                                    }
+                                } else {
+                                    if (options.data.FourthApprover != null) {
+                                        returnText = `<span class="badge">${options.data.FourthApprover}</span>`;
+                                    } else {
+                                        returnText = ``;
+                                    }
+
+                                }
+                                $(returnText).appendTo(container);
+                            }
+
+                        },
+                        //{
+                        //    dataField: "LeaveTo",
+                        //    alignment: 'center',
+                        //    caption: 'To',
+                        //    headerCellTemplate: function (header, info) {
+                        //        $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        //    }, cellTemplate: function (container, options) {
+
+                        //        var returnText = '<button class="btn btn-xs btn-info"> ' + options.data.LateCount + '</button>';
+                        //        $(returnText).on('dxclick', function () {
+                        //            GetDetailLateHistory(options.data);
+                        //        }).appendTo(container);
+                        //    }
+
+                        //},
+
+                        //{
+                        //    caption: 'Action',
+                        //    alignment: 'center',
+                        //    headerCellTemplate: function (header, info) {
+                        //        $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        //    },
+                        //    cellTemplate: function (container, options) {
+                        //        if (options.data.LateCount != options.data.IssuedLateCount) {
+                        //            var returnText = '<button class="btn btn-xs btn-danger"><i class="fa fa-check"></i> Letter Issue</button>';
+                        //            $(returnText).on('dxclick', function () {
+                        //                IssueWarningLetter(options.data);
+                        //            }).appendTo(container);
+                        //        } else {
+                        //            var returnText = '<h6><span class="badge badge-warning">Lette Issued</span></h6>';
+                        //            $(returnText).appendTo(container);
+                        //        }
+                        //    }
+                        //}
+                    ],
+                    onCellPrepared: function (e) {
+
+                        if (e.rowType === "data" && e.column.dataField === "LeaveStatus") {
+                            var cellValue = e.data.LeaveStatus;
+                            if (cellValue == "Processing") {
+                                e.cellElement.addClass('bg-warning');
+                            } else if (cellValue == "Approved") {
+                                e.cellElement.addClass('bg-success');
+                            } else if (cellValue == "Reject") {
+                                e.cellElement.addClass('bg-danger');
+                            }
+                            e.cellElement.addClass('border border-primary')
+                        }
+                        if (e.rowType === "data" && (e.column.dataField === "LeaveType")) {
+                            var leaveTypeValue = e.data.LeaveType;
+                            if (leaveTypeValue == "SICK LEAVE") {
+                                e.cellElement.addClass('bg-primary');
+                            }
+                        }
+                        if (e.rowType === "data" && e.column.dataField === "LeaveTo" && e.data.LeaveStatus === "Approved") {
+
+                            let dayDifference = GetDayDifference(e.data.LeaveFrom, e.data.LeaveTo, true);
+                            if (dayDifference>1) {
+                                e.cellElement.addClass('bg-warning');
+                            }
+
+                        }
+                    },
+                    onCellClick: function (e) {
+
+                        let CellText = e.text;
+                        let LeaveStatus = e.data.LeaveStatus;
+                        let LeaveType = e.data.LeaveType
+                        let applicationID = e.data.LeaveApplicationID
+
+                        if (e.column.dataField == "EmployeeCode" && e.rowType == 'data' && LeaveStatus == "Processing" && ('@isSuperAdmin' == "1" || '@IsLeaveSpecialApprove' == "1")) {
+
+                             GetDetailEmployeeLeave(applicationID, 'Approved');
+
+                        } else if (e.column.dataField == "LeaveStatus" && e.rowType == 'data' && (CellText == "Approved" || CellText == "Processing") && ('@isSuperAdmin' == "1" || '@IsLeaveSpecialCancel' == "1")) {
+
+                            GetDetailEmployeeLeave(applicationID, 'Cancel');
+
+                        } else if (e.column.dataField == "LeaveType" && e.rowType == 'data' && LeaveType =='SICK LEAVE') {
+                            NotificationDetails(applicationID);
+                        }
+                        else if (e.column.dataField == "LeaveTo" && e.rowType == 'data' && LeaveStatus == "Approved") {
+                            let dayDifference = GetDayDifference(e.data.LeaveFrom, e.data.LeaveTo, true);
+                            if (dayDifference > 1 && "@LeaveAdjustmentPower"=="1") {
+                            GetDetailEmployeeLeave(applicationID, 'Adjust');
+                            }
+
+                        }
+                    },
+                }).dxDataGrid("instance");
+            });
+
+            $("#btnEmpLevStatus").click(function () {
+                debugger
+                let epmloyeeID = $(".hdnEmpID").val();
+                let epmloyeeCode = $(".epmCd").val();
+                let LevApplicationID = $(".hdnLeaveApplicationID").val();
+                let cancellationReason = $(".cancellationReason").val();
+                let recommendation = $(".recommendation").val();
+                let levApprovedComment = $(".levApprovedComment").val();
+                let status = $(".hdnStatus").val();
+                let adjustedDateTo = $(".adjustedDateTo").val();
+
+                let EmpLeaveData = {
+                    EmployeeID: epmloyeeID,
+                    EmployeeCode: epmloyeeCode,
+                    LeaveID: LevApplicationID,
+                    Reason: cancellationReason,
+                    Recommendation: recommendation,
+                    Status: status,
+                    Comment: levApprovedComment,
+                    AdjustedDateTo: adjustedDateTo
+                }
+
+                if (EmpLeaveData.EmployeeID > 0 && EmpLeaveData.Status == "Cancel") {
+                    HttpRequest.Ajax("POST", '/AlgoHR/EmployeeLeave/LeaveApplicationCancel', { "employeeLeaveCancelVM": EmpLeaveData }, saveSuccess, null, true);
+                } else if (EmpLeaveData.EmployeeID > 0 && EmpLeaveData.Status == "Adjust") {
+                    HttpRequest.Ajax("POST", '/AlgoHR/EmployeeLeave/LeaveApplicationAdjust', { "leaveAdjust": EmpLeaveData }, saveSuccess, null, true);
+                } else {
+                    $.alert.open('alert', "Something is Error!!");
+                }
+            })
+
+        });
+
+        function saveSuccess(data) {
+            if (data.result == 1) {
+                $.alert.open({
+                    type: 'Success',
+                    content: data.message,
+                    callback: function () {
+                        $("#btnSearch").trigger('click');
+                    }
+                });
+                $('#modalEmployeeLeaveInfo').modal('hide');
+            }
+            else {
+                $.alert.open("error", data.message);
+            }
+        }
+
+        const GetDetailEmployeeLeave = (applicationID, status) => {
+            debugger
+
+
+            let dataEmpLeave = HttpRequest.AjaxData("Get", '/AlgoHR/EmployeeLeave/GetEmpLeaveInfo', { 'leaveApplicationID': applicationID });
+
+            if (dataEmpLeave != null || dataEmpLeave != "") {
+                let tr = ``
+                tr = tr + `
+                                                <div class="row">
+                                                    <div class="col-md-4">
+                                                        <div class="form-group">
+                                                            <input hidden class="hdnEmpID" value='${dataEmpLeave.Emp_ID}'/>
+                                                            <input hidden class="hdnStatus" value='${status}'/>
+                                                            <input hidden class="hdnLeaveApplicationID" value='${dataEmpLeave.LeaveApplicationID}'/>
+                                                            <label>Employee Code</label>
+                                                            <input readonly type="text" class="form-control form-control-sm epmCd" autocomplete="off" placeholder="Employee Code" value='${dataEmpLeave.Emp_Cd}' />
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <div class="form-group">
+                                                            <input type="hidden" />
+                                                            <label>Employee Name</label>
+                                                            <input readonly type="text" class="form-control form-control-sm epmName" autocomplete="off" placeholder="Employee Name" value='${dataEmpLeave.Emp_Name}' />
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <div class="form-group">
+                                                            <input type="hidden" />
+                                                            <label>Department</label>
+                                                            <input readonly type="text" class="form-control form-control-sm empDep" autocomplete="off" placeholder="Department" value='${dataEmpLeave.Dept_Name}' />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-md-4">
+                                                        <div class="form-group">
+                                                            <input type="hidden" />
+                                                            <label>Designation</label>
+                                                            <input readonly type="text" class="form-control form-control-sm empDes" autocomplete="off" placeholder="Designation" value='${dataEmpLeave.Designation_Name}' />
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <div class="form-group">
+                                                            <input type="hidden" />
+                                                            <label>Leave Type</label>
+                                                            <input readonly type="text" class="form-control form-control-sm empLT" autocomplete="off" placeholder="Leave Type" value='${dataEmpLeave.LeaveType}' />
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <div class="form-group">
+                                                            <input type="hidden" />
+                                                            <label >Leave Reason</label>
+                                                            <input readonly type="text" class="form-control form-control-sm" autocomplete="off" placeholder="Leave Reason"  value='${dataEmpLeave.Leave_Reason}' />
+                                                        </div>
+                                                    </div>
+                                                </div>
+<div class="row" id="levAdjustRow">
+                                                    <div class="col-md-4">
+                                                        <div class="form-group">
+                                                            <label>From</label>
+                                                            <input readonly type="text" class="form-control form-control-sm" autocomplete="off" placeholder="Leave From" value='${dataEmpLeave.Leave_FromMsg}' />
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <div class="form-group">
+                                                            <label>To</label>
+                                                            <input type="text" class="form-control form-control-sm dateField adjustedDateTo" autocomplete="off" placeholder="Leave To" value='${dataEmpLeave.Leave_ToMsg}' />
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+                                                <div class="row" id="levCancelRow" >
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label>Cancellation Reason</label>
+                                                            <textarea placeholder="Cancellation Reason..." rows="1" cols="3" maxlength="30" class="form-control form-control-sm cancellationReason"></textarea>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <input type="hidden" />
+                                                            <label>Recommendation</label>
+                                                            <input type="text" class="form-control form-control-sm recommendation" autocomplete="off" placeholder="Recommendation" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row" id="levApprovedRow">
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label>Write your comment if are you sure</label>
+                                                            <textarea placeholder="Comment Please..." rows="1" cols="3" maxlength="30" class="form-control form-control-sm levApprovedComment"></textarea>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                       `
+
+                $("#divEmpLeave").html(tr);
+                $(".dateField").datepicker(
+                    {
+                        dateFormat: "dd-M-yy",
+                        showAnim: "scale",
+                        //changeMonth: true,
+                        //yearRange: "2000:2050",
+                        //changeYear: true
+                        minDate: dataEmpLeave.Leave_FromMsg,
+                        maxDate: dataEmpLeave.Leave_ToMsg,
+                    });
+                if (status == 'Cancel') {
+                    $('.modTitle').text('Cancle Leave Application');
+                    $('#levApprovedRow,#levAdjustRow').addClass('d-none');
+                    $('#levCancelRow').removeClass('d-none');
+                    $('#btnEmpLevStatus').val("Application Cancel");
+                } else if (status == 'Approved') {
+                    $('.modTitle').text('Processing Leave Application Approval');
+                    $('#levApprovedRow').removeClass('d-none');
+                    $('#levCancelRow,#levAdjustRow').addClass('d-none');
+                    $('#btnEmpLevStatus').val("Application Approve");
+                } else if (status == 'Adjust') {
+                    $('.modTitle').text('Adjust Approved Leave');
+                    $('#levAdjustRow,#levApprovedRow').removeClass('d-none');
+                    $('#levCancelRow').addClass('d-none');
+                    $('#btnEmpLevStatus').val("Adjust Application");
+                }
+                $("#modalEmployeeLeaveInfo").modal('toggle');
+
+
+            } else {
+                $.alert.open("alert", 'Data Empty!!');
+            }
+
+        }
+
+        function NotificationDetails(id) {
+
+            $("#tbodyNotificationDetail").html('');
+            if (id > 0) {
+                var dataDetail = HttpRequest.AjaxData('GET', '/AlgoHR/ApplicationDocuments/GetApplicationDocuments', { applicationID: id });
+                let tr = '';
+                if (dataDetail.length > 0) {
+                    let img = ``;
+                    $.each(dataDetail, function (i, v) {
+                        img += `<img class="Image mr-2" src='/${v.DocumentPath}' title='${v.DocumentType}' alt=${v.DocumentType} width="100" height="100" onclick='EnlargeImage(this)'/>`;
+                    });
+
+                    tr = `<tr><td>${img}</td></tr>`;
+
+                }
+                $("#tbodyNotificationDetail").html(tr);
+                $('#notificationDetailModal').modal('toggle');
+            }
+        }
+        function EnlargeImage(thatImg) {
+
+            $("#largeImg").attr('src', thatImg.src);
+            $("#caption").text(thatImg.alt);
+            $("#imgModal").modal('toggle');
+        }
+    </script>
+
+}

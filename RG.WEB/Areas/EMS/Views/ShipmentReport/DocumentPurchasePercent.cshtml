@@ -1,0 +1,58 @@
+﻿@model RG.Application.ViewModel.EMS.Business.ShipmentReport.DocumentPurchasePercentVM
+@{
+    ViewData[PageInfo.PageTitle] = "Document Purchase";
+    ViewData[PageInfo.PageHeader] = "Document Purchase";
+    Layout = "~/Views/Shared/_LayoutMDSir.cshtml";
+}
+<form asp-action="Create" asp-area="EMS" asp-controller="CuttingAdditionFabricRequired" method="post" id="FrmCuttingAdditionalFabric">
+
+    <div class="row">
+        <div class="col-md-2">
+            <div class="form-group">
+                <label asp-for="DateFrom" class="label-ajt-sm required"></label>
+                <input asp-for="DateFrom" type="text" class="form-control form-control-sm dateField" readonly />
+
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="form-group">
+                <label asp-for="DateTo"></label>
+                <input asp-for="DateTo" type="text" class="form-control form-control-sm dateField" readonly />
+
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="form-group">
+                <label asp-for="WithPurchaseRatio"></label>
+                <input asp-for="WithPurchaseRatio" type="checkbox" class="form-control form-control-sm" checked />
+
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <label> &nbsp;</label>
+            <div class="form-group">
+                <input type="button" class="btn btn-sm btn-warning mr-2" value="Search" id="btnSearch" />
+                <input type="button" class="btn btn-sm btn-danger mr-2" value="Clear Date" id="btnClear" />
+            </div>
+        </div>
+    </div>   
+</form>
+@section scripts{
+    <script type="text/javascript">
+
+        $(function () {
+            $("#btnClear").click(function () {
+                $("#DateFrom").val('');
+                $("#DateTo").val('');
+            });
+            $("#btnSearch").click(function () {
+                let dateFrom = $("#DateFrom").val();
+                let dateTo = $("#DateTo").val();
+                let withPurchaseRatio = $("#WithPurchaseRatio").is(":checked");               
+                newWindow(`/EMS/ShipmentReport/DocumentPurchasePercentReport?dateFrom=${dateFrom}&dateTo=${dateTo}&withPurchaseRatio=${withPurchaseRatio}`, "Company Monthly Salary");
+
+                
+            });
+        });
+    </script>
+}

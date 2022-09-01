@@ -1,0 +1,374 @@
+﻿@model List<RG.Application.Contracts.EMS.Business.ExportDocuments.Queries.RequestResponseModel.WeeklyExportDetailsReportRM>
+@{
+    Layout = null;
+    var companyID = ViewBag.CompanyID;
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Shipment Status Report</title>
+    <link href="~/AdminLTE-3.1.0/plugins/jquery-ui/jquery-ui.min.css" rel="stylesheet" />
+    <link href="~/lib/bootstrap-5.0.2/css/bootstrap.min.css" rel="stylesheet" />
+    <script src="~/AdminLTE-3.1.0/plugins/jquery/jquery.min.js"></script>
+    <script src="~/AdminLTE-3.1.0/plugins/jquery-ui/jquery-ui.min.js"></script>
+    <script src="~/lib/bootstrap-5.0.2/js/bootstrap.bundle.min.js"></script>
+
+
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.12/css/jquery.dataTables.min.css" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/1.2.2/css/buttons.dataTables.min.css" />
+    <script type="text/javascript" src="https://code.jquery.com/jquery-1.12.3.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.2.2/js/dataTables.buttons.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/2.5.0/jszip.min.js"></script>
+    <script type="text/javascript" src="https://cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/pdfmake.min.js"></script>
+    <script type="text/javascript" src="https://cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/vfs_fonts.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.2.2/js/buttons.html5.min.js"></script>
+
+    <style>
+        .header {
+            position: sticky;
+            top: 0;
+        }
+
+        .gbcColor {
+            background-color: #6236e4 !important;
+            color: white;
+        }
+
+        .nonGbcColor {
+            background-color: #8c69f2 !important;
+            color: white;
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <div class="container-fluid">
+        @if (Model.Count > 0)
+        {
+            <div class="row">
+                <div class="col-12 text-center">
+                    <h5 class="mb-0">@(companyID==0?"Robintex Group": Model.First().Companyname)</h5>
+                    <h6 class="mb-0">Shipment Status Report</h6>
+                    <h6 class="mb-0">Week- @Model.First().WeekNo</h6>
+                    <h6 class="mb-0">Shipment Mode - SEA</h6>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12 text-center font-wt-bold mb-2 fs-6">
+
+                    <span class="badge bg-danger">&nbsp;&nbsp;</span> Payment Sub Portal Date Not Found
+                    <span class="badge bg-warning">&nbsp;&nbsp;</span> Payment Not Received Within Expected Date
+                    <span class="badge bg-secondary">&nbsp;&nbsp;</span> Invoice Having Multiple Orders
+
+                </div>
+            </div>
+            <table class="table table-sm table-bordered table-striped text-center display nowrap" id="tblShipmentStatus" style="font-size:11px;">
+                <thead class="bg-dark text-white header">
+                    <tr>
+                        <th>SL#</th>
+                        <th>Order No</th>
+                        <th>Dept No</th>
+                        <th>Country</th>
+                        <th>Invoice No</th>
+
+                        <th>Qty(Pcs)</th>
+                        <th>Carton Qty</th>
+                        <th>Unit</th>
+                        <th>Unit Price</th>
+                        <th>Inv Amt</th>
+                        <th>Exfactory DT.</th>
+                        <th title="Stuffing Report Found Date">Stuff. Rpt Found</th>
+                        <th>On Board Dt</th>
+                        <th>Payment<br />Sub Portal</th>
+                        <th>Expected Payment Dt.</th>
+                        <th title="GBC/Non GBC">GBC/<br />NGBC</th>
+                        <th>Negotiate Amt</th>
+                        <th>Negotiate Dt.</th>
+                        <th>Received Amt</th>
+                        <th>Received Dt.</th>
+                        <th>Outstanding Amt</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        var sl = 1;
+                        var shipmentList = Model
+                            .OrderBy(x => x.BuyerID)
+                            .ThenBy(x=> (x.ExpectedPaymentDateMsg != "" && x.ExpectedPaymentDate.Value < DateTime.Now.Date && x.OutstandingAmt > 0)?0:1)
+                            .ThenBy(x=>(x.GBCNonGBC=="GBC")?1:0)
+                            .ThenBy(x => x.EPIM_EXFACTORYDATE)
+                            .ThenBy(x => x.EPIM_ID)
+                            //.ThenBy(x => x.OrderID)
+                            .ToList();
+
+
+
+
+
+                        var lastRow = shipmentList.Last();
+
+                        var previousBuyerID = 0;
+                        var previousBuyer = "";
+                        var prevInvID = 0;
+                        var groupData = Model.GroupBy(x => new { x.BuyerID, x.EPIM_ID, x.EPIM_Quantity, x.EPIM_AMOUNT, x.NegotiateAmt, x.ReceivedAmt, x.OutstandingAmt })
+                                             .Select(x => new
+                                             {
+                                                 x.Key.BuyerID,
+                                                 x.Key.EPIM_ID,
+                                                 x.Key.EPIM_Quantity,
+                                                 NoOfCartons = x.Sum(s => s.NoOfCartons),
+                                                 x.Key.EPIM_AMOUNT,
+                                                 x.Key.NegotiateAmt,
+                                                 x.Key.ReceivedAmt,
+                                                 x.Key.OutstandingAmt
+                                             }).ToList();
+
+
+
+                        foreach (var item in shipmentList)
+                        {
+                            var trColor = "";
+                            var trTitle = "";
+                            var gbcNonGbcColor = "";
+                            var expectedDateExceedsColor = "";
+                            var expectedDateExceedsTitle = "";
+                            var multipleOrderColor = "";
+
+
+                            if (item.EPIM_Payment_Sub_Portal == null)
+                            {
+                                trColor = "bg-danger text-white";
+                                trTitle = "Payment Sub Portal Date Not Found";
+                            }
+                            if (item.GBCNonGBC == "GBC")
+                            {
+                                gbcNonGbcColor = "gbcColor";
+                            }
+                            else if (item.GBCNonGBC == "Non GBC")
+                            {
+                                gbcNonGbcColor = "nonGbcColor";
+                            }
+                            else
+                            {
+                                gbcNonGbcColor = "";
+                            }
+
+
+                            if (item.ExpectedPaymentDateMsg != "" && item.ExpectedPaymentDate.Value < DateTime.Now.Date && item.OutstandingAmt > 0)
+                            {
+                                expectedDateExceedsColor = "bg-warning";
+                                expectedDateExceedsTitle = "Payment Not Received Within Expected Date";
+                            }
+
+                            if (previousBuyerID > 0 && item.BuyerID != previousBuyerID)
+                            {
+                                var totalQty = groupData.Where(x => x.BuyerID == previousBuyerID).Sum(x => x.EPIM_Quantity);
+                                var totalCartonQty = groupData.Where(x => x.BuyerID == previousBuyerID).Sum(x => x.NoOfCartons);
+                                var totalAmount = groupData.Where(x => x.BuyerID == previousBuyerID).Sum(x => x.EPIM_AMOUNT);
+                                var totalNegoAmount = groupData.Where(x => x.BuyerID == previousBuyerID).Sum(x => x.NegotiateAmt);
+                                var totalReceiveAmount = groupData.Where(x => x.BuyerID == previousBuyerID).Sum(x => x.ReceivedAmt);
+                                var totalOutstandingAmount = groupData.Where(x => x.BuyerID == previousBuyerID).Sum(x => x.OutstandingAmt);
+
+                                <tr class="bg-info" title="">
+                                    <th colspan="5">@previousBuyer Total</th>
+                                    <th>@totalQty</th>
+                                    <th>@totalCartonQty</th>
+                                    <th colspan="2"></th>
+                                    <th>@String.Format("{0:n2}", totalAmount)</th>
+                                    <td colspan="6"></td>
+                                    <td>@String.Format("{0:n2}", totalNegoAmount)</td>
+                                    <td></td>
+                                    <td>@String.Format("{0:n2}", totalReceiveAmount)</td>
+                                    <td></td>
+                                    <td>@String.Format("{0:n2}", totalOutstandingAmount)</td>
+                                </tr>
+                            }
+
+                            var invCount = shipmentList.Where(x => x.EPIM_ID == item.EPIM_ID).Count();
+
+                            <tr style="vertical-align:middle" title="@trTitle" class="text-xs text-xl @trColor">
+
+                                @if (invCount > 1)
+                                {
+                                    multipleOrderColor = "text-white bg-secondary";
+                                    if (prevInvID != item.EPIM_ID)
+                                    {
+                                        <th rowspan="@invCount">@(sl++)</th>
+                                    }
+                                }
+                                else
+                                {
+                                    <th>@(sl++)</th>
+
+                                }
+
+
+                                <td class="@multipleOrderColor"><b>@item.EXPOrderNo</b></td>
+
+
+
+
+
+                                @if (invCount > 1)
+                                {
+                                    if (prevInvID != item.EPIM_ID)
+                                    {
+                                        <td title="Invoice Have Multiple Orders" class="text-white bg-secondary fw-bold" rowspan="@invCount">@item.Department</td>
+                                        <td title="Invoice Have Multiple Orders" class="text-white bg-secondary fw-bold" rowspan="@invCount">@item.EPIM_SHIPEDTO</td>
+                                        <td title="Invoice Have Multiple Orders" class="text-white bg-secondary fw-bold" rowspan="@invCount">@item.EPIM_INVOICENO</td>
+
+
+                                        <td rowspan="@invCount">@item.EPIM_Quantity</td>
+                                        <td rowspan="@invCount">@item.NoOfCartons</td>
+                                        <td rowspan="@invCount">@item.EPIM_INVOICEUNIT</td>
+
+                                        <td rowspan="@invCount">@String.Format("{0:n2}", item.EPIM_AVG_PRICE)</td>
+                                        <td rowspan="@invCount" class="fw-bold">@String.Format("{0:n2}", item.EPIM_AMOUNT)</td>
+                                        <td rowspan="@invCount">@item.EPIM_EXFACTORYDATEMsg</td>
+                                        <td rowspan="@invCount">@item.EPIM_Stuffing_Report_DateMsg</td>
+
+                                        <td style="background-color: #003399" class="text-white" rowspan="@invCount">@item.EPIM_Onboard_DateMsg</td>
+                                        <td style="background-color: #006699" class="text-white" rowspan="@invCount">@item.EPIM_Payment_Sub_PortalMsg</td>
+                                        <td title="@expectedDateExceedsTitle" class="@expectedDateExceedsColor" rowspan="@invCount">@item.ExpectedPaymentDateMsg</td>
+                                        <td class="@gbcNonGbcColor" rowspan="@invCount">@item.GBCNonGBC</td>
+                                        <td rowspan="@invCount">@String.Format("{0:n2}", item.NegotiateAmt)</td>
+                                        <td rowspan="@invCount">@item.EFVDateMsg</td>
+                                        <td rowspan="@invCount" class="fw-bold">@String.Format("{0:n2}", item.ReceivedAmt)</td>
+                                        <td rowspan="@invCount">@item.ERVDateMsg</td>
+                                        <td rowspan="@invCount" title="@expectedDateExceedsTitle" class="@expectedDateExceedsColor fw-bold">@String.Format("{0:n2}", item.OutstandingAmt)</td>
+                                    }
+                                }
+                                else
+                                {
+                                    <td>@item.Department</td>
+                                    <td>@item.EPIM_SHIPEDTO</td>
+                                    <td>@item.EPIM_INVOICENO</td>
+
+
+                                    <td>@item.EPIM_Quantity</td>
+                                    <td>@item.NoOfCartons</td>
+                                    <td>@item.EPIM_INVOICEUNIT</td>
+
+                                    <td>@String.Format("{0:n2}", item.EPIM_AVG_PRICE)</td>
+                                    <td class="fw-bold">@String.Format("{0:n2}", item.EPIM_AMOUNT)</td>
+                                    <td>@item.EPIM_EXFACTORYDATEMsg</td>
+                                    <td>@item.EPIM_Stuffing_Report_DateMsg</td>
+
+                                    <td style="background-color: #003399" class="text-white">@item.EPIM_Onboard_DateMsg</td>
+                                    <td style="background-color: #006699" class="text-white">@item.EPIM_Payment_Sub_PortalMsg</td>
+                                    <td title="@expectedDateExceedsTitle" class="@expectedDateExceedsColor">@item.ExpectedPaymentDateMsg</td>
+                                    <td class="@gbcNonGbcColor">@item.GBCNonGBC</td>
+                                    <td>@String.Format("{0:n2}", item.NegotiateAmt)</td>
+                                    <td>@item.EFVDateMsg</td>
+                                    <td class="fw-bold">@String.Format("{0:n2}", item.ReceivedAmt)</td>
+                                    <td>@item.ERVDateMsg</td>
+                                    <td title="@expectedDateExceedsTitle" class="@expectedDateExceedsColor fw-bold">@String.Format("{0:n2}", item.OutstandingAmt)</td>
+                                }
+
+
+
+
+                            </tr>
+
+                            previousBuyerID = item.BuyerID;
+                            previousBuyer = item.Buyer;
+                            prevInvID = item.EPIM_ID;
+                        }
+                        var grandTotalQty = groupData.Sum(x => x.EPIM_Quantity);
+                        var grandTotalCartonQty = groupData.Sum(x => x.NoOfCartons);
+                        var grandTotalAmount = groupData.Sum(x => x.EPIM_AMOUNT);
+                        var grandTotalNegoAmount = groupData.Sum(x => x.NegotiateAmt);
+                        var grandTotalReceiveAmount = groupData.Sum(x => x.ReceivedAmt);
+                        var grandTotalOutstandingAmount = groupData.Sum(x => x.OutstandingAmt);
+
+                        var lastTotalQty = groupData.Where(x => x.BuyerID == previousBuyerID).Sum(x => x.EPIM_Quantity);
+                        var lastTotalCartonQty = groupData.Where(x => x.BuyerID == previousBuyerID).Sum(x => x.NoOfCartons);
+                        var lastTotalAmount = groupData.Where(x => x.BuyerID == previousBuyerID).Sum(x => x.EPIM_AMOUNT);
+                        var lastTotalNegoAmount = groupData.Where(x => x.BuyerID == previousBuyerID).Sum(x => x.NegotiateAmt);
+                        var lastTotalReceiveAmount = groupData.Where(x => x.BuyerID == previousBuyerID).Sum(x => x.ReceivedAmt);
+                        var lastTotalOutstandingAmount = groupData.Where(x => x.BuyerID == previousBuyerID).Sum(x => x.OutstandingAmt);
+
+                        <tr class="bg-info" title="">
+                            <th colspan="5">@previousBuyer Total</th>
+                            <th>@lastTotalQty</th>
+                            <th>@lastTotalCartonQty</th>
+                            <td colspan="2"></td>
+                            <th>@String.Format("{0:n2}", lastTotalAmount)</th>
+                            <td colspan="6"></td>
+                            <th>@String.Format("{0:n2}", lastTotalNegoAmount)</th>
+                            <td></td>
+                            <th>@String.Format("{0:n2}", lastTotalReceiveAmount)</th>
+                            <td></td>
+                            <th>@String.Format("{0:n2}", lastTotalOutstandingAmount)</th>
+                        </tr>
+
+                        <tr class="bg-success text-white" title="">
+                            <th colspan="5">Grand Total</th>
+                            <th>@grandTotalQty</th>
+                            <th>@grandTotalCartonQty</th>
+                            <td colspan="2"></td>
+                            <th>@String.Format("{0:n2}", grandTotalAmount)</th>
+                            <td colspan="6"></td>
+                            <th>@String.Format("{0:n2}", grandTotalNegoAmount)</th>
+                            <td></td>
+                            <th>@String.Format("{0:n2}", grandTotalReceiveAmount)</th>
+                            <td></td>
+                            <th>@String.Format("{0:n2}", grandTotalOutstandingAmount)</th>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+            <div class="text-center">
+                <input type="button" class="btn btn-sm btn-success" value="Excel" id="btnPdf" onclick="exportToExcel()" />
+            </div>
+        }
+        else
+        {
+            <div class="row">
+                <div class="col-sm-12 text-center">
+                    <label class="text-danger">No Data Found</label>
+                </div>
+            </div>
+        }
+    </div>
+
+</body>
+
+</html>
+
+<script type="text/javascript">
+
+    function exportToExcel() {
+        var htmls = "";
+        var uri = 'data:application/vnd.ms-excel;base64,';
+        var template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>';
+        var base64 = function (s) {
+            return window.btoa(unescape(encodeURIComponent(s)))
+        };
+
+        var format = function (s, c) {
+            return s.replace(/{(\w+)}/g, function (m, p) {
+                return c[p];
+            })
+        };
+
+        htmls = document.getElementById("tblOrderStatus").innerHTML;
+
+        var ctx = {
+            worksheet: 'Worksheet',
+            table: htmls
+        }
+        var link = document.createElement("a");
+        link.download = "OrderShipmentBalanceReport.xls";
+        link.href = uri + base64(format(template, ctx));
+        link.click();
+    }
+    $(function () {
+
+    });
+</script>
+
+

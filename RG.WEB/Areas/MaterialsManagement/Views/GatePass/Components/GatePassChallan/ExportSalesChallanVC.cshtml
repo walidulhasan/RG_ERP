@@ -1,0 +1,493 @@
+﻿@using Microsoft.AspNetCore.Antiforgery
+@inject IAntiforgery antiForgeryToken
+@model RG.Application.ViewModel.MaterialsManagement.Business.GatePass.GatePassChallanMasterVM
+@{
+    var token = antiForgeryToken.GetAndStoreTokens(Context); Layout = null; var sl = 1; decimal totalQuantity = 0; var totalCartonQnt = 0.0;
+
+    var claims = User.Claims.ToList();
+    var initialApprovalPower = claims?.FirstOrDefault(x => x.Type.Equals(UserClaimsCC.GatePassInitialApproval, StringComparison.OrdinalIgnoreCase))?.Value;
+
+    var markedOutPower = claims?.FirstOrDefault(x => x.Type.Equals(UserClaimsCC.GatePassMarkedOut, StringComparison.OrdinalIgnoreCase))?.Value;
+    var rejectGatePass = claims?.FirstOrDefault(x => x.Type.Equals(UserClaimsCC.GatePassReject, StringComparison.OrdinalIgnoreCase))?.Value;
+
+    var reportTitle = "Gate Pass";
+    if (Model.ReportType == 2)
+    {
+        reportTitle = "Challan";
+    }
+
+    var UnitWiseQty = Model.GatePassChallanDetails.GroupBy(x => x.UnitName)
+        .Select(g => new
+        {
+            Unit = g.Key,
+            Quantity = g.Sum(x => x.Quantity)
+        }).ToList();
+    var TotalCarton = Model.GatePassChallanDetails.Sum(x => x.CartonQty);
+}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="Robintex comptex">
+    <meta name="generator" content="Jekyll v3.8.6">
+    <title></title>
+
+
+    <meta name="theme-color" content="#563d7c">
+    <link rel="stylesheet" href="~/lib/bootstrap-5.0.2/css/bootstrap.min.css">
+    @*<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>*@
+
+    <style>
+        .bd-placeholder-img {
+            font-size: 1.125rem;
+            text-anchor: middle;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        table thead {
+            text-align: center;
+        }
+
+        table {
+            table-layout: fixed;
+        }
+
+        td {
+            word-wrap: break-word
+        }
+
+        table.table-bordered {
+            border: 1px solid #000;
+            margin-top: 20px;
+        }
+
+            table.table-bordered > thead > tr > th {
+                border: 1px solid #000;
+            }
+
+            table.table-bordered > tbody > tr > td {
+                border: 1px solid #000;
+            }
+
+            table.table-bordered > tbody > tr > th {
+                border: 1px solid #000;
+            }
+
+            table.table-bordered > tfoot > tr > th {
+                border: 1px solid #000;
+            }
+    </style>
+
+
+</head>
+<body>
+
+
+    <style type="text/css" media="print">
+        .table {
+            background: inherit;
+        }
+    </style>
+    <div class="container-fluid printArea">
+        <main role="main" class="col-md-12 ml-sm-auto col-lg-12">
+            <div class="row">
+                <div class="col-md-12" style="text-align:center;">
+                    <span class="col-md-12" style="text-align:center;font-weight:bold;">@Model.CompanyName</span>
+                    <br />
+                    <span class="col-md-12" style="text-align:center;font-weight:bold;">@reportTitle</span>
+                </div>
+            </div>
+            <br />
+            <div class="row" style="font-size:12px;">
+                <input type="hidden" asp-for="GatePassID" />
+                <div class="col-md-12">
+                    <table class="table table-striped  table-sm text-center" id="">
+
+                        <tbody>
+                            <tr>
+
+                                <td colspan="6" style="text-align:left"><b>Issued To :</b> @Model.CustomerName</td>
+                                @if (Model.ReportType == 2)
+                                {
+                            <td colspan="6" style="text-align:left"><b>Challan # : </b>@Model.Serial</td>
+                                }
+                                else
+                                {
+                            <td colspan="6" style="text-align:left"><b>GP # : </b>@Model.Serial</td>
+                                }
+                                
+                            </tr>
+                            <tr>
+
+                                <td colspan="6" style="text-align:left"><b>Purpose : </b>@Model.Purpose</td>
+
+                                <td colspan="6" style="text-align:left"><b>Date & Time : </b>@Model.Time </td>
+                            </tr>
+                            <tr>
+
+                                <td colspan="6" style="text-align:left"><b>Vehicle No : </b>@Model.VehicleNo</td>
+
+                                <td colspan="6" style="text-align:left"><b>Vehicle Ref : </b>@Model.VehicleRef</td>
+                            </tr>
+                            <tr>
+
+                                <td colspan="6" style="text-align:left"><b>Category Name : </b>@Model.CategoryName</td>
+                                <td colspan="6" style="text-align:left"></td>
+                            </tr>
+
+                            <tr>
+                                <td colspan="12">
+                                    <table class="table table-striped table-bordered table-sm mdReport text-center" id="">
+                                        <thead>
+                                            <tr>
+                                                <th style="vertical-align:middle; width:5%">SL</th>
+                                                <th style="vertical-align:middle; width:10%">Buyer</th>
+                                                <th style="vertical-align:middle; width:10%">Order</th>
+                                                <th style="vertical-align:middle; width:10%">Invoice No</th>
+                                                <th style="vertical-align:middle; width:15%">Item Name</th>
+                                                <th style="vertical-align:middle; width:5%">Qty</th>
+                                                <th style="vertical-align:middle; width:5%">Unit</th>
+                                                <th style="vertical-align:middle; width:5%">Carton Qty</th>
+                                                <th style="vertical-align:middle; width:10%">Country</th>
+                                                <th style="vertical-align:middle; width:10%">Clearing Agent </th>
+                                                <th style="vertical-align:middle; width:10%">Shipping Line</th>
+                                                <th style="vertical-align:middle; width:8%">Container Size</th>
+                                                <th style="vertical-align:middle; width:7%">Container</th>
+                                                <th style="vertical-align: middle; width: 10%">Remarks</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+
+
+                                            @{
+                                                var dataList = Model.GatePassChallanDetails
+                                                                .OrderBy(x => x.BuyerName)
+                                                                .ThenBy(x => x.OrderNo)
+                                                                .ThenBy(x => x.InvoiceNumber)
+                                                                .ThenBy(x => x.ItemName)
+                                                                .ThenBy(x => x.CountryName).ToList();
+                                                var previousBuyer = "";
+                                                var previousInvoice = "";
+                                                var previousItem = "";
+                                                var previousUnit = "";
+                                                var previousClearingAgent = "";
+                                                var previousShippingLine = "";
+
+                                                var previousContainerSize = "";
+                                                var previousContainer = "";
+                                                var previousRemarks = "";
+                                                var previousOrder = "";
+                                                var previousCountry = "";
+
+
+
+                                                var lastItem = dataList.Last();
+
+                                                foreach (var details in dataList)
+                                                {
+                                                    var currentBuyerCount = dataList.Where(x => x.BuyerName == details.BuyerName).ToList().Count();
+                                                    var currentInvoiceCount = dataList.Where(x => x.InvoiceNumber == details.InvoiceNumber).ToList().Count();
+                                                    var currentItemCount = dataList.Where(x => x.ItemName == details.ItemName).ToList().Count();
+                                                    var currentUnitCount = dataList.Where(x => x.UnitName == details.UnitName).ToList().Count();
+                                                    var currentClearingAgentCount = dataList.Where(x => x.ClearingAgent == details.ClearingAgent).ToList().Count();
+                                                    var currentShippingLineCount = dataList.Where(x => x.ShippingLine == details.ShippingLine).ToList().Count();
+                                                    var currentSizeCount = dataList.Where(x => x.ContainerSize == details.ContainerSize).ToList().Count();
+                                                    var currentContainerCount = dataList.Where(x => x.ContainerNo == details.ContainerNo).ToList().Count();
+                                                    var currentRemarkCount = dataList.Where(x => x.Remarks == details.Remarks).ToList().Count();
+                                                    var currentOrderCount = dataList.Where(x => x.OrderNo == details.OrderNo).ToList().Count();
+                                                    var currentCountryCount = dataList.Where(x => x.CountryName == details.CountryName).ToList().Count();
+                                                    <tr>
+                                                        <td style="vertical-align:middle;">@sl</td>
+                                                        @if (previousBuyer != details.BuyerName)
+                                                        {
+                                                            <td rowspan="@currentBuyerCount" style="vertical-align:middle;">@details.BuyerName</td>
+                                                        }
+                                                        @if (previousOrder != details.OrderNo)
+                                                        {
+                                                            <td rowspan="@currentOrderCount" style="vertical-align:middle;">@details.OrderNo</td>
+                                                        }
+                                                        @if (previousInvoice != details.InvoiceNumber)
+                                                        {
+                                                            <td rowspan="@currentInvoiceCount" style="vertical-align:middle;">@details.InvoiceNumber</td>
+                                                        }
+                                                        @*@if (previousItem != details.ItemName)
+                                                    {
+                                                        <td rowspan="@currentItemCount" style="vertical-align:middle;">@details.ItemName</td>
+                                                    }*@
+                                                        @if (previousItem != details.ItemName)
+                                                        {
+                                                            <td style="vertical-align:middle;">@details.ItemName</td>
+                                                        }
+                                                        else
+                                                        {
+                                                            <td style="vertical-align:middle;">''</td>
+                                                        }
+                                                        <td class="fw-bold text-danger" style="vertical-align:middle;">@String.Format("{0:n0}", details.Quantity)</td>
+                                                        @if (previousUnit != details.UnitName)
+                                                        {
+
+                                                            <td style="vertical-align:middle;">@details.UnitName</td>
+                                                        }
+                                                        else
+                                                        {
+                                                            <td style="vertical-align:middle;">''</td>
+                                                        }
+
+                                                        <td style="vertical-align:middle;">@details.CartonQty</td>
+                                                        @if (previousCountry != details.CountryName)
+                                                        {
+                                                            <td style="vertical-align:middle;border-bottom:none">@details.CountryName </td>
+                                                        }
+                                                        else
+                                                        {
+                                                            <td style="border:none"></td>
+                                                        }
+                                                        @*<td style="vertical-align:middle;">@details.CountryName </td> rowspan="@currentCountryCount" *@
+                                                        @if (previousClearingAgent != details.ClearingAgent)
+                                                        {
+                                                            <td rowspan="@currentClearingAgentCount" style="vertical-align:middle;">@details.ClearingAgent </td>
+                                                        }
+                                                        @if (previousShippingLine != details.ShippingLine)
+                                                        {
+                                                            <td rowspan="@currentShippingLineCount" style="vertical-align:middle;">@details.ShippingLine</td>
+                                                        }
+                                                        @if (previousContainerSize != details.ContainerSize)
+                                                        {
+                                                            <td rowspan="@currentSizeCount" style="vertical-align:middle;">@details.ContainerSize</td>
+                                                        }
+                                                        @if (previousContainer != details.ContainerNo)
+                                                        {
+                                                            <td rowspan="@currentContainerCount" style="vertical-align:middle;">@details.ContainerNo</td>
+                                                        }
+                                                        @*@if (previousRemarks != details.Remarks)
+                                                    {
+                                                        <td rowspan="@currentRemarkCount" style="vertical-align:middle;">@details.Remarks</td>
+                                                    }*@
+                                                        <td style="vertical-align:middle;">@details.Remarks</td>
+                                                    </tr>
+                                                    sl++;
+
+                                                    if (details.Equals(lastItem))
+                                                    {
+                                                        var totalQty = "";
+                                                        foreach (var itemUnit in UnitWiseQty)
+                                                        {
+                                                            if (totalQty != "")
+                                                                totalQty += ", ";
+
+                                                            totalQty += $"{String.Format("{0:n0}", itemUnit.Quantity)} {itemUnit.Unit}";
+                                                        }
+                                                        <tr class="fw-bold">
+                                                            <td class="" colspan="2">Total</td>
+                                                            <td class="text-end" colspan="5">@totalQty &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </td>
+                                                            <td class="text-start" colspan="7">@TotalCarton Carton</td>
+                                                        </tr>
+                                                    }
+
+                                                    previousBuyer = details.BuyerName;
+                                                    previousInvoice = details.InvoiceNumber;
+                                                    previousItem = details.ItemName;
+                                                    previousUnit = details.UnitName;
+                                                    previousClearingAgent = details.ClearingAgent;
+                                                    previousShippingLine = details.ShippingLine;
+                                                    previousContainerSize = details.ContainerSize;
+                                                    previousContainer = details.ContainerNo;
+                                                    previousRemarks = details.Remarks;
+                                                    previousOrder = details.OrderNo;
+                                                    previousCountry = details.CountryName;
+
+                                                }
+                                            }
+                                            @*<tr>
+                                            <td colspan="4" style="vertical-align:middle;">Total :</td>
+
+                                            <td>@totalQuantity</td>
+                                            <td></td>
+                                            <td>@totalCartonQnt</td>
+                                            <td colspan="5"></td>
+                                        </tr>*@
+                                        </tbody>
+                                    </table>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <br />
+                <div class="row text-center">
+                    <div class="col-md-4 col-sm-4 col-lg-4">
+                        <p class="mb-1">@Model.PreparedByUser</p><hr class="m-1" /><p><b>Prepared By</b></p>
+                    </div>
+                    <div class="col-md-4 col-sm-4 col-lg-4">
+                        @{
+                            var approveby = Model.ApprovedBy > 0 ? Model.ApprovedUser : "Not Approved";
+                        }
+                        <p class="mb-1">@approveby</p><hr class="m-1" /><p><b>Approved By</b></p>
+                    </div>
+                    <div class="col-md-4 col-sm-4 col-lg-4">
+                        <p class="mb-1">&nbsp;</p><hr class="m-1" /><p><b>Gate Office Stamp & Sign</b></p>
+                    </div>
+                    @*<div class="col-md-3 col-sm-3 col-lg-3">
+                    <p>&nbsp;</p><hr /><p>Receive Sign & Name</p>
+                </div>*@
+
+                </div>
+            </div>
+
+            <div class="row noprint no-print">
+                <div class="col-6 col-md-6 col-sm-6 text-end">
+                    @if (initialApprovalPower == "1" && Model.IsApproved == false)
+                    {
+                        <input type="button" id="btnInitialApprove" class="btn btn-sm btn-success" value="Approve">
+                    }
+                    @if (markedOutPower == "1" && Model.IsApproved == true && Model.isMarkedOut == false)
+                    {
+                        <input type="button" id="btnMarkedOut" onclick="MarkOutGatePass()" class="btn btn-sm btn-warning" value="Mark Out">
+                    }
+                    <input type="button" class="btn btn-sm btn-primary d-print-none" id="btnPdf" value="Print">
+                    @*@if (rejectGatePass == "1" && Model.IsApproved == false)
+                {
+                    <input type="button" id="btnReject" class="btn btn-sm btn-danger text-right" value="Reject">
+                }*@
+
+                </div>
+                <div class="col-6 col-md-6 col-sm-6 text-center">
+                    @if (rejectGatePass == "1" && Model.IsApproved == false)
+                    {
+                        <input type="button" id="btnReject" class="btn btn-sm btn-danger text-right" value="Reject">
+                    }
+
+                </div>
+            </div>
+        </main>
+    </div>
+
+    
+</body>
+</html>
+<script src="~/AdminLTE-3.1.0/plugins/jquery/jquery.min.js"></script>
+<script src="~/js/customScripts/GenericHTTPRequest.js"></script>
+<link href="~/lib/jquery-alert/css/alert.css" rel="stylesheet" />
+<link href="~/lib/jquery-alert/themes/default/theme.css" rel="stylesheet" />
+<!--signalR Notification-->
+<script src="~/js/signalr/dist/browser/signalr.js"></script>
+<script src="~/js/notification.js"></script>
+<!-- alert js -->
+<script src="~/lib/jquery-alert/js/alert.js"></script>
+<script type="text/javascript">
+    $(function () {
+        $("#btnInitialApprove").click(function () {
+            debugger
+            let gatePassID = $("#GatePassID").val();
+            if (gatePassID>0) {
+                $.alert.open('confirm', 'Are you sure to approve this gate pass', function (button) {
+                    if (button == 'yes')
+                        HttpRequest.Ajax("POST", "/MaterialsManagement/GatePass/ApprovedGatePass", { gatePassId: gatePassID, '@token.HeaderName': '@token.RequestToken' }, saveSuccess)
+                });
+            }
+        })
+        $("#btnMarkedOut").click(function () {
+            debugger
+            let gatePassID = $("#GatePassID").val();
+            if (gatePassID > 0) {
+                $.alert.open('confirm', 'Are you sure to mark out this gate pass', function (button) {
+                    if (button == 'yes')
+                        HttpRequest.Ajax("POST", "/MaterialsManagement/GatePass/MarkOutGatePass", { gatePassId: gatePassID, '@token.HeaderName': '@token.RequestToken' }, saveSuccessMarkedOut)
+                });
+            }
+        });
+         $("#btnMarkedOut").click(function () {
+            debugger
+            let gatePassID = $("#GatePassID").val();
+            if (gatePassID > 0) {
+                $.alert.open('confirm', 'Are you sure to mark out this gate pass', function (button) {
+                    if (button == 'yes')
+                        HttpRequest.Ajax("POST", "/MaterialsManagement/GatePass/MarkOutGatePass", { gatePassId: gatePassID, '@token.HeaderName': '@token.RequestToken' }, saveSuccessMarkedOut)
+                });
+            }
+         });
+        $("#btnReject").click(function () {
+            debugger
+            let gatePassID = $("#GatePassID").val();
+            if (gatePassID > 0) {
+                 $.alert.open('confirm', 'Are you sure to Reject this record', function (button) {
+            if (button == 'yes')
+                HttpRequest.Ajax("POST", "/MaterialsManagement/GatePass/RemoveGatePass", { gatePassID: gatePassID, '@token.HeaderName': '@token.RequestToken' }, rejectSuccess)
+            });
+            }
+        });
+
+
+
+
+        $("#btnPdf").click(function () {
+            debugger;
+             let gatePassID = $("#GatePassID").val();
+            let categoryID = '@Model.CategoryID';
+            let reportType = '@Model.ReportType';
+            let reportFormat = ("@RG.Application.Constants.ReportExportFormat.PdfFormat.ToString()");
+             var url = `/MaterialsManagement/GatePass/ShowGatePassReports?GatePassID=${gatePassID}&CategoryID=${categoryID}&ReportType=${reportType}&ReportFormat=${reportFormat}`
+            window.open(url, "_blank", "toolbar=no,scrollbars=yes,resizable=yes,top=150,left=50,width=1000,height=800");
+        });
+
+
+
+
+    })
+
+
+    function saveSuccessMarkedOut(data) {
+        debugger
+        if (data.result == 1) {
+            $.alert.open({
+                type: 'Success',
+                content: data.message,
+                callback: function () {
+                    window.location.reload();
+                }
+            });
+        }
+        else {
+            $.alert.open("error", data.message);
+        }
+    }
+    function saveSuccess(data) {
+        debugger
+        if (data.result == 1) {
+            $.alert.open({
+                type: 'Success',
+                content: data.message,
+                callback: function () {
+                    SendNotification();
+                    window.location.reload();
+                }
+            });
+        }
+        else {
+            $.alert.open("error", data.message);
+        }
+    }
+    function rejectSuccess(data) {
+        debugger
+        if (data.result == 1) {
+            $.alert.open({
+                type: 'Success',
+                content: data.message,
+                callback: function () {
+                    //$("input[type^=button]").each(function (index) {
+                    //    $(this).hide();
+                    //});
+                    window.close();
+                }
+            });
+        }
+        else {
+            $.alert.open("error", data.message);
+        }
+    }
+</script>

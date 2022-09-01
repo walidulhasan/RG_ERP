@@ -1,0 +1,343 @@
+﻿@model List<RG.Application.Contracts.Embro.AccountsReports.NoteSummary.Queries.QueryResponseModel.NoteSummaryWithPreviousRM>
+@using RG.Application.Constants.Embro
+@using RG.Application.Contracts.Embro.AccountsReports.NoteSummary.Queries.QueryResponseModel
+@{
+
+
+    Layout = null;
+    //int GroupCategoryID = 0;
+    //string GroupCategoryName = "";
+    string CompanyName = "RBL";
+
+    DateTime toDate = DateTime.Now;
+    DateTime fromDate = DateTime.Now;
+    string ReportHeader = "";
+
+    var totalrow = Model.Count;
+    if (totalrow > 0)
+    {
+        toDate = Convert.ToDateTime(Model[0].DateTo);
+        fromDate = Convert.ToDateTime(Model[0].DateFrom);
+
+        if (fromDate.Month == 7 && fromDate.Day == 1 && toDate.Month == 6 && toDate.Day == 30)
+        {
+            ReportHeader = $"FOR THE YEAR ENDED {Model[0].DateTo}";
+        }
+        else if (fromDate.Month == 7 && fromDate.Day == 1 && toDate.Month <= 6 && toDate.Day < 30)
+        {
+            ReportHeader = $"FOR THE YEAR UP TO {Model[0].DateTo}";
+        }
+        else
+        {
+            ReportHeader = $"FOR THE PERIOD {Model[0].DateFrom} TO {Model[0].DateTo}";
+        }
+
+        CompanyName = Model[0].CompanyName;
+        //GroupCategoryID = Model[0].GroupCategoryID;
+        //GroupCategoryName = Model[0].GroupCategoryName;
+    }
+    var groupData = Model.GroupBy(g => new { g.RowSerial })
+        .Select(s => new NoteSummeryGroupData
+        {
+            RowSerial = s.Key.RowSerial,
+            GroupCurrentYeraAmount = s.Sum(d => d.CurrentBalance),
+            GroupPreviousYearAmount = s.Sum(d => d.OldCurrentBalance),
+
+        }).ToList();
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Income Statement of:- @CompanyName</title>
+    <link href="~/AdminLTE-3.1.0/plugins/jquery-ui/jquery-ui.min.css" rel="stylesheet" />
+    <link href="~/lib/bootstrap-5.0.2/css/bootstrap.min.css" rel="stylesheet" />
+    <script src="~/AdminLTE-3.1.0/plugins/jquery/jquery.min.js"></script>
+    <script src="~/AdminLTE-3.1.0/plugins/jquery-ui/jquery-ui.min.js"></script>
+    <script src="~/lib/bootstrap-5.0.2/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/customScripts/GenericHTTPRequest.js"></script>
+
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.12/css/jquery.dataTables.min.css" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/1.2.2/css/buttons.dataTables.min.css" />
+    <script type="text/javascript" src="https://code.jquery.com/jquery-1.12.3.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.2.2/js/dataTables.buttons.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/2.5.0/jszip.min.js"></script>
+    <script type="text/javascript" src="https://cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/pdfmake.min.js"></script>
+    <script type="text/javascript" src="https://cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/vfs_fonts.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.2.2/js/buttons.html5.min.js"></script>
+
+    <style>
+        .header {
+            position: sticky;
+            top: 0;
+        }
+    </style>
+
+</head>
+<body>
+    <div class="container-fluid">
+        @if (totalrow > 0)
+        {
+            <div class="row">
+                <div class="col-12 text-center">
+                    <h5 class="mb-0">@Model[0].CompanyName</h5>
+                    <h6 class="mb-0">Profit Loss & Comprehensive Income</h6>
+                    <h6 class="mb-0">@ReportHeader</h6>
+                </div>
+            </div>
+
+            <div class="row">
+                @*<div class="col-2 text-center">
+                    </div>*@
+                <div class="col-7 mx-auto">
+                    <table class="table table-sm table-striped text-sm display nowrap" id="tblProfitLossComprehensiveIncome" style="font-size:11px;">
+                        <thead class="header text-center">
+                            <tr class="bg-dark text-white" style="font-weight:bold;vertical-align:middle;">
+                                <td rowspan="2">PARTICULARS</td>
+                                <td rowspan="2">Notes</td>
+                                <td>AMOUNT<br>(BDT)</td>
+                                <td>AMOUNT<br>(BDT)</td>
+                            </tr>
+                            <tr class="bg-dark text-white" style="font-weight:bold;">
+                                <td>@Model[0].DateTo</td>
+                                <td>@Model[0].PrevDateTo</td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{
+                                var orderedData = Model.OrderBy(o => o.RowSerial).ThenBy(x => x.ParticularSerial).ToList();
+
+                                var previousSubHeader = "";
+                                var previousRowSerial = 0;
+
+                                foreach (var item in orderedData)
+                                {
+                                    if (item.ParticularSerial != null)
+                                    {
+                                        if (previousSubHeader == "" || item.SubHeader != previousSubHeader)
+                                        {
+                                            if (previousSubHeader != "" && previousRowSerial > 0)
+                                            {
+                                                <tr>
+                                                    <td style="font-size: 12px; font-weight: bold;">Total @previousSubHeader </td>
+                                                    <td></td>
+                                                    <td class="text-center" style="font-weight:bold;">@(String.Format("{0:n0}", groupData.Where(x=>x.RowSerial== previousRowSerial).First().GroupCurrentYeraAmount))</td>
+                                                    <td class="text-center" style="font-weight:bold;">@(String.Format("{0:n0}", groupData.Where(x => x.RowSerial == previousRowSerial).First().GroupPreviousYearAmount)) </td>
+                                                </tr>
+                                            }
+                                            <tr>
+                                                <td style="font-size:13px;font-weight:bold;">@item.SubHeader :</td>
+                                                <td>&nbsp;</td>
+                                                <td>&nbsp;</td>
+                                                <td>&nbsp;</td>
+                                            </tr>
+                                        }
+                                        <tr>
+                                            <td>@item.Particulars </td>
+                                            <td class="text-center p-0"><button type="button" class="" onclick="ShowGroups('@item.ParticularSerial', '@item.GroupCategoryID')">@item.ParticularSerial</button></td>
+                                            <td class="text-center">@(String.Format("{0:n0}", item.CurrentBalance))</td>
+                                            <td class="text-center">@(String.Format("{0:n0}", item.OldCurrentBalance))</td>
+                                        </tr>
+                                        previousSubHeader = item.SubHeader;
+                                        previousRowSerial = item.RowSerial;
+                                    }
+                                    else
+                                    {
+                                        if (previousRowSerial > 0)
+                                        {
+                                            <tr>
+                                                <td style="font-size: 12px; font-weight: bold;">@previousSubHeader </td>
+                                                <td></td>
+                                                <td class="text-center" style="font-weight:bold;">@(String.Format("{0:n0}", groupData.Where(x=>x.RowSerial == previousRowSerial).First().GroupCurrentYeraAmount))</td>
+                                                <td class="text-center" style="font-weight:bold;">@(String.Format("{0:n0}", groupData.Where(x => x.RowSerial == previousRowSerial).First().GroupPreviousYearAmount)) </td>
+                                            </tr>
+                                        }
+                                        decimal currentBalance = 0;
+                                        decimal oldCurrentBalance = 0;
+
+                                        var mathActions = item.MathActions.Split(",");
+
+                                        foreach (var action in mathActions)
+                                        {
+                                            //int groupSerial = Convert.ToInt32(action.Length > 1 ? action.Substring(action.Length - 1) : action.Contains("%") ? "0" : action.Substring(0, 1));
+                                            //var mathOperator = action.Length > 1 ? action.Substring(0, 1).ToString() : action.Contains("%") ? action : "";
+
+                                            var mathOperator = action.Length > 1 ? action.Substring(0, 1).ToString() : action.Contains("%") ? action : "";
+                                            int groupSerial = Convert.ToInt32(action.Length > 1 ? action.Replace(mathOperator, "") : action.Contains("%") ? "0" : action.Substring(0, 1));
+
+
+                                            var grpData = groupData.FirstOrDefault(x => x.RowSerial == groupSerial);
+                                            switch (mathOperator)
+                                            {
+
+                                                case MathActionTypeConst.Add:
+                                                    {
+                                                        currentBalance += grpData == null ? 0 : grpData.GroupCurrentYeraAmount;
+
+                                                        oldCurrentBalance += grpData == null ? 0 : grpData.GroupPreviousYearAmount;
+
+                                                        break;
+                                                    }
+                                                case MathActionTypeConst.Sub:
+                                                    {
+                                                        currentBalance -= grpData == null ? 0 : grpData.GroupCurrentYeraAmount;
+
+                                                        // oldCurrentBalance = fromData == null ? 0 : fromData.GroupPreviousYearAmount;
+                                                        oldCurrentBalance -= grpData == null ? 0 : grpData.GroupPreviousYearAmount;
+                                                        break;
+                                                    }
+                                                case MathActionTypeConst.Multiply:
+                                                    {
+                                                        //currentBalance = fromData == null ? 0 : fromData.GroupCurrentYeraAmount;
+                                                        currentBalance *= grpData == null ? 0 : grpData.GroupCurrentYeraAmount;
+
+                                                        oldCurrentBalance = grpData == null ? 0 : grpData.GroupPreviousYearAmount;
+                                                        //oldCurrentBalance *= toData == null ? 0 : toData.GroupPreviousYearAmount;
+                                                        break;
+                                                    }
+                                                case MathActionTypeConst.Divided:
+                                                    {
+                                                        //currentBalance = fromData == null ? 0 : fromData.GroupCurrentYeraAmount;
+                                                        currentBalance /= grpData == null ? 1 : grpData.GroupCurrentYeraAmount;
+
+                                                        //oldCurrentBalance = fromData == null ? 0 : fromData.GroupPreviousYearAmount;
+                                                        oldCurrentBalance /= grpData == null ? 1 : grpData.GroupPreviousYearAmount;
+                                                        break;
+                                                    }
+                                                case MathActionTypeConst.Percent:
+                                                    {
+                                                        if (item.UniqueCalculationCode == "CalculateWPP")
+                                                        {
+                                                            if (currentBalance < 0)
+                                                                currentBalance = 0;
+                                                            if (oldCurrentBalance < 0)
+                                                                oldCurrentBalance = 0;
+                                                        }
+
+                                                        currentBalance = currentBalance * (item.CalculationPercent.Value / 100);
+
+                                                        oldCurrentBalance = oldCurrentBalance * (item.CalculationPercent.Value / 100);
+
+                                                        break;
+                                                    }
+                                                default:
+                                                    {
+                                                        currentBalance = grpData == null ? 0 : grpData.GroupCurrentYeraAmount;
+                                                        oldCurrentBalance = grpData == null ? 0 : grpData.GroupPreviousYearAmount;
+                                                        break;
+                                                    }
+                                            }
+                                        }
+
+                                        var fromGroupSerial = Convert.ToInt32(mathActions[0]);
+
+                                        foreach (var itemGrp in groupData.Where(x => x.RowSerial == item.RowSerial))
+                                        {
+                                            itemGrp.GroupCurrentYeraAmount = currentBalance;
+                                            itemGrp.GroupPreviousYearAmount = oldCurrentBalance;
+                                        }
+
+                                        previousRowSerial = 0;
+
+                                        <tr>
+                                            <td style="font-size: 12px; font-weight: bold;"> @item.Particulars </td>
+
+                                            <td></td>
+
+                                            <td class="text-center" style="font-weight:bold;">@(String.Format("{0:n0}", groupData.Where(x=>x.RowSerial== item.RowSerial).First().GroupCurrentYeraAmount))</td>
+                                            <td class="text-center" style="font-weight:bold;">@(String.Format("{0:n0}", groupData.Where(x => x.RowSerial == item.RowSerial).First().GroupPreviousYearAmount)) </td>
+                                        </tr>
+                                    }
+
+
+
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+        else
+        {
+            <h5 class="bg-danger text-center"> No Record Found</h5>
+        }
+        <div class="text-center d-print-none">
+
+            <input type="button" class="btn btn-sm btn-success" value="Excel" id="btnPdf" onclick="exportToExcel()" />
+
+        </div>
+
+    </div>
+
+
+    <div class="modal fade" id="showGroupsModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title" id="exampleModalLabel">COA Groups</h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-sm table-bordered text-center" style="font-size:12px;">
+                        <thead class="bg-dark text-white">
+                            <tr><th>Group Code</th><th>Group Name</th></tr>
+                        </thead>
+                        <tbody id="tblShowGroups"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
+
+
+<script type="text/javascript">
+        function exportToExcel() {
+        var htmls = "";
+        var uri = 'data:application/vnd.ms-excel;base64,';
+            var template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>';
+            var base64 = function (s) {
+                return window.btoa(unescape(encodeURIComponent(s)))
+            };
+
+            var format = function (s, c) {
+                return s.replace(/{(\w+)}/g, function (m, p) {
+                    return c[p];
+                })
+            };
+
+    htmls = document.getElementById("tblProfitLossComprehensiveIncome").innerHTML;
+
+    var ctx = {
+    worksheet: 'Worksheet',
+    table: htmls
+    }
+    debugger;
+    if ('@totalrow' > "0")
+    {
+    let reportName = 'Profit Loss & Comprehensive Income';
+    var link = document.createElement("a");
+    link.download = `${ reportName}.xls`;
+    link.href = uri + base64(format(template, ctx));
+    link.click();
+    }
+
+    }
+    function ShowGroups(particularSerial, groupCategoryID) {
+        debugger;
+        var data = HttpRequest.AjaxData("Get", '/Embro/GeneralLedger/ShowParticularGroups', { particularSerial: particularSerial, groupCategoryID: groupCategoryID });
+        let tr = ``;
+        if (data != null && data.length > 0) {
+
+            $.each(data, function (i, v) {
+                tr += `<tr><td>${v.GroupCode}</td><td>${v.COAGroupName}</td></tr>`;
+            });
+        }
+        $("#tblShowGroups").html(tr);
+        $("#showGroupsModal").modal('toggle');
+    }
+</script>

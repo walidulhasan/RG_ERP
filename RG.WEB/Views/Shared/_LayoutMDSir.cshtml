@@ -1,0 +1,118 @@
+﻿
+@*@using RG.WEB.Helper*@
+@{
+    
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+
+    <title>@ViewData[PageInfo.PageTitle]</title>
+    <partial name="_TopCommonCssAndJs" />
+    <partial name="_ValidationScriptsPartial" />
+    <style>
+        .overlay {
+            display: none;
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 910999;
+            background-size: 100% 100%;
+            -webkit-background-size: cover;
+            -moz-background-size: cover;
+            -o-background-size: cover;
+            background-size: cover;
+            background: rgba(255,255,255,0.8) url("/CustomSiteImages/loading-image.gif") center no-repeat;
+        }
+        /* Turn off scrollbar when body element has the loading class */
+        body.loading {
+            overflow: hidden;
+        }
+            /* Make spinner image visible when body element has the loading class */
+            body.loading .overlay {
+                display: block;
+            }
+    </style>
+</head>
+<body class="hold-transition sidebar-mini layout-fixed layout-navbar-fixed layout-footer-fixed pace-primary text-sm">
+    <div class="overlay">
+        @*<img src="~/CustomSiteImages/loading-image.gif" />*@
+    </div>
+    <div class="wrapper">
+        <!-- Navbar -->
+        <partial name="_MainHeaderMDSir" />
+        <!-- Navbar -->
+        <!-- Main Sidebar Container -->
+        <partial name="_MainSidebarLeftMDSir" />
+        <!-- Main Sidebar Container -->
+        <!-- Content Wrapper. Contains page content -->
+        <div class="content-wrapper"> 
+ 
+            <!-- Content Header (Page header) -->
+            <partial name="_MainContentHeader" />
+            <!--END Content Header (Page header) -->
+            <!-- Main content -->
+            <section class="content">
+                <div class="container-fluid">
+                    @RenderBody()
+                </div><!--/. container-fluid -->
+            </section>
+            <!--End Main content -->
+            <!-- /.content -->
+        </div>
+
+        <!-- End.content-wrapper -->
+        <!-- Control Sidebar -->
+        <partial name="_ControllerSidebarRight" />
+
+        <!-- Main Footer -->
+        <partial name="_Footer" />
+        <!-- Control Sidebar -->
+        <aside class="control-sidebar control-sidebar-dark">
+            <!-- Control sidebar content goes here -->
+        </aside>
+        <!-- /.control-sidebar -->
+    </div>
+    <!-- ./wrapper -->
+
+    <partial name="_BottomCommonJs" />
+
+    @await RenderSectionAsync("Scripts", required: false)
+
+    <script type="text/javascript">
+        $(function () {
+            //https://stackoverflow.com/questions/61025311/adminlte-sidebar-active-menu-doesnt-change-dynamically
+            /*** add active class and stay opened when selected ***/
+            var url = window.location;
+
+            // for sidebar menu entirely but not cover treeview
+            $('ul.nav-sidebar a').filter(function () {
+                if (this.href) {
+                    return this.href == url || url.href.indexOf(this.href) == 0;
+                }
+            }).addClass('active');
+
+            // for the treeview
+            $('ul.nav-treeview a').filter(function () {
+                if (this.href) {
+                    return this.href == url || url.href.indexOf(this.href) == 0;
+                }
+            }).parentsUntil(".nav-sidebar > .nav-treeview").addClass('menu-open').prev('a').addClass('active');
+        });
+
+        // hack to fix jquery 3.6 focus security patch that bugs auto search in select-2
+        $(document).on('select2:open', () => {
+            document.querySelector('.select2-search__field').focus();
+        });
+    </script>
+    <script src="~/js/layout/mainHeader.js"></script>
+</body>
+</html>
+

@@ -1,0 +1,237 @@
+﻿@model RG.Application.ViewModel.FiniteScheduler.Setup.AssetSubType.AssetSubTypeVM
+@{
+    ViewData[PageInfo.PageTitle] = "Create";
+    ViewData[PageInfo.PageHeader] = "Asset Type";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row">
+    <div class="col-md-3">
+        <input asp-for="AssetSubTypeID" type="hidden" />
+        <label class="col-form-label-sm m-0" asp-for="AssetTypeID"></label>
+        <select asp-for="AssetTypeID" class="form-control form-control-sm" asp-items="Model.DDLAssetTypeName"></select>
+        <span asp-validation-for="AssetTypeID" class="span-form-validation"></span>
+    </div>
+    <div class="col-3">
+        <div class="form-group">
+            <label asp-for="SubTypeName" class="label-ajt-sm"></label>
+            <input placeholder="Sub Type Name" asp-for="SubTypeName" class="form-control form-control-sm" type="text" />
+            <span class="text-danger" asp-validation-for="SubTypeName"></span>
+        </div>
+    </div>
+    <div class="col-3">
+        <div class="form-group">
+            <label asp-for="Code" class="label-ajt-sm"></label>
+            <input placeholder="Code" maxlength="3" value="" asp-for="Code" class="form-control form-control-sm" type="text" />
+            <span class="text-danger" asp-validation-for="Code"></span>
+        </div>
+    </div>
+    <div class="col-3">
+        <div class="form-group">
+            <label asp-for="Description" class="label-ajt-sm "></label>
+            <input placeholder="Description" asp-for="Description" class="form-control form-control-sm " type="text" />
+            <span class="text-danger" asp-validation-for="Description"></span>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-2 ml-0">
+        <div class="form-group">
+            <input type="button" class="btn btn-sm btn-success" value="Save" id="btnSave" />
+            @*<input type="button" class="btn btn-sm btn-warning d-none" value="Clear" id="btnClear" onclick="Clear()" />*@
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-12">
+        <div id="grid">
+
+        </div>
+    </div>
+</div>
+@section scripts{
+    <script type="text/javascript">
+        $(function () {
+            GetAssetSubTypeList();
+            $("#btnSave").click(function () {
+                debugger
+                let assetSubTypeID = $("#AssetSubTypeID").val();
+                let assetTypeID = $("#AssetTypeID").val();
+                let subTypeName = $("#SubTypeName").val();
+                let code = $("#Code").val();
+                let description = $("#Description").val();
+
+                if (subTypeName != "" && code != "") {
+                    var Obj = {
+                        AssetSubTypeID: assetSubTypeID,
+                        AssetTypeID: assetTypeID,
+                        SubTypeName: subTypeName,
+                        Code: code,
+                        Description: description
+                    }
+                    if (Obj.AssetSubTypeID > 0) {
+                        HttpRequest.Ajax("POST", '/FiniteScheduler/AssetManagement/AssetSubTypeUpdate', { "assetSubTypeDTM": Obj }, saveSuccess, true);
+                    } else {
+                        HttpRequest.Ajax("POST", '/FiniteScheduler/AssetManagement/AssetSubType', { "assetSubType": Obj }, saveSuccess, true);
+                    }
+                   
+                } else {
+                    $.alert.open('warning', "Something is Error");
+                    return false;
+                }
+                Clear();
+                GetAssetSubTypeList();
+               
+            });
+           
+        })
+        const Clear = () => {
+            $("#AssetSubTypeID").val("0");
+            $("#AssetTypeID").val("");
+            $("#SubTypeName").val("");
+            $("#Code").val("");
+            $("#Description").val("");
+            $("#btnSave").val("Save");
+        }
+
+        const GetAssetSubTypeList = () => {
+            debugger
+            var dataGrid = $("#grid").dxDataGrid({
+                height: 450,
+                remoteOperations: { paging: true, filtering: true, sorting: true, grouping: true, summary: true, groupPaging: true },
+                dataSource: DevExpress.data.AspNet.createStore({
+                    key: "AssetSubTypeID",
+                    loadUrl: "/FiniteScheduler/AssetManagement/GetAllAssetSubType",
+                    loadParams: {
+
+                    }
+                }),
+                hoverStateEnabled: true,
+
+                showBorders: true,
+                columnAutoWidth: true,
+                filterRow: { visible: true },
+                pager: { visible: true, showInfo: true, allowedPageSizes: [10, 20, 50, 100, 500], showPageSizeSelector: true, },
+                paging: { pageSize: 10 },
+                selection: { mode: 'single' },
+                export: {
+                    //   enabled: true
+                },
+                columns: [
+                    {
+                        width: "auto",
+                        caption: "SL #",
+                        alignment: 'center',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        },
+                        cellTemplate: function (container, e) {
+                            var index = dataGrid.pageIndex() * dataGrid.pageSize() + e.rowIndex + 1;
+                            container.text(index);
+                        }
+                    },
+                    {
+                        dataField: "AssetSubTypeID",
+                        visible: false,
+                    },
+                    {
+                        dataField: "AssetType",
+                        alignment: 'center',
+                        caption: 'Type',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+                    },
+                    {
+                        dataField: "SubTypeName",
+                        alignment: 'center',
+                        caption: 'Sub Type',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+                    },
+                    {
+                        dataField: "Code",
+                        alignment: 'center',
+                        caption: 'Code',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+                    }, {
+                        dataField: "Description",
+                        alignment: 'center',
+                        caption: 'Description',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+                    },
+                    {
+                        dataField: "Serial",
+                        alignment: 'center',
+                        caption: 'Serial',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+                    },
+                    {
+                        caption: 'Action',
+                        alignment: 'center',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        },
+                        cellTemplate: function (container, options) {
+
+                            var returnText = '<button class="btn btn-xs btn-warning"><i class="fa fa-edit"></i> Edit</button>';
+                            $(returnText).on('dxclick', function () {
+                                Edit(options.data);
+                            }).appendTo(container);
+
+                            var returnText = '<span>&nbsp</span><button title="Delete" class="btn btn-xs btn-danger"><i class="fa fa-trash"></i>Delete</button>';
+                            returnText = returnText + '</div>';
+                            $(returnText).on('dxclick', function () {
+                                DeleteRow(options.data.AssetSubTypeID);
+                            }).appendTo(container);
+                        }
+                    }
+                ]
+            }).dxDataGrid("instance");
+
+            const Edit = (data) => {
+                console.log(data);
+                $("#AssetSubTypeID").val(data.AssetSubTypeID);
+                $("#AssetTypeID").val(data.AssetTypeID);
+                $("#SubTypeName").val(data.SubTypeName);
+                $("#Description").val(data.Description);
+                $("#Code").val(data.Code);
+                $("#btnSave").val("Update");
+            }
+
+            const DeleteRow = (AssetSubTypeID) => {
+                debugger
+                $.alert.open('confirm', 'Are you sure to delete this record?', function (button) {
+                    if (button == 'yes') {
+                        HttpRequest.Ajax("GET", '/FiniteScheduler/AssetManagement/AssetSubTypeRemove', { "assetSubTypeID": AssetSubTypeID }, saveSuccess, true);
+                    } else {
+
+                    }
+                });
+            }
+        }
+        function saveSuccess(data) {
+            debugger;
+            if (data.result == 1) {
+                $.alert.open({
+                    type: 'Success',
+                    content: data.message,
+                    callback: function () {
+                        //window.location.reload();
+                    }
+                });
+            }
+            else {
+                $.alert.open("error", data.message);
+            }
+        }
+
+    </script>
+}

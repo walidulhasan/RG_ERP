@@ -1,0 +1,239 @@
+﻿@model RG.Application.ViewModel.Maxco.Business.OrderPlanFollowup.OrderPlanFollowupCreateVM
+@{
+    ViewData[PageInfo.PageTitle] = "Plan Followup";
+    ViewData[PageInfo.PageHeader] = "Plan Followup";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="row">
+    <div class="col-sm-12 col-md-12">
+        <div class="card card-dark">
+            <div class="card-header m-0 p-1">
+                <h5 class="card-title">Order Followup</h5>
+            </div>
+            <div class="card-body p-2">
+                <input type="hidden" asp-for="FollowupID" />                   
+
+                <div class="row">
+                    <div class="col-sm-3">
+                        <div class="form-group">
+                            <label asp-for="OrderID" class="required"></label>
+                            <select asp-for="OrderID" asp-items="Model.DDLOrder" class="form-control form-control-sm"></select>
+                            <span asp-validation-for="OrderID" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row" id="">
+                    <div class="col-sm-12">
+                        @*<div class="card card-dark">
+                            <div class="card-header m-0 p-1">
+                                <h5 class="card-title">Order Followup</h5>
+                            </div>
+                            <div class="card-body p-2">*@
+                                <div class="row">
+                                    <div class="col-sm-3">
+                                        <div class="form-group mb-2">
+                                            <label asp-for="OrderClassificationID" class="required"></label>
+                                            <select asp-for="OrderClassificationID" asp-items="Model.DDLOrderClassification" class="form-control form-control-sm"></select>
+                                            <span asp-validation-for="OrderClassificationID" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-3">
+                                        <div class="form-group mb-2">
+                                            <label asp-for="AdditionalFromStock" class=""></label>
+                                            <input type="text" asp-for="AdditionalFromStock" class="form-control form-control-sm" />
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <label asp-for="ApprovedDate" class=""></label>
+                                        <div class="input-group">
+                                            <input asp-for="ApprovedDate" type="text" class="form-control form-control-sm dateField bg-white text-center" readonly />
+                                            <div class="input-group-append">
+                                                <span class="input-group-text"><i class="fa fa-calendar" aria-hidden="true"></i></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <label asp-for="PackingCompleteDate" class=""></label>
+                                        <div class="input-group">
+                                            <input asp-for="PackingCompleteDate" type="text" class="form-control form-control-sm dateField bg-white text-center" readonly />
+                                            <div class="input-group-append">
+                                                <span class="input-group-text"><i class="fa fa-calendar" aria-hidden="true"></i></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <label asp-for="PreFinalDate" class=""></label>
+                                        <div class="input-group">
+                                            <input asp-for="PreFinalDate" type="text" class="form-control form-control-sm dateField bg-white text-center" readonly />
+                                            <div class="input-group-append">
+                                                <span class="input-group-text"><i class="fa fa-calendar" aria-hidden="true"></i></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row pb-2">
+
+                                    <div class="col-sm-3">
+                                        <label asp-for="ExpectedSampleDate" class=""></label>
+                                        <div class="input-group">
+                                            <input asp-for="ExpectedSampleDate" type="text" class="form-control form-control-sm dateField bg-white text-center" readonly />
+                                            <div class="input-group-append">
+                                                <span class="input-group-text"><i class="fa fa-calendar" aria-hidden="true"></i></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <label asp-for="PreProductionSampleApprovalDate" class=""></label>
+                                        <div class="input-group">
+                                            <input asp-for="PreProductionSampleApprovalDate" type="text" class="form-control form-control-sm dateField bg-white text-center" readonly />
+                                            <div class="input-group-append">
+                                                <span class="input-group-text"><i class="fa fa-calendar" aria-hidden="true"></i></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <div class="form-group mb-2">
+                                            <label asp-for="Remarks" class=""></label>
+                                            <input type="text" asp-for="Remarks" class="form-control form-control-sm" />
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-2">
+                                        <div class="form-group mb-2">
+                                            <label asp-for="IsOrderClosed" class=""></label>
+                                            <select asp-for="IsOrderClosed" asp-items="Model.DDLYesNo" class="form-control form-control-sm"></select>
+                                            <span asp-validation-for="OrderID" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            @*</div>
+                        </div>*@
+                    </div>
+                </div>
+                <div class="row" id="">
+                    <div class="col-md-12 text-center">
+                        <div class="form-group">
+                            <button type="button" class="btn btn-sm btn-success" id="btnSave">Save</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script type="text/javascript">
+        function clear() {
+            $("#FollowupID").val(0);
+            $('#OrderID').val(null).trigger('change');
+            $("#OrderClassificationID").val($("#OrderClassificationID option:first").val());
+            $("#AdditionalFromStock").val('');
+            $("#ApprovedDate").val('');
+            $("#PackingCompleteDate").val('');
+            $("#PreFinalDate").val('');
+            $("#IsOrderClosed").val('false');
+            $("#ExpectedSampleDate").val('');
+            $("#PreProductionSampleApprovalDate").val('');
+            $('#btnSave').text('Save').removeClass('btn-warning').addClass('btn-success');
+        }
+        function saveSuccess(data) {
+            if (data.result == 1) {
+                $.alert.open({
+                    type: 'Success',
+                    content: data.message,
+                    callback: function () {
+                        
+                    }
+                });
+            }
+            else {
+                $.alert.open("error", data.message);
+            }
+        }
+        function clearOnOrderChange() {
+            $("#FollowupID").val(0);
+            $("#OrderClassificationID").val($("#OrderClassificationID option:first").val()).removeAttr('disabled');
+            $("#AdditionalFromStock").val('').removeAttr('readonly');
+            $("#ApprovedDate").val('').removeAttr('readonly');
+            $("#PackingCompleteDate").val('').removeAttr('readonly');
+            $("#PreFinalDate").val('').removeAttr('readonly');
+            $("#IsOrderClosed").val('false').removeAttr('disabled');
+            $("#ExpectedSampleDate").val('').removeAttr('readonly');
+            $("#PreProductionSampleApprovalDate").val('').removeAttr('readonly');
+            $('#btnSave').text('Save').removeClass('btn-warning').addClass('btn-success');
+        }
+        $(function () {
+            $("#OrderID").select2();
+            $("#OrderID").change(function () {
+                $("#divOrderDetails").addClass('d-none');
+                $("#divButton").addClass('d-none');
+                let orderID = $("#OrderID").val();
+                if (orderID != "") {
+
+                    let orderFollowup = HttpRequest.AjaxData('GET', '/Maxco/OrderPlanFollowup/GetOrderPlanFollowup', { 'orderID': orderID });
+                    debugger;
+                    if (orderFollowup != null && orderFollowup.FollowupID > 0) {
+
+                        $("#FollowupID").val(orderFollowup.FollowupID);
+                        if (orderFollowup.OrderClassificationID > 0)
+                            $("#OrderClassificationID").val(orderFollowup.OrderClassificationID).attr('disabled', true);
+                        if (orderFollowup.AdditionalFromStock > 0)
+                            $("#AdditionalFromStock").val(orderFollowup.AdditionalFromStock).attr('readonly', true);
+                        if (orderFollowup.ApprovedDate != "")
+                            $("#ApprovedDate").val(orderFollowup.ApprovedDate).attr('disabled', true);
+                        if (orderFollowup.PackingCompleteDate != "")
+                            $("#PackingCompleteDate").val(orderFollowup.PackingCompleteDate).attr('disabled', true);
+                        if (orderFollowup.PreFinalDate != "")
+                            $("#PreFinalDate").val(orderFollowup.PreFinalDate).attr('disabled', true);
+                        if (RtnBoolToLower(orderFollowup.IsOrderClosed))
+                            $("#IsOrderClosed").val(orderFollowup.IsOrderClosed).attr('disabled', true);
+                        if (orderFollowup.ExpectedSampleDate != "")
+                            $("#ExpectedSampleDate").val(orderFollowup.ExpectedSampleDate).attr('disabled', true);
+                        if (orderFollowup.PreProductionSampleApprovalDate != "")
+                            $("#PreProductionSampleApprovalDate").val(orderFollowup.PreProductionSampleApprovalDate).attr('disabled', true);
+                        if (orderFollowup.Remarks != "")
+                            $("#Remarks").val(orderFollowup.Remarks).attr('readonly', true);
+                        $('#btnSave').text('Update').removeClass('btn-success').addClass('btn-warning');
+                    } else {
+                        clearOnOrderChange();
+                    }
+                } else {
+                    clearOnOrderChange();
+                }
+            });
+            $('#btnSave').click(function () {
+                let orderID = $('#OrderID').val();
+                if (orderID != "" && orderID > 0) {
+                    let followupID = $('#FollowupID').val();
+                    let orderClassificationID = $("#OrderClassificationID").val();
+                    let additionalFromStock = $("#AdditionalFromStock").val();
+                    let approvedDate = $("#ApprovedDate").val();
+                    let packingCompleteDate = $("#PackingCompleteDate").val();
+                    let preFinalDate = $("#PreFinalDate").val();
+                    let isOrderClosed = $("#IsOrderClosed").val();
+                    let expectedSampleDate = $("#ExpectedSampleDate").val();
+                    let preProductionSampleApprovalDate = $("#PreProductionSampleApprovalDate").val();
+
+                    let followup = {
+                        FollowupID: followupID,
+                        OrderID: orderID,
+                        OrderClassificationID: orderClassificationID,
+                        AdditionalFromStock: additionalFromStock,
+                        ApprovedDate: approvedDate,
+                        PackingCompleteDate: packingCompleteDate,
+                        PreFinalDate: preFinalDate,
+                        IsOrderClosed: isOrderClosed,
+                        ExpectedSampleDate: expectedSampleDate,
+                        PreProductionSampleApprovalDate: preProductionSampleApprovalDate
+                    }
+                    HttpRequest.Ajax("POST", "/Maxco/OrderPlanFollowup/Create", { 'followup': followup }, saveSuccess);
+                } else {
+                    $.alert.open('warning', 'Please Provide Required Data');
+                }
+
+            });
+        });
+    </script>
+}

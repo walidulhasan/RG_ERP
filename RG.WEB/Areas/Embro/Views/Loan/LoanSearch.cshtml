@@ -1,0 +1,162 @@
+﻿@using RG.Application.Constants.Embro;
+@model RG.Application.ViewModel.Embro.Business.LoanMasters.LoanListSearchVM
+@inject RG.Application.Common.CommonInterfaces.ICurrentUserService _currentuserService;
+@{
+    ViewData[PageInfo.PageTitle] = "Loan Search";
+    ViewData[PageInfo.PageHeader] = "Loan Search";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+}
+
+<form asp-action="Create" asp-area="Embro" asp-controller="Loan" method="post" id="frmLoan">
+    <div class="row">
+        <div class="col-md-3">
+            <div class="form-group">
+                <label asp-for="CompanyID" class="form-label"></label>
+                <select asp-for="CompanyID" asp-items="Model.DDLCompany" class="form-control form-control-sm"></select>
+                <span asp-validation-for="CompanyID" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="form-group">
+                <label asp-for="BankID" class="required"></label>
+                <select asp-for="BankID" asp-items="Model.DDLBank" class="form-control form-control-sm"></select>
+                <span asp-validation-for="BankID" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="form-group">
+                <label asp-for="LoanTypeID" class="required"></label>
+                <select asp-for="LoanTypeID" class="form-control form-control-sm" asp-items="Model.DDLLoanTypeName"></select>
+                <span asp-validation-for="LoanTypeID" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="form-group">
+                <label asp-for="LoanCOAID" class="required"></label>
+                <select asp-for="LoanCOAID" asp-items="Model.DDLLoanNumber" class="form-control form-control-sm"></select>
+                <span asp-validation-for="LoanCOAID" class="text-danger"></span>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="form-group col-md-2">
+            <div class="form-group">
+                <label asp-for="DateFrom" class="label-ajt-sm"></label>
+                <div class="input-group">
+                    <input required asp-for="DateFrom" type="text" name="StartDate" readonly class="datepic readonlyNormal form-control form-control-sm dateField " />
+                    <div class="input-group-append">
+                        <span class="input-group-text"><i class="fa fa-calendar" aria-hidden="true"></i></span>
+                    </div>
+                </div>
+                <span asp-validation-for="DateFrom"></span>
+            </div>
+        </div>
+        <div class="form-group col-md-2">
+            <div class="form-group">
+                <label asp-for="DateTo" class="label-ajt-sm"></label>
+                <div class="input-group">
+                    <input required asp-for="DateTo" type="text" name="EndDate" readonly class="datepic readonlyNormal form-control form-control-sm dateField " />
+                    <div class="input-group-append">
+                        <span class="input-group-text"><i class="fa fa-calendar" aria-hidden="true"></i></span>
+                    </div>
+                </div>
+                <span asp-validation-for="DateTo"></span>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="form-group">
+                <label asp-for="ReportType" class="required"></label>
+                <select asp-for="ReportType" asp-items="Model.DDLReportType" class="form-control form-control-sm"></select>
+                <span asp-validation-for="ReportType" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <label>&nbsp;</label>
+            <div class="form-group">
+                <input type="button" class="btn btn-sm btn-warning " id="btnSearch" value="Search" />
+            </div>
+        </div>
+    </div>
+</form>
+@section scripts{
+    <script type="text/javascript">
+
+        $(function () {
+            $("#LoanCOAID").select2();
+            $("#BankID").select2();
+            getCompanyBank('@Model.CompanyID');
+            $("#CompanyID").change(function () {
+                debugger;
+                const companyID = $("#CompanyID").val();
+                if (companyID!="") {
+                    getCompanyBank(companyID);
+                    //getLoanAccount(companyID);
+                } else {
+                    $('#BankID').html('').select2({ data: [{ id: '', text: 'Please Select' }] });
+                }
+            });
+
+            $("#LoanTypeID").change(function () {
+                debugger;
+                var bankID = $("#BankID").val();
+                var loanTypeID = $("#LoanTypeID").val();
+                if (bankID) {
+                    getLoanAccount(bankID, loanTypeID);
+                } else {
+                    $.alert.open('warning',"Select a bank first");
+                }
+            });
+
+            $("#btnSearch").click(function () {
+                let companyID = $("#CompanyID").val();
+                let bankID = $("#BankID").val();
+                let loanAccountID = $("#LoanCOAID").val();
+                let dateFrom = $("#DateFrom").val();
+                let dateTo = $("#DateTo").val();
+                let LoanTypeID = $("#LoanTypeID").val();
+                let reportType = $("#ReportType").val();
+
+                if (dateFrom && dateTo) {
+                    var urlParm = `DateFrom=${dateFrom}&DateTo=${dateTo}&CompanyID=${companyID}&BankID=${bankID}&LoanTypeID=${LoanTypeID}&LoanAccID=${loanAccountID}`;
+                    let action = ``;
+                    if (reportType == "LP") {
+                        action = `BankLoanPosition`;
+                        const fullUrl = `/Embro/Loan/${action}?${urlParm}`;
+                        newWindow(fullUrl, "Bank Loan Position All");
+                        return;
+                    } else if (reportType == "LGD") {
+                        action = `BankLoanGroupDetail`;
+                        const fullUrl = `/Embro/Loan/${action}?${urlParm}`;
+                        newWindow(fullUrl, "Bank Loan Position Bank Group");
+                        return;
+                    } else if (reportType == "LS") {
+                        action = `BankLoanSummary`;
+                        const fullUrl = `/Embro/Loan/${action}?${urlParm}`;
+                        newWindow(fullUrl, "Bank Loan Position Summary");
+                        return;
+                    } else {
+
+                    }
+                    const fullUrl = `/Embro/Loan/${action}?${urlParm}`;
+                    newWindow(fullUrl, "Bank Loan Position");
+                } else {
+                    $.alert.open("warning", "please enter valid data.");
+                    return;
+                }
+
+            });
+
+        });
+
+
+
+        const getCompanyBank=(companyID) => {
+            HttpRequest.DropDownSelect2("Get", '/Embro/CBMBank/GetDDLBank', { CompanyID: companyID }, 'BankID');
+        }
+        const getLoanAccount=(bankID,loanTypeID) => {
+            HttpRequest.DropDownSelect2("Get", '/Embro/Loan/DDLLoanAccounts', { bankID: bankID, loanTypeID: loanTypeID, predict: $("#LoanCOAID").val() }, 'LoanCOAID');
+        }
+
+    </script>
+}

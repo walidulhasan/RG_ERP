@@ -1,0 +1,355 @@
+﻿@using Microsoft.AspNetCore.Antiforgery
+@inject IAntiforgery antiForgeryToken
+
+@model RG.Application.ViewModel.MaterialsManagement.Business.GatePass.GateControlVM
+@{
+    var token = antiForgeryToken.GetAndStoreTokens(Context);
+
+    ViewData[PageInfo.PageHeader] = "Gate Control";
+    ViewData[PageInfo.PageTitle] = "Gate Control";
+    ViewData[PageInfo.btnText1] = "Create New";
+    ViewData[PageInfo.PageLink1] = "/MaterialsManagement/GatePass/Create";
+    ViewData[PageInfo.btnClass1] = "btn-success";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var isSuperAdmin = Convert.ToBoolean(User.FindFirstValue(SessionKey.IsSuperAdmin));
+
+}
+
+<div class="card card-primary">
+    <div class="row m-0">
+        <div class="col-6 col-sm-3 col-md-3 col-lg-3">
+            <div class="form-group">
+                <label class="col-form-label-sm m-0" asp-for="CategoryID"></label>
+                <select asp-for="CategoryID" asp-items="Model.CategoryList" class="form-control form-control-sm"></select>
+                <span asp-validation-for="CategoryID" class="span-form-validation"></span>
+            </div>
+        </div>
+        <div class="col-6 col-sm-3 col-md-3 col-lg-3">
+            <div class="form-group">
+                <label class="col-form-label-sm m-0" asp-for="StatusID"></label>
+                <select asp-for="StatusID" asp-items="Model.StatusList" class="form-control form-control-sm"></select>
+                <span asp-validation-for="StatusID" class="span-form-validation"></span>
+            </div>
+        </div>
+        <div class="col-6 col-sm-3 col-md-3 col-lg-3">
+            <div class="form-group">
+                <label class="col-form-label-sm m-0 required" asp-for="StartDate"></label>
+                <input type="text" readonly class="form-control form-control-sm dateField" asp-for="StartDate">
+                <span asp-validation-for="StartDate" class="span-form-validation"></span>
+            </div>
+        </div>
+        <div class="col-6 col-sm-3 col-md-3 col-lg-3">
+            <div class="form-group">
+                <label class="col-form-label-sm m-0 required" asp-for="EndDate"></label>
+                <input type="text" readonly class="form-control form-control-sm dateField" asp-for="EndDate">
+                <span asp-validation-for="EndDate" class="span-form-validation"></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="row m-0">
+        <div class="col-6 col-sm-3 col-md-3 col-lg-3">
+            <div class="form-group">
+                <label class="col-form-label-sm m-0 required" asp-for="CategoryPassNo"></label>
+                <input type="text" class="form-control form-control-sm" asp-for="CategoryPassNo" placeholder="Category Pass No">
+                <span asp-validation-for="CategoryPassNo" class="span-form-validation"></span>
+            </div>
+        </div>
+        <div class="col-6 col-sm-3 col-md-3 col-lg-3">
+            <label class="col-form-label-sm m-0">&nbsp;</label>
+            <div class="form-group">
+                <input type="button" class="btn btn-sm btn-success" id="btnSearch" value="Search">
+            </div>
+        </div>
+        @*<div class="col-sm-3 col-md-3 col-lg-3">
+                <label class="col-form-label-sm m-0">&nbsp;</label>
+                <div class="form-group">
+                    <input type="button" class="btn btn-sm btn-success" id="btnNotify" value="Notify">
+                </div>
+            </div>*@
+    </div>
+
+    <div class="row m-0">
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            <div class="table-responsive-sm" id="grid">
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+@*<div class="modal fade" id="challanModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">            
+            <div class="modal-body" id="divChallanModal">
+
+            </div>
+        </div>
+    </div>
+</div>*@
+
+<script type="text/javascript">
+    $(function () {
+        GetICBrowseGetPassesList();
+        $("#btnSearch").click(function () {
+            GetICBrowseGetPassesList();
+        });
+        //$("#btnNotify").click(function () {
+        //    SendNotification();
+        //});
+    })
+    function saveSuccess(data) {
+        if (data.result == 1) {
+            $.alert.open({
+                type: 'Success',
+                content: data.message,
+                callback: function () {
+                    GetICBrowseGetPassesList();
+                }
+            });
+        }
+        else {
+            $.alert.open("error", data.message);
+        }
+    }
+
+    function DataEdit(gatePassID, categoryID) {
+        location.replace('/MaterialsManagement/GatePass/Edit?gatePassID=' + gatePassID + '&categoryID='+categoryID);
+    }
+    function RemoveGatePass(gatePassID) {
+        $.alert.open('confirm', 'Are you sure to delete this record', function (button) {
+            if (button == 'yes')
+                HttpRequest.Ajax("POST", "/MaterialsManagement/GatePass/RemoveGatePass", { gatePassID: gatePassID ,'@token.HeaderName': '@token.RequestToken'}, saveSuccess)
+        });
+    }
+    function CheckReceiveQuantity(that) {
+
+        let thatTr = $(that).parent().parent();
+        let quantity = thatTr.find('.hdnQuantity').val();
+        let issuedQuantity = thatTr.find('.hdnIssuedQuantity').val();
+
+        let receivingQty = thatTr.find('.receivingQty').val();
+        let wastageQty = thatTr.find('.wastageQty').val();
+
+        let balanceQty = (quantity - issuedQuantity - receivingQty - wastageQty);
+        if (balanceQty < 0) {
+            thatTr.find('.receivingQty').val('');
+            thatTr.find('.wastageQty').val('');
+            thatTr.find('.balanceQty').val(quantity - issuedQuantity);
+            alert(`Can't Receive more than issued quantity`);
+        } else {
+            thatTr.find('.balanceQty').val(balanceQty);
+        }
+    }
+
+    function GetICBrowseGetPassesList() {
+
+        var url = "/MaterialsManagement/GatePass/GetICBrowseGetPassesList";
+        let categoryID = RtnNumber($("#CategoryID").val());
+        let statusID = $("#StatusID").val();
+        let startDate = $("#StartDate").val();
+        let endDate = $("#EndDate ").val();
+        let categoryPassNo = $("#CategoryPassNo").val();
+
+        var gatePassReqObj = {
+            CategoryID: categoryID,
+            Status: statusID,
+            StartDate: startDate,
+            EndDate: endDate,
+            GatePassNo: categoryPassNo,
+        }
+       // var dataGridrow;
+        var dataGrid =   $("#grid").dxDataGrid({
+            dataSource: DevExpress.data.AspNet.createStore({
+                key: "GatePassID",
+                loadUrl: url,
+                loadParams: gatePassReqObj
+            }),
+
+            remoteOperations: {
+                paging: true,
+                sorting: true,
+                filtering: true,
+            },
+            showColumnLines: false,
+            showRowLines: true,
+            showBorders:true,
+            paging: {
+                pageSize: 20
+            },
+            pager: {
+                showInfo: true,
+                allowedPageSizes: [10,20, 40, 100, 500],
+                showPageSizeSelector: true,
+            },
+            loadingIndicator: {
+                enabled: true
+            },
+            selection: { mode: 'single' },
+            filterRow: { visible: true },
+            wordWrapEnabled: true,
+            columns: [
+                {
+                    dataField: "GatePassID",
+                    visible: false,
+                    sortOrder: "desc"
+                },
+                {
+
+                    caption: "SL",
+                    alignment: 'center',
+                    cellTemplate: function (cellElement, cellInfo) {
+                        var index = dataGrid.pageIndex() * dataGrid.pageSize() + cellInfo.rowIndex + 1;
+                        cellElement.text(index)
+                    }
+
+                },
+                {
+
+                    caption: "Category",
+                    alignment: 'center',
+                    dataField: "CategoryName",
+                    cellTemplate: function (cellElement, options) {
+                        //debugger;
+                        //if (options.data.IsAccountsApprovalRequired && ! options.data.IsApprovedByAccounts) {
+                        //    var url = `<span>${options.data.CategoryName}</span>`;
+                        //    cellElement.append(url);
+                        //} else {
+                            var url = `<a style="padding:0px;margin:0px;" title="Gate Pass" target="_blank" class="dx-link" href="/MaterialsManagement/GatePass/GatePassChallan?gatePassID=${options.data.GatePassID}&categoryID=${options.data.CategoryID}&reportType=1">${options.data.CategoryName}</a>`;
+                            cellElement.append(url);
+                        //}
+                    }
+
+                },
+                {
+
+                    caption: "GP Serial",
+                    alignment: 'center',
+                    dataField: "Serial",
+                    cellTemplate: function (cellElement, options) {
+                        //if (options.data.IsAccountsApprovalRequired && !options.data.IsApprovedByAccounts) {
+                        //    var url = `<span>${options.data.Serial}</span>`;
+                        //    cellElement.append(url);
+                        //} else {
+                            var url = `<a style="padding:0px;margin:0px;" title="Challan"  target="_blank" class="dx-link" href="/MaterialsManagement/GatePass/GatePassChallan?gatePassID=${options.data.GatePassID}&categoryID=${options.data.CategoryID}&reportType=2">${options.data.Serial}</a>`;
+                            cellElement.append(url);
+                        //}
+                     
+                    }
+                },
+                {
+
+                    caption: "Department",
+                    wordWrapEnabled: false,
+                    alignment: 'center',
+                    //allowFiltering: true,
+                    dataField: "DepartmentName",
+                    hidingPriority: 0,
+                },
+                {
+
+                    caption: "GP Date",
+                    alignment: 'center',
+                    //allowFiltering: true,
+                    dataField: "Date",
+                    sortIndex: 1,
+                 //   sortOrder:"desc"
+
+                },
+                {
+
+                    caption: "Time",
+                    format: "hh:mm a",
+                    dataType: "date",
+                    alignment: 'center',
+                    allowFiltering: false,
+                    dataField: "CreateDate",
+                    hidingPriority: 1,
+
+                },
+                {
+
+                    caption: "Issed By",
+                    alignment: 'center',
+                    dataField: "CreatedEmployee",
+
+                },
+                {
+
+                    caption: "Department",
+                    alignment: 'center',
+
+                    dataField: "CreatedEmployeeDept",
+                    hidingPriority: 2,
+                },
+                {
+
+                    caption: "Designation",
+                    alignment: 'center',
+
+                    dataField: "CreatedEmployeeDesig",
+                    hidingPriority: 3,
+                },
+                {
+
+                    caption: "Ex .Days",
+                    alignment: 'center',
+                    dataField: "ExpireDayes",
+                    hidingPriority: 4,
+                },
+                {
+
+                    caption: "Status",
+                    alignment: 'center',
+                    dataField: "Status",
+                    hidingPriority: 5,
+                },
+                {
+
+                    caption: "Action",
+                    alignment: 'center',
+                    cellTemplate: function (container, options) {
+
+                        if ('@isSuperAdmin' == 'True' || (!options.data.IsApprovedByAccounts && !options.data.isApproved)) {
+
+                            var returnText = `<span>&nbsp</span><button class="btn btn-xs btn-warning" > <i class="fa fa-edit"></i></button>`;
+                            returnText = returnText + '</div>';
+                            $(returnText).on('dxclick', function () {
+                                DataEdit(options.data.GatePassID, options.data.CategoryID);
+                            }).appendTo(container);
+
+                            var returnText = `<span>&nbsp</span><button class="btn btn-xs btn-danger" > <i class="fa fa-trash"></i></button>`;
+                            returnText = returnText + '</div>';
+                            $(returnText).on('dxclick', function () {
+                                RemoveGatePass(options.data.GatePassID);
+                            }).appendTo(container);
+
+                        }
+                    },
+                },
+            ],
+            height: 520,
+            showColumnLines: true,
+            showRowLines: true,
+            showBorders: true,
+        }).dxDataGrid("instance");
+    }
+
+    //function GetChallanModal(gatePassID, categoryID, reportType) {
+    //    debugger;
+    //    $("#divChallanModal").html('');
+    //    if (gatePassID > 0) {
+    //        let url = '';
+    //        if (reportType==1)
+    //            url= `/MaterialsManagement/GatePass/GatePassChallan?gatePassID=${gatePassID}&categoryID=${categoryID}&reportType=${reportType}`;
+    //        else
+    //            url=`/MaterialsManagement/GatePass/GatePassChallan?gatePassID=${gatePassID}&categoryID=${categoryID}&reportType=${reportType}`;
+
+
+    //        $("#divChallanModal").load('/MaterialsManagement/GatePass/GatePassChallan', { gatePassID: gatePassID, categoryID: categoryID, reportType: reportType});
+    //    }
+    //    $("#challanModal").modal('toggle');
+
+    //}
+</script>
+

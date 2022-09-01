@@ -1,0 +1,47 @@
+﻿
+@model RG.Application.ViewModel.MDSir.AccountsInfo.LoanDetailsVM
+
+@{
+    ViewData[PageInfo.PageTitle] = "Loan Summary Report";
+    ViewData[PageInfo.PageHeader] = "Loan Summary";
+    Layout = "~/Views/Shared/_LayoutMDSir.cshtml";
+
+}
+
+<form asp-action="LoanDetails" asp-area="MDSir" asp-controller="AccountsInfo" id="frmLoanDetails">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="form-group">
+                <label asp-for="Company" class="required"></label>
+                <select asp-for="Company" class="form-control form-control-sm" asp-items="Model.DDLCompany"></select>
+                <span asp-validation-for="Company" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="form-group">
+                <label asp-for="Month" class="required"></label>
+                <select asp-for="Month" class="form-control form-control-sm" asp-items="Model.DDLMonths"></select>
+                <span asp-validation-for="Month" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="form-group">
+                <label asp-for="Year" class="required"></label>
+                <select asp-for="Year" class="form-control form-control-sm " asp-items="Model.DDLYears"></select>
+                <span asp-validation-for="Year" class="text-danger"></span>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="form-group text-center">
+                <input type="button" class="btn btn-sm btn-success" value="Show" id="btnSave" />
+                @*<input type="button" class="btn btn-sm btn-warning" value="Clear" id="btnClear" onclick="Clear()" />*@
+            </div>
+        </div>
+    </div>
+    
+
+</form>
+
+

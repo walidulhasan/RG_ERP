@@ -1,0 +1,290 @@
+﻿@model RG.Application.ViewModel.Embro.Business.PrintedCheques.ChequesStatusVM
+
+@{
+    ViewData[PageInfo.PageTitle] = "Cheque Status";
+    ViewData[PageInfo.PageHeader] = "Cheque Status";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<form id="trailBalance" role="form">
+    <div class="row">
+        <div class="col-6">
+            <div class="form-group">
+                <label asp-for="BankID" class="required"></label>
+                <select asp-for="BankID" class="form-control form-control-sm" asp-items="Model.DDLBank"></select>
+                <span asp-validation-for="BankID" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-6">
+            <div class="form-group">
+                <label asp-for="AccountID" class="required"></label>
+                <select asp-for="AccountID" class="form-control form-control-sm" asp-items="Model.DDLAccount"></select>
+                <span asp-validation-for="AccountID" class="text-danger"></span>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-2">
+            <div class="form-group">
+                <label asp-for="DateFrom" class="required"></label>
+                <input type="text" asp-for="DateFrom" value="@Model.DateFrom" class="form-control form-control-sm dateField" readonly />
+                <span asp-validation-for="DateFrom" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="form-group">
+                <label asp-for="DateTo" class="required"></label>
+                <input type="text" asp-for="DateTo" value="@Model.DateTo" class="form-control form-control-sm dateField" readonly />
+                <span asp-validation-for="DateTo" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="form-group">
+                <label asp-for="StatusID" class="label-ajt-sm required"></label>
+                <select asp-for="StatusID" class="form-control form-control-sm" asp-items="Model.DDLStatus"></select>
+                <span asp-validation-for="StatusID" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="form-group">
+                <label asp-for="PaidTo" class="label-ajt-sm"></label>
+                <select asp-for="PaidTo" class="form-control form-control-sm" asp-items="Model.DDLPaidTo"></select>
+                <span asp-validation-for="PaidTo" class="text-danger"></span>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12 text-center">
+            <div class="form-group">
+                <button type="button" class="btn btn-sm btn-warning mr-2" id="btnSearch">Search</button>
+            </div>
+        </div>
+    </div>
+</form>
+<div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <div id="grid">
+        </div>
+    </div>
+</div>
+
+<br />
+<div class="row" >
+    <div class="col-md-2">
+        <div class="form-group">
+            <label asp-for="UpdatedStatusID" class="label-ajt-sm required"></label>
+            <select asp-for="UpdatedStatusID" class="form-control form-control-sm" asp-items="Model.DDLStatus"></select>
+            <span asp-validation-for="UpdatedStatusID" class="text-danger"></span>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="form-group">
+            <label asp-for="ClearingDate" class="required"></label>
+            <input type="text" asp-for="ClearingDate" value="@Model.ClearingDate" class="form-control form-control-sm dateField" readonly />
+            <span asp-validation-for="ClearingDate" class="text-danger"></span>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <label>&nbsp;</label>
+        <div class="form-group text-right">
+            <button type="button" class="btn btn-sm btn-success" id="btnSave">Save</button>
+        </div>
+    </div>
+</div>
+@section scripts{
+    <script type="text/javascript">
+        function GetCheques() {
+
+            let accountID = $("#AccountID").val();
+            let dateFrom = $("#DateFrom").val();
+            let dateTo = $("#DateTo").val();
+            let statusID = $("#StatusID").val();
+            let paidTo = $("#PaidTo").val();
+
+            assignedGrid = '';
+            $("#grid").dxDataGrid({
+                height: 700,
+                remoteOperations: { paging: true, filtering: true, sorting: true, grouping: false, summary: false, groupPaging: false },
+                dataSource: DevExpress.data.AspNet.createStore({
+                    key: "ChqID",
+                    loadUrl: "/Embro/PrintedCheques/GetCBMPrintedCheques",
+                    loadParams: {
+                        accountID: accountID,
+                        fromDate: dateFrom,
+                        toDate: dateTo,
+                        statusID: statusID,
+                        paidTo: paidTo
+                    }
+                }),
+                selection: {
+                    mode: "multiple",
+                    deferred: true
+                },
+                pager: { visible: true, showInfo: true, allowedPageSizes: [500], showPageSizeSelector: true, },
+                paging: { pageSize: 1000 },
+                filterRow: {
+                    visible: true
+                },
+                onInitialized: function (e) {
+                    assignedGrid = e.component;
+                },
+                //selectionFilter: ["ChqID", ">", "0"],
+                showBorders: true,
+                columns: [
+                    {
+                        width: "auto",
+                        caption: "SL #",
+                        alignment: 'center',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        },
+                        cellTemplate: function (container, e) {
+                            var index = e.rowIndex + 1;
+                            container.text(index);
+                        }
+
+                    },
+                    {
+                        dataField: "ChqID",
+                        visible: false,
+
+                    },
+                    {
+                        dataField: "Supplier",
+                        alignment: 'center',
+                        caption: 'Cheque Paid To',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+                    },
+                    {
+                        dataField: "POActivity",
+                        alignment: 'center',
+                        caption: 'Activity',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+                    },                    
+                    {
+                        dataField: "ChqNumber",
+                        alignment: 'center',
+                        caption: 'Chq Number',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+                    },
+                    {
+                        dataField: "ChqDate",
+                        alignment: 'center',
+                        caption: 'Cheque Date',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+                    },
+                    {
+                        dataField: "Amount",
+                        alignment: 'center',
+                        caption: 'Amount',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+                    },
+                    {
+                        dataField: "Status",
+                        alignment: 'center',
+                        caption: 'Status',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+                    },
+                    {
+                        dataField: "StatusDate",
+                        alignment: 'center',
+                        caption: 'Status Date',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+                    }
+                ]
+            }).dxDataGrid("instance");
+
+            
+
+        }
+        function saveSuccess(data) {
+            $("#btnSave").attr("disabled", false);
+            if (data.result == 1) {
+                //let dataGrid = $("#grid").dxDataGrid("instance");
+                //dataGrid.refresh()
+                GetCheques();
+                $.alert.open({
+                    type: 'Success',
+                    content: data.message,
+                    callback: function () {
+                       
+                    }
+                });
+            }
+            else {
+                $.alert.open("error", data.message);
+
+            }
+        }
+        function DDLSupplierWhomChequePaidTo() {
+            //debugger;
+            let accountID = $("#AccountID").val();
+            let dateFrom = $("#DateFrom").val();
+            let dateTo = $("#DateTo").val();            
+            if (accountID != "" && accountID > 0 && dateFrom != "" && dateTo!="") {
+                HttpRequest.DropDownSelect2('GET', '/Embro/PrintedCheques/GetDDLSupplierWhomChequePaidTo', { accountID: accountID, fromDate: dateFrom, toDate: dateTo, predict: $("#PaidTo").val() }, 'PaidTo',true);
+            }
+        }
+
+        $(function () {
+            $("#BankID").select2();
+            $("#AccountID").select2();
+            $("#PaidTo").select2();
+            DDLSupplierWhomChequePaidTo();
+            GetCheques();
+            $("#BankID").change(function () {
+                let bankID = $("#BankID").val();
+                
+                if (bankID != "" && bankID > 0) {
+                    HttpRequest.DropDownSelect2('GET', '/Embro/PrintedCheques/GetDDLCBM_BankAccount', { bankID: bankID, predict: $("#AccountID").val() }, 'AccountID');
+                }
+                
+            });
+            $("#AccountID,#DateFrom,#DateTo").change(function () {
+                debugger;
+                DDLSupplierWhomChequePaidTo();
+            });
+
+            $("#btnSearch").click(function () {
+                GetCheques();
+            });
+
+            $("#btnSave").click(function () {
+                $("#btnSave").attr("disabled", true);
+                debugger;
+                let selectedData = new Array();
+                let updatedStatusID = $("#UpdatedStatusID").val();
+                let clearingDate = $("#ClearingDate").val();
+
+                var _dataGrid = $("#grid").dxDataGrid("instance");
+                _dataGrid.getSelectedRowsData().then(function (selectedRowsData) {
+
+                    selectedRowsData.map(function (sec) {
+                        let data = { ChqID: sec.ChqID, UpdatedStatusID: updatedStatusID, ClearingDate: clearingDate };
+                        selectedData.push(data);
+                    });
+
+                    if (updatedStatusID > 0 && clearingDate!="" && selectedData.length > 0) {
+                        HttpRequest.Ajax("POST", '/Embro/PrintedCheques/UpdateChequeStatus', { "selectedData": selectedData }, saveSuccess, true);
+                    }
+                });
+
+            });
+            
+        });
+    </script>
+
+}

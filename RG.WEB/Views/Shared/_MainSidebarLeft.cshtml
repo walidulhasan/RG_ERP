@@ -1,0 +1,49 @@
+﻿@*@using RG.WEB.Helper*@
+@*@using Application.Common.Interfaces
+    @inject ILoginUserSessionService setUserInfo
+    @{
+        if ((SessionData.UserMenuList.Count == 0) && User.Identity.Name!=null)
+        {
+           var isok= await setUserInfo.SetLoginUserSession(User.Identity.Name);
+                    if (isok == 0)
+                    {
+
+                    }
+        }
+    }
+
+
+    @{ var userMenuList = SessionData.UserMenuList;
+        var a = 0; }*@
+
+
+<aside class="main-sidebar sidebar-dark-primary elevation-4">
+    <!-- Brand Logo -->
+    <a href="/" class="brand-link">
+        <img src="~/CustomSiteImages/robintexGroupLogo.png" alt="Robintex-Group Bangladesh Logo" title="Robintex-Group Bangladesh" class="brand-image img-circle elevation-3"
+        style="opacity: .8">
+   
+        <span class="brand-text font-weight-light text-xs text-warning">
+            @User.FindFirstValue(SessionKey.COMPANY_NAME)
+        </span>
+    </a>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <!-- Sidebar user panel (optional) -->
+        <div class="user-panel mt-0 pb-0 mb-0 d-flex"> 
+            <div class="info">
+                <a href="#" class="d-block">@User.FindFirstValue(SessionKey.EMPLOYEE_NAME)</a>
+            </div>
+        </div>
+        <!-- Sidebar Menu -->   
+        <nav class="mt-2">
+            <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false" id="menu">
+            </ul>
+        </nav>       
+        <!-- /.sidebar-menu -->
+    </div>
+    <!-- /.sidebar -->
+</aside>
+
+
+

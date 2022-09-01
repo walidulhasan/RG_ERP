@@ -1,0 +1,600 @@
+﻿@using Microsoft.AspNetCore.Antiforgery
+@inject IAntiforgery antiForgeryToken
+@model RG.Application.ViewModel.MaterialsManagement.Business.GatePass.ReturnableVCVM
+@{
+    var token = antiForgeryToken.GetAndStoreTokens(Context);
+    string isSelfVehicle = Model.isSelfVehicle == true ? "checked" : "";
+}
+
+<form id="frmRetunableMaster" role="form" name="frmRetunableMaster">
+<div class="row col-sm-12 pl-0 pr-1 ml-1">
+    <input type="hidden" id="hdnGatePassID" asp-for="GatePassID" />
+    <div class="card col-sm-7 col-md-7 col-lg-7 p-0">
+        <div class="card-header p-1 bg-cyan">Vendor Info</div>
+        <div class="card-body p-1">
+            <div class="row m-0">
+                <div class="col-sm-6 col-md-6 col-lg-6">
+                    <div class="form-group">
+                        <label class="col-form-label-sm m-0 required" asp-for="NarrowGroupType"></label>
+                        <select asp-for="NarrowGroupType" asp-items="Model.NarrowGroupTypeList" class="form-control form-control-sm"></select>
+                        <span asp-validation-for="NarrowGroupType" class="span-form-validation"></span>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-md-6 col-lg-6">
+                    <div class="form-group">
+                        <label class="col-form-label-sm m-0 required" asp-for="Identification"></label>
+                        <select asp-for="Identification" asp-items="Model.IdentificationList" class="form-control form-control-sm"></select>
+                        <span asp-validation-for="Identification" class="invalid-feedback"></span>
+                    </div>
+                </div>
+
+            </div>
+            <div class="row m-0">
+                <div class="col-sm-12 col-md-12 col-lg-12">
+                    <div class="form-group">
+                        <label class="col-form-label-sm m-0 required" asp-for="VendorID"></label>
+                        <select asp-for="VendorID" asp-items="Model.VendorList" class="form-control form-control-sm"></select>
+                        <span asp-validation-for="VendorID" class="span-form-validation"></span>
+                    </div>
+                </div>
+
+            </div>
+            <div class="row m-0">
+                <div class="col-sm-6 col-md-6 col-lg-6">
+                    <div class="form-group">
+                        <label class="col-form-label-sm m-0 required" asp-for="VendorRepresentative"></label>
+                        <input type="text" class="form-control form-control-sm" asp-for="VendorRepresentative" placeholder="Vendor Representative" autocomplete="off">
+                        <span asp-validation-for="VendorRepresentative" class="span-form-validation"></span>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-md-6 col-lg-6">
+                    <div class="form-group">
+                        <label class="col-form-label-sm m-0 required" asp-for="VendorRepresentativeContactNo"></label>
+                        <input type="text" class="form-control form-control-sm" asp-for="VendorRepresentativeContactNo" placeholder="Representative Contact" autocomplete="off">
+                        <span asp-validation-for="VendorRepresentativeContactNo" class="span-form-validation"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card col-sm-5 col-md-5 col-lg-5 p-0">
+        <div class="card-header p-1 bg-blue">Comapny Info</div>
+        <div class="card-body p-1">
+            <div class="row m-0">
+                <div class="col-sm-6 col-md-6 col-lg-6">
+                    <div class="form-group">
+                        <label class="col-form-label-sm m-0 required" asp-for="CompanyRepresentative"></label>
+                        <input type="text" class="form-control form-control-sm" asp-for="CompanyRepresentative" placeholder="" autocomplete="off">
+                        <span asp-validation-for="CompanyRepresentative" class="span-form-validation"></span>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-md-6 col-lg-6">
+                    <div class="form-group">
+                        <label class="col-form-label-sm m-0 required" asp-for="CompanyRepresentativeID"></label>
+                        <input type="text" class="form-control form-control-sm" asp-for="CompanyRepresentativeID" placeholder="Representative ID" autocomplete="off">
+                        <span asp-validation-for="CompanyRepresentativeID" class="span-form-validation"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="row m-0">
+                <div class="col-sm-6 col-md-6 col-lg-6">
+                    <div class="form-group">
+                        <label class="col-form-label-sm m-0 required" asp-for="JobDescription"></label>
+                        <input type="text" class="form-control form-control-sm" asp-for="JobDescription" placeholder="Job Description" autocomplete="off">
+                        <span asp-validation-for="JobDescription" class="span-form-validation"></span>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-md-6 col-lg-6">
+                    <div class="form-group">
+                        <label class="col-form-label-sm m-0 required" asp-for="VehicleNo"></label>
+                        <input type="text" class="form-control form-control-sm" asp-for="VehicleNo" placeholder="Vehicle No" autocomplete="off">
+                        <span asp-validation-for="VehicleNo" class="span-form-validation"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="row m-0">
+                <div class="col-sm-6 col-md-6 col-lg-6">
+                    <div class="form-group">
+                        <label class="col-form-label-sm m-0 required" asp-for="DepartmentID"></label>
+                        <select asp-for="DepartmentID" asp-items="Model.DepartmentList" class="form-control form-control-sm"></select>
+                        <span asp-validation-for="DepartmentID" class="span-form-validation"></span>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-md-6 col-lg-6">
+                    <label>&nbsp;</label>
+                    <div class="form-group">
+                        <input type="checkbox" id="IsOwnVehicle" @isSelfVehicle />   Is Companys own vehicle
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row m-0">
+    <div class="col-sm-12 col-md-12 col-lg-12 text-right">
+        <div class="form-group">
+            <input type="button" class="btn btn-xs btn-success" id="AddNewItem" value="Add New Item" data-toggle="modal" data-target="#itemModal" />
+        </div>
+    </div>
+</div>
+<div class="row m-0">
+    <div class="col-sm-12 col-md-12 col-lg-12">
+        <table class="table table-sm table-bordered table-striped text-center text-xs" id="tblItem">
+            <thead class="bg-dark">
+                <tr>
+                    <td style="width:3%;">SL#</td>
+                    <td style="width:5%;">Category</td>
+                    <td style="width:5%;">Requisition No</td>
+                    <td style="width:30%;">Item Name</td>
+                    <td style="width:5%;">UOM</td>
+                    <td style="width:5%;">Weight/ Quantity</td>
+                    <td style="width:8%;">Expt. Return Date </td>
+                    <td style="width:28%;">Remarks</td>
+                    <td style="width:7%;">Action</td>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.GatePassID > 0)
+                {
+                    var sl = 1;
+                    foreach (var item in Model.ReturnableItem)
+                    {
+                        <tr data-id="@item.ID">
+                            <td class='trSerial'>@(sl++)</td>
+                            <td><input type="hidden" class="hdnReturnableItemCategoryID" value="@item.ReturnableItemCategoryID" />@item.ReturnableItemCategory</td>
+                            <td><input type="hidden" class="hdnRequisitionID" value="@item.RequisitionID" />@item.RequisitionID</td>
+
+                            <td><input type="hidden" class="hdnItemName" value="@item.ItemName" />@item.ItemName</td>
+                            <td><input type="hidden" class="hdnUnitOfMeasurementID" value="@item.UnitID" />@item.UnitOfMeasurement</td>
+                            <td><input type="hidden" class="hdnGrossWeight" value="@(item.Quantity==0?item.GrossWeight:item.Quantity)" />@(item.Quantity==0?item.GrossWeight:item.Quantity)</td>
+                            <td><input type="hidden" class="hdnReturnDate" value="@item.ReturnDate" />@item.ReturnDate</td>
+                            <td><input type="hidden" class="hdnRemarks" value="@item.Remarks" />@item.Remarks</td>
+                            <td>
+                                <button type="button" class="btn btn-xs btn-warning" onclick="FillupPopupData('@item.ID')" data-toggle="modal" data-target="#itemModal"><i class="fas fa-external-link-alt"></i></button>
+                                <button type="button" class="btn btn-xs btn-danger" onclick="RemoveRow(this,'@item.ID')"><i class="fa fa-trash" aria-hidden="true"></i></button>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+            <tfoot>
+                <tr><td colspan="9" class="text-center"><input type="button" class="btn btn-sm btn-success" id="btnReturnable" value="Save" /></td></tr>
+            </tfoot>
+        </table>
+    </div>
+</div>
+</form>
+
+<div class="modal fade" id="itemModal" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+
+    <form id="frmReturnableDetails">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-header p-2">
+                <h5 class="modal-title" id="exampleModalLabel">Returnable Item</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="hdnGatePassDetailID" />
+                <div class="row m-0">
+                    <div class="col-sm-3 col-md-3 col-lg-3">
+                        <div class="form-group">
+                            <label class="col-form-label-sm m-0 required" asp-for="ReturnableItemCategoryID"></label>
+                            <select asp-for="ReturnableItemCategoryID" asp-items="Model.ReturnableItemCategoryList" class="form-control form-control-sm"></select>
+                            <span asp-validation-for="ReturnableItemCategoryID" class="span-form-validation"></span>
+                        </div>
+                    </div>
+                    <div class="col-sm-3 col-md-3 col-lg-3 clsYarnRequisition d-none">
+                        <div class="form-group">
+                            <label class="col-form-label-sm m-0 required" asp-for="RequisitionID"></label>
+                            <br />
+                            <select asp-for="RequisitionID" asp-items="Model.RequisitionList" class="form-control form-control-sm" style="width: 100%"></select>
+                            <span asp-validation-for="RequisitionID" class="span-form-validation"></span>
+                        </div>
+                    </div>
+                    <div class="col-sm-1 col-md-1 col-lg-1 clsYarnRequisition d-none">
+                        <label class="col-form-label-sm m-0">&nbsp;</label>
+                        <div class="form-group">
+                            <button type="button" class="btn btn-sm btn-danger" onclick="ViewRequisitionDetailReport()"><i class="fas fa-file-pdf"></i></button>
+                        </div>
+                    </div>
+                </div>
+                <div class="row m-0">
+                    <div class="col-sm-8 col-md-8 col-lg-8">
+                        <div class="form-group">
+                            <label class="col-form-label-sm m-0 required" asp-for="ItemName"></label>
+                            <input type="text" class="form-control form-control-sm" asp-for="ItemName" placeholder="Item Name">
+                            <span asp-validation-for="ItemName" class="span-form-validation"></span>
+                        </div>
+                    </div>
+                    <div class="col-sm-2 col-md-2 col-lg-2">
+                        <div class="form-group">
+                            <label class="col-form-label-sm m-0 required" asp-for="UnitOfMeasurementID"></label>
+                            <select asp-for="UnitOfMeasurementID" asp-items="Model.UnitOfMeasurementList" class="form-control form-control-sm"></select>
+                            <span asp-validation-for="UnitOfMeasurementID" class="span-form-validation"></span>
+                        </div>
+                    </div>
+                    <div class="col-sm-2 col-md-2 col-lg-2">
+                        <div class="form-group">
+                            <label class="col-form-label-sm m-0 required lblGrossWeight" asp-for="GrossWeight"></label>
+                            <input type="text" class="form-control form-control-sm" asp-for="GrossWeight" onkeypress="return checkDecimal(event)" placeholder="Gross Weight">
+                            <span asp-validation-for="GrossWeight" class="span-form-validation"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row m-0">
+                    <div class="col-sm-3 col-md-3 col-lg-3">
+                        <div class="form-group">
+                            <label class="col-form-label-sm m-0 required" asp-for="ReturnDate"></label>
+                            <input type="text" class="form-control form-control-sm dateField" asp-for="ReturnDate" placeholder="Return Date" readonly>
+                            <span asp-validation-for="ReturnDate" class="span-form-validation"></span>
+                        </div>
+                    </div>
+                    <div class="col-sm-9 col-md-9 col-lg-9">
+                        <div class="form-group">
+                            <label class="col-form-label-sm m-0" asp-for="Remarks"></label>
+                            <input type="text" class="form-control form-control-sm" asp-for="Remarks" placeholder="Remarks">
+                            <span asp-validation-for="Remarks" class="span-form-validation"></span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="modal-footer p-2">
+                <button type="button" class="btn btn-xs btn-danger" id="btnAddToListClose">Add To List & Close</button>
+                <button type="button" class="btn btn-xs btn-primary" id="btnAddToList">Add To List</button>
+            </div>
+        </div>
+    </div>
+    </form>
+</div>
+
+<script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+<script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+
+<script src="~/js/customScripts/GenericHTTPRequest.js"></script>
+<script>
+    function AddItemToList() {
+
+
+             let gatePassDetailID = $("#hdnGatePassDetailID").val();
+            let itemName = $("#ItemName").val();
+
+            let categoryID = $("#ReturnableItemCategoryID").val();
+            let categoryName = $("#ReturnableItemCategoryID option:selected").text();
+
+            let requisitionID = $("#RequisitionID").val();
+            if (categoryName != 'Yarn') {
+                requisitionID = '';
+            }
+
+            let unitOfMeasurementID = $("#UnitOfMeasurementID").val();
+            let unitOfMeasurement = $("#UnitOfMeasurementID option:selected").text();
+            let grossWeight = 0;
+            let quantity = 0;
+            if (unitOfMeasurement == 'Kilogram' || unitOfMeasurement == 'Gram') {
+                grossWeight = $("#GrossWeight").val();
+            } else {
+                quantity = $("#GrossWeight").val();
+            }
+            let returnDate = $("#ReturnDate").val();
+            let remarks = $("#Remarks").val();
+            debugger;
+            if (!itemName || itemName == "") {
+                alert("Add Item.");
+                $("#ItemName").focus();
+                return;
+            }
+
+            if ((!grossWeight || grossWeight == 0) && (!quantity || quantity == 0)) {
+                alert("Add Quantity.");
+                $("#GrossWeight").focus();
+                return;
+            }
+
+            if (!returnDate) {
+                alert("Please add expected return date.");
+                $("#ReturnDate").focus();
+                return;
+            }
+
+
+            let currentRowSerial = ($("#tblItem tbody tr").length) + 1;
+            if (gatePassDetailID > 0) {
+                let row = $('tr[data-id="' + gatePassDetailID + '"]');
+                currentRowSerial = row.find('.trSerial').text();
+            }
+            let popupBtn = '';
+            if (gatePassDetailID > 0) {
+                popupBtn = `<button type="button" class="btn btn-xs btn-warning" onclick="FillupPopupData(${gatePassDetailID})" data-toggle="modal" data-target="#itemModal"><i class="fas fa-external-link-alt"></i></button>&nbsp;`
+            }
+            let trTds = `<td class='trSerial'>${currentRowSerial}</td>
+                    <td><input type="hidden" class="hdnReturnableItemCategoryID" value="${categoryID}" /> ${categoryName}</td>
+                    <td><input type="hidden" class="hdnRequisitionID" value="${requisitionID}" /> ${requisitionID}</td>
+                    <td><input type="hidden" class="hdnItemName" value="${itemName}" /> ${itemName}</td>
+                    <td><input type="hidden" class="hdnUnitOfMeasurementID" value="${unitOfMeasurementID}" /> ${unitOfMeasurement}</td>
+                    <td><input type="hidden" class="hdnGrossWeight" value="${grossWeight}" /><input type="hidden" class="hdnQuantity" value="${quantity}" /> ${grossWeight > 0 ? grossWeight : quantity}</td>
+                    <td><input type="hidden" class="hdnReturnDate" value="${returnDate}" /> ${returnDate}</td>
+                    <td><input type="hidden" class="hdnRemarks" value="${remarks}" /> ${remarks}</td>
+                    <td>${popupBtn}<button type="button"  class="btn btn-xs btn-danger" onclick="RemoveRow(this)"><i class="fa fa-trash" aria-hidden="true"></i></button></td>`
+
+            if (gatePassDetailID > 0) {
+                let row = $('tr[data-id="' + gatePassDetailID + '"]');
+                row.addClass('valueChanged')
+                row.html(trTds);
+            } else {
+                $("#tblItem tbody").append(
+                    `<tr class='valueChanged' data-id="0">${trTds}</tr>`
+                );
+            }
+
+    }
+    function ClearPage() {
+        $("#NarrowGroupType").val($("#NarrowGroupType option:first").val());
+        $("#NarrowGroupType").trigger('change');
+        HttpRequest.DropDownDefault("VendorID");
+        $("#VendorRepresentative").val('');
+        $("#VendorRepresentativeContactNo").val('');
+        $("#CompanyRepresentative").val('');
+        $("#CompanyRepresentativeID").val('');
+        $("#JobDescription").val('');
+        $("#VehicleNo").val('');
+        $("#IsOwnVehicle").prop('checked', false);
+    }
+    function saveSuccess(data) {
+        if (data.result == 1) {
+            $.alert.open({
+                type: 'Success',
+                content: data.message,
+                callback: function () {
+                    ClearPage();
+                    $("#tblItem tbody").html('');
+                }
+            });
+        }
+        else {
+            $.alert.open("error", data.message);
+        }
+    }
+    function updateSuccess(data) {
+
+        if (data.result == 1) {
+            $.alert.open({
+                type: 'Success',
+                content: data.message,
+                callback: function () {
+                }
+            });
+        } else if (data.result == 2) {
+               location.replace('/MaterialsManagement/GatePass/Index');
+        }
+        else {
+            $.alert.open("error", data.message);
+        }
+    }
+    function ViewRequisitionDetailReport() {
+        let requisitionID = $('#RequisitionID').val();
+        if (requisitionID != "") {
+            let reportFormat = ("@ReportExportFormat.PdfFormat");
+            var url = `/MaterialsManagement/GatePass/ShowRequisitionDetailReport?RequisitionID=${requisitionID}&ReportFormat=${reportFormat}`
+            window.open(url, "_blank");
+        }
+    }
+    function ClearItemModal() {
+        $("#ReturnableItemCategoryID").val('').trigger('change');
+        $("#hdnGatePassDetailID").val(0)
+        $("#ItemName").val('');
+        $("#GrossWeight").val('');
+        $("#ReturnDate").val('');
+        $("#Remarks").val('');
+        $("#UnitOfMeasurementID").val($("#UnitOfMeasurementID option:first").val());
+    }
+    $(function () {
+        $('#RequisitionID').select2();
+
+        $('#Identification').select2();//{ dropdownCssClass: "text-xs" }
+        $('#VendorID').select2();
+        $('#RequisitionID').change(function () {
+            let itemName = $("#RequisitionID").find(':selected').attr('data-custom1');
+            let unitID = $("#RequisitionID").find(':selected').attr('data-custom2');
+            let quantity = $("#RequisitionID").find(':selected').attr('data-custom3');
+            $("#ItemName").val(itemName);
+            $("#UnitOfMeasurementID").val(unitID).attr('disabled',true);
+            $("#GrossWeight").val(quantity);
+        });
+
+
+        $(".dateField").datepicker(
+            {
+                dateFormat: "dd-M-yy",
+                showAnim: "scale",
+                changeMonth: true,
+                yearRange: "1900:2050",
+                changeYear: true
+            });
+        $('#itemModal').on('hidden.bs.modal', function () {
+            ClearItemModal();
+        });
+        $("#NarrowGroupType").change(function () {
+            let narrowGroupID = $("#NarrowGroupType").val();
+            if (narrowGroupID != "") {
+                HttpRequest.DropDownSelect2("GET", "/Embro/BasicCOA/GetDDLBasicCOAByParent", { parentID: narrowGroupID }, "Identification", false);
+            } else {
+                HttpRequest.DropDownDefault("Identification");
+            }
+        });
+        //$("#NarrowGroupType").trigger('change');
+        $("#Identification").change(function () {
+            debugger;
+            let identificationID = $("#Identification").val();
+            if (identificationID != "") {
+                debugger;
+                HttpRequest.DropDownSelect2("GET", "/Embro/BasicCOA/GetDDLBasicCOAByParent", { parentID: identificationID }, "VendorID", false);
+            } else {
+                HttpRequest.DropDownDefault("VendorID");
+            }
+        });
+        //$("#Identification").trigger('change');
+        $("#UnitOfMeasurementID").change(function () {
+            let unitOfMeasurement = $("#UnitOfMeasurementID option:selected").text();
+            if (unitOfMeasurement == 'Kilogram' || unitOfMeasurement == 'Gram') {
+                $('.lblGrossWeight').text('Gross Weight');
+            } else {
+                $('.lblGrossWeight').text('Quantity');
+            }
+        });
+        $("#btnAddToList").click(function () {
+            let isFormValid = $("#frmReturnableDetails").valid();
+            if (isFormValid) {
+                AddItemToList();
+                ClearItemModal();
+            }
+        });
+        $("#btnAddToListClose").click(function () {
+            let isFormValid = $("#frmReturnableDetails").valid();
+            if (isFormValid) {
+                AddItemToList();
+                ClearItemModal();
+                $('#itemModal').modal('toggle');
+            }
+        });
+        $("#btnReturnable").click(function () {
+            debugger;
+            let isFormValid = $("#frmRetunableMaster").valid();
+            if (isFormValid) {
+                let gatePassID = $("#hdnGatePassID").val();
+                let categoryID = RtnNumber($("#CategoryID").val());
+                let narrowGroupId = $("#NarrowGroupType").val();
+                let identificationId = $("#Identification").val();
+                let vendorID = $("#VendorID").val();
+                let vendorRepresentative = $("#VendorRepresentative").val();
+                let vendorRepresentativeContactNo = $("#VendorRepresentativeContactNo").val();
+                let companyRepresentative = $("#CompanyRepresentative").val();
+                let companyRepresentativeID = $("#CompanyRepresentativeID").val();
+                let jobDescription = $("#JobDescription").val();
+                let vehicleNo = $("#VehicleNo").val();
+                let departmentID = $("#DepartmentID").val();
+                let isOwnVehicle = $('#IsOwnVehicle').is(':checked');
+                let returnableGatePassDetailDTM = new Array();
+                $("#tblItem tbody tr").each(function () {
+
+                    let that = $(this);
+                    let gatePassDetailId = that.data("id");
+
+                    let returnableItemCategoryID = that.find(".hdnReturnableItemCategoryID").val();
+                    let requisitionID = that.find(".hdnRequisitionID").val();
+
+                    let itemName = that.find(".hdnItemName").val();
+                    let unitID = that.find(".hdnUnitOfMeasurementID").val();
+                    let grossWeight = that.find(".hdnGrossWeight").val();
+                    let quantity = that.find(".hdnQuantity").val();
+                    let returnDate = that.find(".hdnReturnDate").val();
+                    let remarks = that.find(".hdnRemarks").val();
+
+                    let detailDTM = {
+                        ID: gatePassDetailId,
+                        ReturnableItemCategoryID: returnableItemCategoryID,
+                        RequisitionID: requisitionID,
+                        ItemName: itemName,
+                        Quantity: quantity,
+                        UnitID: unitID,
+                        GrossWeight: grossWeight,
+                        ExpectedReturnDate: returnDate,
+                        Remarks: remarks
+                    }
+                    returnableGatePassDetailDTM.push(detailDTM);
+                });
+
+                let returnableGatePassMasterDTM = {
+                    GatePassID: gatePassID,
+                    IssuedTo: vendorRepresentative,
+                    VendorID: vendorID,
+                    isSelfVehicle: isOwnVehicle,
+                    Representative: companyRepresentative,
+                    NarrowGroupId: narrowGroupId,
+                    IdentificationId: identificationId,
+                    RepresentativeContact: vendorRepresentativeContactNo,
+                    HRMSID: companyRepresentativeID,
+                    JobDesc: jobDescription,
+                    DepartmentID: departmentID,
+                    IC_ReturnableGatePassDetail: returnableGatePassDetailDTM
+                }
+
+                let returnableDTM = {
+                    ID: gatePassID,
+                    VehicleNo: vehicleNo,
+                    CategoryID: categoryID,
+                    IC_ReturnableGatePassMaster: returnableGatePassMasterDTM
+                }
+
+                if (gatePassID == 0 && returnableGatePassDetailDTM.length > 0) {
+                    HttpRequest.Ajax("POST", "/MaterialsManagement/GatePass/SaveReturnableGatePass", { returnableDTM: returnableDTM, '@token.HeaderName': '@token.RequestToken' }, saveSuccess)
+                } else {
+                    HttpRequest.Ajax("POST", "/MaterialsManagement/GatePass/UpdateReturnableGatePass", { returnableDTM: returnableDTM, '@token.HeaderName': '@token.RequestToken' }, updateSuccess)
+                }
+            }
+        });
+        $("#ReturnableItemCategoryID").change(function () {
+            let categoryID = $("#ReturnableItemCategoryID").val();
+            let categoryName = $("#ReturnableItemCategoryID option:selected").text();
+            $('#ItemName').val('');
+            $('#GrossWeight').val('0');
+            $('#ReturnDate').val('');
+            $("#UnitOfMeasurementID").val($("#UnitOfMeasurementID option:first").val());
+            $('#Remarks').val('');
+            if (categoryName === 'Yarn') {
+                let knitterID = $('#VendorID').val();
+                if (knitterID != '') {
+                    debugger;
+                    let gatePassDetailID = RtnNumber($("#hdnGatePassDetailID").val());
+                    HttpRequest.DropDownCustom('Get', '/MaterialsManagement/GatePass/GetDDLYarnRequisitionAfterAllocation', { knitterID: knitterID, GatePassDetailID: gatePassDetailID },'RequisitionID')
+                    $('.clsYarnRequisition').removeClass('d-none');
+                    $("#ItemName,#GrossWeight").attr('readonly', true);
+                } else {
+                    $('.clsYarnRequisition').addClass('d-none');
+                    alert("Please select vendor first");
+                }
+
+            } else {
+                $("#UnitOfMeasurementID").removeAttr('disabled');
+                $("#ItemName,#GrossWeight").removeAttr('readonly');
+                $('.clsYarnRequisition').addClass('d-none');
+            }
+        })
+
+
+
+
+    });
+    function FillupPopupData(gatePassDetailId) {
+
+        @*let itemList = @Html.Raw(Json.Serialize(Model.ReturnableItem));*@
+        const itemList = HttpRequest.AjaxData("Get", "/MaterialsManagement/GatePass/GetReturnableItem", { GatePassID:'@Model.GatePassID'},false);
+        let itemDetail = itemList.filter(x => x.ID == gatePassDetailId);
+         if (itemDetail.length > 0) {
+
+             let item = itemDetail[0];
+             let quantity = item.Quantity;
+             if (quantity==0) {
+                 quantity = item.GrossWeight;
+             }
+             $("#hdnGatePassDetailID").val(item.ID);
+             //var newOption = new Option(item.RequisitionID, item.RequisitionID, false, false);
+             //$('#RequisitionID').append(newOption).trigger('change');
+             $("#ReturnableItemCategoryID").val(item.ReturnableItemCategoryID).trigger('change');
+             if (item.RequisitionID > 0) {
+                 $('#RequisitionID').val(item.RequisitionID).trigger('change');
+             } else {
+                 $('#ItemName').val(item.ItemName);
+                 $('#UnitOfMeasurementID').val(item.UnitID);
+                 $('#GrossWeight').val(quantity);
+             }
+
+            $('#ReturnDate').val(item.ReturnDate);
+            $('#Remarks').val(item.Remarks);
+        }
+    }
+</script>

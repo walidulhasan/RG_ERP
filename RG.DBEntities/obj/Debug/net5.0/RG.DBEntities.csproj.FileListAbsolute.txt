@@ -1,0 +1,11 @@
+E:\TFS Project\RG_ERP\RG.DBEntities\bin\Debug\net5.0\RG.DBEntities.deps.json
+E:\TFS Project\RG_ERP\RG.DBEntities\bin\Debug\net5.0\RG.DBEntities.dll
+E:\TFS Project\RG_ERP\RG.DBEntities\bin\Debug\net5.0\ref\RG.DBEntities.dll
+E:\TFS Project\RG_ERP\RG.DBEntities\bin\Debug\net5.0\RG.DBEntities.pdb
+E:\TFS Project\RG_ERP\RG.DBEntities\obj\Debug\net5.0\RG.DBEntities.GeneratedMSBuildEditorConfig.editorconfig
+E:\TFS Project\RG_ERP\RG.DBEntities\obj\Debug\net5.0\RG.DBEntities.AssemblyInfoInputs.cache
+E:\TFS Project\RG_ERP\RG.DBEntities\obj\Debug\net5.0\RG.DBEntities.AssemblyInfo.cs
+E:\TFS Project\RG_ERP\RG.DBEntities\obj\Debug\net5.0\RG.DBEntities.csproj.CoreCompileInputs.cache
+E:\TFS Project\RG_ERP\RG.DBEntities\obj\Debug\net5.0\RG.DBEntities.dll
+E:\TFS Project\RG_ERP\RG.DBEntities\obj\Debug\net5.0\ref\RG.DBEntities.dll
+E:\TFS Project\RG_ERP\RG.DBEntities\obj\Debug\net5.0\RG.DBEntities.pdb

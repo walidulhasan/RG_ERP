@@ -1,0 +1,54 @@
+﻿@model RG.Application.ViewModel.EMS.Business.ShipmentReport.PaymentNotReceivedWithinExpectedDateVM
+@{
+    ViewData[PageInfo.PageTitle] = "Payment Not Received Within Expected Date";
+    ViewData[PageInfo.PageHeader] = "Payment Not Received Within Expected Date";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<form>
+    
+    <div class="row">
+        <div class="col-md-2">
+            <div class="form-group">
+                <label asp-for="DateUpto" class="label-ajt-sm required"></label>
+                <input asp-for="DateUpto" type="text" class="form-control form-control-sm dateField" readonly />
+                <span class="text-danger" asp-validation-for="DateUpto"></span>
+            </div>
+        </div>
+        <div class="col-md-2">
+                <label>&nbsp;</label>
+                <div class="form-group">
+                    <input type="button" class="btn btn-sm btn-success mr-2" value="Show" id="btnShow" />
+                </div>
+        </div>
+    </div>
+    @*<div class="text-center">
+        <div class="col-sm-12">
+            <input type="button" class="btn btn-sm btn-success mr-2" value="Show Report" id="btnShow" />            
+        </div>
+    </div>*@
+</form>
+@section scripts{
+    <script type="text/javascript">
+        function showReport() {
+            debugger;
+            let dateUpto = $("#DateUpto").val();
+           
+
+            if (dateUpto != "") {
+                var urlParm = `exFactoryDateTo=${encodeURIComponent(dateUpto)}`;
+                const fullUrl = `/EMS/ShipmentReport/PaymentNotReceivedWithinExpectedDateReport?${urlParm}`;
+
+                newWindow(fullUrl, "Payment Not Received Within Expected Date");
+            } else {
+                $.alert.open("Please provide upto date.");
+            }
+        }
+        $(function () {
+           
+            $("#btnShow").click(function () {
+                showReport();
+            });
+            
+        });
+    </script>
+}

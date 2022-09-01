@@ -1,0 +1,240 @@
+﻿@model RG.Application.ViewModel.AlgoHR.Business.EmployeeLeave.LeaveHistoryVM
+@{
+    ViewData[PageInfo.PageTitle] = "Leave History";
+    ViewData[PageInfo.PageHeader] = "Leave History";
+
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row">
+    <div class="col-sm-12 col-md-12">
+        <div class="card card-dark">
+            <div class="card-header m-0 p-1">
+                <h5 class="card-title">Leave History</h5>
+            </div>
+            <div class="card-body p-2">
+                <input type="hidden" asp-for="EmployeeID" />
+                @if (Model.CanViewOthersHistory)
+                {
+                    <div class="row">
+                        <div class="col-sm-3">
+                            <div class="form-group mb-2">
+                                <label asp-for="EmployeeCode" class="required"></label>
+                                <select asp-for="EmployeeCode" asp-items="Model.DDLEmployee" class="form-control form-control-sm"></select>
+                                <span asp-validation-for="EmployeeCode" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                }
+                <div class="row">
+                    <div class="col-6 col-sm-3">
+                        <div class="form-group mb-2">
+                            <label asp-for="EmployeeCode" class=""></label>
+                            <input type="text" asp-for="EmployeeCode" id="EmpCode" class="form-control form-control-sm" readonly />
+                        </div>
+                    </div>
+                    <div class="col-6 col-sm-3">
+                        <div class="form-group mb-2">
+                            <label asp-for="EmployeeName" class=""></label>
+                            <input type="text" asp-for="EmployeeName" class="form-control form-control-sm" readonly />
+                        </div>
+                    </div>
+                    <div class="col-6 col-sm-3">
+                        <div class="form-group mb-2">
+                            <label asp-for="CompanyName" class=""></label>
+                            <input type="text" asp-for="CompanyName" class="form-control form-control-sm" readonly />
+                        </div>
+                    </div>
+                    <div class="col-6 col-sm-3">
+                        <div class="form-group mb-2">
+                            <label asp-for="DivisionName" class=""></label>
+                            <input type="text" asp-for="DivisionName" class="form-control form-control-sm" readonly />
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-6 col-sm-3">
+                        <div class="form-group mb-2">
+                            <label asp-for="DepartmentName" class=""></label>
+                            <input type="text" asp-for="DepartmentName" class="form-control form-control-sm" readonly />
+                        </div>
+                    </div>
+                    <div class="col-6 col-sm-3">
+                        <div class="form-group mb-2">
+                            <label asp-for="SectionName" class=""></label>
+                            <input type="text" asp-for="SectionName" class="form-control form-control-sm" readonly />
+                        </div>
+                    </div>
+                    <div class="col-6 col-sm-3">
+                        <div class="form-group mb-2">
+                            <label asp-for="Designation" class=""></label>
+                            <input type="text" asp-for="Designation" class="form-control form-control-sm" readonly />
+                        </div>
+                    </div>
+                    <div class="col-6 col-sm-3">
+                        <div class="form-group mb-2">
+                            <label asp-for="AppointmentDate" class=""></label>
+                            <input type="text" asp-for="AppointmentDate" class="form-control form-control-sm" readonly />
+                        </div>
+                    </div>
+                </div>
+                <div class="row rowTableLeaveHistory d-none">
+                    <div class="col-md-12">
+                        <table class="table table-sm table-bordered table-striped text-center text-xs">
+                            <thead id="theadLeaveHistory" class="bg-dark">
+                            </thead>
+                            <tbody id="tbodyLeaveHistory">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                @*<div class="row">
+                        <div class="col-md-12 text-center">
+                            <div class="form-group">
+                                <button type="button" class="btn btn-sm btn-info" id="btnSave"><i class="fas fa-search"></i> Search</button>&nbsp;
+                                <button type="button" class="btn btn-sm btn-danger" id="btnSave"><i class="far fa-file-pdf"></i> PDF</button>
+                            </div>
+                        </div>
+                    </div>*@
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="leaveHistoryModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header p-2">
+                <h6 class="modal-title" id="exampleModalLabel">Leave History Detail</h6>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body" id="divLeaveHistory">
+
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <script>      
+        function deleteSuccess(data) {
+
+            if (data.result == 1) {
+
+                $.alert.open({
+                    type: 'Success',
+                    content: data.message,
+                    callback: function () {
+                        $("#leaveHistoryModal").modal('toggle');
+                    }
+                });
+            }
+            else {
+                $.alert.open("error", data.message);
+
+            }
+        }
+        function GetEmployeeShortInfo() {
+          
+            $("#theadLeaveHistory").html('');
+            $("#tbodyLeaveHistory").html('');
+            let employeeCode = '0';
+           
+            if (!RtnBoolToLower('@Model.CanViewOthersHistory'))
+                employeeCode = '@Model.EmployeeCode';
+            else {
+                employeeCode = $("#EmployeeCode").val();
+              //  employeeCode = '';
+               
+            }
+
+           /* if (employeeCode != "") {*/
+                let empInfo = HttpRequest.AjaxData('GET', '/AlgoHR/EmployeeLeave/GetEmployeeShortInfo', { employeeCode: employeeCode });
+                if (empInfo != null) {
+                    $("#EmployeeID").val(empInfo.EmployeeID);
+                    $("#EmpCode").val(empInfo.EmployeeCode);
+                    $("#EmployeeName").val(empInfo.EmployeeName);
+                    $("#CompanyName").val(empInfo.CompanyName);
+                    $("#DivisionName").val(empInfo.DivisionName);
+
+                    $("#DepartmentName").val(empInfo.DepartmentName);
+                    $("#SectionName").val(empInfo.SectionName);
+                    $("#Designation").val(empInfo.DesignationName);
+                    $("#AppointmentDate").val(empInfo.Emp_Appointment);
+              
+                    let leaveHistory = HttpRequest.AjaxData('GET', '/AlgoHR/EmployeeLeave/GetDDLCustomEmpLeaves', { employeeID: empInfo.EmployeeID, employeeCode: employeeCode });
+                    if (leaveHistory.length > 0) {
+                        let thead = `<tr><th colspan=${leaveHistory.length - 1}><button class="btn btn-xs btn-default" onclick="GetHistoryDetail(${empInfo.EmployeeID},${0},${null},${true})">Leave Status</button></th><th><button class='btn btn-xs btn-primary'  onclick="GetHistoryDetail(${empInfo.EmployeeID},${0},${null},${false})"><i class="fas fa-paper-plane fa-2x" style="color:white"></i></button></th></tr>
+                                    <tr><th></th>`;
+                        let trTotalLeave = `<tr><td class="text-bold">Total no of Leave :</td>`;
+                        let trLeaveAvailed = `<tr><td class="text-bold">Leave Availed :</td>`;
+                        let trLeaveRemaining = `<tr><td class="text-bold">Remaining Leave :</td>`;
+
+                        $.each(leaveHistory, function (i, v) {
+                            if (v.Value!="") {
+                                thead += `<th>${v.Text}</th>`;
+                                trTotalLeave += `<td>${v.Custom1}</td>`;
+                                trLeaveAvailed += v.Custom4 > 0 ? `<td><button class="btn btn-xs btn-warning" onclick="GetHistoryDetail(${empInfo.EmployeeID},${v.Value},${true},${false})">${v.Custom4}</button></td>` : `<td>${v.Custom4}</td>`;
+                                trLeaveRemaining += `<td>${(v.Custom1- v.Custom4)}</td>`;
+                            }
+                        });
+                        thead += `</tr>`;
+                        trTotalLeave += `</tr>`;
+                        trLeaveAvailed += `</tr>`;
+                        trLeaveRemaining += `</tr>`;
+                        let tbody = `${trTotalLeave}${trLeaveAvailed}${trLeaveRemaining}`;
+                        $("#theadLeaveHistory").html(thead);
+                        $("#tbodyLeaveHistory").html(tbody);
+
+                        $(".rowTableLeaveHistory").removeClass("d-none");
+                    } else {
+                        $(".rowTableLeaveHistory").addClass("d-none");
+                    }
+                }
+          /*  }*/
+        }
+        function GetEmployeeList() {
+            HttpRequest.DropDownSelect2Group('GET', '/AlgoHR/CommonDropDown/GetDDLEmployee', { predict: $("#EmployeeCode").val() }, 'EmployeeCode');
+        }
+        function GetHistoryDetail(employeeID, leaveTypeID, leaveStatus, leaveStatusIndependent) {
+            debugger
+            $("#divLeaveHistory").html('');
+            if (employeeID > 0) {
+                $("#divLeaveHistory").load("/AlgoHR/EmployeeLeave/CallViewComponents", { employeeID: employeeID, leaveTypeID: leaveTypeID, leaveStatus: leaveStatus, leaveStatusIndependent: leaveStatusIndependent });
+            } 
+            $("#leaveHistoryModal").modal('toggle');
+
+        }
+        function RemoveLeaveApplication(leaveID, leaveTypeID) {
+            $.alert.open('confirm', 'Are you sure to withdraw this application?', function (button, value) {
+                debugger
+                if (button == 'yes') {
+                    
+                    
+                    if (leaveID > 0) {
+                        HttpRequest.Ajax("Get", '/AlgoHR/EmployeeLeave/RemoveLeaveApplication', { "leaveID": leaveID, "leaveTypeID": leaveTypeID }, deleteSuccess, true);
+                        } else {
+                            
+                        }
+                    
+
+                }
+
+            });
+        }
+        $(document).ready(function () {
+        $("#EmployeeCode").select2();
+            $("#EmployeeCode").change(function () {
+                GetEmployeeShortInfo();
+            });
+
+            if (!RtnBoolToLower('@Model.CanViewOthersHistory')) {
+                GetEmployeeShortInfo();
+            } else {
+                GetEmployeeList();
+            }
+
+        });
+    </script>
+}

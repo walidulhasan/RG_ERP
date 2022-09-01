@@ -1,0 +1,132 @@
+﻿@model List<RG.Application.ViewModel.AlgoHR.Business.EmployeeLeave.LeaveHistoryDetailVCVM>
+@{
+    var rowSL = 1;
+}
+
+@if (Model.Count > 0)
+{
+
+<table class="table table-sm table-striped table-bordered text-center text-xs">
+    <thead class="bg-dark">
+        <tr>
+            <th>SL #</th>
+            @if (Model.First().ShowEmployeeCode)
+            {
+                <td>Code</td>
+            }
+            @if (Model.First().ShowEmployeeName)
+            {
+                <td>Name</td>
+            }
+            @if (Model.First().ShowCompanyName)
+            {
+                <td>Company</td>
+            }
+            @if (Model.First().ShowDivisionName)
+            {
+                <td>Division</td>
+            }
+            @if (Model.First().ShowDepartmentName)
+            {
+                <td>Department</td>
+            }
+            @if (Model.First().ShowSectionName)
+            {
+                <td>Section</td>
+            }
+            @if (Model.First().ShowDesignationName)
+            {
+                <td>Designation</td>
+            }
+            @if (Model.First().ShowAppointmentDate)
+            {
+                <td>Appoint. Date</td>
+            }
+            <th>Leave Type</th>
+            <th>Leave From</th>
+            <th>Leave To</th>
+            <th>Total Days</th>
+            <th>Reason</th>
+            <th>Status</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var leave in Model)
+        {
+            var statusColor = leave.LeaveStatus == "Rejected" ? "bg-danger" : leave.LeaveStatus.Contains("Processing") == true ? "bg-info" : "";
+            if (leave.LeaveTypeID == 0)
+            {
+                statusColor= "bg-primary";
+         }
+            <tr class="@statusColor">
+                <td>@rowSL</td>
+                @if (leave.ShowEmployeeCode)
+                {
+                    <td>@leave.EmployeeCode</td>
+                }
+                @if (leave.ShowEmployeeName)
+                {
+                    <td>@leave.EmployeeName</td>
+                }
+                @if (leave.ShowCompanyName)
+                {
+                    <td>@leave.CompanyName</td>
+                }
+                @if (leave.ShowDivisionName)
+                {
+                    <td>@leave.DivisionName</td>
+                }
+                @if (leave.ShowDepartmentName)
+                {
+                    <td>@leave.DepartmentName</td>
+                }
+                @if (leave.ShowSectionName)
+                {
+                    <td>@leave.SectionName</td>
+                }
+                @if (leave.ShowDesignationName)
+                {
+                    <td>@leave.DesignationName</td>
+                }
+                @if (leave.ShowAppointmentDate)
+                {
+                    <td>@leave.AppointmentDate</td>
+                }
+
+                <td>@leave.LeaveType</td>
+                <td>@leave.LeaveFromMsg</td>
+                @if (leave.LeaveTypeID != 0)
+                {
+                    <td>@leave.LeaveToMsg</td>
+                }
+                else
+                {
+                    <td class="bg-warning" >@(leave.LeaveTimeFrom+"-"+leave.LeaveTimeTo)</td>
+                }
+
+                <td>@leave.LeaveDays</td>
+                <td>@leave.LeaveReason</td>
+                <td>@leave.LeaveStatus</td>
+                @if (leave.ApprovalLevel == 1)
+                {
+
+                    <td title="Remove Application">
+                        <button class="btn btn-xs btn-warning" onclick="RemoveLeaveApplication('@leave.LeaveID', '@leave.LeaveTypeID')">
+                            <i class="fa fa-trash text-danger"></i>
+                        </button>
+                    </td>
+                }
+            </tr>
+            rowSL++;
+        }
+        </tbody>
+    </table>
+}
+
+
+
+
+
+
+

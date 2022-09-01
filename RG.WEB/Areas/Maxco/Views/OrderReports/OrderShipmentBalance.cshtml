@@ -1,0 +1,82 @@
+﻿
+
+@model RG.Application.ViewModel.Maxco.Business.OrderReports.OrderShipmentBalanceVM
+@{
+    ViewData[PageInfo.PageTitle] = "Order Shipment Balance";
+    ViewData[PageInfo.PageHeader] = "Order Shipment Balance";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row">
+    <div class="col-sm-12 col-md-12">
+        <div class="card card-dark">
+            <div class="card-header m-0 p-1">
+                <h5 class="card-title">Order Followup</h5>
+            </div>
+            <div class="card-body p-2">
+                <div class="row">
+                    <div class="col-sm-3">
+                        <div class="form-group">
+                            <label asp-for="BuyerID" class=""></label>
+                            <select asp-for="BuyerID" asp-items="Model.DDLBuyer" class="form-control form-control-sm"></select>
+                            <span asp-validation-for="BuyerID" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="form-group">
+                            <label asp-for="OrderID" class=""></label>
+                            <select asp-for="OrderID" asp-items="Model.DDLOrder" class="form-control form-control-sm"></select>
+                            <span asp-validation-for="OrderID" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <label asp-for="DateFrom" class=""></label>
+                        <div class="input-group">
+                            <input asp-for="DateFrom" type="text" class="form-control form-control-sm dateField bg-white text-center" readonly />
+                            <div class="input-group-append">
+                                <span class="input-group-text"><i class="fa fa-calendar" aria-hidden="true"></i></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <label asp-for="DateTo" class=""></label>
+                        <div class="input-group">
+                            <input asp-for="DateTo" type="text" class="form-control form-control-sm dateField bg-white text-center" readonly />
+                            <div class="input-group-append">
+                                <span class="input-group-text"><i class="fa fa-calendar" aria-hidden="true"></i></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row" id="">
+                    <div class="col-md-12 text-center">
+                        <div class="form-group">
+                            <button type="button" class="btn btn-sm btn-success" id="btnShow">Show</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section scripts{
+    <script type="text/javascript">
+        $(function () {
+            $("#OrderID").select2();
+            $("#BuyerID").change(function () {
+                HttpRequest.DropDownSelect2('GET', '/Maxco/Order/GetOrderWithOutSample', { buyerID: $("#BuyerID").val(), predict: $("#OrderID").val() }, 'OrderID');
+            });
+            $("#btnShow").click(function () {
+                let buyerID = $("#BuyerID").val();
+                let orderID = $("#OrderID").val();
+                let dateFrom = $("#DateFrom").val();
+                let dateTo = $("#DateTo").val();
+                if (dateFrom != "" && dateTo != "") {
+                    window.open(`/Maxco/OrderReports/OrderShipmentBalanceReport?buyerID=${buyerID}&orderID=${orderID}&dateFrom=${dateFrom}&dateTo=${dateTo}`, "Order Shipment Balance Report", "width=900,height=600");
+                }
+            });
+        })
+    </script>
+
+}

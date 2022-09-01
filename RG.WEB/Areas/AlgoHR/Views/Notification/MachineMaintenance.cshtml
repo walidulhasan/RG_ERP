@@ -1,0 +1,265 @@
+﻿@{
+    ViewData[PageInfo.PageTitle] = "Machine Maintenance Notification";
+    ViewData[PageInfo.PageHeader] = "Machine Maintenance Notification";
+
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row">
+    <div class="col-md-12 col-sm-12">
+        <div id="grid">
+        </div>
+    </div>
+</div>
+<!-- Modal -->
+<div id="notificationDetailModal" class="modal fade" role="dialog" style="z-index:1050">
+    <div class="modal-dialog modal-lg">        
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header p-2">
+                <h5 class="modal-title">Maintenance Detail</h5>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <input type="hidden" id="hdnNotificationID" />
+            </div>
+            <div class="modal-body">
+                <table id="tblNotificationDetail" class="table table-sm table-striped table-bordered text-sm text-center">
+                    <thead class="bg-dark">
+                        <tr>
+                            <th>SL #</th>
+                            <th>Item Name</th>
+                            <th>Mechanical Comment</th>
+                            <th>Electrical Comment</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbodyNotificationDetail">
+                    </tbody>
+                </table>
+                <table class="table table-sm table-striped table-bordered text-sm text-center">
+                    <thead class="bg-dark">
+                        <tr>                           
+                            <th>Final Mechanical Comment</th>
+                            <th>Final Electrical Comment</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbodyCommentDetail">
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer p-1">
+                <button type="button" class="btn btn-xs btn-danger mr-auto" onclick="ApproveRejectNotification('reject')">Reject</button>
+                <button type="button" class="btn btn-xs btn-success" onclick="ApproveRejectNotification('approve')">Approve</button>@*data-dismiss="modal"*@
+
+            </div>
+        </div>
+
+    </div>
+</div>
+@section Scripts{
+    <script>
+        function saveSuccess(data) {
+
+            if (data.result == 1) {
+
+                $.alert.open({
+                    type: 'Success',
+                    content: data.message,
+                    callback: function () {
+                        $('#notificationDetailModal').modal('toggle');
+                        NotificationList();
+                    }
+                });
+            }
+            else {
+                $.alert.open("error", data.message);
+
+            }
+        }
+        function ApproveRejectNotification(type) {
+
+            $.alert.open('prompt', 'Are you sure to ' + type + ' this record?<br/>Enter your comment here :', function (button, value) {
+              debugger
+                if (button == 'ok') {
+                    debugger;
+                    if (value != "") {
+                        let notificationIDs = new Array();
+                        let notificationID = $("#hdnNotificationID").val();
+                        notificationIDs.push(notificationID);
+
+                        if (notificationIDs.length > 0) {
+                            if (type=='approve') {
+                                HttpRequest.Ajax("POST", '/AlgoHR/Notification/ApproveNotification', { "notificationIDs": notificationIDs, 'comment': value}, saveSuccess, true);
+                            } else {
+                                HttpRequest.Ajax("POST", '/AlgoHR/Notification/RejectNotification', { "notificationID": notificationID, 'comment': value}, saveSuccess, true);
+                            }
+                        }
+                    } else {
+                        $.alert.open('You must write a comment');
+                    }
+
+                }
+
+            });
+        }
+        function NotificationDetails(data) {
+
+            $("#tbodyNotificationDetail").html('');
+            $("#hdnNotificationID").val(0);
+            var dataDetail = HttpRequest.AjaxData('GET', '/AlgoHR/Notification/GetMachineAndMaintenanceCheckListDetail', { masterID: data.MaintenanceCheckMasterID });
+            if (dataDetail.length > 0) {
+
+                let electricalWorkerComments = dataDetail[0].ElectricalWorkerComments;
+                let mechanicalWorkerComments = dataDetail[0].MechanicalWorkerComments;
+
+                let tr = '';
+                $.each(dataDetail, function (i, v) {
+                    tr = tr + `<tr>
+                            <td>${i + 1}</td>
+                            <td>${v.ItemName}</td>
+                            <td>${v.MechanicalComments}</td>
+                            <td>${v.ElectricalComments}</td>
+                        </tr>`;
+                });
+                $("#hdnNotificationID").val(data.NotificationID);
+                $("#tbodyNotificationDetail").html(tr);
+
+                let commentTr = `<tr><td>${mechanicalWorkerComments}</td><td>${electricalWorkerComments}</td></tr>`
+                $("#tbodyCommentDetail").html(commentTr);
+                $('#notificationDetailModal').modal('toggle');
+            }
+
+        }
+    function NotificationList() {
+        var dataGrid = $("#grid").dxDataGrid({
+        height: 510,
+        remoteOperations: { paging: true, filtering: true, sorting: true, grouping: false, summary: false, groupPaging: false },
+                dataSource: DevExpress.data.AspNet.createStore({
+                    key: "NotificationID",
+                    loadUrl: "/AlgoHR/Notification/GetMachineMaintenanceNotificationList"
+                }),
+                hoverStateEnabled: true,
+
+                showBorders: true,
+               columnAutoWidth: true,
+                 sorting: {
+                   mode: "multiple"
+                 },
+                filterRow: { visible: true },
+                pager: { visible: true, showInfo: true, allowedPageSizes: [10, 20, 50, 100, 500], showPageSizeSelector: true, },
+                paging: { pageSize: 10 },
+                selection: { mode: 'single' },
+                export: {
+                    //   enabled: true
+                },
+                columns: [
+                    {
+                        width: "auto",
+                        caption: "SL #",
+                        alignment: 'center',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        },
+                        cellTemplate: function (container, e) {
+                            var index = dataGrid.pageIndex() * dataGrid.pageSize() + e.rowIndex + 1;
+                            container.text(index);
+                        }
+
+                    },
+                    {
+                        dataField: "NotificationID",
+                        visible: false,
+
+                    },
+                    //    {
+                    //    dataField: "CreationDate",
+                    //        visible: false,
+                    //     sortOrder: "desc",
+
+                    //},
+                    {
+                        dataField: "MachineName",
+                        alignment: 'center',
+                        caption: 'Machine',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+                    },
+                    {
+                        dataField: "CheckedDate",
+                        alignment: 'center',
+                        caption: 'Checked Date',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+                    },
+                    {
+                        dataField: "ScheduleDate",
+                        alignment: 'center',
+                        caption: 'Schedule Date',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+                    },
+                    {
+                        dataField: "TaskCompletedBy",
+                        alignment: 'center',
+                        caption: 'Completed By',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+                    },
+                    {
+                        dataField: "TaskSupervisor",
+                        alignment: 'center',
+                        caption: 'Supervised By',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+                    },
+                    {
+                        dataField: "FirstAuthorityCommentsDate",
+                        alignment: 'center',
+                        caption: 'First Comment',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+                    },
+                    {
+                        dataField: "LastAuthorityCommentsDate",
+                        alignment: 'center',
+                        caption: 'Last Comment',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+                    },
+                    {
+                        caption: "Action",
+                        alignment: 'center',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        },
+                        cellTemplate: function (container, options) {
+                            @*var returnText = '<a href="/Business/OrderInfo/OrderEdit/' + options.data.Id + '" class="btn btn-xs btn-warning"><i class="fa fa-edit"></i> @RTEXERP.SResources.Resources.Resource.Edit</a>';
+                            $(returnText).appendTo(container);*@
+
+                            var returnText = '<span>&nbsp;</span><button class="btn btn-xs btn-info"><i class="fa fa-bars"></i></button>';
+                            returnText = returnText + '</div>';
+                            $(returnText).on('dxclick', function () {
+                                NotificationDetails(options.data);
+                            }).appendTo(container);
+                        }
+                    }
+
+                ]
+
+            }).dxDataGrid("instance");
+    }
+
+    //    function DeleteRow(Id) {
+
+    //    GenericDeleteAndGridLoad("POST", "/Maxco/OrderInfo/DeleteOrder", Id, OrderInfoList);
+    //};
+    $(document).ready(function () {
+        NotificationList();
+    });
+    </script>
+}

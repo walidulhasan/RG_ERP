@@ -1,0 +1,184 @@
+﻿@model List<RG.Application.Contracts.Maxco.Buisness.OrderPlanReports.Queries.RequestResponseModel.PlanNewOrderRM>
+@{ 
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Plan New Order</title>
+    <link href="~/AdminLTE-3.1.0/plugins/jquery-ui/jquery-ui.min.css" rel="stylesheet" />
+    <link href="~/lib/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <script src="~/AdminLTE-3.1.0/plugins/jquery/jquery.min.js"></script>
+    <script src="~/AdminLTE-3.1.0/plugins/jquery-ui/jquery-ui.min.js"></script>
+    <script src="~/AdminLTE-3.1.0/plugins/bootstrap/js/bootstrap.bundle.js"></script>
+
+
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.12/css/jquery.dataTables.min.css" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/1.2.2/css/buttons.dataTables.min.css" />
+    <script type="text/javascript" src="https://code.jquery.com/jquery-1.12.3.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.2.2/js/dataTables.buttons.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/2.5.0/jszip.min.js"></script>
+    <script type="text/javascript" src="https://cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/pdfmake.min.js"></script>
+    <script type="text/javascript" src="https://cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/vfs_fonts.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.2.2/js/buttons.html5.min.js"></script>
+
+    <style>
+        .header {
+            position: sticky;
+            top: 0;
+        }
+    </style>
+
+</head>
+
+<body>
+    <div class="container-fluid">
+        <div class="row" style="height:50px;">
+            <div class="col-12 text-center">
+                <h5 class="mb-0">Robintex Group Bangladesh</h5>
+                <h6>Plan New Order</h6>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <table class="table table-sm table-bordered table-striped text-sm text-center display nowrap" id="tblPlanNewOrder" style="font-size:12px;">
+                    <thead class="bg-dark text-white header">
+                        <tr>
+                            <th>SL#</th>
+                            <th>Order No</th>
+                            <th>Month</th>
+                            <th>Buyer</th>
+                            <th>Fabric Week</th>
+                            <th title="PO Received Date">PO Rcv. Date</th>
+                            <th title="FO Receive Date">Fo Rcv. Date</th>
+                            <th>Shipment Date</th>
+                            <th>Style</th>
+                            <th>Color</th>
+                            <th>Pantone</th>
+                            <th>Fabric Quality</th>
+                            <th>Art Work</th>
+                            <th>Dia</th>
+                            <th>GSM</th>
+                            <th>Knitting Start Date</th>
+                            <th>Knitting End Date</th>
+                            <th>Knitting Duration</th>
+                            <th>Dyeing Production Unit</th>
+                            <th>Fabric Delivery Start Date</th>
+                            <th>Fabric Delivery End Date</th>
+                            <th>Delivery Duration</th>
+                            <th>Order Qty</th>
+                            <th>Finish Fabric Booking KG</th>
+                            <th>Plan Knitting Kg</th>
+                            <th>Knitting Kg</th>
+                            <th>Knitting Balance</th>
+                            <th>Batch KG</th>
+                            <th>Batch Balance</th>
+                            <th>Finished Fab Dlv</th>
+                            <th>Rib</th>
+                            <th>Finsih Fab Dlv Balance</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @{
+                            int sl = 1;
+                        }
+                        @foreach (var row in Model)
+                        {
+                            <tr>
+                                <td>@sl</td>
+                                <td>@row.OrderNO-@row.OrderID</td>
+                                <td>@row.ShipmentMonth</td>
+                                <td>@row.BuyerName</td>
+                                <td>@row.FabricWeek </td>
+                                <td title="PO Received Date">@row.PoReceivedDateST</td>
+                                <td title="FO Receive Date"></td>
+                                <td>@row.ShipmentDateST</td>
+                                <td>@row.StyleName</td>
+                                <td>@row.ColorName</td>
+                                <td>@row.PantoneNo</td>
+                                <td>@row.FabricQuality</td>
+                                <td>@row.ArtWorkName</td>
+                                <td>@row.FinishedWidth</td>
+                                <td>@row.GSM</td>
+                                <td>@row.KnittingStartDateST</td>
+                                <td>@row.KnittingEndDateST</td>
+                                <td>@row.KnittingDuration</td>
+                                <td>@row.PlanDyeingProductionUnit</td>
+                                <td>@row.PlanFabricDeliveryStartDateST</td>
+                                <td>@row.PlanFabricDeliveryEndDateST</td>
+                                <td>@(row.PlanFabricDeliveryEndDate-row.PlanFabricDeliveryStartDate)</td>
+                                <td>@string.Format("{0:n0}", row.ShipmentOrderQuantity)</td>
+                                <td>@string.Format("{0:n2}", row.FinishFabricBookingKg)</td>
+                                <td>@string.Format("{0:n2}", row.PlanKnittingKg)</td>
+                                <td>@string.Format("{0:n2}", row.KnittingKG)</td>
+                                <td>@string.Format("{0:n2}", row.KnittingBalance)</td>
+                                <td>@string.Format("{0:n2}", row.BatchKg)</td>
+                                <td>@string.Format("{0:n2}", row.BatchBalance)</td>
+                                <td>@string.Format("{0:n2}", row.FinishFabricMain)</td>
+                                <td>@string.Format("{0:n2}", row.FinishFabricRib)</td>
+                                <td>@string.Format("{0:n2}", row.FinishFabricBalance)</td>
+                            </tr>
+                            sl = sl + 1;
+                        }
+                    </tbody>
+                </table>
+
+
+
+
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="text-center">
+                    <input type="button" class="btn btn-sm btn-success" value="Excel" id="btnPdf" onclick="exportToExcel()" />
+                </div>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript">
+
+        function bodyOnload() {
+            setTimeout(function () {
+                $("body").removeClass("loading");
+            }, 1000)
+
+        }
+        function exportToExcel() {
+            var htmls = "";
+            var uri = 'data:application/vnd.ms-excel;base64,';
+            var template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>';
+            var base64 = function (s) {
+                return window.btoa(unescape(encodeURIComponent(s)))
+            };
+
+            var format = function (s, c) {
+                return s.replace(/{(\w+)}/g, function (m, p) {
+                    return c[p];
+                })
+            };
+
+            htmls = document.getElementById("tblPlanNewOrder").innerHTML;
+
+            var ctx = {
+                worksheet: 'Worksheet',
+                table: htmls
+            }
+            var link = document.createElement("a");
+            link.download = "PlanNewOrder.xls";
+            link.href = uri + base64(format(template, ctx));
+            link.click();
+        }
+        $(function () {
+            $(document).ready(function () {
+
+                $("body").addClass("loading");
+
+            });
+        });
+    </script>
+</body>
+</html>

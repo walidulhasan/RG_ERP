@@ -1,0 +1,15 @@
+E:\TFS Project\RG_ERP\RG.Application\bin\Debug\net5.0\RG.Application.deps.json
+E:\TFS Project\RG_ERP\RG.Application\bin\Debug\net5.0\RG.Application.dll
+E:\TFS Project\RG_ERP\RG.Application\bin\Debug\net5.0\ref\RG.Application.dll
+E:\TFS Project\RG_ERP\RG.Application\bin\Debug\net5.0\RG.Application.pdb
+E:\TFS Project\RG_ERP\RG.Application\bin\Debug\net5.0\RG.DBEntities.dll
+E:\TFS Project\RG_ERP\RG.Application\bin\Debug\net5.0\RG.DBEntities.pdb
+E:\TFS Project\RG_ERP\RG.Application\obj\Debug\net5.0\RG.Application.csproj.AssemblyReference.cache
+E:\TFS Project\RG_ERP\RG.Application\obj\Debug\net5.0\RG.Application.GeneratedMSBuildEditorConfig.editorconfig
+E:\TFS Project\RG_ERP\RG.Application\obj\Debug\net5.0\RG.Application.AssemblyInfoInputs.cache
+E:\TFS Project\RG_ERP\RG.Application\obj\Debug\net5.0\RG.Application.AssemblyInfo.cs
+E:\TFS Project\RG_ERP\RG.Application\obj\Debug\net5.0\RG.Application.csproj.CoreCompileInputs.cache
+E:\TFS Project\RG_ERP\RG.Application\obj\Debug\net5.0\RG.Application.csproj.CopyComplete
+E:\TFS Project\RG_ERP\RG.Application\obj\Debug\net5.0\RG.Application.dll
+E:\TFS Project\RG_ERP\RG.Application\obj\Debug\net5.0\ref\RG.Application.dll
+E:\TFS Project\RG_ERP\RG.Application\obj\Debug\net5.0\RG.Application.pdb

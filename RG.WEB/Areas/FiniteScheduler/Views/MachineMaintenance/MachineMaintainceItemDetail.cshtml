@@ -1,0 +1,236 @@
+﻿@model List<RG.Application.ViewModel.FiniteScheduler.Business.MachineMaintenance.MonthlyMachineMaintainceItemsVCVM>
+@{
+    //ViewData[PageInfo.PageTitle] = "Maintaince Items";
+    //ViewData[PageInfo.PageHeader] = "Maintaince Items";
+    //Layout = "~/Views/Shared/_Layout.cshtml";
+    var sl = 1;
+    Layout = null;
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Maintaince Report</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="~/lib/bootstrap-5.0.2/css/bootstrap.min.css" rel="stylesheet" />
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap-5.0.2/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/customScripts/GenericHTTPRequest.js"></script>
+    <style>
+        body {
+            /*font-family: 'Times New Roman';*/
+        }
+
+        tbody {
+            font-size: smaller;
+        }
+
+        .tableSchedule > thead {
+            font-size: smaller;
+        }
+    </style>
+</head>
+<body style="overflow-x:scroll;max-height:100vh;">
+
+    <div class="wrapper">
+        <div class="row text text-center sticky-top bg-white">
+            <h4>@Model[0].ReportHeader</h4>
+            <div class="text text-center sticky-top bg-white">
+                <span class="badge bg-warning text-dark">Upcomming Schedule</span>
+                <span class="badge bg-info text-dark">Schedule today</span>
+                <span class="badge bg-danger">Schedule failed</span>
+            </div>
+            <hr class="mt-1 mb-1" />
+        </div>
+
+        <div class="row">
+            <div class="col-md-12 pe-0">
+                <table class="table table-sm table-striped table-bordered text-center text-xs border border-dark">
+                    <tbody>
+                        @foreach (var machineGroups in Model)
+                        {
+                            @*<tr>
+                                <td>@machineGroups.MachineGroup</td>
+                            </tr>*@
+                            @foreach (var itemLocation in machineGroups.GroupWiseMonthlyMachineMaintainceItems)
+                            {
+                                var rowSL = 1;
+
+                                if (itemLocation.MonthlyMachineMaintainceCheckDates.Count == 0)
+                                {
+                                    @*<tr>
+                                        <td>@sl</td>
+                                        @if (rowSL == 1)
+                                        {
+
+                                            <td>@itemLocation.LocationName</td>
+                                            <td>
+                                                <a href="#" class="link-success p-0" onclick="GetMachineInfo('@itemLocation.MachineID'); return false;">@itemLocation.MachineName</a>
+                                            </td>
+                                            <td title="Schedule Date" style="text-wrap:normal">Not Found</td>
+
+                                            sl++;
+                                        }
+                                    </tr>*@
+
+                                }
+
+
+
+                                @foreach (var itemDates in itemLocation.MonthlyMachineMaintainceCheckDates)
+                                {
+                                    var scheduleDate = itemDates.ScheduleDate == null ? "No Schedule" : itemDates.ScheduleDateMsg;
+                                    var checkDate = itemDates.ScheduleDate != null ? itemDates.CheckDate == null ? "Not checked yet" : itemDates.CheckDateMsg : "";
+                                    var checkDateCSS = itemDates.ScheduleDate != null ? itemDates.CheckDate == null ? "text text-danger" : "" : "";
+
+                                    <tr>
+                                        <td>@sl</td>
+                                        @if (rowSL == 1)
+                                        {
+
+                                            <td>@itemLocation.LocationName</td>
+                                            <td>
+                                                <a href="#" class="link-success p-0" onclick="GetMachineInfo('@itemLocation.MachineID'); return false;">@itemLocation.MachineName</a>
+                                            </td>
+                                        }
+                                        else
+                                        {
+                                            <td></td>
+                                            <td></td>
+                                        }
+                                        <td title="Schedule Date" style="text-wrap:normal">@scheduleDate</td>
+                                        <td class="@checkDateCSS" title="Last Check Date">@checkDate</td>
+
+
+                                        @foreach (var items in itemDates.CheckDateWiseItems)
+                                        {
+
+                                            var bgColor = "";
+                                            if (itemDates.ScheduleDate is null)
+                                                bgColor = "bg-secondary text-white bg-gradient";
+                                            else if (itemDates.CheckDate is null && (itemDates.CheckDayDifference > -3 && itemDates.CheckDayDifference < 0))
+                                                bgColor = "bg-warning text-dark bg-gradient";
+                                            else if (itemDates.CheckDate is null && itemDates.CheckDayDifference == 0)
+                                                bgColor = "bg-info text-dark bg-gradient";
+                                            else if (itemDates.CheckDate is not null && itemDates.CheckDayDifference <= 2)
+                                                bgColor = "bg-success  text-white bg-gradient";
+                                            else if (itemDates.CheckDate is not null && itemDates.CheckDayDifference > 2)
+                                                bgColor = "bg-primary text-white bg-gradient";
+                                            else if (itemDates.CheckDate is null && itemDates.CheckDayDifference > 0)
+                                                bgColor = "bg-danger text-white bg-gradient";
+                                            else
+                                                bgColor = "";
+
+                                            <td class="@bgColor">
+                                                <span id="" class="popoverData p-0 text-xs" data-bs-html="true"
+                                                      data-bs-content="<div><span>Comments: @items.MechanicalComments @items.ElectricalComments</span><br/><span>Complted by: @items.MechanicalTaskCompletedBy @items.ElectricalTaskCompletedBy</span><br/><span>Supervisor: @items.MechanicalTaskSupervisor @items.ElectricalTaskSupervisor</span></div>"
+                                                      rel="popover" data-bs-placement="bottom" data-original-title="Info" data-bs-trigger="hover">
+                                                    @items.ItemName
+                                                </span>
+                                            </td>
+
+                                        }
+                                    </tr>
+                                    rowSL++;
+                                    sl++;
+                                }
+
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <!-- Modal -->
+    <div class="modal fade" id="machineInfoModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header p-2">
+                    <h6 class="modal-title" id="exampleModalLabel">Maintenance Schedule</h6>
+
+                    <div class="w-50 d-flex justify-content-end ml-4">
+                        <span class="badge bg-warning text-dark">Upcomming Schedule</span>&nbsp;
+                        <span class="badge bg-info text-dark">Schedule today</span>&nbsp;
+                        <span style="background:#f8d7da;">Checked but schedule failed</span>&nbsp;
+                        <span class="badge bg-danger">Schedule failed</span>&nbsp;
+                    </div>
+                    <button type="button" class="btn-close btn-sm" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-bordered tableSchedule text text-center">
+                        <thead class="bg-dark text-white bg-gradient">
+                            <tr>
+                                <td>SL #</td>
+                                <td>Machine</td>
+                                <td>Schedule Date</td>
+                                <td>Maintenance Date</td>
+                                <td>Task Completed By</td>
+                                <td>Supervisor</td>
+                                <td>Approved By</td>
+                                <td>Admin</td>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodySchedule">
+                        </tbody>
+                    </table>
+                </div>
+                @*<div class="modal-footer p-0">
+                        <button type="button" class="btn btn-warning btn-sm" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-success btn-sm">Save changes</button>
+                    </div>*@
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+
+
+    <script type="text/javascript">
+        function GetMachineInfo(machineID) {
+
+            $("#tbodySchedule").html('');
+            let data = HttpRequest.AjaxData('GET', '/FiniteScheduler/MachineMaintenance/GetMachineMaintenanceSchedule', { 'machineID': machineID })
+            if (data.length > 0) {
+                let tr = '';
+                $.each(data, function (i, v) {
+                    let bgClass = "";
+                    if (v.CheckDate == null && v.DayDifference > 0)
+                        bgClass = "bg-danger text-white bg-gradient";
+                    else if (v.CheckDate != null && v.DayDifference > 0)
+                        bgClass = "table-danger text-white";
+                    else if (v.CheckDate != null && v.DayDifference <= 0)
+                        bgClass = "bg-success text-white bg-gradient";
+                    else if (v.CheckDate == null && v.DayDifference > -3 && v.DayDifference < 0)
+                        bgClass = "bg-warning text-dark bg-gradient";
+                    else if (v.CheckDate == null && v.DayDifference == 0)
+                        bgClass = "bg-info text-dark bg-gradient";
+
+
+                    tr = tr +
+                        `<tr class=${bgClass}><td>${++i}</td>
+                                              <td>${v.MachineName}</td>
+                                              <td>${v.ScheduleDateMsg}</td>
+                                              <td>${v.CheckDateMsg}</td>
+                                              <td>${v.MechanicalTaskCompletedBy}, ${v.ElectricalTaskCompletedBy}</td>
+                                              <td>${v.MechanicalTaskSupervisor}, ${v.ElectricalTaskSupervisor}</td>
+                                              <td>${v.FirstApproval}</td>
+                                              <td>${v.LastApproval}</td></tr>`;
+                });
+                $("#tbodySchedule").html(tr);
+                $('#machineInfoModal').modal('toggle');
+            }
+
+        }
+        $(function () {
+            $('.popoverData').popover();
+        });
+    </script>
+</body>
+
+
+</html>

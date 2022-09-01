@@ -1,0 +1,340 @@
+﻿@model RG.Application.ViewModel.Embro.Setup.COAGroupings.GroupIdentificationVM
+@{
+    ViewData[PageInfo.PageTitle] = "Group Identification";
+    ViewData[PageInfo.PageHeader] = "Group Identification";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    .header {
+        position: sticky;
+        top: 50px;
+    }
+</style>
+<form>
+    <div class="row">
+        <div class="col-md-3">
+            <div class="form-group">
+                @*<input asp-for="GroupID" type="hidden" />*@
+                <label asp-for="GroupCategoryID" class="label-ajt-sm required"></label>
+                <select required asp-for="GroupCategoryID" asp-items="Model.DDLCOAGroupingCategory" class="form-control form-control-sm"></select>
+                <span class="text-danger" asp-validation-for="GroupCategoryID"></span>
+            </div>
+        </div>
+        @*<div class="col-md-6">
+                <div class="form-group">
+                    <label asp-for="GroupID" class="label-ajt-sm required"></label>
+                    <select required asp-for="GroupID" asp-items="Model.DDLCOAGroup" class="form-control form-control-sm"></select>
+                    <span class="text-danger" asp-validation-for="GroupID"></span>
+                </div>
+            </div>*@
+    </div>
+</form>
+<div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <table class="table table-sm table-striped table-bordered text-center text-xs">
+            <thead class="bg-dark header">
+                <tr>
+                    <td style="width:5%">SL#</td>
+                    <td style="width:10%">Category</td>
+                    <td style="width:10%">Sub Category</td>
+                    <td style="width:10%">Broad Group</td>
+                    <td style="width:10%">Narrow Group</td>
+                    <td style="width:10%">Identification</td>
+                    <td style="width:15%">Group</td>
+                    <td style="width:30%">Item</td>
+                </tr>
+            </thead>
+            <tbody id="tbodyCOADetailInfo">
+            </tbody>
+        </table>
+    </div>
+</div>
+@*<div class="row">
+    <div class="col-sm-12">
+        <div class="form-group text-center">
+            <input type="button" class="btn btn-sm btn-success" id="btnSave" value="Save" />
+        </div>
+    </div>
+</div>*@
+@section scripts{
+
+    <script type="text/javascript">
+        function ChangeItemStatus(thatBtn) {
+
+            if ($(thatBtn).find('.clsBtnIcon').hasClass('fa-check')) {
+                $(thatBtn).find('.clsBtnIcon').removeClass('fa-check text-success');
+                $(thatBtn).find('.clsBtnIcon').addClass('fa-times text-danger');
+                //$(thatBtn).parent().addClass('bg-danger');
+            } else {
+                $(thatBtn).find('.clsBtnIcon').removeClass('fa-times text-danger');
+                $(thatBtn).find('.clsBtnIcon').addClass('fa-check text-success');
+                //$(thatBtn).parent().removeClass('bg-danger');
+            }
+
+        }
+        function ChangeCheckedState(that) {
+           
+            if ($(that).is(':checked')) {
+                $(that).parent().parent().find('.clsGroup').attr('disabled', false);
+            } else {
+                let groupIdentificationID = $(that).parent().find('.hdnGroupIdentificationID').val();
+                if (groupIdentificationID>0) {
+                    $(that).parent().parent().find('.clsGroup').val('').trigger('change');
+                } else {
+                    $(that).parent().parent().find('.clsGroup').val('');
+                }                
+                $(that).parent().parent().find('.clsGroup').attr('disabled', true);
+            }
+        }
+        function saveSuccess(data) {
+
+            if (data.result == 1) {
+                //$("#GroupCategoryID").trigger("change");
+                $.alert.open({
+                    type: 'Success',
+                    content: data.message,
+                    callback: function () {
+
+                    }
+                });
+            }
+            else {
+                $.alert.open("error", data.message);
+
+            }
+        }
+        $(function () {
+            //$("#GroupID").select2();
+            //$("#GroupCategoryID").change(function () {
+            //    let groupCategoryID = $("#GroupCategoryID").val();
+            //    if (groupCategoryID != "") {
+            //        HttpRequest.DropDownSelect2("GET", '/Embro/COAGrouping/GetDDLCOAGroup', { categoryID: groupCategoryID, predict: $("#GroupID").val() }, 'GroupID');
+            //    } else {
+            //        $("#tbodyCOADetailInfo").html("");
+            //        HttpRequest.DropDownDefault('GroupID');
+            //    }
+            //});
+
+            $("#GroupCategoryID").change(function () {
+               
+                $("body").addClass("loading");
+                let groupCategoryID = $("#GroupCategoryID").val();
+                if (groupCategoryID != "") {
+
+                    let ddlGroup = HttpRequest.AjaxData("GET", '/Embro/COAGrouping/GetDDLCOAGroup', { categoryID: groupCategoryID, predict: '' });
+                   
+                    let data = HttpRequest.AjaxData("GET", "/Embro/COAGrouping/GetBasicCOADetailInfo", { groupCategoryID: groupCategoryID })
+                    if (data != null && data.length > 0) {
+                        $("body").removeClass("loading");
+                        let tr = ``;
+                        let previousCategory = ``;
+                        let previousSubCategory = ``;
+                        let previousBroadGroup = ``;
+                        let previousNarrowGroup = ``;
+                        let previousIdentification = ``;
+                        $.each(data, function (i, v) {
+                            let currentCategory = v.Category;
+                            let currentCategoryCount = data.filter(x => x.CategoryID == v.CategoryID).length;
+                            let currentSubCategory = v.SubCategory;
+                            let currentSubCategoryCount = data.filter(x => x.SubCategoryID == v.SubCategoryID).length;
+
+                            let currentBroadGroup = v.BroadGroup;
+                            let currentBroadGroupCount = data.filter(x => x.BroadGroupID == v.BroadGroupID).length;
+
+                            let currentNarrowGroup = v.NarrowGroup;
+                            let currentNarrowGroupCount = data.filter(x => x.NarrowGroupID == v.NarrowGroupID).length;
+
+                            let currentIdentification = v.Identification;
+                            let currentIdentificationCount = data.filter(x => x.IdentificationID == v.IdentificationID).length;
+
+                            tr = tr + `<tr> <td>${++i}</td>`;
+                            if (currentCategory != previousCategory) {
+                                tr = tr + `<td title = '${v.Category}' rowspan = ${currentCategoryCount}> ${v.Category}</td >`;
+                            }
+                            if (currentSubCategory != previousSubCategory) {
+                                tr = tr + `<td title = '${v.SubCategory}' rowspan = ${currentSubCategoryCount}>${v.SubCategory}</td>`;
+                            }
+                            if (currentBroadGroup != previousBroadGroup) {
+                                tr = tr + `<td title = '${v.BroadGroup}' rowspan = ${currentBroadGroupCount}>${v.BroadGroup}</td>`;
+                            }
+                            if (currentNarrowGroup != previousNarrowGroup) {
+                                tr = tr + `<td title = '${v.NarrowGroup}' rowspan = ${currentNarrowGroupCount}>${v.NarrowGroup}</td>`
+                            }
+                            if (currentIdentification != previousIdentification) {
+                                let chkBox = ``;
+                                let isDisabled = 'disabled';
+                                let title = `${v.Category} => ${v.SubCategory}=>${v.BroadGroup}=>${v.NarrowGroup}=> ${v.Identification}`;
+                                if (v.IsAssignedIdentification) {
+                                    isDisabled = '';
+                                    if (v.IdentificationAssignedCategoryID != groupCategoryID) {
+                                        isDisabled = 'disabled';
+                                        title += `${v.IdentificationAssignedGroup}`;
+                                    } 
+                                    chkBox = `<input type="checkbox" class="chkIdentification" checked ${isDisabled} onchange='ChangeCheckedState(this)'/>`;
+                                }
+                                //else if (!v.IsAssignedIdentification && v.IdentificationAssignedGroup == "") {
+                                //    isDisabled = 'disabled';
+                                //    chkBox = `<input type="checkbox" class="chkIdentification" onchange='ChangeCheckedState(this)'/>`;
+                                //}
+                                else {
+
+                                    chkBox = `<input type="checkbox" class="chkIdentification" onchange='ChangeCheckedState(this)'/>`;
+                                    //chkBox = '';
+                                    //title = `${v.Identification}(${v.IdentificationAssignedGroup})`;
+                                }
+
+                                tr = tr + `<td class='text-left' title = '${title}' rowspan = ${currentIdentificationCount}>
+                                                <input type='hidden'class='hdnGroupIdentificationID' value=${v.GroupIdentificationID}><input type='hidden'class='hdnIdentificationID' value=${v.IdentificationID}>
+                                                ${chkBox} ${v.Identification}</td>`
+                                tr = tr + `<td  rowspan = ${currentIdentificationCount}>`;
+                                tr = tr + `<select class='clsGroup' ${isDisabled} onchange="IdentificationGroupChange(this)" value = ${v.IdentificationAssignedGroupID}>`;
+                                let optionItem = "";
+                                ddlGroup.forEach(function (opt) {
+                                    var isSelected = v.IdentificationAssignedGroupID == opt.Value;
+                                    optionItem += `<option value="${opt.Value}"  ${isSelected ? "selected" : ""}>${opt.Text}</option>`
+                                });
+                                tr = tr + `${optionItem}</select ></td >`;
+                            }
+                            let btnIcon = 'fa-check text-success';
+                            //if (v.IsIgnoredItem) {
+                            //    btnIcon = 'fa-times text-danger';
+                            //} else if (!v.IsAssignedIdentification && v.IdentificationAssignedGroup != "") {
+                            //    btnIcon = '';
+                            //} onclick="ChangeItemStatus(this)"
+                            tr = tr + `<td class='text-left'><button class='btn btn-sm' ><i class="clsBtnIcon fas ${btnIcon} idn${v.IdentificationID}"></i></button>
+                                                <input type='hidden'class='hdnGroupIdentificationID' value=${v.GroupIdentificationID}><input type='hidden'class='hdnIdentificationID' value=${v.IdentificationID}>
+                                                <input type='hidden'class='hdnItemID' value=${v.ItemID}> ${v.Item}</td>
+                                                                </tr>`;
+                            $(".clsGroup").val(v.IdentificationAssignedGroupID);
+                            previousCategory = v.Category;
+                            previousSubCategory = v.SubCategory;
+                            previousBroadGroup = v.BroadGroup;
+                            previousNarrowGroup = v.NarrowGroup;
+                            previousIdentification = v.Identification;
+
+                        });
+                        $("#tbodyCOADetailInfo").html(tr);
+                        //$(".clsGroup").select2();
+                    }
+                } else {
+                    $("#tbodyCOADetailInfo").html("");
+                }
+            });
+            $("#btnSave").click(function () {
+                debugger;
+                let coaGroup = new Array();
+                let isDataOk = true;
+                let focusItem = "";
+                let groupCategoryID = $("#GroupCategoryID").val();
+                $('.chkIdentification:checkbox:checked').each(function () {
+
+                    let that = $(this);
+                    let groupID = that.parent().parent().find('.clsGroup').val();
+
+                    if (groupID == '' || groupID == 0) {
+                        focusItem= that.parent().parent().find('.clsGroup');
+                        isDataOk = false;
+                        return false;
+                    }
+
+                    if (groupCategoryID != '' && groupID != '' && groupID > 0) {
+                        //alert(groupID);
+                        let groupIdentificationID = that.parent().find('.hdnGroupIdentificationID').val();
+                        let identificationID = that.parent().find('.hdnIdentificationID').val();
+
+                        let ignoredItems = new Array();
+                        $(`.idn${identificationID}`).each(function (i, v) {
+                            let itemBtn = $(this);
+                            if (itemBtn.hasClass('fa-times')) {
+                                let itemID = itemBtn.parent().parent().find('.hdnItemID').val();
+                                let ignoreItem = {
+                                    GroupIdentificationID: groupIdentificationID,
+                                    IdentificationID: identificationID,
+                                    IgnoredItemID: itemID
+                                };
+                                ignoredItems.push(ignoreItem);
+                            }
+                        });
+
+                        coaGroup.push({
+                            GroupIdentificationID: groupIdentificationID,
+                            IdentificationID: identificationID,
+                            GroupID: groupID,
+                            COAGroupIgnoredItem: ignoredItems,
+                            GroupCategoryID: groupCategoryID
+                        });
+
+
+                    } else {
+                        isDataOk = false;
+                        return false;
+                    }
+                });
+                debugger;
+                if (isDataOk && coaGroup.length > 0) {
+                    HttpRequest.Ajax('POST', '/Embro/COAGrouping/GroupIdentification', { groupIdentifications: coaGroup }, saveSuccess);
+                } else {
+                    focusItem.focus();
+                    focusItem.addClass('bg-danger')
+                    $.alert.open('warning', 'Please Select Group For All Selected Identification');
+                }
+            });
+        });
+        function IdentificationGroupChange(that) {
+            debugger;
+            let coaGroup = new Array();
+            let isDataOk = true;
+            let focusItem = "";
+            let groupCategoryID = $("#GroupCategoryID").val();
+
+            let thatDDl = $(that);
+            let groupID = thatDDl.parent().parent().find('.clsGroup').val();
+
+            //if (groupID == '' || groupID == 0) {
+            //    focusItem = thatDDl.parent().parent().find('.clsGroup');
+            //    isDataOk = false;
+            //    return false;
+            //}
+            if (groupCategoryID != '') {
+                //alert(groupID);
+                let groupIdentificationID = thatDDl.parent().parent().find('.hdnGroupIdentificationID').val();
+                let identificationID = thatDDl.parent().parent().find('.hdnIdentificationID').val();
+
+                //let ignoredItems = new Array();
+                //$(`.idn${identificationID}`).each(function (i, v) {
+                //    let itemBtn = $(this);
+                //    if (itemBtn.hasClass('fa-times')) {
+                //        let itemID = itemBtn.parent().parent().find('.hdnItemID').val();
+                //        let ignoreItem = {
+                //            GroupIdentificationID: groupIdentificationID,
+                //            IdentificationID: identificationID,
+                //            IgnoredItemID: itemID
+                //        };
+                //        ignoredItems.push(ignoreItem);
+                //    }
+                //});
+
+                coaGroup.push({
+                    GroupIdentificationID: groupIdentificationID,
+                    IdentificationID: identificationID,
+                    GroupID: groupID,
+                   // COAGroupIgnoredItem: ignoredItems,
+                    GroupCategoryID: groupCategoryID
+                });
+
+
+            } else {
+                isDataOk = false;
+                return false;
+            }
+            debugger;
+            if (isDataOk && coaGroup.length > 0) {
+                HttpRequest.Ajax('POST', '/Embro/COAGrouping/GroupIdentification', { groupIdentifications: coaGroup }, saveSuccess);
+            } else {
+                focusItem.focus();
+                focusItem.addClass('bg-danger')
+                $.alert.open('warning', 'Please Select Group For All Selected Identification');
+            }
+        }
+    </script>
+}

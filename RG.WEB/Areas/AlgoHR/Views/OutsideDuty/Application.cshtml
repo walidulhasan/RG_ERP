@@ -1,0 +1,227 @@
+﻿@model RG.Application.ViewModel.AlgoHR.Business.OutsideDuty.OutsideDutyApplicationVM
+@{
+    ViewData[PageInfo.PageTitle] = "Outside Duty";
+    ViewData[PageInfo.PageHeader] = "Outside Duty";
+    ViewData[PageInfo.btnText1] = "My Applications";
+    ViewData[PageInfo.PageLink1] = "/AlgoHR/OutsideDuty/MyApplications";
+    if (Model.IsApplicationForOther)
+    {
+        ViewData[PageInfo.btnText1] = "All Applications";
+        ViewData[PageInfo.PageLink1] = "/AlgoHR/OutsideDuty/AllApplications";
+    }
+    ViewData[PageInfo.btnClass1] = "btn-success";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+}
+<head>
+    <script src="~/AdminLTE-3.1.0/plugins/moment/moment.min.js"></script>    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.39.0/js/tempusdominus-bootstrap-4.min.js" integrity="sha512-k6/Bkb8Fxf/c1Tkyl39yJwcOZ1P4cRrJu77p83zJjN2Z55prbFHxPs9vN7q3l3+tSMGPDdoH51AEU8Vgo1cgAA==" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.39.0/css/tempusdominus-bootstrap-4.min.css" integrity="sha512-3JRrEUwaCkFUBLK1N8HehwQgu8e23jTH4np5NHOmQOobuC4ROQxFwFgBLTnhcnQRMs84muMh0PnnwXlPq5MGjg==" crossorigin="anonymous" />
+</head>
+
+<form class="">
+    <div class="card card-default">
+        <div class="card-body p-2">
+            <div class="row pt-0">
+                
+                <input type="hidden" asp-for="OutSideTaskID" />
+                <input type="hidden" asp-for="EmployeeCode" />
+                @if (Model.IsApplicationForOther)
+                {
+                    <div class="col-sm-3">
+                        <div class="form-group">
+                            <label asp-for="EmployeeID"></label>
+                            <select class="form-control form-control-sm" asp-for="EmployeeID" asp-items="Model.DDLEmployee">
+                            </select>
+                            <span asp-validation-for="EmployeeID" class="text-danger"></span>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="col-sm-3">
+                        <input type="hidden" asp-for="EmployeeID" />
+                        <div class="form-group mb-2">
+                            <label asp-for="EmployeeName" class=""></label>
+                            <input type="text" asp-for="EmployeeName" id="EmpCode" class="form-control form-control-sm" readonly />
+                        </div>
+                    </div>
+                }
+
+            </div>
+            <div class="row pt-0">
+                <div class="col-6 col-sm-3">
+                    <div class="form-group mb-2">
+                        <label asp-for="TaskDate" class=""></label>                        
+                        <div class="input-group">
+                            <input type="text" asp-for="TaskDate" class="form-control form-control-sm dateField readonlyNormal" readonly />
+                            <div class="input-group-append">
+                                <span class="input-group-text"><i class="fa fa-calendar" aria-hidden="true"></i></span>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="col-6 col-sm-3">
+                    <div class="form-group mb-2">
+                        <label asp-for="WorkingShift" class=""></label>
+                        <input type="text" asp-for="WorkingShift" class="form-control form-control-sm" readonly />
+                    </div>
+                </div>
+                <div class="col-sm-3">
+                    <div class="form-group">
+                        <label asp-for="DutyTypeID"></label>
+                        <select class="form-control form-control-sm" asp-for="DutyTypeID" asp-items="Model.DDLDutyType">
+                        </select>
+                        <span asp-validation-for="DutyTypeID" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-sm-3 col-md-3 col-lg-3 d-none showOnPartial">
+                    <div class="input-group">
+                        <div class="col-6 col-sm-6 col-md-6 col-lg-6 pl-0">
+                            <div class="form-group">
+                                <label asp-for="TimeFrom" class="required"></label>
+                                <div class="input-group date" id="TimeFromPicker" data-target-input="nearest">
+                                    <input type="text" asp-for="TimeFrom" class="form-control form-control-sm datetimepicker-input" data-target="#TimeFromPicker" data-toggle="datetimepicker" />
+                                    <div class="input-group-append" data-target="#TimeFromPicker" data-toggle="datetimepicker">
+                                        <span class="input-group-text"><i class="fa fa-clock" aria-hidden="true"></i></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-sm-6 col-md-6 col-lg-6 pl-0">
+                            <div class="form-group">
+                                <label asp-for="TimeTo" class="required"></label>
+                                <div class="input-group date" id="TimeToPicker" data-target-input="nearest">
+                                    <input type="text" asp-for="TimeTo" class="form-control form-control-sm datetimepicker-input" data-target="#TimeToPicker" data-toggle="datetimepicker" />
+                                    <div class="input-group-append" data-target="#TimeToPicker" data-toggle="datetimepicker">
+                                        <span class="input-group-text"><i class="fa fa-clock" aria-hidden="true"></i></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row pt-0">
+                <div class="col-12 col-sm-6 col-md-6">
+                    <div class="form-group mb-2">
+                        <label asp-for="Reason" class=""></label>
+                        <input type="text" asp-for="Reason" class="form-control form-control-sm" />
+                    </div>
+                </div>
+                <div class="col-12 col-sm-6 col-md-6">
+                    <div class="form-group mb-2">
+                        <label asp-for="Address" class=""></label>
+                        <input type="text" asp-for="Address" class="form-control form-control-sm" />
+                    </div>
+                </div>
+            </div>
+            <div class="row pt-1 justify-content-center">
+                <input type="button" class="btn btn-sm btn-primary" id="btnSave" value="Submit" />
+            </div>
+        </div>
+    </div>
+</form>
+
+
+@section scripts{
+    <script type="text/javascript">
+        function ClearForm() {
+            $("#OutSideTaskID").val(0);
+            $("#EmployeeID").val("").trigger('change');
+            $("#TaskDate").val('@DateTime.Now.ToString("dd-MMM-yyyy")');
+            $("#WorkingShift").val('');
+            $("#DutyTypeID").val($("#DutyTypeID option:first").val()).trigger('change');
+            $("#TimeFrom").val('');
+            $("#TimeTo").val('');
+            $("#Reason").val('');
+            $("#Address").val('');
+        }
+        function GetEmployeeShiftShortInfo() {
+            let date = $("#TaskDate").val();
+            let empID = $("#EmployeeID").val();
+            if (empID > 0 && date != '') {
+                debugger;
+                let info = HttpRequest.AjaxData('Get', '/AlgoHR/OutsideDuty/GetEmployeeShiftShortInfo', { 'empID': empID, 'date': date });
+                if (info != null) {
+                    $("#EmployeeCode").val(info.EmployeeCode);
+                    $("#WorkingShift").val(info.WorkingShift);
+                    $("#DutyTypeID").val($("#DutyTypeID option:first").val()).trigger('change');
+                    $("#TimeFrom").val(info.TimeFrom);
+                    $("#TimeTo").val(info.TimeTo);
+                }
+            }
+        }
+        function GetEmployeeList() {
+ 
+            HttpRequest.DropDownSelect2Group('GET', '/AlgoHR/UserDepartmentAccess/GetDDLUserSectionEmployee', {}, 'EmployeeID',false);
+        }
+        function saveSuccess(data) {
+            if (data.result == 1) {
+                $.alert.open({
+                    type: 'Success',
+                    content: data.message,
+                    callback: function () {                       
+                        ClearForm();
+                    }
+                });
+            }
+            else {
+                $.alert.open("error", data.message);
+            }
+        }
+        $(function () {
+            if ('@Model.EmployeeID' == 0) {
+                $("#EmployeeID").select2();
+            }
+            
+            if (RtnBoolToLower('@Model.IsApplicationForOther')) {
+                GetEmployeeList();
+            } 
+            $('#TimeFromPicker,#TimeToPicker').datetimepicker({
+                format: 'LT'
+            });
+            $("#DutyTypeID").change(function () {
+                let typeID = parseInt($("#DutyTypeID").val());
+                if (typeID === 1) {
+                    $('.showOnPartial').addClass('d-none');
+                } else {
+                    $('.showOnPartial').removeClass('d-none');
+                }
+            });
+            $("#TaskDate,#EmployeeID").change(function () {
+                GetEmployeeShiftShortInfo();
+            });
+            $("#btnSave").click(function () {
+                debugger;
+                let outSideTaskID = $("#OutSideTaskID").val();
+                let employeeID = $("#EmployeeID").val();
+                let employeeCode = $("#EmployeeCode").val();
+                let durationType = $('#DutyTypeID option:selected').text();
+                let taskDate = $("#TaskDate").val();               
+                let timeFrom=$("#TimeFrom").val();
+                let timeTo = $("#TimeTo").val();
+                let reason = $("#Reason").val();
+                let address = $("#Address").val();
+                if (employeeID > 0 && taskDate != "" && timeFrom != "" && timeTo != "") {
+                    let task = {
+                        OutSideTaskID: outSideTaskID,
+                        EmployeeID: employeeID,
+                        EmployeeCode: employeeCode,
+                        OutsideTaskDate: taskDate,
+                        TaskDurationType: durationType,
+                        TimeFrom: timeFrom,
+                        TimeTo: timeTo,
+                        Reason: reason,
+                        TaskAddress: address
+                    };
+                    HttpRequest.Ajax("POST", "/AlgoHR/OutsideDuty/Application", { 'model': task }, saveSuccess);
+                } else {
+                    $.alert.open('warning', 'Please provide required fields');
+                }
+            });
+
+        });
+    </script>
+}

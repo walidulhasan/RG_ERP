@@ -1,0 +1,214 @@
+﻿@model RG.Application.ViewModel.FiniteScheduler.Setup.MaintenanceItem.MT_MaintenanceItem_SetupVM
+
+@{
+    ViewData[PageInfo.PageTitle] = "Maintenance Items";
+    ViewData[PageInfo.PageHeader] = "Maintenance Items";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<form asp-action="Create" asp-area="FiniteScheduler" asp-controller="MaintenanceItem" method="post" id="FrmMaintenanceItem">
+    <div class="row">
+        <div class="col-md-3">
+            <div class="form-group">
+                <input type="hidden" asp-for="ID" />
+                <label asp-for="ItemCategoryID" class="label-ajt-sm required"></label>
+                <select asp-for="ItemCategoryID" class="form-control form-control-sm" asp-items="Model.DDLItemCategory"></select>
+                <span asp-validation-for="ItemCategoryID" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="form-group">
+                <label asp-for="ItemName" class="label-ajt-sm required"></label>
+                <input asp-for="ItemName" class="form-control form-control-sm" autocomplete="off" placeholder="Enter Item Name" />
+                <span asp-validation-for="ItemName" class="text-danger"></span>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="row">
+        <div class="col-sm-3">
+            <div class="form-group">
+                <input type="button" class="btn btn-sm btn-success" value="Save" id="btnSave" />
+                <input type="button" class="btn btn-sm btn-warning d-none" value="Clear" id="btnClear" onclick="Clear()" />
+
+            </div>
+        </div>
+    </div>
+</form>
+<div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <div id="grid">
+        </div>
+    </div>
+</div>
+@section scripts{
+
+    <script type="text/javascript">
+        $(function () {
+            GetListOFMaintenanceItem();
+            $("#ItemCategoryID").change(function () {
+                GetListOFMaintenanceItem();
+            });
+            $("#btnSave").click(function () {
+                debugger
+                let id = $("#ID").val();
+                if ($("#FrmMaintenanceItem").valid()) {
+                    let itemCategoryID = $("#ItemCategoryID").val();
+                    let itemName = $("#ItemName").val();
+
+
+                    var maintenanceItemObj = {
+                        ID: id,
+                        ItemCategoryID: itemCategoryID,
+                        ItemName: itemName
+
+                    }
+                    if (maintenanceItemObj.ID != null && maintenanceItemObj.ID > 0) {
+                        HttpRequest.Ajax("PUT", '/FiniteScheduler/MaintenanceItem/Update', { "dtm": maintenanceItemObj }, saveSuccess, true);
+                    } else {
+                        HttpRequest.Ajax("POST", '/FiniteScheduler/MaintenanceItem/Create', { "dtm": maintenanceItemObj }, saveSuccess, true);
+                    }
+
+                }
+            });
+        });
+    function saveSuccess(data) {
+
+        if (data.result == 1) {
+            $.alert.open({
+                type: 'Success',
+                content: data.message,
+                callback: function () {
+                    $("#btnSave").val("Save");
+                    Clear();
+                    GetListOFMaintenanceItem();
+                }
+            });
+        }
+        else {
+            $.alert.open("error", data.message);
+
+        }
+    }
+
+        function Clear() {
+            $("ID").val("");
+            /*$("#ItemCategoryID").val("");*/
+            $("#ItemName").val("");
+            $("#btnSave").val("Save");
+            $("#btnClear").addClass('d-none');
+        }
+
+
+
+        function GetListOFMaintenanceItem() {
+            let itemCategoryID = $("#ItemCategoryID").val();
+        var dataGrid = $("#grid").dxDataGrid({
+        height: 450,
+        remoteOperations: { paging: true, filtering: true, sorting: true, grouping: true, summary: true, groupPaging: true },
+        dataSource: DevExpress.data.AspNet.createStore({
+            key: "ID",
+            loadUrl: "/FiniteScheduler/MaintenanceItem/GetListOFMaintenanceItem",
+            loadParams: {
+                itemCategoryID:itemCategoryID               
+            }
+        }),
+        hoverStateEnabled: true,
+
+        showBorders: true,
+        columnAutoWidth: true,
+        filterRow: { visible: true },
+        pager: { visible: true, showInfo: true, allowedPageSizes: [10, 20, 50, 100, 500], showPageSizeSelector: true, },
+        paging: { pageSize: 10 },
+        selection: { mode: 'single' },
+        export: {
+            //   enabled: true
+        },
+        columns: [
+            {
+                width: "auto",
+                caption: "SL #",
+                alignment: 'center',
+                    headerCellTemplate: function (header, info) {
+                    $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                },
+                cellTemplate: function (container, e) {
+                    var index = dataGrid.pageIndex() * dataGrid.pageSize() + e.rowIndex + 1;
+                    container.text(index);
+                }
+
+            },
+            {
+                dataField: "ID",
+                visible: false,
+
+            },
+
+            {
+                dataField: "ItemName",
+                alignment: 'center',
+                caption: 'Maintenance Item',
+                headerCellTemplate: function (header, info) {
+                    $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                }
+
+            },
+            {
+                dataField: "ItemCategoryName",
+                alignment: 'center',
+                caption: 'Category',
+                    headerCellTemplate: function (header, info) {
+                    $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                }
+
+                },
+
+
+            {
+                caption: 'Action',
+                alignment: 'center',
+                    headerCellTemplate: function (header, info) {
+                    $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                },
+                cellTemplate: function (container, options) {
+
+                    var returnText = '<button class="btn btn-xs btn-warning"><i class="fa fa-edit"></i> Edit</button>';
+
+                    $(returnText).on('dxclick', function () {
+                        EditMaintenanceItem(options.data);
+                    }).appendTo(container);
+
+                    var returnText = '<span>&nbsp</span><button class="btn btn-xs btn-danger"><i class="fa fa-trash"></i> Delete</button>';
+                    returnText = returnText + '</div>';
+                    $(returnText).on('dxclick', function () {
+                       DeleteRow(options.data.ID);
+                    }).appendTo(container);
+                }
+            }
+        ]
+
+    }).dxDataGrid("instance");
+        }
+        function DeleteRow(itemID) {
+            $.alert.open('confirm', 'Are you sure to delete this record?', function (button) {
+                if (button == 'yes')
+                    HttpRequest.Ajax("PUT", '/FiniteScheduler/MaintenanceItem/Remove', { "itemID": itemID }, saveSuccess, true);
+            });
+
+        }
+        function EditMaintenanceItem(data) {
+            debugger
+            $("#ID").val(data.ID);
+            $("#ItemCategoryID").val(data.ItemCategoryID);
+            $("#ItemName").val(data.ItemName);
+            $("#btnSave").val("Update");
+            $("#btnClear").removeClass('d-none');
+        }
+    </script>
+
+}
+
+
+
+

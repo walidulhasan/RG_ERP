@@ -1,0 +1,63 @@
+﻿@model RG.Application.ViewModel.MaterialsManagement.Business.YarnStockReports.YarnStockReportVM
+@{
+    ViewData[PageInfo.PageHeader] = "Stock Reports";
+    ViewData[PageInfo.PageTitle] = "Stock Reports";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+}
+
+
+<div class="card card-primary">
+    <div class="row m-0">
+        <div class="col-md-6 col-6 col-sm-6 col-lg-6">
+            <div class="form-group">
+                <label asp-for="ReportType" class="col-form-label-sm m-0"></label>
+                <select asp-for="ReportType" class="form-control form-control-sm" asp-items="Model.DDLReportType"></select>
+                <span asp-validation-for="ReportType" class="span-form-validation"></span>
+            </div>
+        </div>
+        <div class="col-md-5 col-5 col-sm-5 col-lg-5 divYarnRackReoprt" style="display:none">
+            <label>&nbsp;</label>
+            <div class="form-check">
+                <span id="spnWithAllTransaction">
+                    <input type="checkbox" class="form-check-input" name="WithAllTransaction" id="WithAllTransaction" /> All Transaction
+                </span>
+                <br />
+                <span id="spnShowEmptyClosing">
+                    <input type="checkbox" class="form-check-input" name="ShowEmptyClosing" id="ShowEmptyClosing" /> Show Empty Closing Lot
+                </span>
+            </div>
+        </div>
+    </div>
+    <div id="divCategoryWiseReportView">
+
+    </div>
+</div>
+@section scripts{
+    <script type="text/javascript">
+        $(function () {
+
+            $("#ReportType").change(function () {
+                debugger
+                let reportType = $("#ReportType").val();
+                let reportTypeName = $("#ReportType option:selected").text();
+                if (reportTypeName === "Yarn Summary") {
+                    $('.divYarnRackReoprt').show();
+                } else {
+                    $('.divYarnRackReoprt').hide();
+                }
+                let dataModel = {
+                    ReportTypeID: reportType,
+                    StockReprotName: reportTypeName
+                };
+                if (dataModel.StockReprotName != "" && dataModel.ReportTypeID>0) {
+                    
+                    $("#divCategoryWiseReportView").load("/MaterialsManagement/StockReport/CallViewComponents", { vcqmModel: dataModel });
+                } else {
+                    $("#divCategoryWiseReportView").html('');
+                }
+            });
+        });
+    </script>
+
+}

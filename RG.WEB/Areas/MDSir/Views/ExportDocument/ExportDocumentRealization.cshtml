@@ -1,0 +1,108 @@
+﻿
+
+@model List<RG.Application.Contracts.EMS.Business.ExportDocuments.Queries.RequestResponseModel.ExportDocumentRealizationRM>
+@{
+    ViewData[PageInfo.PageTitle] = "Export Document Realization";
+    ViewData[PageInfo.PageHeader] = "Export Document Realization";
+    Layout = "~/Views/Shared/_LayoutMDSir.cshtml";
+}
+
+<div class="row">
+    <div class="col-sm-12 col-md-12">
+        <div class="row">
+            <div class="col-md-12 text-center">
+                <table class="table table-sm table-bordered table-striped text-xs">
+                    <thead class="bg-dark" >
+                        <tr>
+                            <th>SL #</th>
+                            <th>Reference No</th>
+                            <th>Week</th>
+                            <th>Period Year</th>
+                            <th>No Of Invoice</th>
+                            <th>Invoice Value</th>
+                            <th>Realize Amount</th>
+                            <th>Balance</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            int sl = 1;
+                            var prevYear = 0;
+                            var dataList = Model.OrderByDescending(x => x.Period_ID);
+                            var lastItem = dataList.Last();
+
+                            foreach (var item in dataList)
+                            {
+                                if (prevYear != item.Period_Year)
+                                {
+                                    if (prevYear != 0)
+                                    {
+                                        var prevYearNoOfInv = Model.Where(x => x.Period_Year == prevYear).Sum(x => x.NoOfInvoice);
+                                        var prevYearInvValue = Model.Where(x => x.Period_Year == prevYear).Sum(x => x.InvoiceValue);
+                                        var prevYearRealizeValue = Model.Where(x => x.Period_Year == prevYear).Sum(x => x.RealizeAmt);
+                                        var prevYearInvBalance = Model.Where(x => x.Period_Year == prevYear).Sum(x => x.FDBPP_Balance);
+                                        <tr class="bg-secondary text-bold">
+                                            <td colspan="4">@prevYear Total</td>
+                                            <td>@prevYearNoOfInv</td>
+                                            <td>@String.Format("{0:n2}", prevYearInvValue)</td>                                           
+                                            <td>@String.Format("{0:n2}", prevYearRealizeValue)</td>
+                                            <td>@String.Format("{0:n2}", prevYearInvBalance)</td>
+                                        </tr>
+                                    }
+                                    <tr class="bg-info text-left text-bold"><td colspan="8">@item.Period_Year</td></tr>
+                                }
+                                <tr>
+                                    <td>@(sl++)</td>
+                                    <td>@item.FDBPP_REFNO</td>
+                                    <td>@item.Period_Name</td>
+                                    <td>@item.Period_Year</td>
+                                    <td>@item.NoOfInvoice</td>
+                                    <td>@String.Format("{0:n2}", item.InvoiceValue)</td>
+                                    <td>@String.Format("{0:n2}", item.RealizeAmt)</td>
+                                    @if (item.FDBPP_Balance > 0)
+                                    {
+                                        <td class="p-0"><a class="btn btn-xs btn-primary text-xs" href="Javascript:void(0);" onclick="GetDetailData('@item.FDBPP_ID')">@String.Format("{0:n2}", item.FDBPP_Balance)</a> </td>
+                                    }
+                                    else
+                                    {
+                                        <td>@String.Format("{0:n2}", item.FDBPP_Balance)</td>
+                                    }
+                                </tr>
+
+                                if (item.Equals(lastItem))
+                                {
+                                    var prevYearNoOfInv = Model.Where(x => x.Period_Year == item.Period_Year).Sum(x => x.NoOfInvoice);
+                                    var prevYearInvValue = Model.Where(x => x.Period_Year == item.Period_Year).Sum(x => x.InvoiceValue);
+                                    var prevYearRealizeValue = Model.Where(x => x.Period_Year == item.Period_Year).Sum(x => x.RealizeAmt);
+                                    var prevYearInvBalance = Model.Where(x => x.Period_Year == item.Period_Year).Sum(x => x.FDBPP_Balance);
+                                    <tr class="bg-secondary text-bold">
+                                        <td colspan="4">@item.Period_Year Total</td>
+                                        <td>@prevYearNoOfInv</td>
+                                        <td>@String.Format("{0:n2}", prevYearInvValue)</td>
+                                        <td>@String.Format("{0:n2}", prevYearRealizeValue)</td>
+                                        <td>@String.Format("{0:n2}", prevYearInvBalance)</td>
+                                    </tr>
+
+                                }
+                                prevYear = item.Period_Year;
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</div>
+@section scripts{
+    <script type="text/javascript">
+        const GetDetailData = (FDBPP_ID) => {
+            let action = `/MDSir/ExportDocument/ExportDocumentRealizationDetail?FDBPP_ID=${FDBPP_ID}`;
+            newWindow(action, "Export Document Realization Detail");
+        }
+
+        $(function () {
+        })
+    </script>
+
+}

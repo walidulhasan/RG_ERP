@@ -1,0 +1,275 @@
+﻿@model List<RG.Application.Contracts.Maxco.Buisness.OrderPlanReports.Queries.RequestResponseModel.GarmentAssortmentAndFabricsInfoRM>
+@{
+    Layout = null;
+
+    var orderData = Model.GroupBy(b => new { b.OrderID }).Select(b => new
+    {
+        OrderID = b.Key.OrderID,
+        NoOfOrders = b.Sum(t => t.NoOfOrders),
+        NumberofGarments = b.Sum(t => t.NumberofGarments),
+        FinishFabrBookKg = b.Sum(t => t.FinFabricBooking),
+        PlanKnittingQty = b.Sum(t => t.PlanKnittingQty),
+        KnittingQty = b.Sum(t => t.KnittingQty),
+        KnittingBalance = b.Sum(t => t.KnittingBalance),
+        BatchQty = b.Sum(t => t.BatchQty),
+        BatchBalance = b.Sum(t => t.BatchBalance),
+        FinishFabricDeliveryQty = b.Sum(t => t.FinishFabricDeliveryQty),
+        RibQty = b.Sum(t => t.RibQty),
+        FinishFabricDeliveryBal = b.Sum(t => t.FinishFabricDeliveryBal)
+    }).ToList();
+
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Order Wise Reports</title>
+    <link href="~/AdminLTE-3.1.0/plugins/jquery-ui/jquery-ui.min.css" rel="stylesheet" />
+    <link href="~/lib/bootstrap-5.0.2/css/bootstrap.min.css" rel="stylesheet" />
+    <script src="~/AdminLTE-3.1.0/plugins/jquery/jquery.min.js"></script>
+    <script src="~/AdminLTE-3.1.0/plugins/jquery-ui/jquery-ui.min.js"></script>
+    <script src="~/lib/bootstrap-5.0.2/js/bootstrap.bundle.min.js"></script>
+
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.12/css/jquery.dataTables.min.css" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/1.2.2/css/buttons.dataTables.min.css" />
+    <script type="text/javascript" src="https://code.jquery.com/jquery-1.12.3.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.2.2/js/dataTables.buttons.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/2.5.0/jszip.min.js"></script>
+    <script type="text/javascript" src="https://cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/pdfmake.min.js"></script>
+    <script type="text/javascript" src="https://cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/vfs_fonts.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.2.2/js/buttons.html5.min.js"></script>
+
+    <style>
+        .header {
+            position: sticky;
+            top: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container-fluid">
+        <div class="row" style="height:50px;">
+            <div class="col-12 text-center">
+                <h5 class="mb-0">Robintex Group Bangladesh</h5>
+                <h6>Order Status Reports</h6>
+            </div>
+        </div>
+        <table class="table table-sm table-bordered table-striped text-sm text-center display nowrap" id="tblOrderStatus" style="font-size:11px;">
+            <thead class="bg-dark text-white header">
+                <tr>
+                    <th>SL#</th>
+                    <th>Order No</th>
+                    <th>Fabric Week</th>
+                    <th>Batch Commitment</th>
+                    <th>DLV Commitment</th>
+                    <th>Dyeing Production Unit</th>
+                    <th>PO Received Date</th>
+                    <th>FO Received Date</th>
+                    <th>Shipment Date</th>
+                    <th width="50" style="word-wrap: break-word">Style</th>
+                    <th>Pantone No</th>
+                    <th>Color</th>
+                    <th>Fabric Type</th>
+                    <th>Art Work</th>
+                    <th>GSM</th>
+                    <th>Fabric Dia</th>
+                    <th>Order Quantity</th>
+                    <th>Finish fab. book Kg</th>
+                    <th>Plan Knitting Kg</th>
+                    <th>Knitting Kg</th>
+                    <th>Knitting Balance</th>
+                    <th>Batch Kg</th>
+                    <th>Batch Balance</th>
+                    <th>Rib</th>
+                    <th>Finish Fab. Dlv.</th>
+                    <th>Finish Fab. Dlv. Bal.</th>
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    var sl = 1;
+                    long prevOrderID = 0;
+                    var prevOrder = "";
+                    var prevDeliveryDate = "";
+                    var prevStyle = "";
+                    var prevPantone = "";
+                    var prevColor = "";
+                    var prevFabricType = "";
+                    var prevArtWork = "";
+                    var prevGsm = 0;
+                    decimal prevDia = 0;
+                    var lastItem = Model.OrderBy(x => x.OrderID).LastOrDefault();
+                    foreach (var item in Model.OrderBy(x => x.BuyerID))
+                    {
+                        var sameOrderCount = Model.Where(x => x.OrderID == item.OrderID).Count();
+                        //var sameDeliveryDateCount = Model.Where(x => x.OrderID == item.OrderID && x.DeliveryDate == item.DeliveryDate).Count();
+                        //var sameStyleCount = Model.Where(x => x.OrderID == item.OrderID && x.StyleName == item.StyleName).Count();
+                        //var samePantoneCount = Model.Where(x => x.OrderID == item.OrderID && x.PantoneNo == item.PantoneNo).Count();
+                        //if (sameOrderCount != samePantoneCount)
+                        //{
+                        //    samePantoneCount = Model.Where(x => x.OrderID == item.OrderID && x.DeliveryDate == item.DeliveryDate && x.PantoneNo == item.PantoneNo).Count();
+                        //}
+                        //var sameFabricTypeCount = Model.Where(x => x.OrderID == item.OrderID && x.Quality == item.Quality).Count();
+                        //var sameArtWorkCount = Model.Where(x => x.OrderID == item.OrderID && x.ArtWork == item.ArtWork).Count();
+                        //if (sameOrderCount != sameArtWorkCount)
+                        //{
+                        //    sameArtWorkCount = Model.Where(x => x.OrderID == item.OrderID && x.DeliveryDate == item.DeliveryDate && x.ArtWork == item.ArtWork).Count();
+                        //}
+                        //var sameGsmCount = Model.Where(x => x.OrderID == item.OrderID && x.GSM == item.GSM).Count();
+                        //if (sameOrderCount != sameGsmCount)
+                        //{
+                        //    sameGsmCount = Model.Where(x => x.OrderID == item.OrderID && x.DeliveryDate == item.DeliveryDate && x.GSM == item.GSM).Count();
+                        //}
+                        //var sameDiaCount = Model.Where(x => x.OrderID == item.OrderID && x.FinishedWidth == item.FinishedWidth).Count();
+                        //if (sameOrderCount != sameDiaCount)
+                        //{
+                        //    sameDiaCount = Model.Where(x => x.OrderID == item.OrderID && x.DeliveryDate == item.DeliveryDate && x.FinishedWidth == item.FinishedWidth).Count();
+                        //}
+
+                        if (item.OrderID != prevOrderID && prevOrderID > 0)
+                        {
+                            var orderSum = orderData.Where(x => x.OrderID == prevOrderID).First();
+                            <tr class="text-white" style="background-color:cornflowerblue !important;font-weight:bold !important">
+                                <td colspan="16">@(prevOrder) Total</td>
+                                <td>@(orderSum.NumberofGarments)</td>
+                                <td>@(String.Format("{0:n2}", orderSum.FinishFabrBookKg))</td>
+                                <td>@(String.Format("{0:n2}", orderSum.PlanKnittingQty))</td>
+                                <td>@(String.Format("{0:n2}", orderSum.KnittingQty))</td>
+                                <td>@(String.Format("{0:n2}", orderSum.KnittingBalance))</td>
+                                <td>@(String.Format("{0:n2}", orderSum.BatchQty))</td>
+                                <td>@(String.Format("{0:n2}", orderSum.BatchBalance))</td>
+                                <td>@(String.Format("{0:n2}", orderSum.RibQty))</td>
+                                <td>@(String.Format("{0:n2}", orderSum.FinishFabricDeliveryQty))</td>
+                                <td>@(String.Format("{0:n2}", orderSum.FinishFabricDeliveryBal))</td>
+                            </tr>
+                        }
+                        <tr>
+                            @if (item.OrderID != prevOrderID)
+                            {
+                                <td rowspan="@sameOrderCount" style="vertical-align: middle;">@(sl)</td>
+                                <td rowspan="@sameOrderCount" style="vertical-align: middle;">@(item.OrderName)</td>
+
+                            }
+                            <td>Week-@(item.FabricWeek)</td>
+                            <td rowspan="" style="vertical-align: middle;">@(item.BatchCommitmentDateMsg)</td>
+                            <td rowspan="" style="vertical-align: middle;">@(item.DeliveryCommitmentDateMsg)</td>
+                            <td rowspan="" style="vertical-align: middle;">@(item.DyeingProductionUnit)</td>
+                            <td rowspan="" style="vertical-align: middle;">@(item.OrderReceiveDateMsg)</td>
+                            <td></td>
+                            <td rowspan="" style="vertical-align: middle;">@(item.DeliveryDateMsg)</td>
+                            <td rowspan="" width="100" style="word-wrap: break-word; vertical-align: middle;">@(item.StyleName)</td>
+                            <td rowspan="" style="vertical-align: middle;">@(item.PantoneNo)</td>
+                            <td rowspan="" style="vertical-align: middle;">@(item.ColorName)</td>
+                            <td rowspan="" style="vertical-align: middle;">@(item.Quality)</td>
+                            <td rowspan="">@(item.ArtWork)</td>
+                            <td rowspan="" style="vertical-align: middle;">@(item.GSM)</td>
+                            <td rowspan="" style="vertical-align: middle;">@(item.FinishedWidth)</td>
+                            <td>@(item.NumberofGarments)</td>
+                            <td>@(String.Format("{0:n2}", item.FinFabricBooking))</td>
+                            <td>@(String.Format("{0:n2}", item.PlanKnittingQty))</td>
+                            <td>@(String.Format("{0:n2}", item.KnittingQty))</td>
+                            <td>@(String.Format("{0:n2}", item.KnittingBalance))</td>
+                            <td>@(String.Format("{0:n2}", item.BatchQty))</td>
+                            <td>@(String.Format("{0:n2}", item.BatchBalance))</td>
+                            <td>@(String.Format("{0:n2}", item.RibQty))</td>
+                            <td>@(String.Format("{0:n2}", item.FinishFabricDeliveryQty))</td>
+                            <td>@(String.Format("{0:n2}", item.FinishFabricDeliveryBal))</td>
+                        </tr>
+                        if (lastItem != null && lastItem.Equals(item))
+                        {
+                            var orderSum = orderData.Where(x => x.OrderID == item.OrderID).First();
+                            <tr class="text-white" style="background-color:cornflowerblue !important;font-weight:bold !important">
+                                <td colspan="16">@(item.OrderName) Total</td>
+                                <td>@(orderSum.NumberofGarments)</td>
+                                <td>@(String.Format("{0:n2}", orderSum.FinishFabrBookKg))</td>
+                                <td>@(String.Format("{0:n2}", orderSum.PlanKnittingQty))</td>
+                                <td>@(String.Format("{0:n2}", orderSum.KnittingQty))</td>
+                                <td>@(String.Format("{0:n2}", orderSum.KnittingBalance))</td>
+                                <td>@(String.Format("{0:n2}", orderSum.BatchQty))</td>
+                                <td>@(String.Format("{0:n2}", orderSum.BatchBalance))</td>
+                                <td>@(String.Format("{0:n2}", orderSum.RibQty))</td>
+                                <td>@(String.Format("{0:n2}", orderSum.FinishFabricDeliveryQty))</td>
+                                <td>@(String.Format("{0:n2}", orderSum.FinishFabricDeliveryBal))</td>
+                            </tr>
+                            <tr class="text-white" style="background-color: deepskyblue !important; font-weight: bold !important">
+                                <td colspan="16">Grand Total</td>
+                                <td>@(orderData.Sum(x=>x.NumberofGarments))</td>
+                                <td>@(String.Format("{0:n2}", orderData.Sum(x=>x.FinishFabrBookKg)))</td>
+                                <td>@(String.Format("{0:n2}", orderData.Sum(x=>x.PlanKnittingQty)))</td>
+                                <td>@(String.Format("{0:n2}", orderData.Sum(x=>x.KnittingQty)))</td>
+                                <td>@(String.Format("{0:n2}", orderData.Sum(x=>x.KnittingBalance)))</td>
+                                <td>@(String.Format("{0:n2}", orderData.Sum(x=>x.BatchQty)))</td>
+                                <td>@(String.Format("{0:n2}", orderData.Sum(x=>x.BatchBalance)))</td>
+                                <td>@(String.Format("{0:n2}", orderData.Sum(x=>x.RibQty)))</td>
+                                <td>@(String.Format("{0:n2}", orderData.Sum(x=>x.FinishFabricDeliveryQty)))</td>
+                                <td>@(String.Format("{0:n2}", orderData.Sum(x=>x.FinishFabricDeliveryBal)))</td>
+                            </tr>
+
+                        }
+                        @if (item.OrderID != prevOrderID)
+                        {
+                            ++sl;
+                        }
+                        prevOrderID = item.OrderID;
+                        prevOrder = item.OrderName;
+                        //prevDeliveryDate = item.DeliveryDateMsg;
+                        //prevStyle = item.StyleName;
+                        //prevPantone = item.PantoneNo;
+                        //prevFabricType = item.Quality;
+                        //prevArtWork = item.ArtWork;
+                        //prevGsm = item.GSM;
+                        //prevDia = item.FinishedWidth;
+                    }
+
+                }
+            </tbody>
+        </table>
+        <div class="text-center">
+            <input type="button" class="btn btn-sm btn-success" value="Excel" id="btnPdf" onclick="exportToExcel()" />
+        </div>
+    </div>
+    <script type="text/javascript">
+
+        function bodyOnload() {
+            setTimeout(function () {
+                $("body").removeClass("loading");
+            }, 1000)
+
+        }
+        function exportToExcel() {
+            var htmls = "";
+            var uri = 'data:application/vnd.ms-excel;base64,';
+            var template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>';
+            var base64 = function (s) {
+                return window.btoa(unescape(encodeURIComponent(s)))
+            };
+
+            var format = function (s, c) {
+                return s.replace(/{(\w+)}/g, function (m, p) {
+                    return c[p];
+                })
+            };
+
+            htmls = document.getElementById("tblOrderStatus").innerHTML;
+
+            var ctx = {
+                worksheet: 'Worksheet',
+                table: htmls
+            }
+            var link = document.createElement("a");
+            link.download = "OrderStatusReport.xls";
+            link.href = uri + base64(format(template, ctx));
+            link.click();
+        }
+        $(function () {
+            $(document).ready(function () {
+
+                $("body").addClass("loading");
+
+            });
+        });
+    </script>
+</body>
+
+</html>

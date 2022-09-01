@@ -1,0 +1,64 @@
+﻿@model RG.Application.ViewModel.MDSir.Salary.SalaryAnalysisVM
+
+@{
+    ViewData[PageInfo.PageTitle] = "Salary Analysis";
+    ViewData[PageInfo.PageHeader] = "Salary Analysis";
+    Layout = "~/Views/Shared/_LayoutMDSir.cshtml";
+}
+<div class="row">
+    <div class="col-sm-12 col-md-12">
+        <div class="card card-dark">
+            <div class="card-header m-0 p-1">
+                <h5 class="card-title">Salary Analysis</h5>
+            </div>
+            <div class="card-body p-2">
+                <div class="row">
+                    @*<div class="col-4 col-md-4  col-sm-4 col-lg-4">
+                        <div class="form-group">
+                            <label class="col-form-label-sm  m-0 required" asp-for="SalaryAnalysisDivisionID"></label>
+                            <select asp-for="SalaryAnalysisDivisionID" asp-items="Model.DDLSalaryAnalysisDivision" class="form-control form-control-sm"></select>
+                        </div>
+                    </div>*@
+                    <div class="col-4 col-md-4  col-sm-4 col-lg-4">
+                        <div class="form-group">
+                            <label class="col-form-label-sm  m-0 required" asp-for="Month"></label>
+                            <select asp-for="Month" asp-items="Model.DDLMonth" class="form-control form-control-sm"></select>
+                        </div>
+                    </div>
+                    <div class="col-4 col-md-4  col-sm-4 col-lg-4">
+                        <div class="form-group mb-2">
+                            <label asp-for="Year" class="col-form-label-sm  m-0 required"></label>
+                            <select asp-for="Year" asp-items="Model.DDLYear" class="form-control form-control-sm"></select>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <button type="button" class="btn btn-sm btn-success" id="btnShow">Show</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section scripts{
+    <script type="text/javascript">
+        $(()=>{
+            $('#btnShow').click(function () {
+                
+                let month = $('#Month').val();
+                let year = $('#Year').val();
+                if ( month != "" && year != "") {
+
+                    let action = `/MDSir/Salary/SalaryAnalysisReport?Month=${month}&Year=${year}`;
+                    newWindow(action, "Company Monthly Salary");
+                } else {
+                    $.alert.open('warning', 'Please provide required search data');
+                }
+
+            });
+        })
+    </script>
+}

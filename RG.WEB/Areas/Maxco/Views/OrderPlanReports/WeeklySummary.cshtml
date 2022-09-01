@@ -1,0 +1,345 @@
+﻿@model List<RG.Application.Contracts.Maxco.Buisness.OrderPlanReports.Queries.RequestResponseModel.GarmentAssortmentAndFabricsInfoRM>
+@{
+    Layout = null;
+
+    var monthData = Model.GroupBy(b => new { b.FabricMonthSl, b.FabricMonth }).Select(b => new
+    {
+        MonthNameSL = b.Key.FabricMonthSl,
+        MonthName = b.Key.FabricMonth,
+        NumberOfOrder = b.Sum(t => t.NoOfOrders),
+        OrderQty = b.Sum(t => t.NumberofGarments),
+        FinishFabrBookKg = b.Sum(t => t.FinFabricBooking),
+        PlanKnittingKG = b.Sum(t => t.PlanKnittingQty),
+        KnittingKg = b.Sum(t => t.KnittingQty),
+        KnittingBalance = b.Sum(t => t.KnittingBalance),
+        BatchKg = b.Sum(t => t.BatchQty),
+        BatchBalance = b.Sum(t => t.BatchBalance),
+        FinishedDelivery = b.Sum(t => t.FinishFabricDeliveryQty),
+        RibQty = b.Sum(t => t.RibQty),
+        FinishFabricDeliveryBalance = b.Sum(t => t.FinishFabricDeliveryBal)
+    }).OrderBy(b => b.MonthNameSL)
+.ToList();
+
+    var monthBuyerData = Model.GroupBy(b => new { b.FabricMonthSl, b.FabricMonth, b.BuyerID, b.BuyerName }).Select(b => new
+    {
+        BuyerID = b.Key.BuyerID,
+        BuyerName = b.Key.BuyerName,
+        MonthNameSL = b.Key.FabricMonthSl,
+        MonthName = b.Key.FabricMonth,
+        NumberOfOrder = b.Sum(t => t.NoOfOrders),
+        OrderQty = b.Sum(t => t.NumberofGarments),
+        FinishFabrBookKg = b.Sum(t => t.FinFabricBooking),
+        PlanKnittingKG = b.Sum(t => t.PlanKnittingQty),
+        KnittingKg = b.Sum(t => t.KnittingQty),
+        KnittingBalance = b.Sum(t => t.KnittingBalance),
+        BatchKg = b.Sum(t => t.BatchQty),
+        BatchBalance = b.Sum(t => t.BatchBalance),
+        FinishedDelivery = b.Sum(t => t.FinishFabricDeliveryQty),
+        RibQty = b.Sum(t => t.RibQty),
+        FinishFabricDeliveryBalance = b.Sum(t => t.FinishFabricDeliveryBal)
+    }).OrderBy(b => b.MonthNameSL)
+      .ThenBy(b => b.BuyerID)
+      .ToList();
+
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Weekly Summary Reports</title>
+    <link href="~/AdminLTE-3.1.0/plugins/jquery-ui/jquery-ui.min.css" rel="stylesheet" />
+    <link href="~/lib/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <script src="~/AdminLTE-3.1.0/plugins/jquery/jquery.min.js"></script>
+    <script src="~/AdminLTE-3.1.0/plugins/jquery-ui/jquery-ui.min.js"></script>
+    <script src="~/AdminLTE-3.1.0/plugins/bootstrap/js/bootstrap.bundle.js"></script>
+
+
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.12/css/jquery.dataTables.min.css" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/1.2.2/css/buttons.dataTables.min.css" />
+    <script type="text/javascript" src="https://code.jquery.com/jquery-1.12.3.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.2.2/js/dataTables.buttons.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/2.5.0/jszip.min.js"></script>
+    <script type="text/javascript" src="https://cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/pdfmake.min.js"></script>
+    <script type="text/javascript" src="https://cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/vfs_fonts.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.2.2/js/buttons.html5.min.js"></script>
+
+    <style>
+        .header {
+            position: sticky;
+            top: 0;
+        }
+    </style>
+
+</head>
+<body onload="bodyOnload()">
+
+    <div class="container-fluid">
+        <div class="row" style="height:50px;">
+            <div class="col-12 text-center">
+                <h5 class="mb-0">Robintex Group Bangladesh</h5>
+                <h6>Weekly Summary Reports</h6>
+            </div>
+        </div>
+        <table class="table table-sm table-bordered table-striped text-sm text-center display nowrap" id="tblWeeklySummary" style="font-size:12px;">
+            <thead class="bg-dark text-white header">
+                <tr>
+                    <th>SL#</th>
+                    <th>Month</th>
+                    <th>Buyer</th>
+                    <th>Fabric Week</th>
+                    <th>Shipment Date</th>
+                    <th>Number of Order</th>
+                    <th>Order Qty</th>
+                    <th>Fin. Fab. Book Kg</th>
+                    <th>Plan Knitting Kg</th>
+                    <th>Knitting Kg</th>
+                    <th>Knitting Balance</th>
+                    <th>Batch Kg</th>
+                    <th>Batch Balance</th>
+                    <th>Finish Fab. Dlv.</th>
+                    <th>Rib</th>
+                    <th>Finish Fab. Dlv. Bal.</th>
+                </tr>
+            </thead>
+            <tbody>
+                @{
+
+                    var sl = 1;
+                    var prevMonth = 0;
+                    var prevMonthName = "";
+                    var prevBuyerName = "";
+
+                    var totalNoOfOrder = 0;
+                    var totalOrderQty = 0;
+                    decimal totalFinFabricBooking = 0;
+                    decimal totalPlanKnittingQty = 0;
+                    decimal totalKnittingQty = 0;
+                    decimal totalKnittingBalance = 0;
+                    decimal totalBatchQty = 0;
+                    decimal totalBatchBalance = 0;
+                    decimal totalFinishFabricDeliveryQty = 0;
+                    decimal totalRibQty = 0;
+                    decimal totalFinishFabricDeliveryBal = 0;
+                    var lastBuyer = "";
+                    var colspanForTotal = 3;
+
+                    var lastItem = Model.Last();
+
+                    foreach (var itemOrders in Model)
+                    {
+                        //if ((itemOrders.BuyerName != prevBuyerName && prevBuyerName != "") || (itemOrders.FabricMonthSl != prevMonth && prevMonth > 0))
+                        //{
+                        //    totalNoOfOrder = 0; totalOrderQty = 0; totalFinFabricBooking = 0; totalPlanKnittingQty = 0; totalKnittingQty = 0; totalKnittingBalance = 0; totalBatchQty = 0;
+                        //    totalBatchBalance = 0; totalFinishFabricDeliveryQty = 0; totalRibQty = 0; totalFinishFabricDeliveryBal = 0;
+                        //}
+
+                        var sameMonthCount = Model.Where(x => x.FabricMonthSl == itemOrders.FabricMonthSl).Count();
+                        var sameMonthBuyerCount = Model.Where(x => x.FabricMonthSl == itemOrders.FabricMonthSl).Select(x => x.BuyerID).Distinct().Count();
+                        var sameMonthSameBuyerCount = Model.Where(x => x.FabricMonthSl == itemOrders.FabricMonthSl && x.BuyerID == itemOrders.BuyerID).Count();
+
+
+
+                        //if(sameMonthCount== sameMonthSameBuyerCount)
+                        //    colspanForTotal = 5;
+                        //else
+                        //    colspanForTotal = 3;
+
+                        if ((itemOrders.BuyerName != prevBuyerName && prevBuyerName != "") || (itemOrders.FabricMonthSl != prevMonth && prevMonth > 0))
+                        {
+                            var buyerTotal = monthBuyerData.Where(b => b.BuyerName == prevBuyerName && b.MonthNameSL == prevMonth).ToList();
+                            <tr class="text-white" style="background-color:cornflowerblue !important;font-weight:bold !important">
+                                <th colspan="@colspanForTotal">@(prevBuyerName) Total</th>
+
+                                <th>@String.Format("{0:n0}", buyerTotal.Sum(b => b.NumberOfOrder))</th>
+                                <th>@String.Format("{0:n0}", buyerTotal.Sum(b => b.OrderQty))</th>
+                                <th>@String.Format("{0:n2}", buyerTotal.Sum(b => b.FinishFabrBookKg))</th>
+                                <th>@String.Format("{0:n2}", buyerTotal.Sum(b => b.PlanKnittingKG)) </th>
+                                <th>@String.Format("{0:n2}", buyerTotal.Sum(b => b.KnittingKg))  </th>
+                                <th>@String.Format("{0:n2}", buyerTotal.Sum(b => b.KnittingBalance))  </th>
+                                <th>@String.Format("{0:n2}", buyerTotal.Sum(b => b.BatchKg))  </th>
+                                <th>@String.Format("{0:n2}", buyerTotal.Sum(b => b.BatchBalance))  </th>
+                                <th>@String.Format("{0:n2}", buyerTotal.Sum(b => b.FinishedDelivery))  </th>
+                                <th>@String.Format("{0:n2}", buyerTotal.Sum(b => b.RibQty))  </th>
+                                <th>@String.Format("{0:n2}", buyerTotal.Sum(b => b.FinishFabricDeliveryBalance))  </th>
+                            </tr>
+                            totalNoOfOrder = 0; totalOrderQty = 0; totalFinFabricBooking = 0; totalPlanKnittingQty = 0; totalKnittingQty = 0; totalKnittingBalance = 0; totalBatchQty = 0;
+                            totalBatchBalance = 0; totalFinishFabricDeliveryQty = 0; totalRibQty = 0; totalFinishFabricDeliveryBal = 0;
+                        }
+                        if ((itemOrders.FabricMonthSl != prevMonth && prevMonth > 0))
+                        {
+                            var mData = monthData.Where(x => x.MonthNameSL == prevMonth).First();
+                            <tr class="text-white" style="background-color: deepskyblue !important; font-weight: bold !important">
+                                <th colspan="5">@(prevMonthName) Total</th>
+
+                                <th>@String.Format("{0:n0}", mData.NumberOfOrder)</th>
+                                <th>@String.Format("{0:n0}", mData.OrderQty)</th>
+                                <th>@(String.Format("{0:n2}", mData.FinishFabrBookKg))</th>
+                                <th>@(String.Format("{0:n2}", mData.PlanKnittingKG))</th>
+                                <th>@(String.Format("{0:n2}", mData.KnittingKg))</th>
+                                <th>@(String.Format("{0:n2}", mData.KnittingBalance))</th>
+                                <th>@(String.Format("{0:n2}", mData.BatchKg))</th>
+                                <th>@(String.Format("{0:n2}", mData.BatchBalance))</th>
+                                <th>@(String.Format("{0:n2}", mData.FinishedDelivery))</th>
+                                <th>@(String.Format("{0:n2}", mData.RibQty))</th>
+                                <th>@(String.Format("{0:n2}", mData.FinishFabricDeliveryBalance))</th>
+                            </tr>
+
+                        }
+                        <tr>
+                            @if (itemOrders.FabricMonthSl != prevMonth)
+                            {
+                                <td rowspan="@(sameMonthCount+sameMonthBuyerCount)" style="vertical-align: middle;">@(sl)</td>
+                            }
+                            @if (itemOrders.FabricMonthSl != prevMonth)
+                            {
+                                <td rowspan="@(sameMonthCount+sameMonthBuyerCount)" style="vertical-align: middle;">@(itemOrders.FabricMonth)</td>
+                            }
+                            @if (((itemOrders.FabricMonthSl == prevMonth) && (itemOrders.BuyerName != prevBuyerName)) || (itemOrders.FabricMonthSl != prevMonth))
+                            {
+                                <td rowspan="@sameMonthSameBuyerCount" style="vertical-align: middle;">@(itemOrders.BuyerName)</td>
+                            }
+
+                            <td>Week-@(itemOrders.FabricWeek)</td>
+                            <td>@(itemOrders.DeliveryDate.ToString("dd-MMM-yyyy"))</td>
+                            <td>@String.Format("{0:n0}", itemOrders.NoOfOrders)</td>
+                            <td>@String.Format("{0:n0}", itemOrders.NumberofGarments)</td>
+                            <td>@String.Format("{0:n2}", itemOrders.FinFabricBooking)</td>
+                            <td>@String.Format("{0:n2}", itemOrders.PlanKnittingQty)</td>
+                            <td>@String.Format("{0:n2}", itemOrders.KnittingQty)</td>
+                            <td>@String.Format("{0:n2}", itemOrders.KnittingBalance)</td>
+                            <td>@String.Format("{0:n2}", itemOrders.BatchQty)</td>
+                            <td>@String.Format("{0:n2}", itemOrders.BatchBalance)</td>
+                            <td>@String.Format("{0:n2}", itemOrders.FinishFabricDeliveryQty)</td>
+                            <td>@String.Format("{0:n2}", itemOrders.RibQty)</td>
+                            <td>@String.Format("{0:n2}", itemOrders.FinishFabricDeliveryBal)</td>
+                        </tr>
+
+                        if (lastItem.Equals(itemOrders))
+                        {
+                            var mData = monthData.Where(x => x.MonthNameSL == lastItem.FabricMonthSl).First();
+                            <tr class="text-white" style="background-color:cornflowerblue !important;font-weight:bold !important">
+                                <th colspan="@colspanForTotal">@(lastBuyer) Total</th>
+
+                                <th>@(totalNoOfOrder)</th>
+                                <th>@(totalOrderQty)</th>
+                                <th>@(String.Format("{0:n2}", totalFinFabricBooking))</th>
+                                <th>@(String.Format("{0:n2}", totalPlanKnittingQty))</th>
+                                <th>@(String.Format("{0:n2}", totalKnittingQty))</th>
+                                <th>@(String.Format("{0:n2}", totalKnittingBalance))</th>
+                                <th>@(String.Format("{0:n2}", totalBatchQty))</th>
+                                <th>@(String.Format("{0:n2}", totalBatchBalance))</th>
+                                <th>@(String.Format("{0:n2}", totalFinishFabricDeliveryQty))</th>
+                                <th>@(String.Format("{0:n2}", totalRibQty))</th>
+                                <th>
+                                    @(String.Format("{0:n2}", totalFinishFabricDeliveryBal))
+                                </th>
+
+                            </tr>
+                            <tr class="text-white" style="background-color:deepskyblue !important;font-weight:bold !important">
+                                <th colspan="5">@(lastItem.FabricMonth) Total</th>
+
+                                <th>@( mData.NumberOfOrder)</th>
+                                <th>@( mData.OrderQty)</th>
+                                <th>@(String.Format("{0:n2}", mData.FinishFabrBookKg))</th>
+                                <th>
+                                    @(String.Format("{0:n2}", mData.PlanKnittingKG))
+                                </th>
+                                <th>@(String.Format("{0:n2}", mData.KnittingKg))</th>
+                                <th>@(String.Format("{0:n2}", mData.KnittingBalance))</th>
+                                <th>@(String.Format("{0:n2}", mData.BatchKg))</th>
+                                <th>@(String.Format("{0:n2}", mData.BatchBalance))</th>
+                                <th>@(String.Format("{0:n2}", mData.FinishedDelivery))</th>
+                                <th>@(String.Format("{0:n2}", mData.RibQty))</th>
+                                <th>@(String.Format("{0:n2}", mData.FinishFabricDeliveryBalance))</th>
+                            </tr>
+                            <tr class="text-white" style="background-color:dodgerblue !important;font-weight:bold !important">
+                                <th colspan="5">Grand Total</th>
+
+                                <th>@(monthData.Sum(x=>x.NumberOfOrder))</th>
+                                <th>@(monthData.Sum(x => x.OrderQty))</th>
+                                <th>@(String.Format("{0:n2}", monthData.Sum(x=>x.FinishFabrBookKg)))</th>
+                                <th>@(String.Format("{0:n2}", monthData.Sum(x=>x.PlanKnittingKG)))</th>
+                                <th>@(String.Format("{0:n2}", monthData.Sum(x=>x.KnittingKg)))</th>
+                                <th>@(String.Format("{0:n2}", monthData.Sum(x=>x.KnittingBalance)))</th>
+                                <th>@(String.Format("{0:n2}", monthData.Sum(x=>x.BatchKg)))</th>
+                                <th>@(String.Format("{0:n2}", monthData.Sum(x=>x.BatchBalance)))</th>
+                                <th>@(String.Format("{0:n2}", monthData.Sum(x=>x.FinishedDelivery)))</th>
+                                <th>@(String.Format("{0:n2}", monthData.Sum(x=>x.RibQty)))</th>
+                                <th>@(String.Format("{0:n2}", monthData.Sum(x=>x.FinishFabricDeliveryBalance)))</th>
+                            </tr>
+
+                        }
+
+                        @if (itemOrders.FabricMonthSl != prevMonth)
+                        {
+                            ++sl;
+                        }
+                        prevMonth = itemOrders.FabricMonthSl;
+                        prevBuyerName = itemOrders.BuyerName;
+                        ++totalNoOfOrder;
+                        totalOrderQty += itemOrders.NumberofGarments;
+                        totalFinFabricBooking += itemOrders.FinFabricBooking;
+                        totalPlanKnittingQty += itemOrders.PlanKnittingQty;
+                        totalKnittingQty += itemOrders.KnittingQty;
+                        totalKnittingBalance += itemOrders.KnittingBalance;
+                        totalBatchQty += itemOrders.BatchQty;
+                        totalBatchBalance += itemOrders.BatchBalance;
+                        totalFinishFabricDeliveryQty += itemOrders.FinishFabricDeliveryQty;
+                        totalRibQty += itemOrders.RibQty;
+                        totalFinishFabricDeliveryBal += itemOrders.FinishFabricDeliveryBal;
+                        lastBuyer = itemOrders.BuyerName;
+                        prevMonthName = itemOrders.FabricMonth;
+                    }
+
+
+                }
+            </tbody>
+        </table>
+        <div class="text-center">
+            <input type="button" class="btn btn-sm btn-success" value="Excel" id="btnPdf" onclick="exportToExcel()" />
+        </div>
+
+    </div>
+</body>
+</html>
+<script type="text/javascript">
+
+    function bodyOnload() {
+        setTimeout(function () {
+            $("body").removeClass("loading");
+        }, 1000)
+
+    }
+    function exportToExcel() {
+        var htmls = "";
+        var uri = 'data:application/vnd.ms-excel;base64,';
+        var template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>';
+        var base64 = function (s) {
+            return window.btoa(unescape(encodeURIComponent(s)))
+        };
+
+        var format = function (s, c) {
+            return s.replace(/{(\w+)}/g, function (m, p) {
+                return c[p];
+            })
+        };
+
+        htmls = document.getElementById("tblWeeklySummary").innerHTML;
+
+        var ctx = {
+            worksheet: 'Worksheet',
+            table: htmls
+        }
+        var link = document.createElement("a");
+        link.download = "WeeklySummary.xls";
+        link.href = uri + base64(format(template, ctx));
+        link.click();
+    }
+    $(function () {
+        $(document).ready(function () {
+
+            $("body").addClass("loading");
+
+        });
+    });
+</script>

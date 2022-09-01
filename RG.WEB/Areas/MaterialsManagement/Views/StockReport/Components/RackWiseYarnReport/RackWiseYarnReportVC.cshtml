@@ -1,0 +1,157 @@
+﻿@model RG.Application.Contracts.MaterialsManagement.Business.YarnStockReport.RequestResponseModel.RackWiseYarnReportVCQM
+@using RG.Application.Enums;
+@{
+    ViewData[PageInfo.PageHeader] = "Rack Wise Yarn Stock Report";
+    ViewData[PageInfo.PageTitle] = "Rack Wise Yarn Stock";
+
+}
+<!doctype html>
+<html lang="en">
+<head>
+
+</head>
+<body>
+    <div class="card card-dark mx-1">
+        <div class="card-header m-0 p-1">
+            <h5 class="card-title">Rack Wise Yarn Report</h5>
+        </div>
+        <div class="row m-0">
+            <div class="col-md-12 col-12 col-sm-3 col-lg-12">
+
+                <div class="input-group">
+                    <div class="col-3 col-sm-3 col-md-3 col-lg-3 p-0">
+                        <div class="form-group">
+                            <label asp-for="Building" class="col-form-label-sm "></label>
+                            <select asp-for="Building" asp-items="Model.DDLBulding" class="form-control form-control-sm"></select>
+                            <span asp-validation-for="Building" class="span-form-validation"></span>
+                        </div>
+                    </div>
+
+                    <div class="col-3 col-sm-3 col-md-3 col-lg-3 p-0 pl-2">
+                        <div class="form-group">
+                            <label asp-for="BuildingFloorID" class="col-form-label-sm "></label>
+                            <select asp-for="BuildingFloorID" asp-items="Model.DDLBuildingFloor" class="form-control form-control-sm"></select>
+                            <span class="span-form-validation"></span>
+                        </div>
+                    </div>
+                    <div class="col-3 col-sm-3 col-md-3 col-lg-3  p-0 pl-2">
+                        <div class="form-group">
+                            <label asp-for="RackID" class="col-form-label-sm "></label>
+                            <select asp-for="RackID" asp-items="Model.DDLRack" class="form-control form-control-sm"></select>
+                            <span asp-validation-for="RackID" class="span-form-validation"></span>
+                        </div>
+                    </div>
+                    <div class="col-3 col-sm-3 col-md-3 col-lg-3">
+                        <div class="form-group">
+                            <label asp-for="LotNo" class="col-form-label-sm "></label>
+                            <select asp-for="LotNo" asp-items="Model.DDLLotno" class="form-control form-control-sm"></select>
+                            <span asp-validation-for="LotNo" class="span-form-validation"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row m-0">
+            <div class="col-md-12 col-12 col-sm-3 col-lg-12">
+
+                <div class="input-group">
+                    @*<div class="col-3 col-sm-3 col-md-3 col-lg-3">
+                        <div class="form-group">
+                            <label asp-for="LotNo" class="col-form-label-sm "></label>
+                            <select asp-for="LotNo" asp-items="Model.DDLLotno" class="form-control form-control-sm"></select>
+                            <span asp-validation-for="LotNo" class="span-form-validation"></span>
+                        </div>
+                    </div>*@
+                    <div class="col-3 col-sm-3 col-md-3 col-lg-3 p-0 pl-2">
+                        <div class="form-group">
+                            <label asp-for="YarnComposition" class="col-form-label-sm ">YarnComposition</label>
+                            <select asp-for="YarnComposition" asp-items="Model.DDLYarnComposition" class="form-control form-control-sm"></select>
+                            <span asp-validation-for="YarnComposition" class="span-form-validation"></span>
+                        </div>
+                    </div>
+                    <div class="col-3 col-sm-3 col-md-3 col-lg-3  p-0 pl-2">
+                        <div class="form-group">
+                            <label asp-for="YarnCount" class="col-form-label-sm ">Yarn Count</label>
+                            <select asp-for="YarnCount" asp-items="Model.DDLYarnCount" class="form-control form-control-sm"></select>
+                            <span asp-validation-for="YarnCount" class="span-form-validation"></span>
+                        </div>
+                    </div>
+                    <div class="col-3 col-sm-3 col-md-3 col-lg-3  p-0 pl-2">
+                        <div class="form-group">
+                            <label asp-for="OrderBy" class="col-form-label-sm ">Order By</label>
+                            <select asp-for="OrderBy" asp-items="Model.DDLOrderBy" class="form-control form-control-sm"></select>
+                            <span asp-validation-for="OrderBy" class="span-form-validation"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-4 col-sm-4 col-md-4 col-lg-4 m-0">
+            <div class="form-group">
+                <button type="button" class="btn btn-sm btn-warning" value="Show" id="btnShow">
+                    <i hidden class="fas fa-spinner fa-pulse "></i> Show
+                </button>
+                <input type="button" class="btn btn-sm btn-primary" value="Excel" id="btnExcel" onclick="exportToExcel()" />
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+<script type="text/javascript">
+    $(function () {
+
+        $("#LotNo").select2({
+            placeholder: 'Please Select',
+            allowClear: true
+        });
+        LotNoAndRackWiseLotno();
+        $("#RackID").change(function () {
+            LotNoAndRackWiseLotno();
+        })
+        $("#BuildingFloorID").change(function () {
+            FloorWiseRack();
+        });
+        $("#Building").change(function () {
+            BuildingWiseFloor();
+        });
+        $("#btnShow").click(function () {
+            let lotNo = $("#LotNo").val();
+            let buildingID = $("#Building").val();
+            let buildingFloorID = $("#BuildingFloorID").val();
+            let rackID = $("#RackID").val();
+            let yarnComposition = $("#YarnComposition").val();
+            let yarnCount = $("#YarnCount").val();
+            let orderBy = $("#OrderBy").val();
+            
+            window.open(`/MaterialsManagement/StockReport/RackWiseYarnReport?LotNo=${lotNo}&BuildingID=${buildingID}&FloorID=${buildingFloorID}&RackID=${rackID}&CompositionID=${yarnComposition}&Count=${yarnCount}&OrderBy=${orderBy}`, "Rack Wise Yarn Report", "width=900,height=600");
+            
+        });
+
+    });
+    function BuildingWiseFloor() {
+        let building = $("#Building").val();
+        HttpRequest.DropDownDefault("BuildingFloorID");
+        HttpRequest.DropDownDefault("RackID");
+            if (building != "") {
+                HttpRequest.DropDown("Get", "/MaterialsManagement/BuildingFloorInfo/GetDDLBuildingFloor", { Building: building, FloorType:@((int)enum_FloorType.YarnStore) }, 'BuildingFloorID', true);
+                $('#LotNo').val("");
+            } else {
+
+            }
+    }
+
+    function FloorWiseRack() {
+        let buildingFloorID = $("#BuildingFloorID").val();
+        HttpRequest.DropDownDefault("RackID");
+            if (buildingFloorID != "") {
+                HttpRequest.DropDown("Get", "/MaterialsManagement/YarnRack/GetDDLBuildingFloorWiseRack", { buildingFloorID: buildingFloorID }, 'RackID', true);
+            } else {
+                
+            }
+    }
+    function LotNoAndRackWiseLotno() {
+        let rackID = $("#RackID").val();
+        HttpRequest.DropDown("Get", "/MaterialsManagement/YarnRack/GetDDLLotNoWithRackWiseLotno", { rackID: rackID, predict: $('#LotNo').val()}, 'LotNo', true);
+
+    }
+</script>

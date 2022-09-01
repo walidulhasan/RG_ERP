@@ -1,0 +1,229 @@
+﻿@model RG.Application.ViewModel.Identity.Setup.AccessDevice.AccessDeviceIndexVM
+@{
+    ViewData[PageInfo.PageHeader] = "Device Access";
+    ViewData[PageInfo.PageTitle] = "Device Access";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@*<script src="~/js/customScripts/HRComDivDeptSecDesigEmpLookUp.js"></script>*@
+
+<form role="form">
+    <div class="col-sm-4 m-0">
+        <div class="icheck-success d-inline">
+            <input id="chkDevOrDevMac" type="checkbox">
+            <label>Device Or Device Identity</label>
+        </div>
+    </div>
+    <div class="row m-1" id="AccessDeviceHdn">
+        <div class="col-sm-5 col-md-5 col-lg-5">
+            <div class="form-group mb-1">
+                <label class="col-form-label-sm m-0 required" asp-for="UserID"></label>
+                <select asp-for="UserID" asp-items="Model.DDLUsers" class="form-control form-control-sm"></select>
+                <span asp-validation-for="UserID" class="span-form-validation"></span>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="form-group mb-1">
+                <label asp-for="DeviceDependencyTypeID" class="col-form-label-sm m-0 "></label>
+                <select asp-for="DeviceDependencyTypeID" asp-items="Model.DDLDeviceDependencyTypes" class="form-control form-control-sm"></select>
+                <span asp-validation-for="DeviceDependencyTypeID" class="text-danger text-sm"></span>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <label class="">&nbsp;</label>
+            <div class="form-group mb-1">
+                <input type="button" class="btn btn-sm btn-success mr-2" value="Save" id="btnSave" />
+                <input type="button" class="btn btn-sm btn-warning d-none" value="Remove Device" id="btnRemove" onclick="Remove()" />
+
+            </div>
+        </div>
+    </div>
+    
+    <div class="row d-none" id="AccessDeviceMacHdn">
+        <div class="col-sm-12 col-md-12">
+            <div class="card card-dark">
+                <div class="card-header m-0 p-1">
+                    <h5 class="card-title">Device Identity Wise User Information</h5>
+                </div>
+                <div class="card-body p-2">
+                    <div class="row " >
+                        <div class="col-sm-5 col-md-5 col-lg-5">
+                            <div class="form-group mb-1">
+                                <label class="col-form-label-sm m-0 required" asp-for="DeviceIdenity"></label>
+                                <input placeholder="Device Identity Please" asp-for="DeviceIdenity" class="form-control form-control-sm" type="text" />
+                                <span asp-validation-for="DeviceIdenity" class="span-form-validation"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="">&nbsp;</label>
+                            <div class="form-group mb-1">
+                                <input type="button" class="btn btn-sm btn-success mr-2" value="Search" id="btnSearch" />
+                                <input type="button" class="btn btn-sm btn-danger mr-2 d-none" value="Remove" id="btnDelete" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="" id="empInfo">
+                       
+                    </div>
+
+                    @*<div class="row">
+            <div class="col-12 col-md-12 text-center">
+                <div class="form-group">
+                    <button type="button" class="btn btn-sm btn-danger" id="btnRemove">Remove</button>
+                </div>
+            </div>
+        </div>*@
+                </div>
+            </div>
+        </div>
+    </div>
+
+</form>
+
+@section scripts{
+    <script type="text/javascript">
+        function DDLUsers() {
+            HttpRequest.DropDownSelect2Group("Get", "/Identity/AccessDevice/DDLUsers", {}, 'UserID');
+        }
+        function saveSuccess(data) {
+            if (data.result == 1) {
+                $.alert.open({
+                    type: 'Success',
+                    content: data.message,
+                    callback: function () {
+                        DDLUsers();
+                        $("#DeviceDependencyTypeID").val('');
+                        $("#btnRemove").addClass('d-none');
+                        $("#btnDelete").addClass('d-none');
+                        $("#empInfo").addClass('d-none');
+                        $("#DeviceIdenity").val('');
+
+                    }
+                });
+            }
+            else {
+                $.alert.open("error", data.message);
+            }
+        }
+        function Remove() {
+            let userID = $("#UserID").val();
+            if (userID > 0) {
+                HttpRequest.Ajax("GET", "/Identity/AccessDevice/RemoveUserDeviceAuth", { userID: userID }, saveSuccess);
+            }
+        }
+        $(function () {
+            $("#UserID").select2();
+            DDLUsers();
+            $("#UserID").change(function () {
+                let userID = $("#UserID").val();
+                if (userID > 0) {
+                    let data = HttpRequest.AjaxData("GET", "/Identity/AccessDevice/UserWiseDeviceDependency", { userID: userID });
+                    if (data != null) {
+                        $("#DeviceDependencyTypeID").val(data.DeviceDependencyTypeID);
+                        if (data.DeviceIdentity != null) {
+                            $("#btnRemove").removeClass('d-none');
+                        } else {
+                            $("#btnRemove").addClass('d-none');
+                        }
+                    }
+                } else {
+                    $("#DeviceDependencyTypeID").val('');
+                }
+            });
+            $("#btnSave").click(function () {
+                debugger;
+                let userID = $("#UserID").val();
+                let deviceDependencyTypeID = $("#DeviceDependencyTypeID").val();
+                if (userID > 0 && deviceDependencyTypeID != "") {
+                    HttpRequest.Ajax("GET", "/Identity/AccessDevice/UpdateUserWiseDeviceDependency", { userID: userID, deviceDependencyTypeID: deviceDependencyTypeID }, saveSuccess);
+                }
+            });
+
+            $("#btnSearch").click(function () {
+                debugger
+                let deviceIdentity = $("#DeviceIdenity").val().trim();
+                if (deviceIdentity != "") {
+                    let data = HttpRequest.AjaxData("GET", "/Identity/AccessDevice/DeviceMacWiseUser", { deviceMac: deviceIdentity })
+                    if (data != null) {
+                        deviceMacWiseUser(data);
+                        $("#btnDelete").removeClass('d-none')
+                    } else {
+                        $.alert.open('alert', 'Device Identity Not Match!!');
+                        $("#empInfo").html('');
+                        $("#btnDelete").addClass('d-none');
+                    }
+                    
+                }
+
+            });
+
+            $("#btnDelete").click(function () {
+                debugger
+                let deviceIdentity = $("#DeviceIdenity").val().trim();
+                if (deviceIdentity != "") {
+                    HttpRequest.Ajax("GET", "/Identity/AccessDevice/RemoveDeviceMacWiseDevice", { deviceMac: deviceIdentity }, saveSuccess);
+                }
+
+            });
+        });
+       
+        $("#chkDevOrDevMac").click(function () {
+            debugger
+            let isChecked = $(this).is(':checked')?1:0;
+            if (isChecked==1) {
+                $("#AccessDeviceHdn").addClass('d-none');
+                $("#AccessDeviceMacHdn").removeClass('d-none');
+                /*$("#empInfo").removeClass('d-none');*/
+            } else if (isChecked==0) {
+                $("#AccessDeviceHdn").removeClass('d-none');
+                $("#AccessDeviceMacHdn").addClass('d-none');
+                $("#btnDelete").addClass('d-none');
+                $("#DeviceIdenity").val('');
+                $("#empInfo").html('');
+            }
+        });
+
+        let deviceMacWiseUser = data => {
+            let divData =` <div class="row">
+                            <div class="col-4 col-sm-4">
+                                <div class="form-group mb-2">
+                                    <label >Code</label>
+                                    <input type="text" value="${data.EmployeeCode}" id="EmpCode" class="form-control form-control-sm" readonly />
+                                </div>
+                            </div>
+                            <div class="col-4 col-sm-4">
+                                <div class="form-group mb-2">
+                                    <label >Employee</label>
+                                    <input type="text" value="${data.EmployeeName}" class="form-control form-control-sm" readonly />
+                                </div>
+                            </div>
+                            <div class="col-4 col-sm-4">
+                                <div class="form-group mb-2">
+                                    <label> Company</label>
+                                    <input type="text" value="${data.CompanyName}" class="form-control form-control-sm" readonly />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class=" col-4 col-sm-4">
+                                <div class="form-group mb-2">
+                                    <label>Company Short Name</label>
+                                    <input type="text" value="${data.CompanyShortName}" class="form-control form-control-sm" readonly />
+                                </div>
+                            </div>
+                            <div class=" col-4 col-sm-4">
+                                <div class="form-group mb-2">
+                                    <label>Department</label>
+                                    <input type="text" value="${data.DepartmentName}" class="form-control form-control-sm" readonly />
+                                </div>
+                            </div>
+                            <div class=" col-4 col-sm-4">
+                                <div class="form-group mb-2">
+                                    <label >Designation</label>
+                                    <input type="text" value="${data.DesignationName}" class="form-control form-control-sm" readonly />
+                                </div>
+                            </div>
+                        </div>`
+            $("#empInfo").html(divData);
+        }
+    </script>
+}

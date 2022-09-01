@@ -1,0 +1,339 @@
+﻿@model RG.Application.ViewModel.MDSir.Salary.SalaryAnalysisDetailReportVM
+@{
+
+    Layout = null;
+    var division = "";
+    decimal currentTotalCostInReport = 0;
+    decimal previousTotalCostInReport = 0;
+
+    currentTotalCostInReport = Model.DivisionSalaryCost.Sum(b => b.Total) + Model.DivisionOtherCost.Sum(b => b.Cost);
+    previousTotalCostInReport = Model.DivisionSalaryCost.Sum(b => b.PreviousMonthTotal) + Model.DivisionOtherCost.Sum(b => b.PreviousMonthCost);
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Salary Analysis Report</title>
+    <link href="~/AdminLTE-3.1.0/plugins/jquery-ui/jquery-ui.min.css" rel="stylesheet" />
+    <link href="~/lib/bootstrap-5.0.2/css/bootstrap.min.css" rel="stylesheet" />
+    <script src="~/AdminLTE-3.1.0/plugins/jquery/jquery.min.js"></script>
+    <script src="~/AdminLTE-3.1.0/plugins/jquery-ui/jquery-ui.min.js"></script>
+    <script src="~/lib/bootstrap-5.0.2/js/bootstrap.bundle.min.js"></script>
+
+
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.12/css/jquery.dataTables.min.css" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/1.2.2/css/buttons.dataTables.min.css" />
+    <script type="text/javascript" src="https://code.jquery.com/jquery-1.12.3.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.2.2/js/dataTables.buttons.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/2.5.0/jszip.min.js"></script>
+    <script type="text/javascript" src="https://cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/pdfmake.min.js"></script>
+    <script type="text/javascript" src="https://cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/vfs_fonts.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.2.2/js/buttons.html5.min.js"></script>
+
+    <style>
+        .header {
+            position: sticky;
+            top: 0;
+        }
+    </style>
+
+</head>
+
+<body>
+    <div class="container-fluid">
+        <div class="row">
+
+            <div class="col-10 col-sm-10 col-md-10 col-lg-10 offset-1 text-center">
+                <h5 class="mb-0">Robintex (Bangladesh) Limited</h5>
+                <h6>Salary Analysis Report For The Month Of @Model.MonthName,@Model.Year</h6>
+
+                <table class="table table-sm table-bordered table-striped text-xs text-center display nowrap" id="tblDocuments">
+                    <thead class="bg-dark text-white header font-weight-bold">
+                        @if (Model.DivisionSalaryCost.Count > 0 || Model.DivisionOtherCost.Count > 0)
+                        {
+                            division = Model.DivisionSalaryCost.Count > 0 ? Model.DivisionSalaryCost[0].AnalysisDivision : Model.DivisionOtherCost[0].AnalysisDivision;
+                            <tr style="vertical-align:middle;">
+                                <th colspan="6" style="background-color: #7c2c2c !important ">@division</th>
+                                <th colspan="2">Prev. Month </th>
+                                <th colspan="2">Comparison<br /><label style="font-size:12px; font-weight:normal;">(Current-Previous)</label></th>
+                            </tr>
+                        }
+                        <tr>
+                            <th>Department</th>
+                            <th>Manpower</th>
+                            <th>Salary</th>
+                            <th>OT</th>
+                            <th>Allowance</th>
+                            <th>Total</th>
+                            <th>Manpower</th>
+                            <th>Cost</th>
+                            <th>Manpower</th>
+                            <th>Cost</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+
+                            foreach (var item in Model.DivisionSalaryCost)
+                            {
+                                string manpowerComparisonClass = "";
+                                string totalComparisonClass = "";
+                                if (item.Manpower - item.PreviousMonthManpower > 0)
+                                {
+                                    manpowerComparisonClass = "bg-danger text-white";
+                                }
+                                else if (item.Manpower - item.PreviousMonthManpower < 0)
+                                {
+                                    manpowerComparisonClass = "bg-success text-white";
+                                }
+                                if (item.Total - item.PreviousMonthTotal > 0)
+                                {
+                                    totalComparisonClass = "bg-danger text-white";
+                                }
+                                else if (item.Total - item.PreviousMonthTotal < 0)
+                                {
+                                    totalComparisonClass = "bg-success text-white";
+                                }
+                                <tr class="">
+
+                                    <td><b>@item.Department</b></td>
+                                    <td class="text-end">
+                                        <a style="cursor: pointer; text-decoration: none" class="text-primary"
+                                           onclick="window.open(`/MDSir/Salary/DivisionWiseSalary?analysisDivision=${'@division'}&departmentGroup=${'@item.Department'}&month=${@item.Month}&year=${@item.Year}`, '_blank', 'location=yes,height=570,width=1000,scrollbars=yes,status=yes');">
+                                            @(String.Format("{0:n0}",item.Manpower))
+                                        </a>
+                                    </td>
+                                    <td class="text-end">@(String.Format("{0:n2}",item.Salary))</td>
+                                    <td class="text-end">@(String.Format("{0:n2}",item.Overtime))</td>
+                                    <td class="text-end">
+                                        <a style="cursor: pointer; text-decoration: none" class="text-primary"
+                                           onclick="window.open(`/MDSir/Salary/DivisionWiseAllowance?analysisDivision=${'@division'}&departmentGroup=${'@item.Department'}&month=${@item.Month}&year=${@item.Year}`, '_blank', 'location=yes,height=570,width=1000,scrollbars=yes,status=yes');">
+                                            @(String.Format("{0:n2}",item.Allowance))
+                                        </a>
+                                    </td>
+                                    <td class="text-end text-white" style="background-color: #999797">@(String.Format("{0:n2}",item.Total))</td>
+                                    <td class="text-end text-white" style="background-color: #646363">@(String.Format("{0:n0}",item.PreviousMonthManpower))</td>
+                                    <td class="text-end text-white" style="background-color: #646363">@(String.Format("{0:n2}",item.PreviousMonthTotal))</td>
+                                    <td class="text-end @manpowerComparisonClass">@(String.Format("{0:n0}",item.Manpower- item.PreviousMonthManpower))</td>
+                                    <td class="text-end @totalComparisonClass">@(String.Format("{0:n2}",item.Total-  item.PreviousMonthTotal))</td>
+                                </tr>
+                                if (item == Model.DivisionSalaryCost.Last())
+                                {
+
+                                    if (Model.DivisionSalaryCost.Sum(x => x.Manpower - x.PreviousMonthManpower) > 0)
+                                    {
+                                        manpowerComparisonClass = "bg-danger text-white";
+                                    }
+                                    else if (Model.DivisionSalaryCost.Sum(x => x.Manpower - x.PreviousMonthManpower) < 0)
+                                    {
+                                        manpowerComparisonClass = "bg-success text-white";
+                                    }
+                                    if (Model.DivisionSalaryCost.Sum(x => x.Total - x.PreviousMonthTotal) > 0)
+                                    {
+                                        totalComparisonClass = "bg-danger text-white";
+                                    }
+                                    else if (Model.DivisionSalaryCost.Sum(x => x.Total - x.PreviousMonthTotal) < 0)
+                                    {
+                                        totalComparisonClass = "bg-success text-white";
+                                    }
+                                    <tr class="bg-info">
+                                        <th>Total</th>
+                                        <th class="text-end">@(String.Format("{0:n0}", Model.DivisionSalaryCost.Sum(x=>x.Manpower)))</th>
+                                        <th class="text-end">@(String.Format("{0:n2}", Model.DivisionSalaryCost.Sum(x => x.Salary)))</th>
+                                        <th class="text-end">@(String.Format("{0:n2}", Model.DivisionSalaryCost.Sum(x => x.Overtime)))</th>
+                                        <th class="text-end">@(String.Format("{0:n2}", Model.DivisionSalaryCost.Sum(x => x.Allowance)))</th>
+                                        <th class="text-end">@(String.Format("{0:n2}", Model.DivisionSalaryCost.Sum(x => x.Total)))</th>
+                                        <th class="text-end">@(String.Format("{0:n0}", Model.DivisionSalaryCost.Sum(x => x.PreviousMonthManpower)))</th>
+                                        <th class="text-end">@(String.Format("{0:n2}", Model.DivisionSalaryCost.Sum(x => x.PreviousMonthTotal)))</th>
+                                        <th class="text-end @manpowerComparisonClass">@(String.Format("{0:n0}", Model.DivisionSalaryCost.Sum(x => x.Manpower- x.PreviousMonthManpower)))</th>
+                                        <th class="text-end @totalComparisonClass">@(String.Format("{0:n2}", Model.DivisionSalaryCost.Sum(x =>x.Total- x.PreviousMonthTotal)))</th>
+                                    </tr>
+                                }
+
+                            }
+                            foreach (var item in Model.DivisionOtherCost)
+                            {
+                                string comparisonClass = "";
+
+                                if (item.Cost - item.PreviousMonthCost > 0)
+                                {
+                                    comparisonClass = "bg-danger text-white";
+                                }
+                                else if (item.Cost - item.PreviousMonthCost < 0)
+                                {
+                                    comparisonClass = "bg-success text-white";
+                                }
+                                else
+                                {
+                                    comparisonClass = "";
+                                }
+
+                                <tr class="">
+                                    @if (item.HasDetailReport)
+                                    {
+                                        var url = $"/MDSir/Salary/CostHeadWiseAllowance?analysisDivision={item.CostHeadID}&departmentGroup={division}&month={item.Month}&year={item.Year}";
+                                        if (item.CostHeadID == 9)
+                                        {
+                                            if (division== "CBL Dyeing")
+                                            {
+                                                int currencyRate =(int)Model.CurrencyRate;
+                                                url = $"http://119.148.55.93:8081/ALLReports/MonthlyBatchReportPage?MonthID={item.Month}&Year={item.Year}&CompanyId=20183&CurrencyRate={currencyRate}&OrderID=0";
+                                            }
+                                            else if (division == "AOP")
+                                            {
+                                                url = $"http://119.148.55.93:8081/ALLReports/MonthlyAOPCostingReportPage?MonthID={item.Month}&Year={item.Year}";
+                                            }
+                                            else if (division == "Oval Print")
+                                            {
+                                                url = $"http://119.148.55.93:8081/ALLReports/MonthlyOvalPrintingReportPage?MonthID={item.Month}&Year={item.Year}";
+                                            }
+                                            else if (division == "Digital Print")
+                                            {
+                                                url = $"http://119.148.55.93:8081/ALLReports/MonthlyDigitalPrintCostingReportPage?MonthID={item.Month}&Year={item.Year}";
+                                            }
+                                            else if (division == "Garments")
+                                            {
+                                                url = $"http://119.148.55.93:8081/ALLReports/MonthlyGarmentsProductionReportPage?MonthID={item.Month}&Year={item.Year}&ReportFor=2";
+                                            }
+                                            else
+                                            {
+                                                url = $"";
+                                            }
+                                        }
+
+                                        <td colspan="5" class="text-start">
+                                            <a style="cursor:pointer; text-decoration:none" class="text-primary"                                               
+                                               onclick="window.open(`@url`, '_blank', 'location=yes,height=570,width=1000,scrollbars=yes,status=yes');">
+                                                <b> @item.CostHead</b>
+                                            </a>
+                                        </td>
+                                    }
+                                    else
+                                    {
+
+                                        <td colspan="5" class="text-start"><b>@item.CostHead</b></td>
+                                    }
+                                    <td class="text-end text-white" style="background-color: #999797">@(String.Format("{0:n2}",item.Cost))</td>
+                                    <td colspan="2" class="text-end text-white" style="background-color: #646363">@(String.Format("{0:n2}",item.PreviousMonthCost))</td>
+                                    <td colspan="2" class="text-end @comparisonClass">@(String.Format("{0:n2}",item.Cost- item.PreviousMonthCost))</td>
+                                </tr>
+
+                            }
+                            string comparisonCostClass = "";
+
+                            if (Model.TotalCost - Model.PreviousMonthTotalCost > 0)
+                            {
+                                comparisonCostClass = "bg-danger text-white";
+                            }
+                            else if (Model.TotalCost - Model.PreviousMonthTotalCost < 0)
+                            {
+                                comparisonCostClass = "bg-success text-white";
+                            }
+                            string comparisonEarningClass = "";
+
+                            if (Model.TotalEarning - Model.PreviousMonthTotalEarning < 0)
+                            {
+                                comparisonEarningClass = "bg-danger text-white";
+                            }
+                            else if (Model.TotalEarning - Model.PreviousMonthTotalEarning > 0)
+                            {
+                                comparisonEarningClass = "bg-success text-white";
+                            }
+
+
+                            <tr class="" style="background-color: #eda2a2">
+                                <td colspan="5" class="text-start"><b>Total Cost</b></td>
+                                <td class="text-end" title="@currentTotalCostInReport">@(String.Format("{0:n2}",Model.TotalCost))</td>
+                                <td class="text-end" title="@previousTotalCostInReport" colspan="2">@(String.Format("{0:n2}",Model.PreviousMonthTotalCost))</td>
+                                <td class="text-end @comparisonCostClass" colspan="2">@(String.Format("{0:n2}",Model.TotalCost- Model.PreviousMonthTotalCost))</td>
+                            </tr>
+                            <tr class="" style="background-color: #60a960">
+                                <td colspan="5" class="text-start"><b>Total Earning</b></td>
+                                <td class="text-end">@(String.Format("{0:n2}",Model.TotalEarning))</td>
+                                <td class="text-end" colspan="2">@(String.Format("{0:n2}",Model.PreviousMonthTotalEarning))</td>
+                                <td class="text-end @comparisonEarningClass" colspan="2">@(String.Format("{0:n2}",Model.TotalEarning- Model.PreviousMonthTotalEarning))</td>
+                            </tr>
+
+                            string profitStatusColor = "";
+                            decimal profitAmount = Model.TotalEarning - Model.TotalCost;
+                            if (profitAmount < 0)
+                            {
+                                profitStatusColor = "bg-danger text-white";
+                            }
+                            else if (profitAmount > 0)
+                            {
+                                profitStatusColor = "bg-success text-white";
+                            }
+
+                            string prevProfitStatusColor = "";
+
+                            decimal prevProfitAmount = Model.PreviousMonthTotalEarning - Model.PreviousMonthTotalCost;
+                            if (prevProfitAmount < 0)
+                            {
+                                prevProfitStatusColor = "bg-danger text-white";
+                            }
+                            else if (prevProfitAmount > 0)
+                            {
+                                prevProfitStatusColor = "bg-success text-white";
+                            }
+
+                            string prevProfitStatusComparisonColor = "";
+
+                            decimal prevProfitComparisonAmount = profitAmount - prevProfitAmount;
+                            if (prevProfitComparisonAmount < 0)
+                            {
+                                prevProfitStatusComparisonColor = "bg-danger text-white";
+                            }
+                            else if (prevProfitComparisonAmount > 0)
+                            {
+                                prevProfitStatusComparisonColor = "bg-success text-white";
+                            }
+
+
+                            <tr class="@profitStatusColor">
+                                <td colspan="5" class="text-start"><b>Profit/ Loss</b></td>
+                                <td class="text-end"><b>@(String.Format("{0:n2}", profitAmount))</b></td>
+                                <td class="text-end @prevProfitStatusColor" colspan="2"><b>@(String.Format("{0:n2}", prevProfitAmount))</b></td>
+                                <td class="text-end @prevProfitStatusComparisonColor" colspan="2"><b>@(String.Format("{0:n2}", prevProfitComparisonAmount))</b></td>
+
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+                <div class="text-center">
+                    <input type="button" class="btn btn-sm btn-success" value="Excel" id="btnExcel" onclick="exportToExcel()" />
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
+<script type="text/javascript">
+    function exportToExcel() {
+        var htmls = "";
+        var uri = 'data:application/vnd.ms-excel;base64,';
+        var template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>';
+        var base64 = function (s) {
+            return window.btoa(unescape(encodeURIComponent(s)))
+        };
+
+        var format = function (s, c) {
+            return s.replace(/{(\w+)}/g, function (m, p) {
+                return c[p];
+            })
+        };
+
+        htmls = document.getElementById("tblDocuments").innerHTML;
+
+        var ctx = {
+            worksheet: 'Worksheet',
+            table: htmls
+        }
+        var link = document.createElement("a");
+        link.download = "MonthWiseSalaryAnalysis.xls";
+        link.href = uri + base64(format(template, ctx));
+        link.click();
+    }
+</script>

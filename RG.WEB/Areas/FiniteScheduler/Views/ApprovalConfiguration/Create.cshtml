@@ -1,0 +1,920 @@
+﻿@model RG.Application.ViewModel.FiniteScheduler.Setup.ApprovalConfiguration.ApprovalConfigMasterVM
+@{
+    ViewData[PageInfo.PageHeader] = "Approval Configuration";
+    ViewData[PageInfo.PageTitle] = "Approval Configuration";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<script src="~/js/customScripts/HRComDivDeptSecDesigEmpLookUp.js"></script>
+
+<form role="form" id="frmConfigure">
+    <input type="hidden" asp-for="ConfigMasterID" />
+    <input type="hidden" id="EditRowSl" />
+    <div class="row m-1">
+        <div class="col-sm-3 col-md-3 col-lg-3">
+            <div class="form-group mb-1">
+                <label class="col-form-label-sm m-0" asp-for="ModuleID"></label>
+                @*<select asp-for="ModuleID" asp-items="Model.DDLApprovalModulesList" class="form-control form-control-sm"></select>*@
+                <select asp-for="ModuleID" class="form-control form-control-sm">
+                    @foreach (var item in Model.DDLApprovalModulesList)
+                    {
+                        <option value="@item.Value" data-Custom1="@item.Custom1">@item.Text</option>
+                    }
+                </select>
+                <span asp-validation-for="ModuleID" class="span-form-validation"></span>
+            </div>
+        </div>
+    </div>
+    <div class="card card-dark mb-0 d-none" id="divConfigurationFor">
+        <div class="card-header m-0 p-1">
+            <h5 class="card-title">Configuration For</h5>
+        </div>
+        <div class="card-body p-1">
+
+            <div class="row m-1">
+                <div class="col-sm-3 col-md-3 col-lg-3">
+                    <div class="form-group mb-1">
+                        <label class="col-form-label-sm m-0 required" asp-for="ConfigCompanyID"></label>
+                        <select asp-for="ConfigCompanyID" asp-items="Model.DDLCompanyList" class="form-control form-control-sm"></select>
+                        <span asp-validation-for="ConfigCompanyID" class="span-form-validation"></span>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group mb-1">
+                        <label asp-for="ConfigOfficeDivisionID" class="col-form-label-sm m-0 "></label>
+                        <select asp-for="ConfigOfficeDivisionID" asp-items="Model.DDLOfficeDivisionList" class="form-control form-control-sm"></select>
+                        <span asp-validation-for="ConfigOfficeDivisionID" class="text-danger text-sm"></span>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group mb-1">
+                        <label asp-for="ConfigDepartmentID" class="col-form-label-sm m-0 "></label>
+                        <select asp-for="ConfigDepartmentID" asp-items="Model.DDLDepartmentList" class="form-control form-control-sm"></select>
+                        <span asp-validation-for="ConfigDepartmentID" class="text-danger text-sm"></span>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group mb-1">
+                        <label asp-for="ConfigSectionID" class="col-form-label-sm m-0 "></label>
+                        <select asp-for="ConfigSectionID" asp-items="Model.DDLSectionList" class="form-control form-control-sm"></select>
+                        <span asp-validation-for="ConfigSectionID" class="text-danger text-sm"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="row m-1">
+                <div class="col-sm-3 col-md-3 col-lg-3">
+                    <div class="form-group mb-1">
+                        <label class="col-form-label-sm m-0" asp-for="ConfigJobTitleID"></label>
+                        <select asp-for="ConfigJobTitleID" asp-items="Model.DDLJobTitleList" class="form-control form-control-sm"></select>
+                        <span asp-validation-for="ConfigJobTitleID" class="span-form-validation"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card card-dark mt-1">
+        <div class="card-header m-0 p-1">
+            <h5 class="card-title">Approvers</h5>
+            <button type="button" id="btnChangeApproverModal" class="btn btn-xs btn-warning pt-0 pb-0 float-right d-none" data-toggle="modal" data-target="#changeApproverModal">
+                <i class="fa fa-retweet" aria-hidden="true"></i> Replace Approver@*Change Approver From All Configuration*@
+            </button>
+        </div>
+        <div class="card-body p-1">
+            <div class="col-sm-12 col-md-12 col-lg-12">
+                <div class="form-group mb-1 text-center">
+                    <div id="gridContainer"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="changeApproverModal" role="dialog" aria-labelledby="changeApproverModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header p-1">
+                    <h6 class="modal-title" id="changeApproverModalLabel">Replace Approver</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body p-2">
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="card m-0">
+                                <div class="card-header p-1 bg-danger">
+                                    From
+                                </div>
+                                <div class="card-body p-1">
+                                    <div class="row">
+                                        <div class="col-12 col-sm-12">
+                                            <div class="form-group mb-2">
+                                                <label asp-for="FromEmployeeCode" class="required"></label>
+                                                <select asp-for="FromEmployeeCode" asp-items="Model.FromDDLEmployee" class="form-control form-control-sm"></select>
+                                                <span asp-validation-for="FromEmployeeCode" class="text-danger"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        @*<div class="col-6 col-sm-3">
+                                                <div class="form-group mb-2">
+                                                    <label asp-for="FromEmployeeCode" class=""></label>
+                                                    <input type="text" asp-for="FromEmployeeCode" id="EmpCode" class="form-control form-control-sm" readonly />
+                                                </div>
+                                            </div>
+                                            <div class="col-6 col-sm-3">
+                                                <div class="form-group mb-2">
+                                                    <label asp-for="FromEmployeeName" class=""></label>
+                                                    <input type="text" asp-for="FromEmployeeName" class="form-control form-control-sm" readonly />
+                                                </div>
+                                            </div>*@
+                                        <div class="col-6 col-sm-6">
+                                            <div class="form-group mb-2">
+                                                <label asp-for="FromCompanyName" class=""></label>
+                                                <input type="text" asp-for="FromCompanyName" class="form-control form-control-sm" readonly />
+                                                <input type="hidden" asp-for="FromCompanyID" />
+                                                <input type="hidden" asp-for="FromEmployeeID" />
+                                            </div>
+                                        </div>
+                                        <div class=" col-6 col-sm-6">
+                                            <div class="form-group mb-2">
+                                                <label asp-for="FromDivisionName" class=""></label>
+                                                <input type="text" asp-for="FromDivisionName" class="form-control form-control-sm" readonly />
+                                                <input type="hidden" asp-for="FromDivisionID" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-6 col-sm-6">
+                                            <div class="form-group mb-2">
+                                                <label asp-for="FromDepartmentName" class=""></label>
+                                                <input type="text" asp-for="FromDepartmentName" class="form-control form-control-sm" readonly />
+                                                <input type="hidden" asp-for="FromDepartmentID" />
+                                            </div>
+                                        </div>
+                                        <div class="col-6 col-sm-6">
+                                            <div class="form-group mb-2">
+                                                <label asp-for="FromSectionName" class=""></label>
+                                                <input type="text" asp-for="FromSectionName" class="form-control form-control-sm" readonly />
+                                                <input type="hidden" asp-for="FromSectionID" />
+                                            </div>
+                                        </div>
+                                        @*<div class="col-6 col-sm-3">
+                                                <div class="form-group mb-2">
+                                                    <label asp-for="FromDesignation" class=""></label>
+                                                    <input type="text" asp-for="FromDesignation" class="form-control form-control-sm" readonly />
+                                                    <input type="hidden" asp-for="FromDesignationID" />
+                                                </div>
+                                            </div>
+                                            <div class="col-6 col-sm-3">
+                                                <div class="form-group mb-2">
+                                                    <label asp-for="FromAppointmentDate" class=""></label>
+                                                    <input type="text" asp-for="FromAppointmentDate" class="form-control form-control-sm" readonly />
+                                                </div>
+                                            </div>*@
+                                    </div>
+                                    <div class="row">
+                                        @*<div class="col-6 col-sm-3">
+                                                <div class="form-group mb-2">
+                                                    <label asp-for="FromDepartmentName" class=""></label>
+                                                    <input type="text" asp-for="FromDepartmentName" class="form-control form-control-sm" readonly />
+                                                    <input type="hidden" asp-for="FromDepartmentID" />
+                                                </div>
+                                            </div>
+                                            <div class="col-6 col-sm-3">
+                                                <div class="form-group mb-2">
+                                                    <label asp-for="FromSectionName" class=""></label>
+                                                    <input type="text" asp-for="FromSectionName" class="form-control form-control-sm" readonly />
+                                                    <input type="hidden" asp-for="FromSectionID" />
+                                                </div>
+                                            </div>*@
+                                        <div class="col-6 col-sm-6">
+                                            <div class="form-group mb-2">
+                                                <label asp-for="FromDesignation" class=""></label>
+                                                <input type="text" asp-for="FromDesignation" class="form-control form-control-sm" readonly />
+                                                <input type="hidden" asp-for="FromDesignationID" />
+                                            </div>
+                                        </div>
+                                        <div class="col-6 col-sm-6">
+                                            <div class="form-group mb-2">
+                                                <label asp-for="FromAppointmentDate" class=""></label>
+                                                <input type="text" asp-for="FromAppointmentDate" class="form-control form-control-sm" readonly />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="card m-0">
+                                <div class="card-header p-1 bg-success">
+                                    To
+                                </div>
+                                <div class="card-body p-1">
+                                    <div class="row">
+                                        <div class="col-12 col-sm-12">
+                                            <div class="form-group mb-2">
+                                                <label asp-for="ToEmployeeCode" class="required"></label>
+                                                <select asp-for="ToEmployeeCode" asp-items="Model.ToDDLEmployee" class="form-control form-control-sm"></select>
+                                                <span asp-validation-for="ToEmployeeCode" class="text-danger"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        @*<div class="col-6 col-sm-3">
+                                                <div class="form-group mb-2">
+                                                    <label asp-for="ToEmployeeCode" class=""></label>
+                                                    <input type="text" asp-for="ToEmployeeCode" id="EmpCode" class="form-control form-control-sm" readonly />
+                                                </div>
+                                            </div>
+                                            <div class="col-6 col-sm-3">
+                                                <div class="form-group mb-2">
+                                                    <label asp-for="ToEmployeeName" class=""></label>
+                                                    <input type="text" asp-for="ToEmployeeName" class="form-control form-control-sm" readonly />
+                                                </div>
+                                            </div>*@
+                                        <div class="col-6 col-sm-6">
+                                            <div class="form-group mb-2">
+                                                <label asp-for="ToCompanyName" class=""></label>
+                                                <input type="text" asp-for="ToCompanyName" class="form-control form-control-sm" readonly />
+                                                <input type="hidden" asp-for="ToCompanyID" />
+                                                <input type="hidden" asp-for="ToEmployeeID" />
+                                            </div>
+                                        </div>
+                                        <div class=" col-6 col-sm-6">
+                                            <div class="form-group mb-2">
+                                                <label asp-for="ToDivisionName" class=""></label>
+                                                <input type="text" asp-for="ToDivisionName" class="form-control form-control-sm" readonly />
+                                                <input type="hidden" asp-for="ToDivisionID" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-6 col-sm-6">
+                                            <div class="form-group mb-2">
+                                                <label asp-for="ToDepartmentName" class=""></label>
+                                                <input type="text" asp-for="ToDepartmentName" class="form-control form-control-sm" readonly />
+                                                <input type="hidden" asp-for="ToDepartmentID" />
+                                            </div>
+                                        </div>
+                                        <div class="col-6 col-sm-6">
+                                            <div class="form-group mb-2">
+                                                <label asp-for="ToSectionName" class=""></label>
+                                                <input type="text" asp-for="ToSectionName" class="form-control form-control-sm" readonly />
+                                                <input type="hidden" asp-for="ToSectionID" />
+                                            </div>
+                                        </div>
+                                        @*<div class="col-6 col-sm-3">
+                                                <div class="form-group mb-2">
+                                                    <label asp-for="ToDesignation" class=""></label>
+                                                    <input type="text" asp-for="ToDesignation" class="form-control form-control-sm" readonly />
+                                                    <input type="hidden" asp-for="ToDesignationID" />
+                                                </div>
+                                            </div>
+                                            <div class="col-6 col-sm-3">
+                                                <div class="form-group mb-2">
+                                                    <label asp-for="ToAppointmentDate" class=""></label>
+                                                    <input type="text" asp-for="ToAppointmentDate" class="form-control form-control-sm" readonly />
+                                                </div>
+                                            </div>*@
+                                    </div>
+                                    <div class="row">
+                                        @*<div class="col-6 col-sm-3">
+                                                <div class="form-group mb-2">
+                                                    <label asp-for="ToDepartmentName" class=""></label>
+                                                    <input type="text" asp-for="ToDepartmentName" class="form-control form-control-sm" readonly />
+                                                    <input type="hidden" asp-for="ToDepartmentID" />
+                                                </div>
+                                            </div>
+                                            <div class="col-6 col-sm-3">
+                                                <div class="form-group mb-2">
+                                                    <label asp-for="ToSectionName" class=""></label>
+                                                    <input type="text" asp-for="ToSectionName" class="form-control form-control-sm" readonly />
+                                                    <input type="hidden" asp-for="ToSectionID" />
+                                                </div>
+                                            </div>*@
+                                        <div class="col-6 col-sm-6">
+                                            <div class="form-group mb-2">
+                                                <label asp-for="ToDesignation" class=""></label>
+                                                <input type="text" asp-for="ToDesignation" class="form-control form-control-sm" readonly />
+                                                <input type="hidden" asp-for="ToDesignationID" />
+                                            </div>
+                                        </div>
+                                        <div class="col-6 col-sm-6">
+                                            <div class="form-group mb-2">
+                                                <label asp-for="ToAppointmentDate" class=""></label>
+                                                <input type="text" asp-for="ToAppointmentDate" class="form-control form-control-sm" readonly />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer pt-0 pb-0">
+                    <button id="btnReplaceApprover" type="button" class="btn btn-xs btn-success float-right">Replace Approver</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<script type="text/javascript">
+
+    var hrEmployee = [];
+    function GetDDLConfigDesignationList() {
+        let officeDivisionID = $("#ConfigOfficeDivisionID").val();
+        let depID = $("#ConfigDepartmentID").val();
+        let sectionID = $("#ConfigSectionID").val();
+
+        HttpRequest.DropDown("Get", "/AlgoHR/CommonDropDown/GetDDLDesignationList", { officeDivisionID: officeDivisionID, departmentID: depID, sectionID: sectionID, defaultOption: true }, 'ConfigJobTitleID', true);
+
+    }
+
+    function saveSuccess(data) {
+
+        if (data.result == 1) {
+            $.alert.open({
+                type: 'Success',
+                content: data.message,
+                callback: function () {
+                    GetModuleWiseApprovalConfigDetail();
+                }
+            });
+        }
+        else {
+            $.alert.open({
+                type: 'error',
+                content: data.message,
+                callback: function () {
+                    GetModuleWiseApprovalConfigDetail();
+                }
+            });
+        }
+
+    }
+
+    function GetModuleWiseApprovalConfigDetail() {
+
+
+        const moduleID = $("#ModuleID").val();
+        let moduleName = $("#ModuleID option:selected").text();
+
+        if (moduleID && moduleName != "") {
+            let configCompanyID = null;
+            let configOfficeDivisionID = null;
+            let configDepartmentID = null;
+            let configSectionID = null;
+            let configJobTitleID = null;
+
+            let isMasterConfigNeeded = RtnBoolToLower($("#ModuleID").find(':selected').attr('data-custom1'));
+            if (isMasterConfigNeeded) {
+                configCompanyID = $("#ConfigCompanyID").val();
+                configOfficeDivisionID = $("#ConfigOfficeDivisionID").val();
+                configDepartmentID = $("#ConfigDepartmentID").val();
+                configSectionID = $("#ConfigSectionID").val();
+                configJobTitleID = $("#ConfigJobTitleID").val();
+            }
+
+            let queryModel = {
+                ModuleName: moduleName,
+                ConfigCompanyID: configCompanyID,
+                ConfigOfficeDivisionID: configOfficeDivisionID,
+                ConfigDepartmentID: configDepartmentID,
+                ConfigSectionID: configSectionID,
+                ConfigJobTitleID: configJobTitleID
+            };
+
+
+            var data = HttpRequest.AjaxData("Post", '/FiniteScheduler/ApprovalConfiguration/GetModuleWiseApprovalConfigDetail', { "queryModel": queryModel });
+
+            $("#ConfigMasterID").val(0);
+            var rowDesignation = [];
+            var rowEmployee = [];
+            $.each(data, function (i, v) {
+
+                if (i == 0)
+                    $("#ConfigMasterID").val(data[i].ConfigMasterID);
+
+                var designation = { 'ID': v.ApproverJobTitleID, "Name": v.ApproverJobTitle };
+                rowDesignation.push(designation);
+                var emp = { 'ID': v.ApproverEmployeeID, "Name": v.ApproverEmployee, "DesignationID": v.ApproverJobTitleID };
+                rowEmployee.push(emp);
+            })
+
+            $("#gridContainer").dxDataGrid({
+                dataSource: data,
+                keyExpr: "ConfigDetailID",
+                showBorders: true,
+                paging: {
+                    enabled: false
+                },
+                loadPanel: {
+                    enabled: true
+                },
+                editing: {
+                    mode: "batch",
+                    refreshMode: "reshape",
+                    allowUpdating: true,
+                    allowDeleting: true,
+                    allowAdding: true
+                },
+                columns: [
+                    {
+                        dataField: "ApproverCompanyID",
+                        caption: "Company",
+                        width: 180,
+                        setCellValue: function (rowData, value) {
+                            rowData.ApproverCompanyID = value;
+                            rowData.ApproverOfficeDivisionID = null;
+                            rowData.ApproverDepartmentID = null;
+                            rowData.ApproverSectionID = null;
+                            rowData.ApproverJobTitleID = null;
+                            rowData.ApproverEmployeeID = null;
+                        },
+                        lookup: {
+                            dataSource: getCompaniesLookupData,
+                            displayExpr: "Name",
+                            valueExpr: "ID"
+                        }
+                    },
+                    {
+                        dataField: "ApproverOfficeDivisionID",
+                        width: 150,
+                        caption: "Division",
+                        setCellValue: function (rowData, value) {
+                            rowData.ApproverOfficeDivisionID = value;
+                            rowData.ApproverDepartmentID = null;
+                            rowData.ApproverSectionID = null;
+                            rowData.ApproverJobTitleID = null;
+                            rowData.ApproverEmployeeID = null;
+                        },
+                        lookup: {
+                            dataSource: function (options) {
+                                return {
+                                    store: getDivisionsLookupData,
+                                    filter: options.data ? ["ParentID", "=", options.data.ApproverCompanyID] : null
+                                };
+                            },
+                            valueExpr: "ID",
+                            displayExpr: "Name"
+                        }
+                    },
+                    {
+                        dataField: "ApproverDepartmentID",
+                        width: 100,
+                        caption: "Department",
+                        setCellValue: function (rowData, value) {
+                            rowData.ApproverDepartmentID = value;
+                            rowData.ApproverSectionID = null;
+                            rowData.ApproverJobTitleID = null;
+                            rowData.ApproverEmployeeID = null;
+                        },
+                        lookup: {
+                            dataSource: function (options) {
+                                return {
+                                    store: getDepartmentsLookupData,
+                                    filter: options.data ? ["ParentID", "=", options.data.ApproverOfficeDivisionID] : null
+                                };
+                            },
+                            valueExpr: "ID",
+                            displayExpr: "Name"
+                        }
+                    },
+                    {
+                        dataField: "ApproverSectionID",
+                        width: 100,
+                        caption: "Section",
+                        setCellValue: function (rowData, value) {
+                            rowData.ApproverSectionID = value;
+                            rowData.ApproverJobTitleID = null;
+                            rowData.ApproverEmployeeID = null;
+                        },
+                        lookup: {
+                            dataSource: function (options) {
+                                return {
+                                    store: getSectionsLookupData,
+                                    filter: options.data ? ["ParentID", "=", options.data.ApproverDepartmentID] : null
+                                };
+                            },
+                            valueExpr: "ID",
+                            displayExpr: "Name"
+                        }
+                    },
+                    {
+                        dataField: "ApproverJobTitleID",
+                        width: 150,
+                        //calculateDisplayValue: function (rowData) {
+                        //    return rowData.ApproverJobTitle;
+                        //},
+                        setCellValue: function (rowData, value) {
+
+                            rowData.ApproverJobTitleID = value;
+                            rowData.ApproverEmployeeID = null;
+                        },
+                        caption: "Designation",
+                        lookup: {
+                            /*   dataSource: function (options) {
+                                   debugger;
+                                   if (typeof(options.data) != "undefined") {
+                                       return getDesignationsLookupData(options.data.ApproverCompanyID, options.data.ApproverOfficeDivisionID, options.data.ApproverDepartmentID, options.data.ApproverSectionID);
+                                   } else {
+                                       return rowDesignation;
+                                   }
+                               },*/
+                            dataSource: function (options) {
+                                return {
+                                    store: getSectionDesignationLookupData,
+                                    filter: options.data ? [["ParentID_2", "=", options.data.ApproverOfficeDivisionID], ["ParentID_1", "=", options.data.ApproverDepartmentID], ["ParentID", "=", options.data.ApproverSectionID]] : null
+                                };
+                            },
+                            valueExpr: "ID",
+                            displayExpr: "Name",
+                            allowClearing: true
+                        }
+                    },
+                    {
+                        dataField: "ApproverEmployeeID",
+                        width: 200,
+                        caption: "Approver",
+                        lookup: {
+                            dataSource: function (options) {
+                                /*
+                                debugger;
+                                if (typeof (options.data) != "undefined") {
+                                  //rowEmployee = getEmployeesLookupData(options.data.ApproverCompanyID, options.data.ApproverOfficeDivisionID, options.data.ApproverDepartmentID, options.data.ApproverSectionID, options.data.ApproverJobTitleID);
+                                    let parm = {
+                                        companyID: options.data.ApproverCompanyID,
+                                        divisionID: options.data.ApproverOfficeDivisionID,
+                                        departmentID: options.data.ApproverDepartmentID,
+                                        sectionID: options.data.ApproverSectionID,
+                                        designation: options.data.ApproverJobTitleID
+                                    };
+                                    $.ajax({
+                                        type: "Post",
+                                        url: "/AlgoHR/CommonDropDown/GetDDLEmployeeLookUp",
+                                        data: parm,
+                                        dataType: 'json',
+                                        async: false,
+                                    }).done(function (jsData) {
+                                        console.log(jsData);
+                                        rowEmployee = jsData;//  deferred.resolve(jsData);
+                                    });
+                                   // rowEmployee = deferred.promise();   //empData;
+                                }
+                                return rowEmployee;
+                                */
+                                return {
+                                    store: hrEmployee,
+                                    filter: options.data ? [
+                                        ["CompanyID", "=", options.data.ApproverCompanyID],
+                                        ["DivisionID", "=", options.data.ApproverOfficeDivisionID],
+                                        ["DepartmentID", "=", options.data.ApproverDepartmentID],
+                                        ["SectionID", "=", options.data.ApproverSectionID],
+                                        ["DesignationID", "=", options.data.ApproverJobTitleID]
+                                    ] : null
+                                };
+                            },
+                            valueExpr: "ID",
+                            displayExpr: "Name"
+                        }
+                    },
+                    {
+                        dataField: "ApprovalLevel",
+                        caption: "Level",
+                        width: 50,
+                        lookup: {
+                            dataSource: getApprovalLevelsLookupData,
+                            displayExpr: "Name",
+                            valueExpr: "ID"
+                        }
+                    }
+                ],
+                onEditingStart: function (e) {
+                    //logEvent(e,"EditingStart");
+                },
+                //onInitNewRow: function (e) {
+                //    logEvent(e,"InitNewRow");
+                //},
+                //onRowInserting: function (e) {
+                //    logEvent("RowInserting");
+                //},
+                //onRowInserted: function (e) {
+                //    logEvent("RowInserted");
+                //},
+                //onRowUpdating: function (e) {
+                //    alert('hlw');
+                //},
+                //onRowUpdated: function (e) {
+                //    logEvent("RowUpdated");
+                //},
+                onRowRemoving: function (e) {
+                    //debugger;
+                    //selectedRowIndex = e.component.getRowIndexByKey(e.selectedRowKeys[0]);
+                    //  alert('Remove');
+                    //   GetModuleWiseApprovalConfigDetail();
+                    //console.log(`onRowRemoving+${new Date()}`)
+                    //   alert('onRowRemoving')
+                },
+                onRowRemoved: function (e) {
+                    //    GetModuleWiseApprovalConfigDetail();
+                    //selectedRowIndex = e.component.getRowIndexByKey(e.selectedRowKeys[0]);
+                    // alert('Remove');
+                    //console.log(`onRowRemoved +${new Date()}`)
+                    //logEvent('onRowRemoved')
+                },
+                onSaving: function (e) {
+                    saveData(e);
+
+                },
+                onSaved: function (e) {
+                    //console.log(`onSaved +${new Date()}`)
+                    /*   logEvent('onSaved')*/
+                    //logEvent("Saved");
+                },
+                //onEditCanceling: function (e) {
+                //    logEvent("EditCanceling");
+                //},
+                //onEditCanceled: function (e) {
+                //    logEvent("EditCanceled");
+                //}
+            });
+        } else {
+            $("#tbodyApprovers").html(`<tr class="text-danger text-bold"><td colspan="9">No data found</td></tr>`);
+        }
+    }
+    function saveData(e) {
+
+        let configMasterID = $("#ConfigMasterID").val();
+        var grid = $('#gridContainer').dxDataGrid('instance');
+        var rows = grid.getVisibleRows();
+
+        var dataList = '';
+        let detailDataList = new Array();
+        let isValidData = true;
+
+        $.each(rows, function (key, value) {
+            if (!value.removed && isValidData) {
+                if (value.data.ApproverCompanyID !== 0) {
+                    let configDetailID = value.data.ConfigDetailID
+                    let approverCompanyID = value.data.ApproverCompanyID;
+                    let approverOfficeDivisionID = value.data.ApproverOfficeDivisionID;
+                    let approverDepartmentID = value.data.ApproverDepartmentID;
+                    let approverSectionID = value.data.ApproverSectionID;
+                    let approverJobTitleID = value.data.ApproverJobTitleID;
+                    let approverEmployeeID = value.data.ApproverEmployeeID;
+                    let approvalLevel = value.data.ApprovalLevel;
+                    if (approverEmployeeID > 0 && approvalLevel > 0) {
+                        let detailData = {
+                            ConfigDetailID: configDetailID,
+                            ConfigMasterID: configMasterID,
+                            ApprovalLevel: approvalLevel,
+                            ApproverCompanyID: approverCompanyID,
+                            ApproverOfficeDivisionID: approverOfficeDivisionID,
+                            ApproverDepartmentID: approverDepartmentID,
+                            ApproverSectionID: approverSectionID,
+                            ApproverJobTitleID: approverJobTitleID,
+                            ApproverEmployeeID: approverEmployeeID,
+                        };
+                        detailDataList.push(detailData);
+                    } else {
+                        isValidData = false;
+                        return false;
+                    }
+                }
+            }
+        });
+        if (detailDataList.length > 0 && isValidData) {
+
+            let configCompanyID = null;
+            let configOfficeDivisionID = null;
+            let configDepartmentID = null;
+            let configSectionID = null;
+            let configJobTitleID = null;
+            //const moduleID = $("#ModuleID").val();
+            let moduleName = $("#ModuleID option:selected").text();
+
+            let isMasterConfigNeeded = RtnBoolToLower($("#ModuleID").find(':selected').attr('data-custom1'));
+            if (isMasterConfigNeeded) {
+                configCompanyID = $("#ConfigCompanyID").val();
+                configOfficeDivisionID = $("#ConfigOfficeDivisionID").val();
+                configDepartmentID = $("#ConfigDepartmentID").val();
+                configSectionID = $("#ConfigSectionID").val();
+                configJobTitleID = $("#ConfigJobTitleID").val();
+            }
+
+            let masterData = {
+                ConfigMasterID: configMasterID,
+                ModuleName: moduleName,
+                ConfigCompanyID: configCompanyID,
+                ConfigOfficeDivisionID: configOfficeDivisionID,
+                ConfigDepartmentID: configDepartmentID,
+                ConfigSectionID: configSectionID,
+                ConfigJobTitleID: configJobTitleID,
+                ApprovalConfigDetail: detailDataList
+            };
+            HttpRequest.Ajax("POST", '/FiniteScheduler/ApprovalConfiguration/Create', { "model": masterData }, saveSuccess, true);
+        } else {
+            $.alert.open('warning', 'Please Add Correct Approval Leyer for This Configuration');
+            //e.component.refresh(true).done(() => {
+            //    e.component.cancelEditData();
+            //});
+        }
+
+    }
+    function GetFromEmployeeList() {
+        HttpRequest.DropDownSelect2Group('GET', '/AlgoHR/UserDepartmentAccess/GetDDLUserSectionEmployee', { predict: $("#FromEmployeeCode").val() }, 'FromEmployeeCode');
+    }
+    function GetToEmployeeList() {
+        HttpRequest.DropDownSelect2Group('GET', '/AlgoHR/UserDepartmentAccess/GetDDLUserSectionEmployee', { predict: $("#ToEmployeeCode").val() }, 'ToEmployeeCode');
+    }
+
+    function ClearModal(FromTo) {
+        if (FromTo === "From") {
+            $('#FromEmployeeCode').val(null).trigger('change');
+            $("#FromEmployeeID").val(0);
+
+            $("#FromCompanyName").val('');
+            $("#FromDivisionName").val('');
+            $("#FromDepartmentName").val('');
+            $("#FromSectionName").val('');
+            $("#FromDesignation").val('');
+            $("#FromAppointmentDate").val('');
+        } else {
+            $('#ToEmployeeCode').val(null).trigger('change');
+
+            $("#ToEmployeeID").val(0);
+            $("#ToCompanyName").val('');
+            $("#ToDivisionName").val('');
+            $("#ToDepartmentName").val('');
+            $("#ToSectionName").val('');
+            $("#ToDesignation").val('');
+            $("#ToAppointmentDate").val('');
+
+            $("#ToCompanyID").val(0);
+            $("#ToDivisionID").val(0);
+            $("#ToDepartmentID").val(0);
+            $("#ToSectionID").val(0);
+            $("#ToDesignationID").val(0);
+        }
+    }
+
+    function GetEmployeeShortInfo(that) {
+        debugger
+        let employeeCode = '';
+        let employeeID = 0;
+        let changedInputID = that.id;
+        employeeID = $(`#${changedInputID}`).val();
+
+
+
+        /* if (employeeCode != "") {*/
+        let empInfo = HttpRequest.AjaxData('GET', '/AlgoHR/EmployeeLeave/GetEmployeeShortInfo', { employeeCode: employeeCode, employeeID: employeeID });
+        let empCode = empInfo.EmployeeID;
+
+        if (empInfo != null) {
+            if (changedInputID === "FromEmployeeCode") {
+                $("#FromEmployeeID").val(empInfo.EmployeeID);
+                //$("#EmpCode").val(empInfo.EmployeeCode);
+                //$("#EmployeeName").val(empInfo.EmployeeName);
+                $("#FromCompanyName").val(empInfo.CompanyName);
+                $("#FromDivisionName").val(empInfo.DivisionName);
+                $("#FromDepartmentName").val(empInfo.DepartmentName);
+                $("#FromSectionName").val(empInfo.SectionName);
+                $("#FromDesignation").val(empInfo.DesignationName);
+                $("#FromAppointmentDate").val(empInfo.Emp_Appointment);
+            } else {
+                $("#ToEmployeeID").val(empInfo.EmployeeID);
+                //$("#EmpCode").val(empInfo.EmployeeCode);
+                //$("#EmployeeName").val(empInfo.EmployeeName);
+                $("#ToCompanyName").val(empInfo.CompanyName);
+                $("#ToDivisionName").val(empInfo.DivisionName);
+                $("#ToDepartmentName").val(empInfo.DepartmentName);
+                $("#ToSectionName").val(empInfo.SectionName);
+                $("#ToDesignation").val(empInfo.DesignationName);
+                $("#ToAppointmentDate").val(empInfo.Emp_Appointment);
+
+                $("#ToCompanyID").val(empInfo.EmbroCompanyID);
+                $("#ToDivisionID").val(empInfo.DivisionID);
+                $("#ToDepartmentID").val(empInfo.DepartmentID);
+                $("#ToSectionID").val(empInfo.SectionID);
+                $("#ToDesignationID").val(empInfo.DesignationID);
+
+            }
+
+        } else {
+            if (changedInputID === "FromEmployeeCode") { $("#FromEmployeeID").val(0); } else { $("#ToEmployeeID").val(0); }
+        }
+        /*}*/
+    }
+    $(function () {
+
+        hrEmployee = HttpRequest.AjaxData("Post", '/AlgoHR/CommonDropDown/GetDDLEmployeeLookUp', {});
+        // $('#ApproverEmployeeID').select2();
+        // GetDDLEmployeeList();
+        //$("#ApproverEmployeeID").change(function () {
+        //    GetDDLEmployeeList();
+        //});
+
+        $("#FromEmployeeCode,#ToEmployeeCode").select2();
+        GetFromEmployeeList();
+        GetToEmployeeList();
+
+        $("#FromEmployeeCode,#ToEmployeeCode").change(function () {
+            GetEmployeeShortInfo(this);
+        });
+
+        $('#changeApproverModal').on('show.bs.modal', function (e) {
+            ClearModal("From");
+            ClearModal("To");
+        });
+
+        $("#ConfigJobTitleID").change(function () {
+            GetModuleWiseApprovalConfigDetail();
+        });
+        $("#ConfigSectionID").change(function () {
+            GetDDLConfigDesignationList();
+            GetModuleWiseApprovalConfigDetail();
+        });
+        $("#ConfigDepartmentID").change(function () {
+            let depID = $("#ConfigDepartmentID").val();
+            if (depID != "") {
+                HttpRequest.DropDown("Get", "/AlgoHR/CommonDropDown/GetDDLSectionList", { deptID: depID }, 'ConfigSectionID', true);
+
+            } else {
+                HttpRequest.DropDownDefault("ConfigSectionID");
+            }
+            GetDDLConfigDesignationList();
+            GetModuleWiseApprovalConfigDetail();
+
+        });
+        $("#ConfigOfficeDivisionID").change(function () {
+
+            let officeDivisionID = $("#ConfigOfficeDivisionID").val();
+            if (officeDivisionID != "") {
+                HttpRequest.DropDown("Get", "/AlgoHR/CommonDropDown/GetDDLDeptList", { divisionID: officeDivisionID }, 'ConfigDepartmentID', true);
+
+            } else {
+                HttpRequest.DropDownDefault("ConfigDepartmentID");
+                HttpRequest.DropDownDefault("ConfigSectionID");
+            }
+            GetDDLConfigDesignationList();
+            GetModuleWiseApprovalConfigDetail();
+        });
+        $("#ConfigCompanyID").change(function () {
+
+            let compID = $("#ConfigCompanyID").val();
+            if (compID != "") {
+                HttpRequest.DropDown("Get", "/AlgoHR/CommonDropDown/GetDDLDivisionListByEmbroCompany", { embroCompanyID: compID }, 'ConfigOfficeDivisionID', true);
+            } else {
+                HttpRequest.DropDownDefault("ConfigOfficeDivisionID");
+            }
+            $("#ConfigOfficeDivisionID").trigger('change');
+
+        });
+
+        $("#ModuleID").change(function () {
+
+            let isMasterConfigNeeded = RtnBoolToLower($("#ModuleID").find(':selected').attr('data-custom1'));
+            if (isMasterConfigNeeded) {
+                $("#divConfigurationFor").removeClass('d-none');
+                $("#btnChangeApproverModal").removeClass('d-none');
+            } else {
+                $("#divConfigurationFor").addClass('d-none');
+                $("#btnChangeApproverModal").addClass('d-none');
+            }
+
+            GetModuleWiseApprovalConfigDetail();
+        });
+
+        $("#btnReplaceApprover").click(function () {
+            debugger;
+            let moduleName = $("#ModuleID option:selected").text();
+            let fromEmployeeID = $("#FromEmployeeID").val();
+            let toEmployeeID = $("#ToEmployeeID").val();
+            let toCompanyID = $("#ToCompanyID").val();
+            let toDivisionID = $("#ToDivisionID").val();
+            let toDepartmentID = $("#ToDepartmentID").val();
+            let toSectionID = $("#ToSectionID").val();
+            let toDesignationID = $("#ToDesignationID").val();
+            if (moduleName != "" && fromEmployeeID > 0 && toEmployeeID > 0 && toCompanyID > 0
+                && toDivisionID > 0 && toDepartmentID > 0 && toSectionID > 0 && toDesignationID > 0) {
+
+                let replaceApprover = {
+                    ModuleName: moduleName,
+                    FromEmployeeID: fromEmployeeID,
+                    ToEmployeeID: toEmployeeID,
+                    ToCompanyID: toCompanyID,
+                    ToDivisionID: toDivisionID,
+                    ToDepartmentID: toDepartmentID,
+                    ToSectionID: toSectionID,
+                    ToDesignationID: toDesignationID
+                }
+                HttpRequest.Ajax("POST", '/FiniteScheduler/ApprovalConfiguration/ReplaceApprover', { "model": replaceApprover }, saveSuccess, true);
+            } else {
+                $.alert.open('warning','Error occured');
+            }
+        });
+    });
+
+</script>

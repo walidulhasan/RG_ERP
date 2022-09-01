@@ -1,0 +1,214 @@
+﻿@model RG.WEB.Areas.Identity.Data.LoginVM;
+@inject Wangkanai.Detection.Services.IDetectionService DetectionService
+@inject IAntiforgery antiForgeryToken
+
+@{
+    var token = antiForgeryToken.GetAndStoreTokens(Context);
+    Layout = null;
+    ViewData["Title"] = "Log in";
+    string returnUrl = Model.ReturnUrl ?? Url.Content("~/");
+    var deviceType = DetectionService.Device.Type.ToString();
+    var devicePlatform = DetectionService.Platform.Name.ToString();
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Sign in | Robintex Group</title>
+    <!-- Tell the browser to be responsive to screen width -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="~/AdminLTE-3.1.0/plugins/fontawesome-free/css/all.min.css" rel="stylesheet" />
+    <link href="~/lib/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="~/AdminLTE-3.1.0/dist/css/adminlte.min.css" rel="stylesheet" />
+</head>
+<body class="hold-transition" style="background-image: url(/CustomSiteImages/bg_Enterprise.jpg); background-repeat: no-repeat; background-size: 100% 100%; ">
+    <div class="login-page" style="background-color:transparent!important">
+        <div class="login-box">
+            @if (deviceType == "Mobile")
+            {
+                <br />
+            }
+            <!-- /.login-logo -->
+            <div class="card">
+                <div class="card-body login-card-body">
+                    <div class="text-center"><span class="text-xs text-white">@Model.DeviceIdentity</span></div>
+                    <div class="login-logo mb-0">
+                        <a href="#" title="RobinTex"><b>Robintex Group</b></a>
+                    </div>
+                    <h6 class="login-box-msg">User Sign In</h6>
+
+
+                    <form class="row" id="acount" method="post" asp-area="Identity" asp-controller="Account" asp-action="Login" asp-route-returnUrl="@returnUrl">
+                        <input type="hidden" asp-for="DeviceIdentity" />
+                        <input type="hidden" asp-for="LoginDeviceType" />
+                        <input type="hidden" asp-for="DevicePlatform" />
+                        <input type="hidden" asp-for="RequestSecretCode" />
+                        <input type="hidden" asp-for="AppVersion" />
+
+                        <div class="col-12">
+                            <div class="input-group mb-1">
+                                <input asp-for="UserName" class="form-control" placeholder=" Username." autocomplete="off">
+                                <div class="input-group-append">
+                                    <div class="input-group-text">
+                                        <span class="fas fa-user-alt"></span>
+                                    </div>
+
+                                </div>
+
+                            </div>
+                            <span asp-validation-for="UserName" class="text-danger text-center"></span>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="input-group mb-0">
+                                <input asp-for="Password" class="form-control" placeholder=" Password" autocomplete="off">
+                                <div class="input-group-append">
+                                    <div class="input-group-text">
+                                        <span class="fas fa-unlock-alt"></span>
+                                    </div>
+                                </div>
+
+                            </div>
+                            <span asp-validation-for="Password" class="text-danger text-center"></span>
+                        </div>
+                        @if (Model.Message != null)
+                        {
+                            <div class="col-12" id="divBackError">
+                                <span class="text-danger" id="divBackErrorMsg">@Model.Message</span>
+                            </div>
+
+                        }
+                        @if (Model.AppLink != null)
+                        {
+                            <div class="col-12 text-center" id="divBackError">
+                                <span class="text-danger" id="divBackErrorMsg">@Html.Raw(Model.AppLink)</span>
+                            </div>
+                        }
+                        <div class="col-12 mt-2">
+                            <div class="row">
+                                <div class="col-8">
+                                    <div class="form-check">
+                                        <input asp-for="RememberMe" class="form-check-input">
+                                        <label for="remember" class="form-check-label">
+                                            @Html.DisplayNameFor(m => m.RememberMe)
+                                        </label>
+                                    </div>
+                                </div>
+                                <!-- /.col -->
+                                <div class="col-4">
+                                    <button type="submit" class="btn btn-success btn-block">Sign In</button>
+                                </div>
+                                <!-- /.col -->
+                            </div>
+                        </div>
+                    </form>
+                    
+
+                </div>
+                <!-- /.login-card-body -->
+            </div>
+        </div>
+        <!-- /.login-box -->
+    </div>
+
+    @if (Model.IsNeedBusinessID == 1)
+    {
+        <form class="row" id="frmBusinessAndCompany" method="post" asp-area="Identity" asp-controller="Account" asp-action="Login" asp-route-returnUrl="@returnUrl">
+            <div id="myModal" class="modal fade" data-keyboard="false" data-backdrop="static" role="dialog">
+                <div class="modal-dialog">
+                    <!-- Modal content-->
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h4 class="modal-title">Select Company & Business</h4>
+                        </div>
+                        <div class="modal-body">
+                            <input type="hidden" asp-for="UserName" />
+                            <input type="hidden" asp-for="Password" />
+                            <input type="hidden" asp-for="RememberMe" />
+                            <input type="hidden" asp-for="DeviceIdentity" />
+                            <input type="hidden" asp-for="LoginDeviceType" />
+                            <input type="hidden" asp-for="RequestSecretCode" />
+                            <input type="hidden" asp-for="AppVersion" />
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label class="label-ajt-sm required">User Company</label>
+                                        <select asp-for="CompanyID" asp-items="Model.DDLUserCompany" class="form-control form-control-sm input-sm"></select>
+                                    </div>
+                                </div>
+
+                            </div>
+                            <div class="row">
+
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label class="label-ajt-sm required">User Business</label>
+                                        <select asp-for="BusinessID" asp-items="Model.DDLUserBusiness" class="form-control form-control-sm input-sm"></select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-success">Go</button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </form>
+    }
+
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+    <script src="~/js/customScripts/GenericHTTPRequest.js"></script>
+    <script type="text/javascript">
+
+
+        $(function () {
+
+            if ('@Model.DeviceIdentity' == '') {
+                var url = new URL(window.location.href);
+                let machineIdentity = url.searchParams.get("deviceIdentity");
+                $("#MachineIdentity").val(machineIdentity);
+            } if ('@Model.LoginDeviceType'=='') {
+                $("#LoginDeviceType").val('@deviceType');
+                $("#DevicePlatform").val('@devicePlatform');
+            }
+
+            $("#UserName,#Password").on('blur change click', function () {
+                $("#divBackErrorMsg").html("");
+                $("#divBackError").hide();
+            });
+
+            if ('@Model.IsNeedBusinessID' === '1') {
+                $("#myModal").modal('show');
+            }
+            $("#CompanyID").on('change', function () {
+
+
+
+                let userId = "@Model.UserId";
+                let companyId = $("#CompanyID").val();
+
+
+
+                if (userId && userId > 0 && companyId > 0) {
+                    $("#BusinessID").html(HttpRequest.DropDownOptions("Get", "/api/UserAuthentication/UserAccessAPI/GetDDLUserBusiness", { UserID: userId, "companyID": companyId }, false, false));
+                }
+            });
+
+        })
+    </script>
+</body>
+</html>
+
+
+
+

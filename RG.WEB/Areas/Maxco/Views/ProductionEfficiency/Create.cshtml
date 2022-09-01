@@ -1,0 +1,234 @@
+﻿@model RG.Application.ViewModel.Maxco.Setup.ProductionEfficiencyCreateVM
+@{
+    ViewData[PageInfo.PageTitle] = "Create";
+    ViewData[PageInfo.PageHeader] = "Production Efficiency";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row">
+    <div class="form-group col-md-3">
+        <input asp-for="ID" type="hidden" />
+        <div class="form-group">
+
+            <label asp-for="ProductionDate" class="label-ajt-sm required"></label>
+            <div class="input-group">
+                <input required asp-for="ProductionDate" type="text" name="FormDate" readonly class="datepic form-control form-control-sm dateField text-center" />
+                <div class="input-group-append">
+                    <span class="input-group-text"><i class="fa fa-calendar" aria-hidden="true"></i></span>
+                </div>
+            </div>
+            <span asp-validation-for="ProductionDate"></span>
+        </div>
+    </div>
+
+    <div class="col-3">
+        <div class="form-group">
+            <label asp-for="OverAllEfficiencyPercent" class="label-ajt-sm"></label>
+            <input value="" asp-for="OverAllEfficiencyPercent" class="form-control form-control-sm" type="number" />
+            <span class="text-danger" asp-validation-for="OverAllEfficiencyPercent"></span>
+        </div>
+    </div>
+    <div class="col-3">
+        <div class="form-group">
+            <label asp-for="StandardEfficiencyPercent" class="label-ajt-sm "></label>
+            <input value="" asp-for="StandardEfficiencyPercent" class="form-control form-control-sm " type="number" />
+            <span class="text-danger" asp-validation-for="StandardEfficiencyPercent"></span>
+        </div>
+    </div>
+    <div class="col-3">
+        <label>&nbsp;</label>
+        <div class="form-group">
+            <input type="button" class="btn btn-sm btn-success mr-2" value="Save" id="btnSave" />
+            <input type="button" class="btn btn-sm btn-warning d-none" value="Clear" id="btnClear" onclick="Clear()" />
+        </div>
+    </div>
+   
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div id="grid">
+
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script type="text/javascript">
+        $(function () {
+            GetProductionEfficiencyList();
+            $("#btnSave").click(function () {
+                debugger
+                let id = $("#ID").val();
+                let productionDate = $("#ProductionDate").val();
+                let standardEfficiencyPercent = $("#StandardEfficiencyPercent").val();
+                let overAllEfficiencyPercent = $("#OverAllEfficiencyPercent").val();
+
+                if (standardEfficiencyPercent == "" && overAllEfficiencyPercent == "") {
+                    alert("Standard OR Overall Effi Can't be Empty");
+                    return false;
+                }
+
+                if (standardEfficiencyPercent > 100 || overAllEfficiencyPercent>100 ) {
+                    alert("Efficiency % Can't take more then 100");
+                    return false;
+                }
+
+                if (productionDate != null) {
+                    var Obj = {
+                        ID: id,
+                        ProductionDate: productionDate,
+                        StandardEfficiencyPercent: standardEfficiencyPercent,
+                        OverAllEfficiencyPercent: overAllEfficiencyPercent
+                    }
+                    if (Obj.ID > 0) {
+                        HttpRequest.Ajax("POST", '/Maxco/ProductionEfficiency/Update', { "productionEfficiency": Obj }, saveSuccess,true);
+                    } else {
+
+                        HttpRequest.Ajax("POST", '/Maxco/ProductionEfficiency/Create', { "productionEfficiency": Obj }, saveSuccess, true);
+                    }
+                } else {
+                    $.alert.open('warning', "Something is Error");
+
+                    return false;
+                }
+                GetProductionEfficiencyList();
+                Clear();
+            });
+        });
+
+        function saveSuccess(data) {
+            debugger;
+            if (data.result == 1) {
+                $.alert.open({
+                    type: 'Success',
+                    content: data.message,
+                    callback: function () {
+
+                    }
+                });
+            }
+            else {
+                $.alert.open("error", data.message);
+            }
+        }
+
+        function GetProductionEfficiencyList() {
+            debugger
+
+            var dataGrid = $("#grid").dxDataGrid({
+                height: 450,
+                remoteOperations: { paging: true, filtering: true, sorting: true, grouping: true, summary: true, groupPaging: true },
+                dataSource: DevExpress.data.AspNet.createStore({
+                    key: "ID",
+                    loadUrl: "/Maxco/ProductionEfficiency/GetProductionEfficiencyList",
+                    loadParams: {
+
+                    }
+                }),
+                hoverStateEnabled: true,
+
+                showBorders: true,
+                columnAutoWidth: true,
+                filterRow: { visible: true },
+                pager: { visible: true, showInfo: true, allowedPageSizes: [10, 20, 50, 100, 500], showPageSizeSelector: true, },
+                paging: { pageSize: 10 },
+                selection: { mode: 'single' },
+                export: {
+                    //   enabled: true
+                },
+                columns: [
+                    {
+                        width: "auto",
+                        caption: "SL #",
+                        alignment: 'center',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        },
+                        cellTemplate: function (container, e) {
+                            var index = dataGrid.pageIndex() * dataGrid.pageSize() + e.rowIndex + 1;
+                            container.text(index);
+                        }
+                    },
+                    {
+                        dataField: "ID",
+                        visible: false,
+                    },
+                    {
+                        dataField: "ProductionDateStr",
+                        alignment: 'center',
+                        caption: 'Date',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+                    },
+                    {
+                        dataField: "OverAllEfficiencyPercent",
+                        alignment: 'center',
+                        caption: 'Overall Effi. %',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+                    },
+                    {
+                        dataField: "StandardEfficiencyPercent",
+                        alignment: 'center',
+                        caption: 'Standard Effi. %',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        }
+
+                    },
+                    {
+                        caption: 'Action',
+                        alignment: 'center',
+                        headerCellTemplate: function (header, info) {
+                            $('<div>').html(info.column.caption).css('font-weight', 'bold').appendTo(header);
+                        },
+                        cellTemplate: function (container, options) {
+
+                            var returnText = '<button class="btn btn-xs btn-warning"><i class="fa fa-edit"></i> Edit</button>';
+                            //$(returnText).appendTo(container);
+                            $(returnText).on('dxclick', function () {
+                                Edit(options.data);
+                            }).appendTo(container);
+
+                            var returnText = '<span>&nbsp</span><button class="btn btn-xs btn-danger"><i class="fa fa-trash"></i> Delete</button>';
+                            returnText = returnText + '</div>';
+                            $(returnText).on('dxclick', function () {
+                                DeleteRow(options.data.ID);
+                            }).appendTo(container);
+                        }
+                    }
+                ]
+            }).dxDataGrid("instance");
+        }
+
+        function DeleteRow(ID) {
+            $.alert.open('confirm', 'Are you sure to delete this record?', function (button) {
+                if (button == 'yes') {
+                    HttpRequest.Ajax("GET", '/Maxco/ProductionEfficiency/Remove', { "ID": ID }, saveSuccess, true);
+                    GetProductionEfficiencyList();
+                } 
+            });
+        }
+         function Clear() {
+            $("#ID").val("0");
+            $("#ProductionDate").val("@DateTime.Now.ToString("dd-MMM-yyyy")");
+            $("#StandardEfficiencyPercent").val("");
+            $("#OverAllEfficiencyPercent").val("");
+            $("#btnSave").val("Save");
+            $("#btnClear").addClass('d-none');
+         }
+
+        function Edit(data) {
+            debugger
+            $("#ID").val(data.ID);
+            $("#ProductionDate").val(data.ProductionDateStr);
+            $("#StandardEfficiencyPercent").val(data.StandardEfficiencyPercent);
+            $("#OverAllEfficiencyPercent").val(data.OverAllEfficiencyPercent);
+            $("#btnSave").val("Update");
+            $("#btnClear").removeClass('d-none');
+        }
+    </script>
+}

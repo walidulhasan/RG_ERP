@@ -1,0 +1,333 @@
+﻿
+@model List<RG.Application.Contracts.EMS.Business.ExportDocuments.Queries.RequestResponseModel.LCMaturityRealizeRM>
+@{
+    Layout = null;
+
+    int totalExptOrderQty = 0;
+    decimal totalExptOrderVal = 0;
+    if (Model.Count > 0)
+    {
+        var totalOrderQty = Model.GroupBy(x => new { x.CompanyID, x.OrderQty, x.ExpectedValue })
+            .Select(p => new
+            {
+                CompanyID = p.Key.CompanyID,
+                OrderQty = p.Key.OrderQty,
+                ExpectedValue = p.Key.ExpectedValue
+            }).ToList();
+
+        totalExptOrderQty = totalOrderQty.Sum(x => x.OrderQty);
+
+        totalExptOrderVal = totalOrderQty.Sum(x => x.ExpectedValue);
+    }
+    var reportType = ViewBag.ReportType;
+}
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>LC Maturity Realization</title>
+    <link href="~/AdminLTE-3.1.0/plugins/jquery-ui/jquery-ui.min.css" rel="stylesheet" />
+    <link href="~/lib/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <script src="~/AdminLTE-3.1.0/plugins/jquery/jquery.min.js"></script>
+    <script src="~/AdminLTE-3.1.0/plugins/jquery-ui/jquery-ui.min.js"></script>
+    <script src="~/AdminLTE-3.1.0/plugins/bootstrap/js/bootstrap.bundle.js"></script>
+
+
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.12/css/jquery.dataTables.min.css" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/1.2.2/css/buttons.dataTables.min.css" />
+    <script type="text/javascript" src="https://code.jquery.com/jquery-1.12.3.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.2.2/js/dataTables.buttons.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/2.5.0/jszip.min.js"></script>
+    <script type="text/javascript" src="https://cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/pdfmake.min.js"></script>
+    <script type="text/javascript" src="https://cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/vfs_fonts.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.2.2/js/buttons.html5.min.js"></script>
+
+    <style>
+        .header {
+            position: sticky;
+            top: 0;
+        }
+    </style>
+
+</head>
+<body>
+    <div class="row">
+        <div class="col-md-12 text-center">
+            <h5 class="m-0">Robintex Group Bangladesh</h5>
+            <h6 class="m-0">Outstanding LC Realization Report</h6>
+            <h6 class="">@Html.Raw(reportType)</h6>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12 col-md-12">
+            <div class="row">
+                <div class="col-md-12 text-center">
+                    <table class="table table-sm table-bordered table-striped" style="font-size:12px;" id="tblMaturityRealization">
+                        <thead class="bg-dark text-white header">
+                            <tr>
+                                <th style="white-space: nowrap;">SL #</th>
+                                <th>LC No #</th>
+                                <th>PI No #</th>
+                                <th>Supplier Name</th>
+                                <th>Bank Name</th>
+                                <th>LC Item</th>
+                                <th style="white-space: nowrap;">LC Value</th>
+                                <th style="white-space: nowrap;">Maturity Date</th>
+                                <th style="white-space: nowrap;">Maturity Value</th>
+                                <th>Paid Amt.</th>
+                                <th>Rem. Bal.</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                           
+                            @{
+                                if (Model.Count > 0)
+                                {
+                                    int sl = 1;
+                                    var orderedData = Model.OrderBy(x => x.CompanyID).ThenBy(x => x.FundType).ThenBy(x => x.SupplierID)
+                                                         .ThenBy(x => x.LcBankId).ThenBy(x => x.LcItem).ThenBy(x => x.LcId);
+                                    decimal prevCompanyID = 0;
+                                    string prevCompanyName = "";
+                                    string prevFundType = "";
+                                    var lastData = orderedData.Last();
+                                    var prevLCNo = "";
+                                    decimal companyTotalLCValue = 0;
+                                    decimal companyMaturityValue = 0;
+                                    decimal fundTypeWiseLCValue = 0;
+                                    decimal fundTypeWiseMaturityValue = 0;
+
+                                    decimal grandTotalLCValue = 0;
+                                    decimal grandMaturityValue = 0;
+                                    foreach (var item in orderedData)
+                                    {
+                                        var totalMaturityAmount = orderedData.Where(x => x.LcId == item.LcId).Sum(x => x.MaturityAmount);
+                                        var remainingAmount = totalMaturityAmount - item.PaidAmount;// (item.MaturityAmount - item.PaidAmount);
+                                        var remainingAmountBgClass = "";
+
+                                        @if (remainingAmount == 0)
+                                        {
+                                            remainingAmountBgClass = "bg-success text-white";
+                                        }
+                                        else if (item.PaidAmount > 0)
+                                        {
+                                            remainingAmountBgClass = "bg-secondary text-white";
+                                        }
+
+                                        if ((prevCompanyID != 0 && prevCompanyID != item.CompanyID) || (prevFundType != "" && prevFundType != item.FundType))
+                                        {
+                                            <tr class="bg-warning font-weight-bold"><td colspan="6">@prevFundType Total</td><td>@String.Format("{0:n2}", fundTypeWiseLCValue)</td><td></td><td>@String.Format("{0:n2}", fundTypeWiseMaturityValue)</td><td colspan="2"></td></tr>
+                                            fundTypeWiseLCValue = 0;
+                                            fundTypeWiseMaturityValue = 0;
+                                        }
+                                        if (prevCompanyID == 0 || prevCompanyID != item.CompanyID)
+                                        {
+                                            var exptOrderQty = orderedData.Where(x => x.CompanyID == item.CompanyID).First().OrderQty;
+                                            var exptOrderVal = orderedData.Where(x => x.CompanyID == item.CompanyID).First().ExpectedValue;
+                                            if (prevCompanyID != 0 && prevCompanyID != item.CompanyID)
+                                            {
+                                                <tr class="bg-danger text-white font-weight-bold"><td colspan="6">@prevCompanyName Total</td><td>@String.Format("{0:n2}", companyTotalLCValue)</td><td></td><td>@String.Format("{0:n2}", companyMaturityValue)</td><td colspan="2"></td></tr>
+                                                companyTotalLCValue = 0;
+                                                companyMaturityValue = 0;
+                                                <tr><td colspan="11"></td></tr>
+                                            }
+
+                                            <tr class="bg-primary text-left text-white font-weight-bold"><td colspan="11">@item.Company</td></tr>
+                                            
+
+                                        }
+                                        if (prevCompanyID != item.CompanyID || prevFundType == "" || prevFundType != item.FundType)
+                                        {
+
+                                            <tr class="bg-info text-left text-white font-weight-bold"><td colspan="11">@item.FundType</td></tr>
+                                        }
+
+                                        var currentFundTypeWiseLCNoCount = orderedData.Where(x => x.CompanyID == item.CompanyID && x.FundType == item.FundType && x.LcNo == item.LcNo).ToList().Count();
+
+                                        <tr class="@remainingAmountBgClass">
+                                            @if (prevLCNo != item.LcNo)
+                                            {
+                                                <td rowspan="@currentFundTypeWiseLCNoCount" style="vertical-align:middle;">@(sl++)</td>
+                                            }
+
+                                            @if (prevLCNo != item.LcNo)
+                                            {
+                                                <td rowspan="@currentFundTypeWiseLCNoCount" style="vertical-align:middle;"><a href="Javascript:void(0)" style="color:blue !important;" onclick="GetReport('@item.LcId', '@item.LcItem')"><b>@item.LcNo</b></a></td>
+
+                                            }
+
+                                            @if (prevLCNo != item.LcNo)
+                                            {
+                                                if (currentFundTypeWiseLCNoCount > 1)
+                                                {
+                                                    <td rowspan="@currentFundTypeWiseLCNoCount" style="vertical-align:middle;">@item.PINo</td>
+                                                }
+                                                else
+                                                {
+                                                    <td>@item.PINo</td>
+                                                }
+                                            }
+                                            @if (prevLCNo != item.LcNo)
+                                            {
+                                                if (currentFundTypeWiseLCNoCount > 1)
+                                                {
+                                                    <td rowspan="@currentFundTypeWiseLCNoCount" style="vertical-align:middle;">@item.Supplier</td>
+                                                }
+                                                else
+                                                {
+                                                    <td>@item.Supplier</td>
+                                                }
+                                            }
+                                            @if (prevLCNo != item.LcNo)
+                                            {
+                                                if (currentFundTypeWiseLCNoCount > 1)
+                                                {
+                                                    <td rowspan="@currentFundTypeWiseLCNoCount" style="vertical-align:middle;">@item.BankName</td>
+                                                }
+                                                else
+                                                {
+                                                    <td>@item.BankName</td>
+                                                }
+                                            }
+                                            <td>@item.LcItem</td>
+
+
+                                            @if (prevLCNo != item.LcNo)
+                                            {
+                                                if (currentFundTypeWiseLCNoCount > 1)
+                                                {
+                                                    <td rowspan="@currentFundTypeWiseLCNoCount" style="vertical-align:middle;">@String.Format("{0:n2}", item.LcValue)</td>
+                                                }
+                                                else
+                                                {
+                                                    <td>@String.Format("{0:n2}", item.LcValue)</td>
+                                                }
+                                                companyTotalLCValue += item.LcValue;
+                                                grandTotalLCValue += item.LcValue;
+
+                                                fundTypeWiseLCValue += item.LcValue;
+                                            }
+
+
+
+                                            <td>@item.BankMaturityDate.ToString("dd-MMM-yyyy")</td>
+                                            <td>@String.Format("{0:n2}", item.MaturityAmount)</td>
+
+                                            @if (prevLCNo != item.LcNo)
+                                            {
+                                                if (currentFundTypeWiseLCNoCount > 1)
+                                                {
+
+                                                    <td rowspan="@currentFundTypeWiseLCNoCount" style="vertical-align:middle;">@String.Format("{0:n2}", item.PaidAmount)</td>
+                                                }
+                                                else
+                                                {
+                                                    <td>@String.Format("{0:n2}", item.PaidAmount)</td>
+                                                }
+
+                                            }
+
+                                            @if (prevLCNo != item.LcNo)
+                                            {
+                                                if (currentFundTypeWiseLCNoCount > 1)
+                                                {
+
+                                                    <td rowspan="@currentFundTypeWiseLCNoCount" style="vertical-align:middle;">@String.Format("{0:n2}", (remainingAmount))</td>
+                                                }
+                                                else
+                                                {
+                                                    <td>@String.Format("{0:n2}", (remainingAmount)) </td>
+                                                }
+
+                                            }
+
+                                            @*<td>@String.Format("{0:n2}", item.PaidAmount)</td>*@
+                                            @*<td>@String.Format("{0:n2}", remainingAmount)</td>*@
+                                        </tr>
+                                        prevCompanyID = item.CompanyID;
+                                        prevFundType = item.FundType;
+                                        prevLCNo = item.LcNo;
+                                        prevCompanyName = item.Company;
+
+                                        companyMaturityValue += item.MaturityAmount;
+                                        grandMaturityValue += item.MaturityAmount;
+                                        fundTypeWiseMaturityValue += item.MaturityAmount;
+
+                                        if (item.Equals(lastData))
+                                        {
+                                            <tr class="bg-warning font-weight-bold"><td colspan="6">@prevFundType Total</td><td>@String.Format("{0:n2}", fundTypeWiseLCValue)</td><td></td><td>@String.Format("{0:n2}", fundTypeWiseMaturityValue)</td><td colspan="2"></td></tr>
+                                            <tr class="bg-danger text-white font-weight-bold"><td colspan="6">@prevCompanyName Total</td><td>@String.Format("{0:n2}", companyTotalLCValue)</td><td></td><td>@String.Format("{0:n2}", companyMaturityValue)</td><td colspan="2"></td></tr>
+
+                                            <tr class="bg-dark text-white font-weight-bold"><td colspan="6">Grand Total</td><td>@String.Format("{0:n2}", grandTotalLCValue)</td><td></td><td>@String.Format("{0:n2}", grandMaturityValue)</td><td colspan="2"></td></tr>
+                                        }
+
+                                    }
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="text-center">
+                <input type="button" class="btn btn-sm btn-success" value="Excel" id="btnPdf" onclick="exportToExcel()" />
+            </div>
+        </div>
+
+    </div>
+</body>
+</html>
+
+<script type="text/javascript">
+    function newWindow(url, title) {
+        const h = screen.height - screen.height / 5;
+        const w = screen.width - screen.width / 20;
+        var y = window.outerHeight / 2 + window.screenY - (h / 2)
+        var x = window.outerWidth / 2 + window.screenX - (w / 2)
+        return window.open(url, title, 'toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=yes, resizable=yes, copyhistory=no, width=' + w + ', height=' + h + ', top=' + y + ', left=' + x);
+    }
+    const GetReport = (lcID, lcItem) => {
+        let action = ``;
+        if (lcItem === "Accessories") {
+            action = "http://119.148.55.92/lcm/Reports/BTB.aspx?LCID=" + lcID + "&LCType=0";
+        } else {
+            action = "http://119.148.55.92/erp/LCM/cash/LC_CASHLC_LC.asp?CLC=" + lcID;
+        }
+        newWindow(action, "Realization Detail");
+    }
+
+    function exportToExcel() {
+        debugger;
+        var htmls = "";
+        var uri = 'data:application/vnd.ms-excel;base64,';
+        var template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>';
+        var base64 = function (s) {
+            return window.btoa(unescape(encodeURIComponent(s)))
+        };
+
+        var format = function (s, c) {
+            return s.replace(/{(\w+)}/g, function (m, p) {
+                return c[p];
+            })
+        };
+
+        htmls = document.getElementById("tblMaturityRealization").innerHTML;
+
+        var ctx = {
+            worksheet: 'Worksheet',
+            table: htmls
+        }
+        var link = document.createElement("a");
+        link.download = "LCMaturityRealization.xls";
+        link.href = uri + base64(format(template, ctx));
+        link.click();
+    }
+
+
+    $(function () {
+
+    })
+</script>
+
+
+

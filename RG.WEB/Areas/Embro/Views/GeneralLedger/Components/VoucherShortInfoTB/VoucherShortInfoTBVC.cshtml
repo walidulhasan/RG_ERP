@@ -1,0 +1,153 @@
+﻿
+@model List<RG.Application.Contracts.Embro.AccountsReports.Vouchers.Queries.QueryResponseModel.VoucherShortInfoTBRM>
+@{
+
+}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="Robintex comptex">
+    <meta name="generator" content="Jekyll v3.8.6">
+    <title></title>
+
+
+    <meta name="theme-color" content="#563d7c">
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+
+    <style>
+        .header {
+            position: sticky;
+            top: 0;
+        }
+    </style>
+
+
+</head>
+<body>
+
+
+
+    @if (Model.Count > 0)
+    {
+
+        <div class="">
+            <main role="main" class="col-md-12 ml-sm-auto col-lg-12 px-4">
+                <div class="row pb-2">
+                    <div class="col-md-12" style="text-align:center;">
+                        <span class="col-md-12" style="text-align:center;font-weight:bold;">@Model.Last().CompanyName</span>
+                        <br />
+                        <span class="col-md-12" style="text-align:center;font-weight:bold;">@Model.Last().AccountName</span>
+                        <br />
+
+                    </div>
+                </div>
+
+                <div class="row" style="font-size:12px; max-height:450px;overflow:scroll;">
+                    <div class="col-md-12 p-0">
+                        <table class="table table-bordered table-striped table-sm text-center m-0" id="">
+                            <thead class="header bg-dark text-white">
+                                <tr>
+                                    <th>SL</th>
+                                    <th>Voucher No</th>
+                                    <th>Date</th>
+                                    <th>Description</th>
+                                    <th>Cost Center</th>
+                                    <th>Activity</th>
+                                    <th>Debit</th>
+                                    <th>Credit</th>
+                                    <th>Balance</th>
+                                </tr>
+
+                            </thead>
+                            <tbody>
+                                @{
+                                    var sl = 1;
+                                    decimal runningSum = 0;
+                                    string drOrCr = "";
+                                    foreach (var voucher in Model)
+                                    {
+                                            runningSum += voucher.Amount;
+                                        if (voucher.VoucherId == 0)
+                                        {
+                                            if (voucher.Debit>0) { drOrCr = "Dr."; }
+                                            else
+                                            {
+                                                drOrCr = "Cr.";
+                                            }
+                                            <tr style="vertical-align:middle;" class="bg-info text-white">
+                                                <td colspan="6">Account Opening Balance</td>
+
+                                                <td>@String.Format("{0:n2}", voucher.Debit)</td>
+                                                <td>@String.Format("{0:n2}", voucher.Credit) </td>
+                                                <td>@String.Format("{0:n2}", Math.Abs(runningSum)) <sub class="pl-1 fw-bold">@drOrCr</sub></td>
+                                          
+                                            </tr>
+                                        }
+                                        else
+                                        {
+                                            //runningSum += voucher.Amount;
+                                            if (runningSum > 0)
+                                            {
+                                                drOrCr = "Dr.";
+                                            }
+                                            else
+                                            {
+                                                drOrCr = "Cr.";
+                                            }
+                                            <tr style="vertical-align:middle;">
+                                                <td>@sl</td>
+                                                <td>@voucher.VoucherNumber</td>
+                                                <td>@voucher.VDateMsg</td>
+                                                <td style="font-size:8px;" title="@voucher.VoucherDescription">@(voucher.VoucherDescription.Length > 50 ? voucher.VoucherDescription.Substring(0, 50) : voucher.VoucherDescription)</td>
+                                                <td>@voucher.CostcenterName</td>
+                                                <td>@voucher.ActivityName</td>
+                                                <td>@String.Format("{0:n2}", voucher.Debit)</td>
+                                                <td>@String.Format("{0:n2}", voucher.Credit) </td>
+                                                <td>@String.Format("{0:n2}", Math.Abs(runningSum)) <sub class="pl-1 fw-bold">@drOrCr</sub></td>
+                                               
+                                            </tr>
+                                            sl++;
+                                        }
+                                    }
+                                }
+                            </tbody>
+                            <tfoot>
+                                <tr style="vertical-align:middle;">
+                                    <td colspan="6" class="fw-bold">Total</td>
+
+                                    <td style="font-size:9px;" class="fw-bold">@String.Format("{0:n2}", Model.Sum(x => x.Debit))</td>
+                                    <td style="font-size:9px;" class="fw-bold">@String.Format("{0:n2}", Model.Sum(x => x.Credit)) </td>
+
+                                    <td></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+
+
+                </div>
+                <script>
+
+                </script>
+            </main>
+        </div>
+    }
+
+</body>
+</html>
+<!--<script src="~/AdminLTE-3.1.0/plugins/jquery/jquery.min.js"></script>
+<script src="~/js/customScripts/GenericHTTPRequest.js"></script>
+<link href="~/lib/jquery-alert/css/alert.css" rel="stylesheet" />
+<link href="~/lib/jquery-alert/themes/default/theme.css" rel="stylesheet" />-->
+
+<script type="text/javascript">
+    $(function () {
+
+    });
+
+</script>

@@ -1,0 +1,96 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup Label="Globals">
+    <SccProjectName>SAK</SccProjectName>
+    <SccProvider>SAK</SccProvider>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccLocalPath>SAK</SccLocalPath>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Contracts\Embro\Setups\COAGroupings\**" />
+    <Compile Remove="Contracts\ERPAccessAuth\**" />
+    <Compile Remove="Contracts\FiniteScheduler\MT_Location_Setup\**" />
+    <Compile Remove="Contracts\FiniteScheduler\MT_Machine_Setup\**" />
+    <EmbeddedResource Remove="Contracts\Embro\Setups\COAGroupings\**" />
+    <EmbeddedResource Remove="Contracts\ERPAccessAuth\**" />
+    <EmbeddedResource Remove="Contracts\FiniteScheduler\MT_Location_Setup\**" />
+    <EmbeddedResource Remove="Contracts\FiniteScheduler\MT_Machine_Setup\**" />
+    <None Remove="Contracts\Embro\Setups\COAGroupings\**" />
+    <None Remove="Contracts\ERPAccessAuth\**" />
+    <None Remove="Contracts\FiniteScheduler\MT_Location_Setup\**" />
+    <None Remove="Contracts\FiniteScheduler\MT_Machine_Setup\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Interfaces\Repositories\FiniteScheduler\Business\IApprovalNotificationRepository.cs" />
+    <Compile Remove="Interfaces\Repositories\FiniteScheduler\Setup\IApprovalConfigMasterRepository.cs" />
+    <Compile Remove="Interfaces\Repositories\FiniteScheduler\Setup\IApprovalModulesRepository.cs" />
+    <Compile Remove="Interfaces\Services\FiniteScheduler\Business\IApprovalNotificationService.cs" />
+    <Compile Remove="Interfaces\Services\FiniteScheduler\Setup\IApprovalConfigMasterService.cs" />
+    <Compile Remove="Interfaces\Services\FiniteScheduler\Setup\IApprovalModulesService.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Contracts\AlgoHR\Business\EmployeeLeaveCancels\Queries\" />
+    <Folder Include="Contracts\AlgoHR\Business\EmployeeShortLeaves\Commands\Update\" />
+    <Folder Include="Contracts\AlgoHR\Business\KPIParticularValuess\Query\" />
+    <Folder Include="Contracts\AlgoHR\Setups\UploadedDocumentTypes\Commands\" />
+    <Folder Include="Contracts\AlgoHR\Setups\UserDepartmentAccess\NewFolder\" />
+    <Folder Include="Contracts\Embro\CompanyInfos\Commands\" />
+    <Folder Include="Contracts\Embro\Setups\COAGroupCategorys\Commands\" />
+    <Folder Include="Contracts\EMS\Setups\bl_Periods\Queries\RequestResponseModel\" />
+    <Folder Include="Contracts\FiniteScheduler\Setups\AssetDepriciationHistories\Commands\Create\" />
+    <Folder Include="Contracts\FiniteScheduler\Setups\AssetDepriciationHistories\Commands\DataTransferModel\" />
+    <Folder Include="Contracts\FiniteScheduler\Setups\AssetDepriciationHistories\Commands\Update\" />
+    <Folder Include="Contracts\FiniteScheduler\Setups\AssetDepriciationHistories\Queries\RequestResponseModel\" />
+    <Folder Include="Contracts\FiniteScheduler\Setups\AssetInfos\Commands\Update\" />
+    <Folder Include="Contracts\FiniteScheduler\Setups\AssetLocations\Commands\Create\" />
+    <Folder Include="Contracts\FiniteScheduler\Setups\AssetLocations\Commands\DataTransferModel\" />
+    <Folder Include="Contracts\FiniteScheduler\Setups\AssetLocations\Commands\Update\" />
+    <Folder Include="Contracts\FiniteScheduler\Setups\AssetLocations\Queries\RequestResponseModel\" />
+    <Folder Include="Contracts\FiniteScheduler\Setups\MT_Location_Setups\Commands\" />
+    <Folder Include="Contracts\FiniteScheduler\Setups\MT_MaintenanceItem_Setups\Commands\Create\" />
+    <Folder Include="Contracts\MaterialsManagement\Business\AllocatedYarnIssueFromRack\Commands\" />
+    <Folder Include="Contracts\MaterialsManagement\Business\YarnIssuanceToKnitter\Commands\Create\" />
+    <Folder Include="Contracts\MaterialsManagement\Business\YarnIssuanceToKnitter\Commands\Update\" />
+    <Folder Include="Contracts\MaterialsManagement\Business\YarnIssuanceToKnitter\Queries\RequestResponseModel\" />
+    <Folder Include="Contracts\MaterialsManagement\Business\YarnRackAllocations\Commands\Update\" />
+    <Folder Include="Contracts\MaterialsManagement\Setups\BuildingInfos\Commands\" />
+    <Folder Include="Contracts\MaterialsManagement\Setups\IC_SampleTypeProcess_Setups\Queries\RequestResponseModel\" />
+    <Folder Include="Contracts\MaterialsManagement\Setups\YarnRackSetups\Commands\DataTransferModel\" />
+    <Folder Include="Contracts\Maxco\Buisness\Plan_OrderMasters\Commands\Update\" />
+    <Folder Include="Interfaces\Repositories\ERPAccessAuth\" />
+    <Folder Include="Interfaces\Services\ERPAccessAuth\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="8.1.1" />
+    <PackageReference Include="DevExtreme.AspNet.Data" Version="2.8.6" />
+    <PackageReference Include="FluentValidation" Version="10.3.3" />
+    <PackageReference Include="FluentValidation.AspNetCore" Version="10.3.3" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="10.3.3" />
+    <PackageReference Include="Hangfire" Version="1.7.25" />
+    <PackageReference Include="Hangfire.MemoryStorage" Version="1.7.0" />
+    <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="9.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="5.0.11" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="5.0.11" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.ViewFeatures" Version="2.2.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.11" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="5.0.11" />
+    
+    <PackageReference Include="NETCore.MailKit" Version="2.0.3" />
+    <PackageReference Include="NetCore.AutoRegisterDi" Version="2.1.0" />
+    <PackageReference Include="Serilog.Extensions.Logging.File" Version="2.0.0" />
+    <PackageReference Include="Snickler.EFCore" Version="2.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\RG.DBEntities\RG.DBEntities.csproj" />
+  </ItemGroup>
+
+</Project>

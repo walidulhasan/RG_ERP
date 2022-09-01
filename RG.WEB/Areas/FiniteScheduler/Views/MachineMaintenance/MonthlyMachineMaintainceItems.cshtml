@@ -1,0 +1,135 @@
+﻿@model RG.Application.ViewModel.FiniteScheduler.Business.MachineMaintenance.MonthlyMachineMaintainceItemsVM
+@{
+    ViewData[PageInfo.PageTitle] = "Maintaince Items";
+    ViewData[PageInfo.PageHeader] = "Maintaince Items";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+
+}
+
+<form id="AspNetRolesCreate" method="post">
+    <div class="row">
+        <div class="col-sm-3">
+            <div class="form-group">
+                <label asp-for="CompanyID" class="label-ajt-sm required"></label>
+                <select asp-for="CompanyID" asp-items="Model.DDLCompany" class="form-control form-control-sm"></select>
+                <span asp-validation-for="CompanyID" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <div class="form-group">
+                <label asp-for="LocationID" class="label-ajt-sm required"></label>
+                <select asp-for="LocationID" asp-items="Model.DDLLocation" class="form-control form-control-sm"></select>
+                <span asp-validation-for="LocationID" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-sm-3">
+            <div class="form-group">
+                <label asp-for="MachineID" class="label-ajt-sm required"></label>
+                <select asp-for="MachineID" asp-items="Model.DDLMachine" class="form-control form-control-sm"></select>
+                <span asp-validation-for="MachineID" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="form-group">
+                <label asp-for="MonthID" class="label-ajt-sm required"></label>
+                <select asp-for="MonthID" asp-items="Model.DDLMonth" class="form-control form-control-sm"></select>
+                <span asp-validation-for="MonthID" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="form-group">
+                <label asp-for="YearID" class="label-ajt-sm required"></label>
+                <select asp-for="YearID" asp-items="Model.DDLYear" class="form-control form-control-sm"></select>
+                <span asp-validation-for="YearID" class="text-danger"></span>
+            </div>
+        </div>
+
+    </div>
+    <div class="row">
+        <div class="col-md-4">
+            <div class="form-group">
+                <button type="button" class="btn btn-sm btn-success" id="btnShow">Show</button>
+                @*<button type="button" class="btn btn-sm btn-danger" id="btnPDF">PDF</button>
+                    <button type="button" class="btn btn-sm btn-warning" id="btnExcel">Excel</button>*@
+            </div>
+        </div>
+    </div>
+
+    @*<a class="btn popoverData" href="#" data-content="Popover with data-trigger" rel="popover" data-placement="bottom" data-original-title="Title" data-trigger="hover">Popover</a>*@
+    @*<div class="row">
+            <div class="col-sm-12 col-md-12" id="divMaintenanceItems">
+            </div>
+        </div>*@
+
+</form>
+@section scripts{
+    <script type="text/javascript">
+     
+        $(function () {
+
+            $("#MachineID").change(function () {
+                let machineID = $("#MachineID").val();
+                if (machineID != "") {
+
+                } else {
+                    $("#tblMaintenanceItem").html("");
+                    $("#tfootBtn").hide();
+                }
+            });
+            $("#LocationID").change(function () {
+                let locationID = $("#LocationID").val();
+                if (locationID != "") {
+                    HttpRequest.DropDown("GET", "/FiniteScheduler/CommonDropDown/GetDDLLocationWiseMachine", { "locationID": locationID }, "MachineID", "");
+                } else {
+                    HttpRequest.DropDownDefault('MachineID');
+                    $("#MachineID").trigger('change');
+                }
+
+            });
+            $("#CompanyID").change(function () {
+                let companyID = $("#CompanyID").val();
+                if (companyID != "") {
+                    HttpRequest.DropDown("GET", "/FiniteScheduler/CommonDropDown/GetDDLCompanyWiseLocation", { "companyID": companyID }, "LocationID", "");
+                } else {
+                    HttpRequest.DropDownDefault('LocationID');
+                    $("#LocationID").trigger('change');
+                }
+
+            });
+            $("#btnShow").click(function () {
+                let locationId = RtnNumber($("#LocationID").val());
+                let year = RtnNumber($("#YearID").val());
+                let month = RtnNumber($("#MonthID").val());
+                let monthName = $("#MonthID option:selected").text();
+                let machineID = RtnNumber($("#MachineID").val());
+                if ( month > 0 && year > 0) {
+                    //let queryModel = {
+                    //    Year: year,
+                    //    Month: month,
+                    //    LocationID: locationId,
+                    //    MachineID: machineID
+                    //};
+                    window.open(`/FiniteScheduler/MachineMaintenance/MachineMaintainceItemDetail?LocationID=${locationId}&MachineID=${machineID}&Month=${month}&Year=${year}`, '_blank').focus();
+                    //$("#divMaintenanceItems").load("/FiniteScheduler/MachineMaintenance/CallViewComponents", { 'viewComponentName':'MachineMaintainceItemDetail','queryModel': queryModel });
+                } else {
+                    /*$("#divMaintenanceItems").html('');*/
+                }
+            });
+        @*$("#btnPDF").click(function () {
+               LocationMonthlyScheduleMaintenceReport("@ReportExportFormat.PdfFormat");
+           });
+
+        $("#btnExcel").click(function () {
+                   LocationMonthlyScheduleMaintenceReport("@ReportExportFormat.ExcelFormat");
+            });*@
+
+        });
+
+
+
+
+
+    </script>
+
+}

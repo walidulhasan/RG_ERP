@@ -1,0 +1,616 @@
+﻿@using Microsoft.AspNetCore.Antiforgery
+@inject IAntiforgery antiForgeryToken
+@using System.Text.Json;
+@model RG.Application.ViewModel.MaterialsManagement.Business.GatePass.ExportSalesVCVM
+@{
+    var token = antiForgeryToken.GetAndStoreTokens(Context);
+
+}
+ 
+<head>
+    <script src="~/js/layout/buttonControl.js"></script>
+</head>
+    
+ 
+ 
+<div class="row m-0">
+    <input type="hidden" id="hdnGatePassID" asp-for="GatePassID" />
+    <div class="col-sm-3 col-md-3 col-lg-3">
+        <div class="form-group">
+            <label class="col-form-label-sm m-0 required" asp-for="IssuedTo"></label>
+            <input type="text" class="form-control form-control-sm" autocomplete="off" asp-for="IssuedTo" placeholder="Issued To">
+            <span asp-validation-for="IssuedTo" class="span-form-validation"></span>
+        </div>
+    </div>
+    <div class="col-sm-3 col-md-3 col-lg-3">
+        <div class="form-group">
+            <label class="col-form-label-sm m-0 required" asp-for="Purpose"></label>
+            <input type="text" class="form-control form-control-sm" autocomplete="off" asp-for="Purpose" placeholder="Purpose">
+            <span asp-validation-for="Purpose" class="span-form-validation"></span>
+        </div>
+    </div>
+    <div class="col-sm-3 col-md-3 col-lg-3">
+        <div class="form-group">
+            <label class="col-form-label-sm m-0 required" asp-for="VehicleRef"></label>
+            <input type="text" class="form-control form-control-sm" autocomplete="off" asp-for="VehicleRef" placeholder="Vehicle No">
+            <span asp-validation-for="VehicleRef" class="span-form-validation"></span>
+        </div>
+    </div>
+    <div class="col-sm-3 col-md-3 col-lg-3">
+        <div class="form-group">
+            <label class="col-form-label-sm m-0" asp-for="DriverName"></label>
+            <input type="text" class="form-control form-control-sm" autocomplete="off" asp-for="DriverName" placeholder="Driver Name">
+            <span asp-validation-for="DriverName" class="span-form-validation"></span>
+        </div>
+    </div>
+</div>
+<div class="row m-0">
+    <div class="col-sm-3 col-md-3 col-lg-3">
+        <div class="form-group">
+            <label class="col-form-label-sm m-0" asp-for="MobileNo"></label>
+            <input type="text" class="form-control form-control-sm" autocomplete="off" asp-for="MobileNo" placeholder="Mobile No">
+            <span asp-validation-for="MobileNo" class="span-form-validation"></span>
+        </div>
+    </div>
+    <div class="col-sm-3 col-md-3 col-lg-3">
+        <div class="form-group">
+            <label class="col-form-label-sm m-0" asp-for="TransportServiceName"></label>
+            <input type="text" class="form-control form-control-sm" autocomplete="off" asp-for="TransportServiceName" placeholder="Transport Service Name">
+            <span asp-validation-for="TransportServiceName" class="span-form-validation"></span>
+        </div>
+    </div>
+</div>
+<div class="row m-0">
+    <div class="col-sm-3 col-md-3 col-lg-3">
+        <div class="form-group">
+            <label class="col-form-label-sm m-0 required" asp-for="DepartmentID"></label>
+            <select asp-for="DepartmentID" asp-items="Model.DepartmentList" class="form-control form-control-sm"></select>
+            <span asp-validation-for="DepartmentID" class="span-form-validation"></span>
+        </div>
+    </div>
+    <div class="col-sm-9 col-md-9 col-lg-9">
+        <div class="form-group">
+            <label class="col-form-label-sm m-0" asp-for="Description"></label>
+            <input type="text" class="form-control form-control-sm" autocomplete="off" asp-for="Description" placeholder="Description">
+            <span asp-validation-for="Description" class="span-form-validation"></span>
+        </div>
+    </div>
+</div>
+<div class="row m-0">
+    <div class="col-sm-12 col-md-12 col-lg-12 text-right">
+        <div class="form-group">
+            <input type="button" class="btn btn-xs btn-success" id="AddNewItem" value="Add New Item" data-toggle="modal" data-target="#itemModal" />
+        </div>
+    </div>
+</div>
+<div class="row m-0">
+    <div class="col-sm-12 col-md-12 col-lg-12 p-0">
+        <table class="table table-sm table-bordered table-striped text-center text-xs" id="tblItem">
+            <thead class="bg-dark">
+                <tr>
+                    <td>SL#</td>
+                    <td>Item Name</td>
+                    <td>Buyer Name</td>
+                    <td>Order No</td>
+                    <td>PO No</td>
+                    <td>Country</td>
+                    <td>Quantity</td>
+                    <td>UOM</td>
+                    <td>Carton</td>
+                    <td>From E#</td>
+                    <td>Container</td>
+                    <td>Container Size</td>
+                    <td>Seal</td>
+                    <td>Shipping Line</td>
+                    <td>Clearing Agent</td>
+                    <td>Invoice No</td>
+                    <td>Remarks</td>
+                    <td width="75">Action</td>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.GatePassID > 0)
+                {
+                    var sl = 1;
+                    foreach (var item in Model.ExportSalesItem)
+                    {
+                <tr data-id="@item.ID">
+                    <td class='trSerial'>@(sl++)</td>
+                    <td><input type="hidden" class="hdnItemName" value="@item.ItemName" />@item.ItemName</td>
+                    <td>
+                        <input type="hidden" class="hdnBuyerID" value="@item.BuyerID" />
+                        <input type="hidden" class="hdnBuyerName" value="@item.BuyerName" />
+                        @item.BuyerName
+                    </td>
+                    <td><input type="hidden" class="hdnOrderID" value="@item.OrderID" />@item.OrderNo</td>
+                    <td><input type="hidden" class="hdnPONumber" value="@item.OrderID" />@item.PONumber</td>
+                    <td>
+                        <input type="hidden" class="hdnCountryID" value="@item.CountryID" />
+                        <input type="hidden" class="hdnCountryName" value="@item.CountryName" /> @item.CountryName
+                    </td>
+
+                    <td class="text-bold text-danger"><input type="hidden" class="hdnQuantity" value="@item.Quantity" />@String.Format("{0:n0}", item.Quantity)</td>
+                    <td><input type="hidden" class="hdnUnitOfMeasurementID" value="@item.UnitID" />@item.UnitOfMeasurement</td>
+                    <td><input type="hidden" class="hdnCartonQuantity" value="@item.CartonQuantity" />@item.CartonQuantity</td>
+
+                    <td><input type="hidden" class="hdnFromE" value="@item.FromE" />@item.FromE</td>
+                    <td><input type="hidden" class="hdnContainer" value="@item.Container" />@item.Container</td>
+                    <td><input type="hidden" class="hdnContainerSize" value="@item.ContainerSize" />@item.ContainerSize</td>
+                    <td><input type="hidden" class="hdnSeal" value="@item.Seal" />@item.Seal</td>
+                    <td><input type="hidden" class="hdnShippingLine" value="@item.ShippingLine" />@item.ShippingLine</td>
+                    <td><input type="hidden" class="hdnClearingAgent" value="@item.ClearingAgent" />@item.ClearingAgent</td>
+                    <td><input type="hidden" class="hdnInvoiceNumber" value="@item.InvoiceNumber" />@item.InvoiceNumber</td>
+                    <td><input type="hidden" class="hdnRemarks" value="@item.Remarks" />@item.Remarks</td>
+                    <td>
+                        <button type="button" class="btn btn-xs btn-warning" onclick="FillupPopupData('@item.ID')" data-toggle="modal" data-target="#itemModal"><i class="fas fa-external-link-alt"></i></button>
+                        <button type="button" class="btn btn-xs btn-danger" onclick="RemoveRow(this,'@item.ID')"><i class="fa fa-trash" aria-hidden="true"></i></button>
+                    </td>
+                </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="modal fade" id="itemModal" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-header p-2">
+                <h5 class="modal-title" id="exampleModalLabel">Export Sales Item</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="hdnGatePassDetailID" />
+                <div class="row m-0">
+                    <div class="col-sm-5 col-md-5 col-lg-5">
+                        <div class="form-group">
+                            <label class="col-form-label-sm m-0 required" asp-for="ItemName"></label>
+                            <input type="text" class="form-control form-control-sm" autocomplete="off" asp-for="ItemName" placeholder="Item Name">
+                            <span asp-validation-for="ItemName" class="span-form-validation"></span>
+                        </div>
+                    </div>
+                    <div class="col-sm-3 col-md-3 col-lg-3">
+                        <div class="form-group">
+                            <label class="col-form-label-sm m-0" asp-for="UnitOfMeasurementID"></label>
+                            <select asp-for="UnitOfMeasurementID" asp-items="Model.UnitOfMeasurementList" class="form-control form-control-sm"></select>
+                            <span asp-validation-for="UnitOfMeasurementID" class="span-form-validation"></span>
+                        </div>
+                    </div>
+                    <div class="col-sm-2 col-md-2 col-lg-2">
+                        <div class="form-group">
+                            <label class="col-form-label-sm m-0 required" asp-for="Quantity"></label>
+                            <input type="text" class="form-control form-control-sm" autocomplete="off" asp-for="Quantity" placeholder="Quantity">
+                            <span asp-validation-for="Quantity" class="span-form-validation"></span>
+                        </div>
+                    </div>
+                    <div class="col-sm-2 col-md-2 col-lg-2">
+                        <div class="form-group">
+                            <label class="col-form-label-sm m-0 required" asp-for="CartonQuantity"></label>
+                            <input type="text" class="form-control form-control-sm" autocomplete="off" asp-for="CartonQuantity" placeholder="Carton Quantity">
+                            <span asp-validation-for="CartonQuantity" class="span-form-validation"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row m-0">
+                    <div class="col-sm-3 col-md-3 col-lg-3">
+                        <div class="form-group">
+                            <label class="col-form-label-sm m-0 required" asp-for="BuyerID"></label>
+                            <br />
+                            <select asp-for="BuyerID" asp-items="Model.BuyerList" class="form-control form-control-sm select2" style="width:100%"></select>
+                            <span asp-validation-for="BuyerID" class="span-form-validation"></span>
+                        </div>
+                    </div>
+                    <div class="col-sm-3 col-md-3 col-lg-3">
+                        <div class="form-group">
+                            <label class="col-form-label-sm m-0 required" asp-for="OrderID"></label>
+                            <select asp-for="OrderID" asp-items="Model.OrderList" class="form-control form-control-sm" style="width:100%"></select>
+                            <span asp-validation-for="OrderID" class="span-form-validation"></span>
+                        </div>
+                    </div> 
+                    <div class="col-sm-2 col-md-2 col-lg-2">
+                        <div class="form-group">
+                            <label class="col-form-label-sm m-0 required" asp-for="PONumber"></label>
+                            <input type="text" class="form-control form-control-sm" asp-for="PONumber" autocomplete="off" placeholder="PO No">
+                            <span asp-validation-for="PONumber" class="span-form-validation"></span>
+                        </div>
+                    </div>
+                    <div class="col-sm-2 col-md-2 col-lg-2">
+                        <div class="form-group">
+                            <label class="col-form-label-sm m-0 required" asp-for="CountryID"></label>
+                            <select asp-for="CountryID" asp-items="Model.CountryList" class="form-control form-control-sm" style="width:100%"></select>
+                            <span asp-validation-for="CountryID" class="span-form-validation"></span>
+                        </div>
+                    </div>
+                    <div class="col-sm-2 col-md-2 col-lg-2">
+                        <div class="form-group">
+                            <label class="col-form-label-sm m-0 required" asp-for="InvoiceNumber"></label>
+                            <input type="text" class="form-control form-control-sm" asp-for="InvoiceNumber" autocomplete="off" placeholder="Invoice No">
+                            <span asp-validation-for="InvoiceNumber" class="span-form-validation"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row m-0">
+                    <div class="col-sm-3 col-md-3 col-lg-3">
+                        <div class="form-group">
+                            <label class="col-form-label-sm m-0" asp-for="FromE"></label>
+                            <input type="text" class="form-control form-control-sm" autocomplete="off" asp-for="FromE" placeholder="From E">
+                            <span asp-validation-for="FromE" class="span-form-validation"></span>
+                        </div>
+                    </div>
+                    <div class="col-sm-3 col-md-3 col-lg-3">
+                        <div class="form-group">
+                            <label class="col-form-label-sm m-0" asp-for="Container"></label>
+                            <input type="text" class="form-control form-control-sm" autocomplete="off" asp-for="Container" placeholder="Container">
+                            <span asp-validation-for="Container" class="span-form-validation"></span>
+                        </div>
+                    </div>
+                    <div class="col-sm-3 col-md-3 col-lg-3">
+                        <div class="form-group">
+                            <label class="col-form-label-sm m-0" asp-for="ContainerSize"></label>
+                            <input type="text" class="form-control form-control-sm" asp-for="ContainerSize" autocomplete="off" placeholder="Container Size">
+                            <span asp-validation-for="ContainerSize" class="span-form-validation"></span>
+                        </div>
+                    </div>
+                    <div class="col-sm-3 col-md-3 col-lg-3">
+                        <div class="form-group">
+                            <label class="col-form-label-sm m-0" asp-for="Seal"></label>
+                            <input type="text" class="form-control form-control-sm" asp-for="Seal" autocomplete="off" placeholder="Seal">
+                            <span asp-validation-for="Seal" class="span-form-validation"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row m-0">
+                    <div class="col-sm-3 col-md-3 col-lg-3">
+                        <div class="form-group">
+                            <label class="col-form-label-sm m-0" asp-for="ShippingLine"></label>
+                            <input type="text" class="form-control form-control-sm" asp-for="ShippingLine" autocomplete="off" placeholder="Shipping Line">
+                            <span asp-validation-for="ShippingLine" class="span-form-validation"></span>
+                        </div>
+                    </div>
+                    <div class="col-sm-3 col-md-3 col-lg-3">
+                        <div class="form-group">
+                            <label class="col-form-label-sm m-0" asp-for="ClearingAgent"></label>
+                            <input type="text" class="form-control form-control-sm" autocomplete="off" asp-for="ClearingAgent" placeholder="Clearing Agent">
+                            <span asp-validation-for="ClearingAgent" class="span-form-validation"></span>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-md-6 col-lg-6">
+                        <div class="form-group">
+                            <label class="col-form-label-sm m-0" asp-for="Remarks"></label>
+                            <input type="text" class="form-control form-control-sm" autocomplete="off" asp-for="Remarks" placeholder="Remarks">
+                            <span asp-validation-for="Remarks" class="span-form-validation"></span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="modal-footer p-2">
+                <button type="button" class="btn btn-xs btn-danger" id="btnAddToListClose">Add To List & Close</button>
+                <button type="button" class="btn btn-xs btn-warning" id="btnAddToListClear">Add To List & Clear</button>
+                <button type="button" class="btn btn-xs btn-primary" id="btnAddToList">Add To List</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row m-0 text-center">
+    <div class="col-sm-12 col-md-12 col-lg-12">
+        <div class="form-group">
+            <input type="button" class="btn btn-sm btn-success" id="btnSave" value="Save">
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    function AddItemToList() {
+        let itemName = ToProperCase( $("#ItemName").val());
+        let gatePassDetailID = $("#hdnGatePassDetailID").val();
+        let unitOfMeasurementID = RtnNumber($("#UnitOfMeasurementID").val());
+        let buyerID = RtnNumber($("#BuyerID").val());
+        let orderID = RtnNumber($("#OrderID").val());
+        let orderNo = $("#OrderID option:selected").text();
+        let poNumber = $("#PONumber").val();
+        let countryID = RtnNumber($("#CountryID").val());
+        let countryName = $("#CountryID option:selected").text();
+        let unitOfMeasurement = $("#UnitOfMeasurementID option:selected").text();
+        if (!unitOfMeasurementID) {
+            unitOfMeasurement = "";
+        }
+
+        let quantity = RtnFloatUpToPrecision($("#Quantity").val(), 2);
+        let cartonQuantity = RtnFloatUpToPrecision($("#CartonQuantity").val(), 2);
+        let invoiceNo = ToProperCase($("#InvoiceNumber").val());
+
+        let buyerName = $("#BuyerID option:selected").text();
+        if (!buyerID) {
+            buyerName = "";
+        }
+        let fromE = ToProperCase($("#FromE").val());
+        let container = ToProperCase($("#Container").val());
+        let containerSize = $("#ContainerSize").val();
+        let seal = $("#Seal").val();
+        let shippingLine = ToProperCase( $("#ShippingLine").val());
+        let clearingAgent = ToProperCase($("#ClearingAgent").val());
+        let remarks = ToProperCase($("#Remarks").val());
+        if (itemName != "" && quantity > 0 && cartonQuantity > 0 && buyerID > 0 && orderID > 0) {
+
+
+            let currentRowSerial = ($("#tblItem tbody tr").length) + 1;
+            if (gatePassDetailID > 0) {
+                let row = $('tr[data-id="' + gatePassDetailID + '"]');
+                currentRowSerial = row.find('.trSerial').text();
+            }
+            let popupBtn = '';
+            if (gatePassDetailID > 0) {
+                popupBtn = `<button type="button" class="btn btn-xs btn-warning" onclick="FillupPopupData(${gatePassDetailID})" data-toggle="modal" data-target="#itemModal"><i class="fas fa-external-link-alt"></i></button>&nbsp;`
+            }
+
+            let trTds = `<td class='trSerial'>${currentRowSerial}</td><td><input type="hidden" class="hdnItemName" value="${itemName}" />  ${itemName}</td>
+                         <td><input type="hidden" class="hdnBuyerID" value="${buyerID}" />
+                            <input type="hidden" class="hdnOrderID" value="${orderID}" />
+                            <input type="hidden" class="hdnBuyerName" value="${buyerName}" />${buyerName}</td>
+                     <td><input type="hidden" class="hdnOrderID" value="${orderID}" />${orderNo}</td>
+<td><input type="hidden" class="hdnPONumber" value="${poNumber}" />${poNumber}</td>
+                    <td><input type="hidden" class="hdnCountryID" value="${countryID}" />
+                        <input type="hidden" class="hdnCountryName" value="${countryName}" />${countryName}</td>
+                    <td class="text-bold text-danger"><input type="hidden" class="hdnQuantity" value="${quantity}" />${quantity}</td>
+                    <td><input type="hidden" class="hdnUnitOfMeasurementID" value="${unitOfMeasurementID}" />${unitOfMeasurement}</td>
+                    <td><input type="hidden" class="hdnCartonQuantity" value="${cartonQuantity}" />${cartonQuantity}</td>
+                    <td><input type="hidden" class="hdnFromE" value="${fromE}" />${fromE}</td>
+                    <td><input type="hidden" class="hdnContainer" value="${container}" />${container}</td>
+                    <td><input type="hidden" class="hdnContainerSize" value="${containerSize}" />${containerSize}</td>
+                    <td><input type="hidden" class="hdnSeal" value="${seal}" />${seal}</td>
+                    <td><input type="hidden" class="hdnShippingLine" value="${shippingLine}" />${shippingLine}</td>
+                    <td><input type="hidden" class="hdnClearingAgent" value="${clearingAgent}" />${clearingAgent}</td>
+                    <td><input type="hidden" class="hdnInvoiceNumber" value="${invoiceNo}" />${invoiceNo}</td>
+                    <td><input type="hidden" class="hdnRemarks" value="${remarks}" />${remarks}</td>
+                    <td>${popupBtn}<button type="button"  class="btn btn-xs btn-danger" onclick="RemoveRow(this)"><i class="fa fa-trash" aria-hidden="true"></i></button></td>`;
+
+            if (gatePassDetailID > 0) {
+                let row = $('tr[data-id="' + gatePassDetailID + '"]');
+                row.addClass('valueChanged')
+                row.html(trTds);
+            } else {
+                $("#tblItem tbody").append(
+                    `<tr class='valueChanged' data-id="0">${trTds}</tr>`
+                );
+            }
+
+
+
+        } else {
+            alert("Input Field is Required");
+        }
+    }
+    function ClearItemModal() {
+        $("#hdnGatePassDetailID").val(0);
+        $("#ItemName").val('');
+        $("#UnitOfMeasurementID").val(1);
+        $("#Quantity").val(0);
+        $("#CartonQuantity").val(0);
+        $("#InvoiceNumber").val('');
+        $("#BuyerName").val('');
+        $("#FromE").val('');
+        $("#Container").val('');
+        $("#ContainerSize").val('');
+        $("#Seal").val('');
+        $("#ShippingLine").val('');
+        $("#ClearingAgent").val('');
+        $("#Remarks").val('');
+        $('#CountryID').val(null).trigger("change");
+        $('#BuyerID').val(null).trigger("change");
+        $('#OrderID').val(null).trigger("change");
+    }
+    function ClearPartialItemModal() {
+        $("#hdnGatePassDetailID").val(0);
+        $("#Quantity").val(0);
+        $("#CartonQuantity").val(0);
+        $('#CountryID').val(null).trigger("change");
+        $("#InvoiceNumber").val('');
+    }
+    $(function () {
+        $('#BuyerID').select2();
+        $('#OrderID').select2();
+        $('#CountryID').select2();
+        //$('#UnitOfMeasurementID').select2();
+
+        debugger;
+        $('#itemModal').on('hidden.bs.modal', function () {
+
+            ClearItemModal();
+        });
+
+        $("#btnAddToList").click(function () {
+            AddItemToList();
+            ClearPartialItemModal();
+        });
+        $("#btnAddToListClear").click(function () {
+            AddItemToList();
+            ClearItemModal();
+        });
+        $("#btnAddToListClose").click(function () {
+            AddItemToList();
+            $('#itemModal').modal('toggle');
+        });
+
+        $("#BuyerID").change(function () {
+
+            debugger;
+            let buyerId = RtnNumber($("#BuyerID").val());
+            // HttpRequest.DropDown("GET", "/MaterialsManagement/GatePass/GetOrderNumber", { buyerID: buyerId }, "OrderID")
+            if (buyerId > 0) {
+                HttpRequest.DropDownSelect2('GET', '/Maxco/Order/GetOrderWithOutSample', { buyerID: buyerId, ConditionDate: "@DateTime.Now.AddYears(-2)" }, 'OrderID', false);
+            }
+        });
+
+      //  .trigger('change');
+        $("#btnSave").click(function () {
+            debugger;
+                let categoryID = RtnNumber($("#CategoryID").val());
+                let gatePassID = $("#hdnGatePassID").val();
+                let customer = $("#IssuedTo").val();
+                let purpose =  $("#Purpose").val();
+                let vehicleRef = $("#VehicleRef").val();
+                let driverName = $("#DriverName").val();
+                let mobileNo = $("#MobileNo").val();
+                let transportServiceName = $("#TransportServiceName").val();
+                let description = $("#Description").val();
+            let departmentID = $("#DepartmentID").val();
+              let ExportSalesGatePassDetail = new Array();
+              $('#tblItem tbody tr').each(function () {
+                  let thatTr = $(this);
+                  let gatePassDetailId = thatTr.data("id");
+                  let itemName = thatTr.find('.hdnItemName').val();
+                  let unitID = thatTr.find('.hdnUnitOfMeasurementID').val();
+                  let invoiceNo = thatTr.find('.hdnInvoiceNumber').val();
+                  let quantity = thatTr.find('.hdnQuantity').val();
+                  let buyerID = thatTr.find('.hdnBuyerID').val();
+                  let orderID = thatTr.find('.hdnOrderID').val();
+                  let poNumber = thatTr.find('.hdnPONumber').val();
+                  let countryID = thatTr.find('.hdnCountryID').val();
+                  let buyerName = thatTr.find('.hdnBuyerName').val();
+                  let fromE = thatTr.find('.hdnFromE').val();
+                  let container = thatTr.find('.hdnContainer').val();
+                  let containerSize = thatTr.find('.hdnContainerSize').val();
+                  let seal = thatTr.find('.hdnSeal').val();
+                  let shippingLine = thatTr.find('.hdnShippingLine').val();
+                  let clearingAgent = thatTr.find('.hdnClearingAgent').val();
+                  let cartonQuantity = thatTr.find('.hdnCartonQuantity').val();
+                  let remarks = thatTr.find('.hdnRemarks').val();
+
+                  let exportSalesDetail = {
+                      Id: gatePassDetailId,
+                      ItemName: itemName,
+                      UnitId: unitID,
+                      InvoiceNumber: invoiceNo,
+                      FormENo: fromE,
+                      ContainerNo: container,
+                      ContainerSize: containerSize,
+                      BuyerName: buyerName,
+                      ClearingAgent: clearingAgent,
+                      SealNo: seal,
+                      ShippingLine: shippingLine,
+                      //ExportSalesGatePassID	:0,
+                      Remarks: remarks,
+                      Quantity: quantity,
+                      CartonQty: cartonQuantity,
+                      BuyerID: buyerID,
+                      OrderID: orderID,
+                      CountryID: countryID,
+                      PONumber: poNumber
+                  }
+                  ExportSalesGatePassDetail.push(exportSalesDetail);
+              });
+              let ExportSalesGatePassMaster = {
+                  GatePassId: gatePassID,
+                  CustomerId: customer,
+                  IssuedBy: 0,
+                  Purpose: purpose,
+                  VehicleRef: vehicleRef,
+                  Description: description,
+                  DepartmentID: departmentID,
+                  DriverName: driverName,
+                  MobileNo: mobileNo,
+                  TransportServiceName: transportServiceName,
+                  IC_ExportSalesGatePassDetail: ExportSalesGatePassDetail
+              }
+              let exportSalesGatePassMasterDTM = {
+                  ID: gatePassID,
+                  CategoryID: categoryID,
+                  IC_ExportSalesGatePassMaster: ExportSalesGatePassMaster
+              }
+
+
+            if (gatePassID == 0) {
+                if (ExportSalesGatePassDetail.length > 0 && customer != "" && purpose != "" && vehicleRef != "") {
+                    HttpRequest.Ajax("POST", "/MaterialsManagement/GatePass/SaveExportSalesGatePass", { exportSalesDTM: exportSalesGatePassMasterDTM, '@token.HeaderName': '@token.RequestToken' }, saveSuccess)
+                } else {
+                    $.alert.open('warning', 'Item Required to save');
+                }
+            } else {
+                HttpRequest.Ajax("POST", "/MaterialsManagement/GatePass/UpdateExportSalesGatePass", { exportSalesDTM: exportSalesGatePassMasterDTM,'@token.HeaderName': '@token.RequestToken'}, updateSuccess)
+            }
+
+        })
+
+    });
+
+    function set(value) {
+        return value;
+    }
+   function saveSuccess(data) {
+        debugger
+        if (data.result == 1) {
+            $.alert.open({
+                type: 'Success',
+                content: data.message,
+                callback: function () {
+                   $("#IssuedTo").val('');
+                   $("#Purpose").val('');
+                    $("#VehicleRef").val('');
+                    $("#DriverName").val('');
+                    $("#MobileNo").val('');
+                    $("#TransportServiceName").val('');
+                    $("#Description").val('');
+                    $("#tblItem").html("");
+                }
+            });
+        }
+        else {
+            $.alert.open("error", data.message);
+        }
+    }
+    function updateSuccess(data) {
+        debugger
+        if (data.result == 1) {
+            $.alert.open({
+                type: 'Success',
+                content: data.message,
+                callback: function () {
+                }
+            });
+        }
+        else {
+            $.alert.open("error", data.message);
+        }
+    }
+    function FillupPopupData(gatePassDetailId) {
+        debugger;
+        let itemList = new Array();
+        debugger;
+        //itemList =  Html.Raw(Json.Serialize(Model.ExportSalesItem)); //JSON.parse('Html.Raw(JsonSerializer.Serialize(Model.ExportSalesItem))');
+       itemList = HttpRequest.AjaxData("Get", "/MaterialsManagement/GatePass/GetExportItem", { GatePassID:'@Model.GatePassID'},false);
+        console.log(itemList);
+        let itemDetail = itemList.filter(x => x.ID == gatePassDetailId);
+        if (itemDetail.length > 0) {
+             debugger;
+
+             let item = itemDetail[0];
+             $("#hdnGatePassDetailID").val(item.ID);
+             $('#ItemName').val(item.ItemName);
+             $("#UnitOfMeasurementID").val(item.UnitID);
+             $('#Quantity').val(item.Quantity);
+             $("#CartonQuantity").val(item.CartonQuantity);
+             $("#BuyerID").val(item.BuyerID).trigger('change');
+             $("#CountryID").val(item.CountryID).trigger('change');
+
+
+
+             $('#InvoiceNumber').val(item.InvoiceNumber);
+             $('#FromE').val(item.FromE);
+             $('#Container').val(item.Container);
+             $('#ContainerSize').val(item.ContainerSize);
+             $('#Seal').val(item.Seal);
+
+             $('#ShippingLine').val(item.ShippingLine);
+             $('#ClearingAgent').val(item.ClearingAgent);
+             $('#Remarks').val(item.Remarks);
+
+             var newOption = new Option(item.OrderNo, item.OrderID, false, false);
+             $('#OrderID').append(newOption).trigger('change');
+
+        }
+    }
+</script>

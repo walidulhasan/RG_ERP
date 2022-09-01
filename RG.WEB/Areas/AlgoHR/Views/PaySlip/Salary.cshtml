@@ -1,0 +1,242 @@
+﻿@model RG.Application.ViewModel.AlgoHR.Business.PaySlip.SalaryVM
+@{
+    ViewData[PageInfo.PageTitle] = "Salary Pay Slip";
+    ViewData[PageInfo.PageHeader] = "Salary Pay Slip";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+}
+<div class="row">
+    <div class="col-sm-12 col-md-12">
+        <div class="card card-dark">
+
+            <div class="card-body p-2">
+                <input type="hidden" asp-for="EmployeeID" />
+                @*@if (Model.CanApplyForOthers)
+                    {
+                        <div class="row">
+                            <div class="col-sm-3">
+                                <div class="form-group mb-2">
+                                    <label asp-for="EmployeeCode" class="required"></label>
+                                    <select asp-for="EmployeeCode" asp-items="Model.DDLEmployee" class="form-control form-control-sm"></select>
+                                    <span asp-validation-for="EmployeeCode" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+                    }*@
+                <div class="row">
+                    <div class="col-sm-3">
+                        <div class="form-group mb-2">
+                            <label asp-for="EmployeeCode" class="required"></label>
+                            <input type="text" asp-for="EmployeeCode" id="EmpCode" class="form-control form-control-sm" readonly />
+                        </div>
+                    </div>
+                    <div class="col-6 col-sm-3">
+                        <div class="form-group mb-2">
+                            <label asp-for="Month" class="required"></label>
+                            <select asp-for="Month" asp-items="Model.DDLMonth" class="form-control form-control-sm"></select>
+                            <span asp-validation-for="Month" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-6 col-sm-3">
+                        <div class="form-group mb-2">
+                            <label asp-for="Year" class="required"></label>
+                            <select asp-for="Year" asp-items="Model.DDLYear" class="form-control form-control-sm"></select>
+                            <span asp-validation-for="Year" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-12 col-sm-3">
+                        
+                        <div class="form-group mb-2 text-center">
+                            <button type="button" class="btn btn-sm btn-success" id="btnSearch">Search</button>
+                            @*<button type="button" class="btn btn-sm btn-danger" id="btnPDF">PDF</button>*@
+                        </div>
+                    </div>
+                </div>
+                @*<br />*@
+                <div class="row d-none" id="divPaySlip">
+                    <div class="col-sm-3"></div>
+                    <div class="col-sm-6">
+                        <table class="table table-sm table-bordered table-striped text-xs">
+                            <thead>
+                                <tr class="text-center text-bold">
+                                    <td colspan="2">                                       
+                                            রবিনটেক্স গ্রুপ <br />
+                                            ভুলতা, রূপগন্জ, নারায়নগন্জ। <br />
+                                            মজুরী স্লিপ                                        
+                                    </td>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colspan="2">ইউনিট : <span id="unitName"></span><br /> সেকশন:  <span id="sectionName"></span></td>
+                                </tr>
+                                <tr>
+                                    <td class="text-bold" >মাস : <span id="monthName"></span></td>
+                                    <td class="text-bold" > সন:  <span id="yearName"></span></td>
+                                </tr>
+                                <tr class="text-center text-bold">
+                                    <td colspan="2">ব্যক্তিগত ও মজুরী সংক্রান্ত তথ্যাবলী</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2">কর্মচারীর নাম :<span id="employeeName"></span></td>
+                                </tr>
+                                <tr>
+                                    <td>কোড নং: <span id="newCode"></span></td>
+                                    <td>পুরাতন কোড নং: <span id="oldCode"></span></td>
+                                </tr>
+
+                                <tr>
+                                    <td>পদবী: <span id="designationName"></span></td>
+                                    <td>গ্রেড: <span id="graderNo"></span></td>
+                                </tr>
+                                <tr>
+                                    <td>মূল বেতন:</td>
+                                    <td> <span id="basicSalary" class="text-bold"></span></td>
+                                </tr>
+                                <tr>
+                                    <td>বাড়ী ভাড়া ভাতা (মূল বেতনের 50 %):</td>
+                                    <td> <span id="houseRent"></span></td>
+                                </tr>
+                                <tr>
+                                    <td>চিকিৎসা ভাতা:</td>
+                                    <td> <span id="medicalAllowance"></span></td>
+                                </tr>
+                                <tr>
+                                    <td>খাদ্য ভাতা:</td>
+                                    <td> <span id="foodAllowance"></span></td>
+                                </tr>
+                                <tr>
+                                    <td>যাতায়াত ভাতা:</td>
+                                    <td> <span id="conveyanceAllowance"></span></td>
+                                </tr>
+                                <tr class="text-center text-bold">
+                                    <td colspan="2">পরিশোধযোগ্য মজুরীর তথ্যাবলী</td>
+                                </tr>
+                                <tr>
+                                    <td>মোট উপস্থিতি ...<span id="totalAttendance"></span>... দিনের মোট মজুরী:</td>
+                                    <td> <span id="totalSalary" class="text-bold"></span></td>
+                                </tr>
+                                <tr>
+                                    <td>ওভার টাইমের হার টাকা/ঘন্টা:</td>
+                                    <td> <span id="overtimeRate"></span></td>
+                                </tr>
+                                <tr>
+                                    <td>মোট ওভারটাইম (ঘন্টা):</td>
+                                    <td> <span id="overtimeHour"></span></td>
+                                </tr>
+                                <tr>
+                                    <td>পরিশোধযোগ্য মোট ওভারটাইম (টাকা):</td>
+                                    <td> <span id="overtimeBill"></span></td>
+                                </tr>
+                                <tr>
+                                    <td>কমপ্লায়েন্স বোনাস:</td>
+                                    <td> <span id="complianceBonus"></span></td>
+                                </tr>
+                                <tr>
+                                    <td>উৎসব ভাতা (যদি থাকে):</td>
+                                    <td> <span id="festivalBonus"></span></td>
+                                </tr>
+                                <tr>
+                                    <td>কর্তন (যদি থাকে):</td>
+                                    <td> <span id="deductionAmount"></span></td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2"></td>
+                                </tr>
+                                <tr class="text-bold">
+                                    <td>প্রকৃত পরিশোধযোগ্য মোট মজুরী (টাকা):</td>
+                                    <td> <span id="totalAmountToPay"></span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                    </div>
+
+                </div>
+                </div>
+        </div>
+    </div>
+</div>
+@section scripts{
+
+    <script type="text/javascript">
+        function GetSalaryPaySlipInfo() {
+            let employeeID = $("#EmployeeID").val();
+            let month = $("#Month").val();
+            let monthName = $("#Month option:selected").text();
+            let year = $("#Year").val();
+
+            if (employeeID > 0 && month > 0 && year > 0) {
+                let paySlipInfo = HttpRequest.AjaxData('GET', '/AlgoHR/PaySlip/GetSalaryPaySlipInfo', { employeeID: employeeID, month: month, year: year });
+                
+                if (paySlipInfo != null) {
+                    $("#unitName").html(`${paySlipInfo.CompanyNameBn}, ${paySlipInfo.DivisionNameBn}`);
+                    $("#sectionName").html(paySlipInfo.SectionNameBn);
+                    $("#monthName").html(monthName);
+                    $("#yearName").html(year);
+                    $("#employeeName").html(paySlipInfo.EmployeeNameBn);
+                    $("#newCode").html(paySlipInfo.EmployeeCode);
+                    $("#oldCode").html(paySlipInfo.EmployeeAlgoCode);
+                    $("#designationName").html(paySlipInfo.DesignationNameBn);
+                    $("#graderNo").html(paySlipInfo.EmployeeGrade);
+                    $("#basicSalary").html(paySlipInfo.BasicSalary.toLocaleString());
+                    $("#houseRent").html(paySlipInfo.HouseRent.toLocaleString());
+                    $("#medicalAllowance").html(paySlipInfo.MedicalAllowance.toLocaleString());
+                    $("#foodAllowance").html(paySlipInfo.FoodAllowance.toLocaleString());
+                    $("#conveyanceAllowance").html(paySlipInfo.ConveyanceAmount.toLocaleString());
+                    $("#totalAttendance").html(paySlipInfo.PresentDays);
+                    $("#totalSalary").html(paySlipInfo.GrossSalary.toLocaleString());
+                    $("#overtimeRate").html(paySlipInfo.OtRate);
+                    $("#overtimeHour").html(paySlipInfo.OtHours);
+                    $("#overtimeBill").html(paySlipInfo.OtAmount.toLocaleString());
+                    $("#complianceBonus").html(paySlipInfo.ComplianceBonus.toLocaleString());
+                    $("#festivalBonus").html(paySlipInfo.FestivalAllowance.toLocaleString());
+                    $("#deductionAmount").html(paySlipInfo.DeductionAmount.toLocaleString());
+                    $("#totalAmountToPay").html(`${paySlipInfo.NetSalary.toLocaleString()}/-`);
+                }
+
+                $("#divPaySlip").removeClass('d-none');
+            } else {
+                $.alert.open('warning', 'Please provide required data');
+            }
+        }
+        function ClearPaySlip() {
+            $("#unitName").text('');
+            $("#sectionName").text('');
+            $("#monthName").text('');
+            $("#yearName").text('');
+            $("#employeeName").text('');
+            $("#newCode").text('');
+            $("#oldCode").text('');
+            $("#designationName").text('');
+            $("#graderNo").text('');
+            $("#basicSalary").text('');
+            $("#houseRent").text('');
+            $("#medicalAllowance").text('');
+            $("#foodAllowance").text('');
+            $("#conveyanceAllowance").text('');
+            $("#totalAttendance").text('');
+            $("#totalSalary").text('');
+            $("#overtimeRate").text('');
+            $("#overtimeHour").text('');
+            $("#overtimeBill").text('');
+            $("#complianceBonus").text('');
+            $("#festivalBonus").text('');
+            $("#deductionAmount").text('');
+            $("#totalAmountToPay").text('');
+
+           
+        }
+        $(function () {
+            //GetSalaryPaySlipInfo();
+            $("#btnSearch").click(function () {
+                GetSalaryPaySlipInfo();
+            });
+            $("#Month,#Year").change(function () {
+                ClearPaySlip();
+                $("#divPaySlip").addClass('d-none');
+            });
+           
+        });
+    </script>
+}

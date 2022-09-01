@@ -1,0 +1,313 @@
+﻿@model List<RG.Application.Contracts.AlgoHR.Setups.CompanyKPIParticularss.Queries.RequestResponseModel.CompanyKPIReportRM>
+@{
+    ViewData[PageInfo.PageTitle] = "Company KPI Report";
+    ViewData[PageInfo.PageHeader] = "Company KPI Report";
+    Layout = null;
+    decimal conversionRate = Model.First().ConversionRate;
+    var kpiMonthYear = Model.Where(x => x.KPIMonthName != "").Select(x => new
+    {
+        x.KPIMonth,
+        x.KPIYear,
+        x.KPIMonthName
+    }).Distinct().OrderBy(x => x.KPIYear).ThenBy(x => x.KPIMonth);
+
+    var particulars = Model.Select(x => new
+    {
+        x.ParticularHead,
+        x.Particulars,
+        x.Serial,
+        x.ID,
+        x.DecimalUpTo
+    }).Distinct().OrderBy(x => x.Serial).ThenBy(x => x.ID);
+
+}
+@functions{
+    decimal AddParticulars(List<int> selectedParticulars, int month, int year)
+    {
+        var returnValue = Model.Where(x => x.KPIMonth == month && x.KPIYear == year && selectedParticulars.Contains(x.ID)).Sum(x => x.ParticularValue);
+        return returnValue == null ? 0 : returnValue.Value;
+    }
+    decimal ProducedMinOverall(int month, int year)
+    {
+        List<int> selectedParticulars = new() { 7, 8 };
+        var totalProducedPcs = Model.Where(x => x.KPIMonth == month && x.KPIYear == year && selectedParticulars.Contains(x.ID)).Sum(x => x.ParticularValue);
+        var smvParticular = Model.Where(x => x.KPIMonth == month && x.KPIYear == year && x.ID == 6).FirstOrDefault();
+        if (totalProducedPcs != null && smvParticular != null)
+        {
+            return totalProducedPcs.Value * smvParticular.ParticularValue.Value;
+        }
+        else
+        {
+            return 0;
+        }
+    }
+    decimal InputMinOverall(int month, int year)
+    {
+        /*
+        decimal valueMultiplied = 1;
+        List<int> selectedParticulars = new() { 1, 4 };
+        Model.Where(x => x.KPIMonth == month && x.KPIYear == year && selectedParticulars.Contains(x.ID))
+            .ToList().ForEach(x => { valueMultiplied *= x.ParticularValue != null ? x.ParticularValue.Value : 1; });
+
+        return valueMultiplied * 10 * 60;
+        */
+        //Total Data is fullfiled by IE Department
+        var minOverall = Model.Where(b => b.ID == 11).FirstOrDefault();
+        if (minOverall != null)
+        {
+            return minOverall.ParticularValue??1;
+        }
+        return 1;
+    }
+    decimal EfficiencyOverall(int month, int year)
+    {
+        List<int> selectedParticulars = new() { 9 };
+        return AddParticulars(selectedParticulars, month, year);
+        //var prodMin = ProducedMinOverall(month, year);
+        //var inputMin = InputMinOverall(month, year);
+        //return prodMin / inputMin;
+    }
+    decimal GrandTotal(int month, int year)
+    {
+        List<int> selectedParticulars = new() { 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31 };
+        return AddParticulars(selectedParticulars, month, year);
+    }
+    decimal CMWithDepreciation(int month, int year)
+    {
+        var grandTotal = GrandTotal(month, year);
+        var producedMin = ProducedMinOverall(month, year);
+        return producedMin>0? grandTotal / producedMin:0;
+    }
+    decimal CMWithOutDepreciation(int month, int year)
+    {
+        decimal dep = 0;
+        var cmWithDep = CMWithDepreciation(month, year);
+        var depParticular = Model.Where(x => x.KPIMonth == month && x.KPIYear == year && x.ID == 30).FirstOrDefault();
+        if (depParticular != null)
+        {
+            dep = depParticular.ParticularValue.Value;
+        }
+        var producedMin = ProducedMinOverall(month, year);
+        return producedMin > 0 ? cmWithDep - (dep / producedMin):0;
+    }
+    decimal CPMWithDepreciation(int month, int year)
+    {
+        var grandTotal = GrandTotal(month, year);
+        var inputMin = InputMinOverall(month, year);
+        return grandTotal / inputMin;
+    }
+}
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>KPI Report</title>
+        <link href="~/AdminLTE-3.1.0/plugins/jquery-ui/jquery-ui.min.css" rel="stylesheet" />
+        <link href="~/lib/bootstrap-5.0.2/css/bootstrap.min.css" rel="stylesheet" />
+        <script src="~/AdminLTE-3.1.0/plugins/jquery/jquery.min.js"></script>
+        <script src="~/AdminLTE-3.1.0/plugins/jquery-ui/jquery-ui.min.js"></script>
+        <script src="~/lib/bootstrap-5.0.2/js/bootstrap.bundle.min.js"></script>
+
+
+        <link rel="stylesheet" href="https://cdn.datatables.net/1.10.12/css/jquery.dataTables.min.css" />
+        <link rel="stylesheet" href="https://cdn.datatables.net/buttons/1.2.2/css/buttons.dataTables.min.css" />
+        <script type="text/javascript" src="https://code.jquery.com/jquery-1.12.3.js"></script>
+        <script type="text/javascript" src="https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
+        <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.2.2/js/dataTables.buttons.min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/2.5.0/jszip.min.js"></script>
+        <script type="text/javascript" src="https://cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/pdfmake.min.js"></script>
+        <script type="text/javascript" src="https://cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/vfs_fonts.js"></script>
+        <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.2.2/js/buttons.html5.min.js"></script>
+
+        <style>
+            .header {
+                position: sticky;
+                top: 0;
+            }
+        </style>
+
+    </head>
+    <body>
+        <div class="row">
+            <div class="col-md-12 col-sm-12 col-lg-12">
+                <table class="table table-sm table-bordered table-striped text-sm" style="font-size:11px;">
+                    <thead class="bg-dark text-white">
+                        <tr><td colspan="@(kpiMonthYear.Count() + 1)" class="fw-bold" style="font-size:14px;">Robintex Group</td></tr>
+                        <tr>
+                            <td>KPI of</td>
+                            @{
+
+                                foreach (var item in kpiMonthYear)
+                                {
+                                    <td class="fw-bold">@($"{item.KPIMonthName}, {item.KPIYear}")</td>
+                                }
+                            }
+                        </tr>
+                        <tr class="bg-danger text-center"><td colspan="@(kpiMonthYear.Count() + 1)" class="fw-bold">Conversion Rate($): @conversionRate</td></tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            var prevParticularHead = "";
+
+                            @foreach (var item in particulars)
+                            {
+                                if (prevParticularHead != item.ParticularHead)
+                                {
+                                    if (item.ParticularHead == item.Particulars)
+                                    {
+                                        string rowColor = "";
+                                        if (item.ID == 16)
+                                        {
+                                            rowColor = "bg-success fw-bold fst-italic";
+                                        }
+                                        else if (item.ID == 17)
+                                        {
+                                            rowColor = "bg-info fw-bolder fst-italic";
+                                        }
+                                        <tr class="@rowColor">
+                                            <td class="col-sm-2 col-md-2">@($"{item.Serial}. {item.Particulars}")</td>
+                                            @foreach (var itemMonthYear in kpiMonthYear)
+                                            {
+                                                var decimalUpTo = "{" + $"0:n{item.DecimalUpTo}" + "}";
+                                                decimal particularValue = 0;
+
+                                                if (item.ID == 5)
+                                                {
+                                                    particularValue = ProducedMinOverall(itemMonthYear.KPIMonth, itemMonthYear.KPIYear);
+                                                }
+                                                //else if (item.ID == 11)
+                                                //{
+                                                //    particularValue = InputMinOverall(itemMonthYear.KPIMonth, itemMonthYear.KPIYear);
+                                                //}
+                                                else if (item.ID == 12)
+                                                {
+                                                    particularValue = CMWithOutDepreciation(itemMonthYear.KPIMonth, itemMonthYear.KPIYear);
+                                                }
+                                                else if (item.ID == 13)
+                                                {
+                                                    particularValue = CMWithDepreciation(itemMonthYear.KPIMonth, itemMonthYear.KPIYear);
+                                                }
+                                                else if (item.ID == 14)
+                                                {
+                                                    particularValue = CMWithOutDepreciation(itemMonthYear.KPIMonth, itemMonthYear.KPIYear)/conversionRate;
+                                                }
+                                                else if (item.ID == 15)
+                                                {
+                                                    particularValue = CMWithDepreciation(itemMonthYear.KPIMonth, itemMonthYear.KPIYear) / conversionRate;
+                                                }
+                                                else if (item.ID == 16)
+                                                {
+                                                    particularValue = CPMWithDepreciation(itemMonthYear.KPIMonth, itemMonthYear.KPIYear);
+                                                }
+                                                else if (item.ID == 17)
+                                                {
+                                                    particularValue = CPMWithDepreciation(itemMonthYear.KPIMonth, itemMonthYear.KPIYear) / conversionRate;
+                                                }
+                                                else
+                                                {
+                                                    var particular = Model.Where(x => x.ID == item.ID && x.KPIMonth == itemMonthYear.KPIMonth && x.KPIYear == itemMonthYear.KPIYear).FirstOrDefault();
+                                                    if (particular != null)
+                                                    {
+                                                        particularValue = particular.ParticularValue.Value;
+                                                    }
+                                                }
+                                                <td>@String.Format(decimalUpTo, particularValue)</td>
+                                            }
+                                        </tr>
+                                    }
+                                    else
+                                    {
+                                        <tr>
+                                            <td class="col-sm-2 col-md-2 fw-bold">@($"{item.Serial}. {item.ParticularHead}")</td>
+                                            @*AddParticulars*@
+                                            @foreach (var itemMonthYear in kpiMonthYear)
+                                            {
+                                                var decimalUpTo = "{" + $"0:n{item.DecimalUpTo}" + "}";
+                                                decimal particularValue = 0;
+                                                if (item.ID == 2)
+                                                {
+                                                    List<int> selectedParticulars = new() { 2, 3 };
+                                                    particularValue = AddParticulars(selectedParticulars, itemMonthYear.KPIMonth, itemMonthYear.KPIYear);
+                                                }
+                                                if (item.ID == 4)
+                                                {
+                                                    List<int> selectedParticulars = new() { 4 };
+                                                    particularValue = AddParticulars(selectedParticulars, itemMonthYear.KPIMonth, itemMonthYear.KPIYear);
+                                                }
+                                                if (item.ID == 7)
+                                                {
+                                                    List<int> selectedParticulars = new() { 7, 8 };
+                                                    particularValue = AddParticulars(selectedParticulars, itemMonthYear.KPIMonth, itemMonthYear.KPIYear);
+                                                }
+                                                if (item.ID == 9)
+                                                {
+                                                    particularValue = EfficiencyOverall(itemMonthYear.KPIMonth, itemMonthYear.KPIYear);
+                                                }
+                                                if (item.ID == 18)
+                                                {
+                                                    List<int> selectedParticulars = new() { 18,19,20,21};
+                                                    particularValue = AddParticulars(selectedParticulars, itemMonthYear.KPIMonth, itemMonthYear.KPIYear);
+                                                }
+                                                if (item.ID == 22)
+                                                {
+                                                    List<int> selectedParticulars = new() { 22, 23 };
+                                                    particularValue = AddParticulars(selectedParticulars, itemMonthYear.KPIMonth, itemMonthYear.KPIYear);
+                                                }
+                                                <td class="fw-bold">@String.Format(decimalUpTo, particularValue)</td>
+                                            }
+                                        </tr>
+                                        <tr>
+                                            <td class="col-sm-2 col-md-2">&nbsp;&nbsp;&nbsp;&nbsp; @($"{item.Particulars}")</td>
+                                            @foreach (var itemMonthYear in kpiMonthYear)
+                                            {
+                                                decimal particularValue = 0;
+                                                var particular = Model.Where(x => x.ID == item.ID && x.KPIMonth == itemMonthYear.KPIMonth && x.KPIYear == itemMonthYear.KPIYear).FirstOrDefault();
+                                                if (particular != null)
+                                                {
+                                                    particularValue = particular.ParticularValue.Value;
+                                                }
+                                                var decimalUpTo = "{" + $"0:n{item.DecimalUpTo}" + "}";
+                                                <td>@String.Format(decimalUpTo, particularValue)</td>
+                                            }
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td class="col-sm-2 col-md-2">&nbsp;&nbsp;&nbsp;&nbsp; @($"{item.Particulars}")</td>
+                                        @foreach (var itemMonthYear in kpiMonthYear)
+                                        {
+                                            var decimalUpTo = "{" + $"0:n{item.DecimalUpTo}" + "}";
+                                            decimal particularValue = 0;
+
+
+                                            var particular = Model.Where(x => x.ID == item.ID && x.KPIMonth == itemMonthYear.KPIMonth && x.KPIYear == itemMonthYear.KPIYear).FirstOrDefault();
+                                            if (particular != null)
+                                            {
+                                                particularValue = particular.ParticularValue.Value;
+                                            }
+
+                                            <td>@String.Format(decimalUpTo, particularValue)</td>
+                                        }
+                                    </tr>
+                                }
+                                prevParticularHead = item.ParticularHead;
+                            }
+                        }
+                    </tbody>
+                    <tfoot>
+                        <tr class="fw-bold">
+                            <td>Grand Total</td>
+                            @foreach (var itemMonthYear in kpiMonthYear)
+                            {
+                                decimal particularValue = 0;
+                                particularValue = GrandTotal(itemMonthYear.KPIMonth, itemMonthYear.KPIYear);
+                                <td>@(String.Format("{0:n3}", particularValue))</td>
+                            }
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </body>
+</html>

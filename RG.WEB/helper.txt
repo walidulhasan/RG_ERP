@@ -1,0 +1,7 @@
+﻿/*
+# Bootstrap Select Checkbox
+# https://github.com/davidstutz/bootstrap-multiselect
+ #https://davidstutz.github.io/bootstrap-multiselect/
+
+
+*/

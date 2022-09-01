@@ -1,0 +1,284 @@
+﻿@model RG.Application.ViewModel.FiniteScheduler.Setup.AssetInfo.AssetReportsVM
+@using RG.Application.Enums;
+@{
+    ViewData[PageInfo.PageTitle] = "Asset Reports";
+    ViewData[PageInfo.PageHeader] = "Asset Reports";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="row">
+    <div class="col-sm-12 col-md-12">
+        <div class="card card-dark">
+            <div class="card-header m-0 p-1">
+                <h5 class="card-title">Searching Criterias</h5>
+            </div>
+
+            <div class="card-body p-2">
+                <div class="row">
+                    <div class="col-6 col-md-3 col-3 col-sm-3 col-lg-3">
+                        <div class="form-group">
+                            <label class="col-form-label-sm  m-0">Searching Type</label>
+                            <select asp-for="SearchingType" asp-items="Model.DDLSearchingType" class="form-control form-control-sm" disabled></select>
+                        </div>
+                    </div>
+                </div>
+                <div class="row assetinfos">
+                    <div class="col-6 col-md-3 col-3 col-sm-3 col-lg-3">
+                        <div class="form-group">
+                            <label class="col-form-label-sm  m-0" asp-for="AssetAssignedType"></label>
+                            <select asp-for="AssetAssignedType" asp-items="Model.DDLAssetAssignedType" class="form-control form-control-sm"></select>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3 col-3 col-sm-3 col-lg-3">
+                        <div class="form-group mb-2">
+                            <label asp-for="AssetTypeName" class=""></label>
+                            <select asp-for="AssetTypeName" asp-items="Model.DDLAssetTypeName" class="form-control form-control-sm"></select>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3 col-sm-3 col-lg-3">
+                        <div class="form-group mb-2">
+                            <label asp-for="AssetSubTypeID" class=""></label>
+                            <select asp-for="AssetSubTypeID" asp-items="Model.DDLAssetSubTypeName" class="form-control form-control-sm"></select>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3 col-sm-3 col-lg-3">
+                        <div class="form-group mb-2">
+                            <label asp-for="AssetName" class=""></label>
+                            <select asp-for="AssetName" asp-items="Model.DDLAssetName" class="form-control form-control-sm"></select>
+                        </div>
+                    </div>
+
+
+                </div>
+                <div class="row">
+                    <div class="col-6 col-md-3 col-sm-3 col-lg-3">
+                        <div class="form-group">
+                            <label asp-for="DateFrom" class="label-ajt-sm "></label>
+                            <div class="input-group">
+                                <input autocomplete="off" value="" asp-for="DateFrom" required type="text" name="FormDate" readonly class="datepic form-control form-control-sm dateField text-center" />
+                                <div class="input-group-append">
+                                    <span class="input-group-text"><i class="fa fa-calendar" aria-hidden="true"></i></span>
+                                </div>
+                            </div>
+                            <span class="text-danger" asp-validation-for="PurchaseDate"></span>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3 col-sm-3 col-lg-3">
+                        <div class="form-group">
+                            <label asp-for="DateTo" class="label-ajt-sm "></label>
+                            <div class="input-group">
+                                <input autocomplete="off" value="" asp-for="DateTo" required type="text" name="FormDate" readonly class="datepic form-control form-control-sm dateField text-center" />
+                                <div class="input-group-append">
+                                    <span class="input-group-text"><i class="fa fa-calendar" aria-hidden="true"></i></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3 col-sm-3 col-lg-3 assetinfos">
+                        <div class="form-group">
+                            <label asp-for="Code" class="label-ajt-sm "></label>
+                            <select asp-for="Code" asp-items="Model.DDLAssetName" class="form-control form-control-sm"></select>
+                            <span class="text-danger" asp-validation-for="Code"></span>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3 col-sm-3 col-lg-3">
+                        <label class="col-form-label-sm  m-0" asp-for="CompanyID"></label>
+                        <select asp-for="CompanyID" asp-items="Model.DDLCompany" class="form-control form-control-sm"></select>
+                        <span asp-validation-for="CompanyID" class="span-form-validation"></span>
+                    </div>
+                </div>
+                <div class="row">
+
+                    <div id="FiscalYears" class="col-6 col-md-3 col-sm-3 col-lg-3 d-none">
+                        <label class="col-form-label-sm  m-0" asp-for="FiscalYear"></label>
+                        <select asp-for="FiscalYear" asp-items="Model.DDLYear" class="form-control form-control-sm"></select>
+                    </div>
+                    <div class="col-6 col-md-3 col-sm-3 col-lg-3 assetinfos">
+                        <label class="col-form-label-sm  m-0 " asp-for="DivisionID"></label>
+                        <select asp-for="DivisionID" asp-items="Model.DDLDevision" class="form-control form-control-sm"></select>
+                        <span asp-validation-for="DivisionID" class="span-form-validation"></span>
+                    </div>
+                    <div class="col-6 col-md-3 col-sm-3 col-lg-3 assetinfos">
+                        <label class="col-form-label-sm m-0" asp-for="DepartmentID"></label>
+                        <select asp-for="DepartmentID" asp-items="Model.DDLDepartment" class="form-control required form-control-sm"></select>
+                        <span asp-validation-for="DepartmentID" class="span-form-validation"></span>
+                    </div>
+                    <div class="col-6 col-md-3 col-sm-3 col-lg-3 assetinfos">
+
+                        <label class="col-form-label-sm m-0" asp-for="BuildingID"></label>
+                        <select asp-for="BuildingID" asp-items="Model.DDLBuilding" class="form-control form-control-sm required"></select>
+                        <span asp-validation-for="BuildingID" class="span-form-validation"></span>
+                    </div>
+                    <div class="col-6 col-md-3 col-sm-3 col-lg-3 assetinfos">
+                        <label class="col-form-label-sm  m-0" asp-for="FloorID"></label>
+                        <select asp-for="FloorID" asp-items="Model.DDLLBuildingFloor" class="form-control form-control-sm"></select>
+                        <span asp-validation-for="FloorID" class="span-form-validation"></span>
+                    </div>
+                </div>
+                <div class="row d-none" id="divFilterableAttributes">
+
+                </div>
+                @*<div class="row mt-2">
+                    <div class="col-6 col-md-2 col-2 col-sm-2 col-lg-2">
+                        <div class="form-group">
+                            <button type="button" class="btn btn-sm btn-success" id="btnSearch">Search</button>
+                            <button type="button" class="btn btn-sm btn-warning" id="btnPrintSticker">Print Sticker</button>
+                        </div>
+                    </div>
+                </div>*@
+                <div class="row text-center mt-3">
+                    <div class="col-sm-12 col-md-12 col-lg-12">
+                        <button type="button" id="btnSearch" class="btn btn-xs btn-danger"><i class="fas fa-search"></i> Search</button>
+                        &nbsp;<button type="button" id="btnPrintSticker" class="btn btn-xs btn-warning"><i class="fas fa-print"></i> Print Sticker</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+@section scripts{
+    <script>
+        const BuildingWiseFloor = () => {
+            let building = $("#BuildingID").val();
+            if (building != "") {
+                HttpRequest.DropDown("Get", "/MaterialsManagement/BuildingFloorInfo/GetDDLBuildingFloor", { Building: building, FloorType:@((int)enum_FloorType.Asset) }, 'FloorID', true);
+            } else {
+                HttpRequest.DropDownDefault("FloorID");
+            }
+        }
+        const AssetTypeWiseAssetSubType = () => {
+          
+            let AssetTypeID = $("#AssetTypeName").val();
+            if (AssetTypeID != "") {
+                HttpRequest.DropDown("Get", "/FiniteScheduler/AssetManagement/GetDDLAssetSubType", { AssetTypeID: AssetTypeID }, 'AssetSubTypeID', true);
+            } else {
+                HttpRequest.DropDownDefault("AssetSubTypeID");
+            }
+        }
+        const AssetSubTypeWiseAssetName = () => {
+            let assetSubTypeID = $("#AssetSubTypeID").val();
+            if (assetSubTypeID != "") {
+                HttpRequest.DropDown("Get", "/FiniteScheduler/AssetManagement/GetDDLAssetNameViaAssetSubType", { assetSubTypeID: assetSubTypeID}, 'AssetName', true);
+            } else {
+                HttpRequest.DropDownDefault("AssetName");
+            }
+        }
+        const ComapnyWiseDivision=()=>{
+            let companyID = $("#CompanyID").val();
+            if (companyID != "") {
+                HttpRequest.DropDown("POST", "/FiniteScheduler/AssetManagement/EmbroCompanyWiseDDLDivision", { embroCompanyID: companyID }, 'DivisionID', true);
+            } else {
+                HttpRequest.DropDownDefault("DivisionID");
+            }
+
+        }
+        const DivisionWiseDepartment = () => {
+
+            let divisionID = $("#DivisionID").val();
+            if (divisionID != "") {
+                HttpRequest.DropDown("POST", "/FiniteScheduler/AssetManagement/GetDivisionWiseDDLDepartment", { DivisionId: divisionID }, 'DepartmentID', true);
+            } else {
+                HttpRequest.DropDownDefault("DepartmentID");
+            }
+  
+        }
+        const AssetNameWiseCodes = () => {
+            let AssetName = $("#AssetName").val();
+            if (AssetName != "") {
+                HttpRequest.DropDown("Get", "/FiniteScheduler/AssetManagement/GetDDLAssetNameWiseAssetCode", { AssetName: AssetName }, 'Code', true);
+            } else {
+                HttpRequest.DropDownDefault("Code");
+            }
+        }
+        
+        const DF = (that,e) => {
+            let assetSubTypeID = $("#AssetSubTypeID").val();
+            debugger;
+            let filterID = that.id;
+            let attributeID = $(that).parent().find('.hdnAttributeID').val();
+            let predict = $(that).val();
+            //predict = `${predict}${e.key}`;
+            
+            let attributeValues = HttpRequest.AjaxData('GET', '/FiniteScheduler/AssetManagement/AttributeValueAutoComplete', { assetSubTypeID: assetSubTypeID, attributeID: attributeID, predict: predict })
+            $(`#${filterID}`).autocomplete({                
+                source: attributeValues
+            });
+        }
+        $(function () {
+            $("#AssetName").select2();
+            $("#Code").select2();
+
+            $("#AssetTypeName").change(function () {
+                AssetTypeWiseAssetSubType();
+            });
+            $("#AssetSubTypeID").change(function () {
+                AssetSubTypeWiseAssetName();
+                //AssetSubTypeWiseFilterableAttributes();
+            });
+            $("#AssetName").change(function () {
+                AssetNameWiseCodes();
+            });
+            $("#CompanyID").change(function () {
+                ComapnyWiseDivision();
+                HttpRequest.DropDownDefault("DepartmentID");
+            });
+            $("#DivisionID").change(function () {
+                DivisionWiseDepartment();
+            });
+            $("#BuildingID").change(function () {
+                BuildingWiseFloor();
+            });
+            $("#btnSearch").click(function () {
+                debugger;
+                let assetTypeName = $("#AssetTypeName").val();
+                let assetSubTypeID = $("#AssetSubTypeID").val();
+
+                let assetAssignedType = $("#AssetAssignedType").val();
+                let assetName = $("#AssetName").val();
+                let dateFrom = $("#DateFrom").val();
+                let dateTo = $("#DateTo").val();
+                let code = "";
+                if ($("#Code").val()!="") {
+                    code = $("#Code option:selected").text();
+                }
+               
+                let companyID = $("#CompanyID").val();
+
+                let divisionID = $("#DivisionID").val();                
+                let departmentID = $("#DepartmentID").val();               
+                let buildingID = $("#BuildingID").val();               
+                let floorID = $("#FloorID").val();
+                
+                newWindow(`/FiniteScheduler/AssetManagement/Report?AssetTypeName=${assetTypeName}&AssetSubTypeID=${assetSubTypeID}&AssetAssignedType=${assetAssignedType}&AssetName=${assetName}&DateFrom=${dateFrom}&DateTo=${dateTo}&Code=${code}&CompanyID=${companyID}&DivisionID=${divisionID}&DepartmentID=${departmentID}&BuildingID=${buildingID}&FloorID=${floorID}`, "Company Monthly Salary");
+            });
+
+            $("#btnPrintSticker").click(function () {
+                debugger;
+                let assetTypeName = $("#AssetTypeName").val();
+                let assetSubTypeID = $("#AssetSubTypeID").val();
+
+                let assetAssignedType = $("#AssetAssignedType").val();
+                let assetName = $("#AssetName").val();
+                let dateFrom = $("#DateFrom").val();
+                let dateTo = $("#DateTo").val();
+                let code = "";
+                if ($("#Code").val() != "") {
+                    code = $("#Code option:selected").text();
+                }
+
+                let companyID = $("#CompanyID").val();
+
+                let divisionID = $("#DivisionID").val();
+                let departmentID = $("#DepartmentID").val();
+                let buildingID = $("#BuildingID").val();
+                let floorID = $("#FloorID").val();
+
+                newWindow(`/FiniteScheduler/AssetManagement/AssetStickerReport?AssetTypeName=${assetTypeName}&AssetSubTypeID=${assetSubTypeID}&AssetAssignedType=${assetAssignedType}&AssetName=${assetName}&DateFrom=${dateFrom}&DateTo=${dateTo}&Code=${code}&CompanyID=${companyID}&DivisionID=${divisionID}&DepartmentID=${departmentID}&BuildingID=${buildingID}&FloorID=${floorID}`, "Company Monthly Salary");
+            });
+                
+        })
+    </script>
+}

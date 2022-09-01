@@ -1,0 +1,172 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31613.86
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{CAB7A265-00CA-46FB-99ED-9ED56E52C370}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RG.DBEntities", "RG.DBEntities\RG.DBEntities.csproj", "{3BD65B2E-8D35-4D33-9221-37EAA833A247}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RG.Infrastructure", "RG.Infrastructure\RG.Infrastructure.csproj", "{8DEDF2DF-71BE-44C7-935C-34152135AB3D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RG.Application", "RG.Application\RG.Application.csproj", "{BAD63C44-A44A-4F5C-BC92-172AABD59664}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RG.WEB", "RG.WEB\RG.WEB.csproj", "{5505D9A6-2055-46A6-8CC8-C79D35FFDBCC}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "report", "report", "{C72EFCC7-ECFF-4063-BCF4-88344DCA8EB6}"
+EndProject
+Project("{F14B399A-7131-4C87-9E4B-1186C45EF12D}") = "FiniteScheduler_Report", "FiniteScheduler_Report\FiniteScheduler_Report.rptproj", "{6A130474-2417-4D01-8EE0-3D698869836F}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SSRSReport.Library", "SSRSReport.Library\SSRSReport.Library.csproj", "{9DA82353-3F45-47BF-A84F-22B82E9F0F30}"
+EndProject
+Project("{F14B399A-7131-4C87-9E4B-1186C45EF12D}") = "AlgoHR_Report", "AlgoHR_Report\AlgoHR_Report.rptproj", "{B8524BF4-9C51-42E4-BF6D-0B6C77433D3E}"
+EndProject
+Project("{F14B399A-7131-4C87-9E4B-1186C45EF12D}") = "MaterialsManagement_Report", "MaterialsManagement_Report\MaterialsManagement_Report.rptproj", "{3BCAB6C8-659A-4001-A22A-7F46CCE2D349}"
+EndProject
+Project("{F14B399A-7131-4C87-9E4B-1186C45EF12D}") = "Embro_Report", "Embro_Report\Embro_Report.rptproj", "{5AA737E8-1181-4601-ABC5-D89189D16A63}"
+EndProject
+Project("{F14B399A-7131-4C87-9E4B-1186C45EF12D}") = "EMS_Report", "EMS_Report\EMS_Report.rptproj", "{3CF4148F-A9E6-43D5-AAD1-FA8E6F861774}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		DebugLocal|Any CPU = DebugLocal|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3BD65B2E-8D35-4D33-9221-37EAA833A247}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3BD65B2E-8D35-4D33-9221-37EAA833A247}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3BD65B2E-8D35-4D33-9221-37EAA833A247}.DebugLocal|Any CPU.ActiveCfg = Debug|Any CPU
+		{3BD65B2E-8D35-4D33-9221-37EAA833A247}.DebugLocal|Any CPU.Build.0 = Debug|Any CPU
+		{3BD65B2E-8D35-4D33-9221-37EAA833A247}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3BD65B2E-8D35-4D33-9221-37EAA833A247}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8DEDF2DF-71BE-44C7-935C-34152135AB3D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8DEDF2DF-71BE-44C7-935C-34152135AB3D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8DEDF2DF-71BE-44C7-935C-34152135AB3D}.DebugLocal|Any CPU.ActiveCfg = Debug|Any CPU
+		{8DEDF2DF-71BE-44C7-935C-34152135AB3D}.DebugLocal|Any CPU.Build.0 = Debug|Any CPU
+		{8DEDF2DF-71BE-44C7-935C-34152135AB3D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8DEDF2DF-71BE-44C7-935C-34152135AB3D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BAD63C44-A44A-4F5C-BC92-172AABD59664}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BAD63C44-A44A-4F5C-BC92-172AABD59664}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BAD63C44-A44A-4F5C-BC92-172AABD59664}.DebugLocal|Any CPU.ActiveCfg = Debug|Any CPU
+		{BAD63C44-A44A-4F5C-BC92-172AABD59664}.DebugLocal|Any CPU.Build.0 = Debug|Any CPU
+		{BAD63C44-A44A-4F5C-BC92-172AABD59664}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BAD63C44-A44A-4F5C-BC92-172AABD59664}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5505D9A6-2055-46A6-8CC8-C79D35FFDBCC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5505D9A6-2055-46A6-8CC8-C79D35FFDBCC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5505D9A6-2055-46A6-8CC8-C79D35FFDBCC}.DebugLocal|Any CPU.ActiveCfg = Debug|Any CPU
+		{5505D9A6-2055-46A6-8CC8-C79D35FFDBCC}.DebugLocal|Any CPU.Build.0 = Debug|Any CPU
+		{5505D9A6-2055-46A6-8CC8-C79D35FFDBCC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5505D9A6-2055-46A6-8CC8-C79D35FFDBCC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6A130474-2417-4D01-8EE0-3D698869836F}.Debug|Any CPU.ActiveCfg = Debug
+		{6A130474-2417-4D01-8EE0-3D698869836F}.Debug|Any CPU.Build.0 = Debug
+		{6A130474-2417-4D01-8EE0-3D698869836F}.Debug|Any CPU.Deploy.0 = Debug
+		{6A130474-2417-4D01-8EE0-3D698869836F}.DebugLocal|Any CPU.ActiveCfg = DebugLocal
+		{6A130474-2417-4D01-8EE0-3D698869836F}.DebugLocal|Any CPU.Build.0 = DebugLocal
+		{6A130474-2417-4D01-8EE0-3D698869836F}.Release|Any CPU.ActiveCfg = Release
+		{6A130474-2417-4D01-8EE0-3D698869836F}.Release|Any CPU.Build.0 = Release
+		{6A130474-2417-4D01-8EE0-3D698869836F}.Release|Any CPU.Deploy.0 = Release
+		{9DA82353-3F45-47BF-A84F-22B82E9F0F30}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9DA82353-3F45-47BF-A84F-22B82E9F0F30}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9DA82353-3F45-47BF-A84F-22B82E9F0F30}.DebugLocal|Any CPU.ActiveCfg = Debug|Any CPU
+		{9DA82353-3F45-47BF-A84F-22B82E9F0F30}.DebugLocal|Any CPU.Build.0 = Debug|Any CPU
+		{9DA82353-3F45-47BF-A84F-22B82E9F0F30}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9DA82353-3F45-47BF-A84F-22B82E9F0F30}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B8524BF4-9C51-42E4-BF6D-0B6C77433D3E}.Debug|Any CPU.ActiveCfg = Debug
+		{B8524BF4-9C51-42E4-BF6D-0B6C77433D3E}.Debug|Any CPU.Build.0 = Debug
+		{B8524BF4-9C51-42E4-BF6D-0B6C77433D3E}.Debug|Any CPU.Deploy.0 = Debug
+		{B8524BF4-9C51-42E4-BF6D-0B6C77433D3E}.DebugLocal|Any CPU.ActiveCfg = DebugLocal
+		{B8524BF4-9C51-42E4-BF6D-0B6C77433D3E}.DebugLocal|Any CPU.Build.0 = DebugLocal
+		{B8524BF4-9C51-42E4-BF6D-0B6C77433D3E}.Release|Any CPU.ActiveCfg = Release
+		{B8524BF4-9C51-42E4-BF6D-0B6C77433D3E}.Release|Any CPU.Build.0 = Release
+		{B8524BF4-9C51-42E4-BF6D-0B6C77433D3E}.Release|Any CPU.Deploy.0 = Release
+		{3BCAB6C8-659A-4001-A22A-7F46CCE2D349}.Debug|Any CPU.ActiveCfg = Debug
+		{3BCAB6C8-659A-4001-A22A-7F46CCE2D349}.Debug|Any CPU.Build.0 = Debug
+		{3BCAB6C8-659A-4001-A22A-7F46CCE2D349}.Debug|Any CPU.Deploy.0 = Debug
+		{3BCAB6C8-659A-4001-A22A-7F46CCE2D349}.DebugLocal|Any CPU.ActiveCfg = DebugLocal
+		{3BCAB6C8-659A-4001-A22A-7F46CCE2D349}.DebugLocal|Any CPU.Build.0 = DebugLocal
+		{3BCAB6C8-659A-4001-A22A-7F46CCE2D349}.Release|Any CPU.ActiveCfg = Release
+		{3BCAB6C8-659A-4001-A22A-7F46CCE2D349}.Release|Any CPU.Build.0 = Release
+		{3BCAB6C8-659A-4001-A22A-7F46CCE2D349}.Release|Any CPU.Deploy.0 = Release
+		{5AA737E8-1181-4601-ABC5-D89189D16A63}.Debug|Any CPU.ActiveCfg = Debug
+		{5AA737E8-1181-4601-ABC5-D89189D16A63}.Debug|Any CPU.Build.0 = Debug
+		{5AA737E8-1181-4601-ABC5-D89189D16A63}.Debug|Any CPU.Deploy.0 = Debug
+		{5AA737E8-1181-4601-ABC5-D89189D16A63}.DebugLocal|Any CPU.ActiveCfg = DebugLocal
+		{5AA737E8-1181-4601-ABC5-D89189D16A63}.DebugLocal|Any CPU.Build.0 = DebugLocal
+		{5AA737E8-1181-4601-ABC5-D89189D16A63}.Release|Any CPU.ActiveCfg = Release
+		{5AA737E8-1181-4601-ABC5-D89189D16A63}.Release|Any CPU.Build.0 = Release
+		{5AA737E8-1181-4601-ABC5-D89189D16A63}.Release|Any CPU.Deploy.0 = Release
+		{3CF4148F-A9E6-43D5-AAD1-FA8E6F861774}.Debug|Any CPU.ActiveCfg = Debug
+		{3CF4148F-A9E6-43D5-AAD1-FA8E6F861774}.Debug|Any CPU.Build.0 = Debug
+		{3CF4148F-A9E6-43D5-AAD1-FA8E6F861774}.Debug|Any CPU.Deploy.0 = Debug
+		{3CF4148F-A9E6-43D5-AAD1-FA8E6F861774}.DebugLocal|Any CPU.ActiveCfg = DebugLocal
+		{3CF4148F-A9E6-43D5-AAD1-FA8E6F861774}.DebugLocal|Any CPU.Build.0 = DebugLocal
+		{3CF4148F-A9E6-43D5-AAD1-FA8E6F861774}.Release|Any CPU.ActiveCfg = Release
+		{3CF4148F-A9E6-43D5-AAD1-FA8E6F861774}.Release|Any CPU.Build.0 = Release
+		{3CF4148F-A9E6-43D5-AAD1-FA8E6F861774}.Release|Any CPU.Deploy.0 = Release
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{3BD65B2E-8D35-4D33-9221-37EAA833A247} = {CAB7A265-00CA-46FB-99ED-9ED56E52C370}
+		{8DEDF2DF-71BE-44C7-935C-34152135AB3D} = {CAB7A265-00CA-46FB-99ED-9ED56E52C370}
+		{BAD63C44-A44A-4F5C-BC92-172AABD59664} = {CAB7A265-00CA-46FB-99ED-9ED56E52C370}
+		{5505D9A6-2055-46A6-8CC8-C79D35FFDBCC} = {CAB7A265-00CA-46FB-99ED-9ED56E52C370}
+		{6A130474-2417-4D01-8EE0-3D698869836F} = {C72EFCC7-ECFF-4063-BCF4-88344DCA8EB6}
+		{9DA82353-3F45-47BF-A84F-22B82E9F0F30} = {C72EFCC7-ECFF-4063-BCF4-88344DCA8EB6}
+		{B8524BF4-9C51-42E4-BF6D-0B6C77433D3E} = {C72EFCC7-ECFF-4063-BCF4-88344DCA8EB6}
+		{3BCAB6C8-659A-4001-A22A-7F46CCE2D349} = {C72EFCC7-ECFF-4063-BCF4-88344DCA8EB6}
+		{5AA737E8-1181-4601-ABC5-D89189D16A63} = {C72EFCC7-ECFF-4063-BCF4-88344DCA8EB6}
+		{3CF4148F-A9E6-43D5-AAD1-FA8E6F861774} = {C72EFCC7-ECFF-4063-BCF4-88344DCA8EB6}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {47D161DE-4087-4A00-9D82-CF4C5B2F0927}
+	EndGlobalSection
+	GlobalSection(TeamFoundationVersionControl) = preSolution
+		SccNumberOfProjects = 11
+		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
+		SccTeamFoundationServer = https://dev.azure.com/robintexerp
+		SccLocalPath0 = .
+		SccProjectUniqueName1 = RG.Application\\RG.Application.csproj
+		SccProjectTopLevelParentUniqueName1 = RG_ERP.sln
+		SccProjectName1 = RG.Application
+		SccLocalPath1 = RG.Application
+		SccProjectUniqueName2 = RG.DBEntities\\RG.DBEntities.csproj
+		SccProjectTopLevelParentUniqueName2 = RG_ERP.sln
+		SccProjectName2 = RG.DBEntities
+		SccLocalPath2 = RG.DBEntities
+		SccProjectUniqueName3 = RG.Infrastructure\\RG.Infrastructure.csproj
+		SccProjectTopLevelParentUniqueName3 = RG_ERP.sln
+		SccProjectName3 = RG.Infrastructure
+		SccLocalPath3 = RG.Infrastructure
+		SccProjectUniqueName4 = RG.WEB\\RG.WEB.csproj
+		SccProjectTopLevelParentUniqueName4 = RG_ERP.sln
+		SccProjectName4 = RG.WEB
+		SccLocalPath4 = RG.WEB
+		SccProjectUniqueName5 = FiniteScheduler_Report\\FiniteScheduler_Report.rptproj
+		SccProjectTopLevelParentUniqueName5 = RG_ERP.sln
+		SccProjectName5 = FiniteScheduler_Report
+		SccLocalPath5 = FiniteScheduler_Report
+		SccProjectUniqueName6 = SSRSReport.Library\\SSRSReport.Library.csproj
+		SccProjectTopLevelParentUniqueName6 = RG_ERP.sln
+		SccProjectName6 = SSRSReport.Library
+		SccLocalPath6 = SSRSReport.Library
+		SccProjectUniqueName7 = AlgoHR_Report\\AlgoHR_Report.rptproj
+		SccProjectTopLevelParentUniqueName7 = RG_ERP.sln
+		SccProjectName7 = AlgoHR_Report
+		SccLocalPath7 = AlgoHR_Report
+		SccProjectUniqueName8 = MaterialsManagement_Report\\MaterialsManagement_Report.rptproj
+		SccProjectTopLevelParentUniqueName8 = RG_ERP.sln
+		SccProjectName8 = MaterialsManagement_Report
+		SccLocalPath8 = MaterialsManagement_Report
+		SccProjectUniqueName9 = Embro_Report\\Embro_Report.rptproj
+		SccProjectTopLevelParentUniqueName9 = RG_ERP.sln
+		SccProjectName9 = Embro_Report
+		SccLocalPath9 = Embro_Report
+		SccProjectUniqueName10 = EMS_Report\\EMS_Report.rptproj
+		SccProjectTopLevelParentUniqueName10 = RG_ERP.sln
+		SccProjectName10 = EMS_Report
+		SccLocalPath10 = EMS_Report
+	EndGlobalSection
+EndGlobal

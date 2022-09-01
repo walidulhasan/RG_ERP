@@ -1,0 +1,420 @@
+﻿@model RG.Application.ViewModel.FiniteScheduler.Business.MachineMaintenance.MachineMaintenanceCheckVM
+@{
+    ViewData[PageInfo.PageTitle] = "Machine Maintenance";
+    ViewData[PageInfo.PageHeader] = "Machine Maintenance Detail";
+    ViewData[PageInfo.btnText1] = "Back to List";
+    ViewData[PageInfo.PageLink1] = "/FiniteScheduler/MachineMaintenance/Index";
+    ViewData[PageInfo.btnClass1] = "btn-warning";
+
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+}
+<form id="MachineAndMaintenanceCheckListMaster">
+    <input type="hidden" asp-for="MasterID" />
+    <div class="row">
+        <div class="col-sm-12 col-md-12">
+            <div class="card card-dark">
+                <div class="card-header m-0 p-1">
+                    <h5 class="card-title">Machine Information</h5>
+                </div>
+                <div class="card-body mb-0">
+                    <div class="row">
+                        <div class="col-sm-3">
+                            <div class="form-group">
+                                <label asp-for="CompanyID" class="required"></label>
+                                <select asp-for="CompanyID" asp-items="Model.DDLCompany" class="form-control form-control-sm"></select>
+                                <span asp-validation-for="CompanyID" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-sm-2">
+                            <div class="form-group">
+                                <label asp-for="LocationID" class="required"></label>
+                                <select asp-for="LocationID" asp-items="Model.DDLLocation" class="form-control form-control-sm"></select>
+                                <span asp-validation-for="LocationID" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-sm-3">
+                            <div class="form-group">
+                                <label asp-for="MachineID" class="required"></label>
+                                <select asp-for="MachineID" asp-items="Model.DDLMachine" class="form-control form-control-sm"></select>
+                                <span asp-validation-for="MachineID" class="text-danger"></span>
+                            </div>
+                        </div>
+                        @if (Model.MasterID > 0)
+                        {<div class="col-sm-2">
+                                <div class="form-group">
+                                    <label asp-for="ScheduleDate" class="required"></label>
+                                    <input type="text" asp-for="ScheduleDate" class="form-control form-control-sm dateField" />
+                                    <span asp-validation-for="ScheduleDate" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                        }
+                        else
+                        {
+                            <div class="col-sm-2">
+                                <div class="form-group">
+                                    <label asp-for="ScheduleDate" class="required"></label>
+                                    <select asp-for="ScheduleDate" asp-items="Model.DDLScheduleDates" class="form-control form-control-sm"></select>
+                                    <span asp-validation-for="ScheduleDate" class="text-danger"></span>
+                                </div>
+                            </div>
+                        }
+                        <div class="col-sm-2">
+                            <div class="form-group">
+                                <label asp-for="CheckDate" class="required"></label>
+                                <input type="text" asp-for="CheckDate" value="" placeholder="Check Date" class="form-control form-control-sm dateField" />
+                                <span asp-validation-for="CheckDate" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+        <div class="col-sm-12 col-md-12 m-0">
+            <div class="card card-gray-dark">
+                <div class="card-header m-0 p-1">
+                    <h4 class="card-title">Machine Information</h4>
+                </div>
+                <div class="card-body m-0">
+                    <table class="table table-sm table-bordered table-striped text-center" id="">
+                        <thead>
+                            <tr>
+                                <th>SL</th>
+                                <th><input type="checkbox" class="allchkIssue" onchange="AllItemCheck(this)" id="" value="" /></th>
+                                <th colspan="2">Name Of Work</th>
+                                <th></th>
+                                <th>Comment On Work (Mechanical)</th>
+                                <th></th>
+                                <th>Comment On Work (Electrical)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tblMaintenanceItem">
+                        </tbody>
+                        <tfoot id="tfootBtn" style="display:none">
+                            <tr>
+                                <td colspan="4" style="text-align:center">
+                                    <table class="" id="">
+                                        <thead class="text-center bg-info">
+                                            <tr>
+                                                <td colspan="4"><strong>Mechanical</strong> </td>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td><label>Member</label> </td>
+                                                <td>
+                                                    <input type="text" asp-for="MechanicalTaskTeamMember" class="form-control form-control-sm" style="height:25px" placeholder="Team Member">
+                                                </td>
+                                                <td><label>Supervisor</label> </td>
+                                                <td>
+                                                    <input type="text" asp-for="MechanicalSupervisor" class="form-control form-control-sm" style="height:25px" placeholder="Task Supervisor">
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td><label>Comment</label> </td>
+                                                <td colspan="3">
+                                                    <textarea asp-for="MechanicalWorkerComments" class="form-control form-control-sm" placeholder="Comment"></textarea>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </td>
+                                <td colspan="4" style="text-align:center">
+                                    <table class="" id="tblAllMaintenanceItem">
+                                        <thead class="text-center bg-info">
+                                            <tr>
+                                                <td colspan="4"><strong>Electrical</strong>  </td>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td><label>Member</label> </td>
+                                                <td>
+                                                    <input type="text" asp-for="ElectricalTaskTeamMember" class="form-control form-control-sm" style="height:25px" placeholder="Team Member">
+                                                </td>
+                                                <td><label>Supervisor</label> </td>
+                                                <td>
+                                                    <input type="text" asp-for="ElectricalSupervisor" class="form-control form-control-sm" style="height:25px" placeholder="Task Supervisor">
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td><label>Comment</label> </td>
+                                                <td colspan="3">
+                                                    <textarea type="text" asp-for="ElectricalWorkerComments" class="form-control form-control-sm" placeholder="Comment"></textarea>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="8" style="text-align:center"> <button type="button" class="btn btn-sm btn-success" id="btnSave">Save</button></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</form>
+
+@section scripts{
+    <script type="text/javascript">
+
+    function GetMachineAndMaintenanceItem() {
+        let machineID = $("#MachineID").val();
+        let masterID = $("#MasterID").val();
+        var data = HttpRequest.AjaxData("GET", "/FiniteScheduler/MachineMaintenance/GetMachineWiseMaintenanceItemDetail", { "machineID": machineID, 'masterID': masterID });
+
+        if (data.length > 0) {
+            let maintenanceItem = '';
+            $("#tblMaintenanceItem").html("");
+            $.each(data, function (i, v) {
+                if (v.AssociationID > 0) {
+                    let mainChk = '';
+                    let mechaniclaChk = '';
+                    let electricalChk = '';
+
+                    if (v.MasterDetailID > 0) {
+                        mainChk = 'checked';
+                        if (v.MechanicalChecked)
+                            mechaniclaChk = 'checked'
+                        if (v.ElectricalChecked)
+                            electricalChk='checked'
+                    }
+                    if ('@Model.MasterID' == 0) {
+                        mainChk = 'checked';
+                        if (v.ItemCategoryID == 1) {
+                            mechaniclaChk = "checked";
+                            electricalChk = "checked";
+                        } else if (v.ItemCategoryID == 2) {
+                            mechaniclaChk = "checked";
+                        } else if (v.ItemCategoryID == 3) {
+                            electricalChk = "checked";
+                        }
+                    }
+
+
+                    maintenanceItem = maintenanceItem + `<tr class="">
+                            <td>${++i}</td>
+                            <td>
+                             <input type="checkbox" class="chkCheckingIssueItem" id="" value="" onchange="ItemCheckIssue(this)" ${mainChk}/>
+                             <input type="hidden" class="hdnMasterDetailID" value="${v.MasterDetailID}"/>
+                             <input type="hidden" class="hdnAssociationID" value="${v.AssociationID}"/>
+                            </td>
+                            <td colspan="2">${v.ItemName}</td>
+                              <td> <input type="checkbox" ${mechaniclaChk}  class="chkMechanical" id="" value=""/></td>
+                            <td><input class="form-control form-control-sm MechanicalComments" style="height:20px" value="${v.MechanicalComments}" /></td>
+                             <td> <input type="checkbox" ${electricalChk}  class="chkElectrical" id="" value=""/></td>
+                            <td><input class="form-control form-control-sm ElectricalComments" style="height:20px" value="${v.ElectricalComments}" /></td>
+                        </tr>`;
+                    $("#tfootBtn").show();
+                }
+            });
+            $("#tblMaintenanceItem").html(maintenanceItem);
+        }
+    }
+    function ItemCheckIssue(that) {
+
+        let trLength = $("#tblMaintenanceItem tr").length;
+        let chkItem = 0;
+        let isChecked = $(that).is(':checked');
+        if (isChecked) {
+            $(that).parent().parent().find('.chkMechanical, .chkElectrical').prop('checked', true);
+            $(".chkCheckingIssueItem:checkbox:checked").each(function () {
+                debugger
+                chkItem += $(this).length;
+                if (trLength == chkItem) {
+                    $('.allchkIssue').prop('checked', true);
+                } else {
+                    $(this).prop('checked', true)
+                    $('.allchkIssue').prop('checked', false);
+                }
+            })
+        } else {
+            $(that).parent().parent().find('.chkMechanical, .chkElectrical').prop('checked', false);
+            $('.allchkIssue').prop('checked', false);
+        }
+    }
+    function AllItemCheck(that) {
+            let isChecked = $(that).is(':checked');
+            if (isChecked) {
+                $('.chkCheckingIssueItem').prop('checked', true);
+                $('.chkMechanical, .chkElectrical').prop('checked', true);
+            } else {
+                $('.chkCheckingIssueItem').prop('checked', false);
+                $('.chkMechanical, .chkElectrical').prop('checked', false);
+            }
+        }
+        function ClearPage() {
+            $("#CompanyID").val('').trigger('change');
+            $("#CheckDate").val('');
+            $('.MechanicalComments, .ElectricalComments').val('');
+            $('.chkCheckingIssueItem').prop('checked', true).trigger('change');
+    }
+    function saveSuccess(data) {
+
+        if (data.result == 1) {
+
+            $.alert.open({
+                type: 'Success',
+                content: data.message,
+                callback: function () {
+                    if ('@Model.MasterID' > 0) {
+                        window.location.replace('/FiniteScheduler/MachineMaintenance/Index');
+                    } else {
+                        ClearPage();
+                    }
+                }
+            });
+        }
+        else {
+            $.alert.open("error", data.message);
+
+        }
+    }
+    $(function () {
+        $("#MachineID").change(function () {
+            let machineID = $("#MachineID").val();
+            if (machineID != "") {
+                HttpRequest.DropDown("GET", "/FiniteScheduler/CommonDropDown/GetDDLMachineWiseMaintenanceSchedule", { "machineID": machineID }, "ScheduleDate", "");
+                GetMachineAndMaintenanceItem();
+            } else {
+                HttpRequest.DropDownDefault('ScheduleDate');
+                $("#tblMaintenanceItem").html("");
+                $("#tfootBtn").hide();
+            }
+        });
+        $("#LocationID").change(function () {
+            let locationID = $("#LocationID").val();
+            if (locationID != "") {
+                HttpRequest.DropDown("GET", "/FiniteScheduler/CommonDropDown/GetDDLLocationWiseMachine", { "locationID": locationID }, "MachineID", "");
+            } else {
+                HttpRequest.DropDownDefault('MachineID');
+                $("#MachineID").trigger('change');
+            }
+
+        });
+        $("#CompanyID").change(function () {
+            let companyID = $("#CompanyID").val();
+            if (companyID != "") {
+                HttpRequest.DropDown("GET", "/FiniteScheduler/CommonDropDown/GetDDLCompanyWiseLocation", { "companyID": companyID }, "LocationID", "");
+            } else {
+                HttpRequest.DropDownDefault('LocationID');
+                $("#LocationID").trigger('change');
+            }
+
+        });
+
+
+        $("#btnSave").click(function () {
+            debugger
+            if ($("#MachineAndMaintenanceCheckListMaster").valid()) {
+                let masterID = $("#MasterID").val();
+                let machineID = $("#MachineID").val();
+                let scheduleID = $("#ScheduleDate").val();
+                let mechanicalTaskTeamMember = $("#MechanicalTaskTeamMember").val();
+                let mechanicalSupervisor = $("#MechanicalSupervisor").val();
+
+                let electricalTaskTeamMember = $("#ElectricalTaskTeamMember").val();
+                let electricalSupervisor = $("#ElectricalSupervisor").val();
+
+                let checkDate = $("#CheckDate").val();
+                const checkDateParse = new Date(checkDate);
+                let mechanicalWorkerComments = $("#MechanicalWorkerComments").val();
+                let electricalWorkerComments = $("#ElectricalWorkerComments").val();
+
+
+                const conditionDateFrom = new Date();
+                conditionDateFrom.setDate(conditionDateFrom.getDate() - 4);
+
+                const conditionDateTo = new Date();
+                conditionDateTo.setDate(conditionDateTo.getDate() +0);
+
+                if (checkDateParse <= conditionDateFrom) {
+                    $.alert.open("warning", `Check date is not correct. Check date is 4 days less than current date.`)
+                    return;
+                }
+                if (checkDateParse >= conditionDateTo)
+                {
+                    $.alert.open("warning", `Check date is not correct.Check date is future date.`)
+                    return;
+
+                }
+
+                let checkedDataCount = $(".chkCheckingIssueItem:checkbox:checked").length;
+                if (checkedDataCount > 0 && machineID != "") {
+                    let MachineAndMaintenanceCheckList = new Array();
+                  
+                    $(".chkCheckingIssueItem:checkbox:checked").each(function () {
+                       
+                        let that = $(this).parent().parent();
+                        let detailID = that.find('.hdnMasterDetailID').val();
+                        let associationID = that.find('.hdnAssociationID').val();
+                        let mechanicalChecked = that.find('.chkMechanical').is(':checked');
+                        let electricalChecked = that.find('.chkElectrical').is(':checked');
+                        let mechanicalComments = that.find('.MechanicalComments').val();
+                        let electricalComments = that.find('.ElectricalComments').val();
+
+                        let masterDetailsObj = {
+                            DetailID: detailID,
+                            AssociationID: associationID,
+                            MechanicalChecked: mechanicalChecked,
+                            MechanicalComments: mechanicalComments,
+                            ElectricalChecked: electricalChecked,
+                            ElectricalComments: electricalComments
+                        };
+                        MachineAndMaintenanceCheckList.push(masterDetailsObj);
+
+                    });
+                    var masterObj = {
+                        MasterID: masterID,
+                        MachineID: machineID,
+                        ScheduleID: scheduleID,
+                        MechanicalTaskCompletedBy: mechanicalTaskTeamMember,
+                        MechanicalTaskSupervisor: mechanicalSupervisor,
+                        ElectricalTaskCompletedBy: electricalTaskTeamMember,
+                        ElectricalTaskSupervisor: electricalSupervisor,
+                        CheckDate: checkDate,
+                        MechanicalWorkerComments: mechanicalWorkerComments,
+                        ElectricalWorkerComments: electricalWorkerComments,
+                        MachineAndMaintenanceCheckListDetails: MachineAndMaintenanceCheckList
+                    }
+                    if ((mechanicalTaskTeamMember != "" && mechanicalSupervisor != "") || (electricalTaskTeamMember != "" && electricalSupervisor != "")) {
+                        HttpRequest.Ajax("POST", '/FiniteScheduler/MachineMaintenance/Create', { "model": masterObj }, saveSuccess, true);
+
+                    } else {
+                        $.alert.open("error","Member And Supervisor Field is Required")
+                    }
+
+
+                }
+            }
+
+
+        });
+
+        if ('@Model.MasterID' > 0) {
+
+            $("#ScheduleDate").val('@Model.ScheduleDate').attr('disabled', true);
+            $("#CheckDate").val('@Model.CheckDate').attr('disabled', true);
+            if ('@Model.CompanyID' > 0) {
+                $("#CompanyID").trigger('change').attr('disabled', true);
+            }
+            if ('@Model.LocationID' > 0) {
+                $("#LocationID").val('@Model.LocationID').trigger('change').attr('disabled', true);
+            }
+            if ('@Model.MachineID' > 0) {
+                $("#MachineID").val('@Model.MachineID').trigger('change').attr('disabled', true);
+            }
+        }
+    })
+
+    </script>
+}
+
+

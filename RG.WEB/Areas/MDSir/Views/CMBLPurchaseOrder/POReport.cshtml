@@ -1,0 +1,384 @@
+﻿@model RG.Application.ViewModel.MDSir.CMBLPurchaseOrder.POReportVM
+
+@{
+
+    Layout = null;
+    var poProcessBGColor = "";
+    poProcessBGColor = Model.POStatus == "Rejected" ? "bg-danger text-white" :
+                     Model.POStatus == "In Process" ? "bg-warning" :
+                     Model.POStatus == "Created" ? "bg-info" : "bg-success text-white";
+
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PO Report</title>
+    <link href="~/AdminLTE-3.1.0/plugins/jquery-ui/jquery-ui.min.css" rel="stylesheet" />
+    <link href="~/lib/bootstrap-5.0.2/css/bootstrap.min.css" rel="stylesheet" />
+    <script src="~/AdminLTE-3.1.0/plugins/jquery/jquery.min.js"></script>
+    <script src="~/AdminLTE-3.1.0/plugins/jquery-ui/jquery-ui.min.js"></script>
+    <script src="~/lib/bootstrap-5.0.2/js/bootstrap.bundle.min.js"></script>
+
+
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.12/css/jquery.dataTables.min.css" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/1.2.2/css/buttons.dataTables.min.css" />
+    <script type="text/javascript" src="https://code.jquery.com/jquery-1.12.3.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.2.2/js/dataTables.buttons.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/2.5.0/jszip.min.js"></script>
+    <script type="text/javascript" src="https://cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/pdfmake.min.js"></script>
+    <script type="text/javascript" src="https://cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/vfs_fonts.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.2.2/js/buttons.html5.min.js"></script>
+
+</head>
+
+<body>
+    <div class="container-fluid">
+        <br />
+        <div class="row" style="font-size:12px;">
+
+            <div class="col-4 col-sm-4 col-md-4 col-lg-4">
+                <table class="display nowrap">
+
+                    <tbody>
+                        <tr><th>Supplier: @Model.POSupplierInfo.SupplierName</th></tr>
+                        <tr><td><b>Address: </b>@Model.POSupplierInfo.SupplierAddress</td></tr>
+                        <tr><td><b>Phone No: </b>@Model.POSupplierInfo.SupplierPhoneNo</td></tr>
+                        <tr><td><b>Email: </b>@Model.POSupplierInfo.SupplierEmail</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="col-4 col-sm-4 col-md-4 col-lg-4 text-center">
+                @{
+                    if (Model.CompanyID == 183)
+                    {
+
+                        <img src="~/CustomSiteImages/RBLLogo.png" height="50" />
+                    }
+                    else
+                    {
+                        <img src="~/CustomSiteImages/CBLLogo.png" height="50" />
+                    }
+                }
+            </div>
+            <div class="col-3 col-sm-3 col-md-3 col-lg-3 offset-1">
+                <table class="display nowrap">
+                    <tbody>
+                        <tr><th><h6 class="m-0">@Model.POCompanyInfo.CompanyName</h6></th></tr>
+                        <tr><td><b>House#</b> 108(5th Floor)</td></tr>
+                        <tr><td><b>Road#</b> 11, <b>Block# </b>C, Banani,</td></tr>
+                        <tr><td>Dhaka-1213, Bangladesh</td></tr>
+                        <tr><td><b>Factory:</b> Vulta, Rupgonj, Narayangonj </td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+        <div class="row">
+
+            <div class="col-12 col-sm-12 col-md-12 col-lg-12 text-center" style="font-size:12px;">
+                <h6 class="bg-info p-1"><u>General Purchase Order</u></h6>
+                <table class="table table-sm table-bordered table-striped text-xs text-center display nowrap">
+                    <tbody>
+                        <tr>
+                            <th class="text-end col-sm-4">PO Date</th>
+                            <td class="text-start col-sm-2" id="PODate">@Model.PODate</td>
+                            <th class="text-end col-sm-2">PO No</th>
+                            <td class="text-start col-sm-4" id="PONo">@Model.PONO &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="@poProcessBGColor fw-bold p-1">( @Model.POStatus )</span></td>
+                        </tr>
+                        <tr>
+                            <th class="text-end">Delivery Location</th>
+                            <td class="text-start" id="DeliveryLocation">@Model.DeliveryLocation</td>
+                            <th class="text-end">Payment Mode</th>
+                            <td class="text-start" id="PaymentMode">@(Model.PaymentMode=="Advance"?$"{Model.PaymentMode} ({Model.AdvancePercentage}%)": Model.PaymentMode)</td>
+                        </tr>
+                        <tr>
+                            <th class="text-end">LC No</th>
+                            <td class="text-start" id="LCNo">@Model.LCNo</td>
+                            <th class="text-end">Payment Term</th>
+                            <td class="text-start" id="PaymentTerm">@Model.PaymentTerm</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12 col-sm-12 col-md-12 col-lg-12 text-center" style="font-size:12px;">
+                <h6 class="bg-info p-1"><u>PO Requisitions</u></h6>
+                <table class="table table-sm table-bordered table-striped text-center display nowrap">
+                    <thead>
+                        <tr>
+                            <th>SL#</th>
+                            <th>Requisition No</th>
+                            <th>Prepared By</th>
+                            <th>Buyer Name</th>
+                            <th>Order No</th>
+
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            int requisitionSL = 0;
+                            foreach (var item in Model.PORequisition.OrderBy(x => x.RequisitionNo))
+                            {
+                                <tr>
+                                    <td>@(++requisitionSL)</td>
+                                    <th>
+                                        <a style="cursor:pointer;" class="text-primary"
+                                           onclick="window.open(`http://119.148.55.92/erp/MaterialsManagement/Consumables_new/requisition/Requisition_Preview.asp?Id=4&irid=${@item.IRID}`, '_blank', 'location=yes,height=570,width=1000,scrollbars=yes,status=yes');">
+                                            @item.RequisitionNo
+                                        </a>
+                                    </th>
+                                    <td>@item.UserName</td>
+                                    <td>@item.Buyer</td>
+                                    <td>@item.OrderNo</td>
+                                </tr>
+
+                            }
+
+
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+        @if (Model.POQuotationFile != null && Model.POQuotationFile.Count > 0)
+        {
+            <div class="row text-center">
+                    <h6 class="bg-info p-1"><u>PO Quotation</u></h6>
+                <div class="col-8 col-sm-8 col-md-8 col-lg-8 offset-2" style="font-size:12px;">
+                    <table class="table table-sm table-bordered table-striped text-center display nowrap">
+                        <thead>
+                            <tr>
+                                <th>SL#</th>
+                                <th>File Name</th>
+                                <th>Comments</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{
+                                int quotationSL = 0;
+                                foreach (var item in Model.POQuotationFile)
+                                {
+                                    <tr>
+                                        <td class="col-1 col-sm-1 col-md-1">@(++quotationSL)</td>
+
+                                        <th class="col-5 col-sm-5 col-md-5">
+                                            <a style="cursor:pointer;" class="text-primary"
+                                               onclick="window.open(`http://192.173.163.8/Store/PODocuments/@item.FileName`, '_blank', 'location=yes,height=570,width=1000,scrollbars=yes,status=yes');">
+                                                @item.FileName
+                                            </a>
+                                        </th>
+                                        <td class="col-6 col-sm-6 col-md-6">@item.Comments</td>
+
+
+                                    </tr>
+
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        }
+        <div class="row">
+            <div class="col-12 col-sm-12 col-md-12 col-lg-12 text-center" style="font-size:12px;">
+                <h6 class="bg-info p-1"><u>PO Items</u></h6>
+                <table class="table table-sm table-bordered table-striped  text-center display nowrap">
+                    <thead>
+                        <tr>
+                            <th>SL#</th>
+                            <th>Item Name</th>
+                            <th>Category</th>
+                            <th>Req. No</th>
+                            <th>Quantity</th>
+                            <th>Unit</th>
+                            <th>Rate</th>
+                            <th>Amount</th>
+
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            int itemSL = 0;
+                            long previousReqNo = 0;
+                            foreach (var item in Model.POItem.OrderBy(x => x.RequisitionNo))
+                            {
+                                if (Model.PORequisition.Count > 1)
+                                {
+                                    if (previousReqNo == 0 || previousReqNo != item.RequisitionNo)
+                                    {
+                                        <tr class="text-start">
+                                            <th colspan="8">Requisition No: @item.RequisitionNo</th>
+
+                                        </tr>
+                                    }
+                                }
+                                <tr>
+                                    <td>@(++itemSL)</td>
+                                    <td class="text-start">@item.ItemName</td>
+                                    <td>@item.Category</td>
+                                    <td>@item.RequisitionNo</td>
+                                    <td class="text-end">@(String.Format("{0:n2}", item.Quantity))</td>
+                                    <td>@item.Unit</td>
+                                    <td>@(String.Format("{0:n2}", item.Rate))</td>
+                                    <td class="text-end">@(String.Format("{0:n2}", item.AmountTotal))</td>
+                                </tr>
+                                previousReqNo = item.RequisitionNo;
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="row" style="font-size:12px;">
+
+            <div class="col-5 col-sm-5 col-md-5 col-lg-5">
+                <table class="table table-sm table-bordered table-striped text-xs display nowrap">
+
+                    <thead>
+                        <tr class="text-center">
+                            <th>Req. No</th>
+                            <th>Comment</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+
+                            foreach (var item in Model.PORequisition)
+                            {
+                                <tr>
+                                    <th class="text-center">@(item.RequisitionNo)</th>
+                                    <td>@item.RequisitionComments</td>
+                                </tr>
+
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <div class="col-5 col-sm-5 col-md-5 col-lg-5 offset-2">
+                <table class="table table-sm table-bordered table-striped text-center display nowrap">
+                    <thead>
+                        <tr>
+                            <th colspan="2">Delivery Schedule</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @{
+                            var deliverySchedule = Model.POItem
+                                .GroupBy(x => x.DeliveryDate)
+                                .Select(y => new
+                                {
+                                    DeliveryDate = y.Key,
+                                    Quantity = y.Sum(x => x.Quantity)
+                                }).ToList();
+
+                            foreach (var item in deliverySchedule)
+                            {
+                                <tr>
+                                    <th>Delivery :<b> @item.DeliveryDate.ToString("dd-MMM-yyyy")</b></th>
+                                    <th>Quantity :<b> @(String.Format("{0:n2}", item.Quantity))</b></th>
+
+                                </tr>
+
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+        <div class="row">
+            <div class="col-12 col-sm-12 col-md-12 col-lg-12" style="font-size:12px;">
+
+                <table class="table table-sm table-bordered table-striped display nowrap">
+                    <thead>
+                        <tr class="text-center">
+                            <th><u>Terms and Conditions</u></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                        <tr>
+                            <td><b>1-</b> Goods must be delivered in accordance with delivery schedule as stipulated above within normal working hours.</td>
+                        </tr>
+                        <tr>
+                            <td><b>2-</b> The Acceptance should be faxed within 3 days of receipt failing which, this contract shall be deemed as acceped contract.</td>
+                        </tr>
+                        <tr>
+                            <td><b>3-</b> Goods is accepted only, if it meets standard attached with purchase contract.</td>
+                        </tr>
+                        <tr>
+                            <td><b>4-</b> In case of any quality/ quantity problem, goods must be replaced as per buyer needs.</td>
+                        </tr>
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="row" style="font-size:12px;">
+
+            <div class="col-4 col-sm-4 col-md-4 col-lg-4">
+                <table class="table table-sm table-bordered table-striped text-xs display nowrap">
+                    <tbody>
+                        <tr>
+                            <td><b>Total Item Quantity</b></td>
+                            <td class="text-end"><b>@(String.Format("{0:n2}", Model.POItem.Sum(x => x.Quantity))) </b></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="col-3 col-sm-3 col-md-3 col-lg-3 offset-5">
+                <table class="table table-sm table-bordered table-striped text-xs display nowrap">
+                    <tbody>
+                        <tr>
+                            <th>PO Value</th>
+                            <td class="text-end"><b>@(String.Format("{0:n2}", Model.POItem.Sum(x => x.AmountTotal)))</b></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+        <br />
+
+        <div class="row text-center" style="font-size:12px;">
+
+            <div class="col-3 col-sm-3 col-md-3 col-lg-3">
+                <table class="display nowrap col-12 col-sm-12 col-md-12">
+                    <tbody>
+                        <tr>
+                            <th>@Model.UserName</th>
+                        </tr>
+                        <tr>
+                            <td style="border-top:1px solid black;"><b>Prepared By</b></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="col-3 col-sm-3 col-md-3 col-lg-3 offset-6">
+                <table class="display nowrap col-12 col-sm-12 col-md-12">
+                    <tbody>
+                        <tr>
+                            <td style="border-top:1px solid black;"><b>Approved By</b></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+    <br />
+    <br />
+</body>
+</html>
+
+<script type="text/javascript">
+
+</script>

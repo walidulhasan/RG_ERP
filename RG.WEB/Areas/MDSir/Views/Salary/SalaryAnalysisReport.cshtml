@@ -1,0 +1,157 @@
+﻿@model List<RG.Application.ViewModel.MDSir.Salary.SalaryAnalysisReportVM>
+@{
+
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Document Purchase Ratio</title>
+    <link href="~/AdminLTE-3.1.0/plugins/jquery-ui/jquery-ui.min.css" rel="stylesheet" />
+    <link href="~/lib/bootstrap-5.0.2/css/bootstrap.min.css" rel="stylesheet" />
+    <script src="~/AdminLTE-3.1.0/plugins/jquery/jquery.min.js"></script>
+    <script src="~/AdminLTE-3.1.0/plugins/jquery-ui/jquery-ui.min.js"></script>
+    <script src="~/lib/bootstrap-5.0.2/js/bootstrap.bundle.min.js"></script>
+
+
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.12/css/jquery.dataTables.min.css" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/1.2.2/css/buttons.dataTables.min.css" />
+    <script type="text/javascript" src="https://code.jquery.com/jquery-1.12.3.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.2.2/js/dataTables.buttons.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/2.5.0/jszip.min.js"></script>
+    <script type="text/javascript" src="https://cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/pdfmake.min.js"></script>
+    <script type="text/javascript" src="https://cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/vfs_fonts.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.2.2/js/buttons.html5.min.js"></script>
+
+    <style>
+        .header {
+            position: sticky;
+            top: 0;
+        }
+        .total-text-danger {
+            color:#912020;
+        }
+        .total-text-success {
+            color: #a4ff6c;
+        }
+    </style>
+
+</head>
+
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="text-center">
+                <h5 class="mb-0">Robintex (Bangladesh) Limited</h5>
+                <h6>Month Wise Salary Analysis</h6>
+                @if (Model.Count > 0)
+                {
+                    <h6>@Model[0].MonthFirstDate to @Model[0].MonthLastDate</h6>
+                }
+            </div>
+        </div>
+
+        <div class="col-8 col-sm-8 col-md-8 col-lg-8 offset-2 text-center">
+            <table class="table table-sm table-bordered table-striped text-sm text-center display nowrap" id="tblDocuments">
+                <thead class="bg-dark text-white header font-weight-bold">
+                    <tr>
+                        <th>Sl#</th>
+                        <th>Division</th>
+                        <th>Earning (BDT)</th>
+                        <th>Cost (BDT)</th>
+                        <th>Profit/Loss (BDT)</th>
+
+                    </tr>
+                </thead>
+                <tbody>
+                    @{ var sl = 0;
+
+                        foreach (var item in Model)
+                        {
+
+
+                            sl++;
+                            var profitLoss = item.Earning - item.TotalCost;
+                            var bgProfitLoss = "bg-success";
+                            if (profitLoss < 0)
+                            {
+                                bgProfitLoss = "bg-danger";
+                            }
+                            <tr>
+                                <td>@sl</td>
+
+                                <th>
+                                    <a style="cursor:pointer;" class="text-primary"
+                                       onclick="window.open(`/MDSir/Salary/SalaryAnalysisDetailReport?SalaryAnalysisDivisionID=${@item.SalaryAnalysisDivisionID}&Month=${@item.Month}&Year=${@item.Year}`, '_blank', 'location=yes,height=570,width=1000,scrollbars=yes,status=yes');">
+                                        @item.AnalysisDivision
+                                    </a>
+                                </th>
+                                <td class="text-end">@(String.Format("{0:n2}", item.Earning))</td>
+                                <td class="text-end">@(String.Format("{0:n2}", item.TotalCost))</td>
+                                <td class="text-end @bgProfitLoss text-white">@(String.Format("{0:n2}", profitLoss))</td>
+
+                            </tr>
+
+                            if (Model.Last() == item)
+                            {
+                                string profitColor = "";
+                                var profit = Model.Sum(x => x.Earning - x.TotalCost);
+                                if (profit < 0)
+                                {
+                                    profitColor = "total-text-danger";
+                                }
+                                else if (profit > 0)
+                                {
+                                    profitColor = "total-text-success";
+                                }
+                         
+                                <tr class="bg-info">
+
+                                    <td colspan="2"><b>Total</b></td>
+                                    <td class="text-end "><b>@(String.Format("{0:n2}", Model.Sum(x=>x.Earning)))</b></td>
+                                    <td class="text-end "><b>@(String.Format("{0:n2}", Model.Sum(x => x.TotalCost)))</b></td>
+                                    <td class="text-end @profitColor"><b>@(String.Format("{0:n2}", profit))</b></td>
+                                </tr>
+                            }
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="text-center">
+            <input type="button" class="btn btn-sm btn-success" value="Excel" id="btnExcel" onclick="exportToExcel()" />
+        </div>
+    </div>
+</body>
+</html>
+
+<script type="text/javascript">
+    function exportToExcel() {
+        var htmls = "";
+        var uri = 'data:application/vnd.ms-excel;base64,';
+        var template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>';
+        var base64 = function (s) {
+            return window.btoa(unescape(encodeURIComponent(s)))
+        };
+
+        var format = function (s, c) {
+            return s.replace(/{(\w+)}/g, function (m, p) {
+                return c[p];
+            })
+        };
+
+        htmls = document.getElementById("tblDocuments").innerHTML;
+
+        var ctx = {
+            worksheet: 'Worksheet',
+            table: htmls
+        }
+        var link = document.createElement("a");
+        link.download = "MonthWiseSalaryAnalysis.xls";
+        link.href = uri + base64(format(template, ctx));
+        link.click();
+    }
+</script>

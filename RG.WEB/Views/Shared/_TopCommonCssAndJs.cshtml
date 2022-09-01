@@ -1,0 +1,101 @@
+﻿@*<link href="~/AdminLTE-3.1.0/plugins/fontawesome-free/css/all.css" rel="stylesheet" />*@
+<link href="~/lib/fontawesome-free-6.0.0-web/css/all.min.css" rel="stylesheet" />
+<link href="~/AdminLTE-3.1.0/plugins/flag-icon-css/css/flag-icon.css" rel="stylesheet" />
+<link href="~/AdminLTE-3.1.0/plugins/jquery-ui/jquery-ui.min.css" rel="stylesheet" />
+
+<link href="~/AdminLTE-3.1.0/plugins/overlayScrollbars/css/OverlayScrollbars.css" rel="stylesheet" />
+
+
+<link href="~/AdminLTE-3.1.0/plugins/overlayScrollbars/css/OverlayScrollbars.css" rel="stylesheet" />
+
+<link href="~/AdminLTE-3.1.0/dist/css/adminlte.css" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
+<link href="~/lib/devExtreme/css/dx.light.compact.css" rel="stylesheet" />
+
+
+<script src="~/AdminLTE-3.1.0/plugins/jquery/jquery.min.js"></script>
+<script src="~/AdminLTE-3.1.0/plugins/jquery-ui/jquery-ui.min.js"></script>
+
+<script>
+    $.widget.bridge('uibutton', $.ui.button)
+</script>
+
+<script src="~/AdminLTE-3.1.0/plugins/bootstrap/js/bootstrap.bundle.js"></script>
+
+
+<!--Custom CSS-->
+<link href="~/css/site.css" rel="stylesheet" />
+<!-- alert css -->
+<link href="~/lib/jquery-alert/css/alert.css" rel="stylesheet" />
+<link href="~/lib/jquery-alert/themes/default/theme.css" rel="stylesheet" />
+<!-- alert js -->
+<script src="~/lib/jquery-alert/js/alert.js"></script>
+<script src="~/js/customScripts/generalizedFunctions.js"></script>
+<script src="~/js/customScripts/GenericHTTPRequest.js"></script>
+<!--SignalR Notification-->
+<script src="~/js/signalr/dist/browser/signalr.min.js"></script>
+
+
+
+<link href="~/AdminLTE-3.1.0/plugins/select2/css/select2.min.css" rel="stylesheet" />
+<link href="~/AdminLTE-3.1.0/plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css" rel="stylesheet" />
+<script src="~/AdminLTE-3.1.0/plugins/select2/js/select2.min.js"></script>
+
+<script type="text/javascript">
+
+    function buttonDisabled(thatButton) {
+
+        thatButton.prop('disabled', true);
+        var loadingText = '<i class="fa fa-circle-o-notch fa-spin"></i> loading...';
+        if (thatButton.html() !== loadingText) {
+            thatButton.data('original-text', thatButton.html());
+            thatButton.html(loadingText);
+        }
+        setTimeout(function () {
+            thatButton.html(thatButton.data('original-text'));
+            thatButton.prop('disabled', false);
+        }, 500);
+    }
+    function newWindow(url, title) {
+        const h = screen.height - screen.height / 5;
+        const w = screen.width - screen.width / 20;
+        var y = window.outerHeight / 2 + window.screenY - (h / 2)
+        var x = window.outerWidth / 2 + window.screenX - (w / 2)
+        return window.open(url, title, 'toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=yes, resizable=yes, copyhistory=no, width=' + w + ', height=' + h + ', top=' + y + ', left=' + x);
+    }
+
+    $(function () {
+
+        //Keep Menu Selected
+        /** add active class and stay opened when selected */
+        var url = window.location;
+
+        // for sidebar menu entirely but not cover treeview
+        $('ul.nav-sidebar a').filter(function () {
+            return this.href == url;
+        }).addClass('active');
+
+
+
+        // for treeview
+        $('ul.nav-treeview a').filter(function () {
+            return this.href == url;
+        }).parentsUntil(".nav-sidebar > .nav-treeview").addClass('menu-open').prev('a').addClass('active');
+        //Keep Menu Selected ends
+
+
+        $('.select2Filter').select2();
+        $(".dateField").datepicker(
+            {
+                dateFormat: "dd-M-yy",
+                showAnim: "scale",
+                changeMonth: true,
+                yearRange: "2000:2050",
+                changeYear: true
+            })
+        $('[data-toggle="tooltip"]').tooltip({
+            html: true
+        });
+    });
+
+</script>

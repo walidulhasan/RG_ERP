@@ -1,0 +1,140 @@
+﻿
+@model RG.Application.ViewModel.MDSir.AccountsInfo.LoanDetailsVM
+
+@{
+    ViewData[PageInfo.PageTitle] = "Loan Details Report";
+    ViewData[PageInfo.PageHeader] = "Loan Details";
+    Layout = "~/Views/Shared/_LayoutMDSir.cshtml";
+
+}
+
+<form asp-action="LoanDetails" asp-area="MDSir" asp-controller="AccountsInfo" id="frmLoanDetails">
+    <div class="row ">
+        <div class="col-md-4">
+            <div class="form-group">
+                <label asp-for="Company" class="required"></label>
+                <select asp-for="Company" class="form-control form-control-sm" asp-items="Model.DDLCompany"></select>
+                <span asp-validation-for="Company" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <label></label>
+            <div class="form-check">
+                <input type="checkbox" class="form-check-input" id="chkMonthWise" checked>
+                <label class="form-check-label font-weight-bold">Month Wise</label>
+            </div>
+        </div>
+        <div class="col-md-2 monthWise">
+            <div class="form-group">
+                <label asp-for="Month" class="required"></label>
+                <select asp-for="Month" class="form-control form-control-sm" asp-items="Model.DDLMonths"></select>
+                <span asp-validation-for="Month" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-md-2 monthWise">
+            <div class="form-group">
+                <label asp-for="Year" class="required"></label>
+                <select asp-for="Year" class="form-control form-control-sm " asp-items="Model.DDLYears"></select>
+                <span asp-validation-for="Year" class="text-danger"></span>
+            </div>
+
+        </div>
+        <div class="col-2 col-sm-2 dateWise d-none">
+            <div class="form-group mb-2">
+                <label asp-for="DateFrom" class="required"></label>
+                <div class="input-group">
+                    <input type="text" asp-for="DateFrom" class="form-control form-control-sm dateField" readonly />
+                    <div class="input-group-append">
+                        <span class="input-group-text"><i class="fa fa-calendar" aria-hidden="true"></i></span>
+                    </div>
+                </div>
+                <span asp-validation-for="DateFrom" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-2 col-sm-2 dateWise d-none">
+            <div class="form-group mb-2">
+                <label asp-for="DateTo" class="required"></label>
+                <div class="input-group">
+                    <input type="text" asp-for="DateTo" class="form-control form-control-sm dateField" readonly />
+                    <div class="input-group-append">
+                        <span class="input-group-text"><i class="fa fa-calendar" aria-hidden="true"></i></span>
+                    </div>
+                </div>
+                <span asp-validation-for="DateTo" class="text-danger"></span>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="form-group text-center">
+                <input type="button" class="btn btn-md btn-success mr-1" value="Bank Wise" id="btnBankWiseLoan" />
+                <input type="button" class="btn btn-md btn-primary" value="Loan Summary" id="btnLoanSummary" />
+            </div>
+        </div>
+    </div>
+
+</form>
+
+
+@section scripts{
+    <script type="text/javascript">
+        function padTo2Digits(num) {
+            return num.toString().padStart(2, '0');
+        }
+        function formatDate(date) {
+            return [
+                date.getFullYear(),
+                padTo2Digits(date.getMonth() + 1),
+                padTo2Digits(date.getDate()),
+            ].join('-');
+        }
+        $(function () {
+
+            const getReportParm = () => {
+                debugger;
+                let dateFrom = '';
+                let dateTo = '';
+                const companyID = $("#Company").val() == "" ? 0 : $("#Company").val();
+                let month = 0;
+                let year = 0;
+                let userID = '@Model.UserID';
+                if ($('#chkMonthWise').is(':checked')) {
+                    //const filterDate = new Date(year, month - 1, 1);
+                    //dateFrom = formatDate(filterDate);
+                    //dateTo = formatDate(new Date(filterDate.getFullYear(), filterDate.getMonth() + 1, 0));
+                     month = parseInt($("#Month").val());
+                    year = parseInt($("#Year").val());
+                } else {
+                    dateFrom = $("#DateFrom").val();
+                    dateTo = $("#DateTo").val();
+                }
+
+                var urlParm = `month=${month}&year=${year}&dateFrom=${dateFrom}&dateTo=${dateTo}&companyID=${companyID}&bankID=0&loanAccountID=0&userID=${userID}`;
+                return urlParm;
+            }
+            $("#chkMonthWise").change(function () {
+                debugger;
+                if ($(this).is(':checked')) {
+                    $(".dateWise").addClass('d-none');
+                    $(".monthWise").removeClass('d-none');
+                } else {
+                    $(".monthWise").addClass('d-none');
+                    $(".dateWise").removeClass('d-none');
+                }
+            });
+
+            $("#btnBankWiseLoan").click(function () {
+
+                var getParm = getReportParm();
+                let action = `/Embro/Loan/BankLoanGroupDetail?${getParm}`;
+                newWindow(action, "Bank Loan Position");
+            });
+            $("#btnLoanSummary").click(function () {
+
+                var getParm = getReportParm();
+                let action = `/Embro/Loan/BankLoanSummary?${getParm}`;
+                newWindow(action, "Bank Loan Summary.");
+            });
+        });
+    </script>
+}

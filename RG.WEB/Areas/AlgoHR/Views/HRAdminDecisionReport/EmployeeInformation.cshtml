@@ -1,0 +1,154 @@
+﻿@model RG.Application.ViewModel.AlgoHR.Business.HRAdminDecisionReport.EmpInfoSearchVM;
+@{
+    ViewData[PageInfo.PageTitle] = "Employee Info";
+    ViewData[PageInfo.PageHeader] = "Employee Info";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="row">
+    <div class="col-6">
+        <div class="form-group">
+            <label class="col-form-label-sm m-0" asp-for="CompanyID"></label>
+            <select asp-for="CompanyID" asp-items="Model.DDLCompany" class="form-control form-control-sm" multiple="multiple"></select>
+            <span asp-validation-for="CompanyID" class="span-form-validation"></span>
+        </div>
+    </div>
+    <div class="col-6">
+        <div class="form-group">
+            <label class="col-form-label-sm m-0" asp-for="DivisionID"></label>
+            <select asp-for="DivisionID" asp-items="Model.DDLDivision" class="form-control form-control-sm" multiple="multiple"></select>
+            <span asp-validation-for="DivisionID" class="span-form-validation"></span>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-6">
+        <div class="form-group">
+            <label class="col-form-label-sm m-0" asp-for="DepartmentID"></label>
+            <select asp-for="DepartmentID" asp-items="Model.DDLDepartment" class="form-control form-control-sm" multiple="multiple"></select>
+            <span asp-validation-for="DepartmentID" class="span-form-validation"></span>
+        </div>
+    </div>
+    <div class="col-6">
+        <div class="form-group">
+            <label class="col-form-label-sm m-0" asp-for="SectionID"></label>
+            <select asp-for="SectionID" asp-items="Model.DDLSection" class="form-control form-control-sm" multiple="multiple"></select>
+            <span asp-validation-for="SectionID" class="span-form-validation"></span>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-6">
+        <div class="form-group">
+            <label class="col-form-label-sm m-0" asp-for="DesignationID"></label>
+            <select asp-for="DesignationID" asp-items="Model.DDLDesignation" class="form-control form-control-sm" multiple="multiple"></select>
+            <span asp-validation-for="DesignationID" class="span-form-validation"></span>
+        </div>
+    </div>
+    <div class="col-6">
+        <div class="form-group">
+            <label class="col-form-label-sm m-0" asp-for="EmployeeCode"></label>
+            <select class="form-control form-control-sm" asp-for="EmployeeCode" asp-items="Model.EmployeeList" multiple="multiple"></select>
+            <span asp-validation-for="EmployeeCode" class="span-form-validation"></span>
+        </div>
+    </div>
+</div>
+<div class="row text-center mt-0">
+    <div class="col-sm-12 col-md-12 col-lg-12">
+        <button type="button" id="btnPdf" class="btn btn-xs btn-danger"><i class="fas fa-file-pdf"></i> PDF</button>
+        <button type="button" id="btnExcel" class="btn btn-xs btn-warning"><i class="fas fa-file-excel"></i> Excel</button>
+    </div>
+</div>
+
+@section scripts{
+    <script type="text/javascript">
+        function ReportPrint(reportFormat) {
+            debugger;
+            let companyID = $("#CompanyID").val(); //getDDLMultiSelectedList("CompanyID");
+            let companies = companyID.join();
+            let divisionID = $("#DivisionID").val();
+            let divisions = divisionID.join();
+            let departmentID = $("#DepartmentID").val();
+            let departments = departmentID.join();
+            let sectionID = $("#SectionID").val();
+            let sections = sectionID.join();
+            let designationID = $("#DesignationID").val();
+            let designations = designationID.join();
+            let employeeCode = $("#EmployeeCode").val();
+            let employeeCodes = employeeCode.join();
+
+            var url = `/AlgoHR/HRAdminDecisionReport/EmployeeInfoReportPrint?Companies=${companies}&Divisions=${divisions}&Departments=${departments}&Sections=${sections}&Designations=${designations}&EmployeeCodes=${employeeCodes}&ReportFormat=${reportFormat}`;
+
+            newWindow(url,"Employee Info");
+            return false;
+        }
+        function getDDLMultiSelectedList(controlId) {
+            let companyID = new Array();
+            let selectedCompanies = $(`#${controlId}`).val();
+            $.each(selectedCompanies, function (i, v) {
+                let companies = v.split(',');
+                $.each(companies, function (j, k) {
+                    companyID.push(k);
+                });
+            });
+            return companyID;
+        }
+        function getDDLEmployee() {
+            let companyID = getDDLMultiSelectedList("CompanyID");
+            let divisionID = getDDLMultiSelectedList('DivisionID');
+            let departmentID = getDDLMultiSelectedList("DepartmentID");
+            let sectionID = getDDLMultiSelectedList("SectionID");
+            let designationID = getDDLMultiSelectedList("DesignationID");
+
+            HttpRequest.DropDownSelect2("POST", '/AlgoHR/CommonDropDown/GetDDLEmployeeListAdvanceFilter', { companys: companyID, officeDivisions: divisionID, departments: departmentID, sections: sectionID, designations: designationID }, 'EmployeeCode', false);
+        }
+        function GetDDLCompDivDeptSecWiseDesignation() { 
+            let divisionID = getDDLMultiSelectedList('DivisionID');
+            let departmentID = getDDLMultiSelectedList("DepartmentID");
+            let sectionID = getDDLMultiSelectedList("SectionID");
+            HttpRequest.DropDownSelect2("POST", "/AlgoHR/CommonDropDown/GetDDLDesignationFilterList", { officeDivisionID: divisionID, departmentID: departmentID, sectionID: sectionID }, 'DesignationID', false);
+            $("#DesignationID").trigger('change');
+        }
+
+ 
+
+        $(function () {
+
+            $("#CompanyID").select2();
+            $("#DivisionID").select2();
+            $("#DepartmentID").select2();
+            $("#SectionID").select2();
+            $("#DesignationID").select2();
+            $('#EmployeeCode').select2();
+            getDDLEmployee();
+            $("#SectionID").change(function () {
+                GetDDLCompDivDeptSecWiseDesignation();
+            });
+            $("#DepartmentID").change(function () {
+                let departmentID = getDDLMultiSelectedList("DepartmentID");
+                HttpRequest.DropDownSelect2("POST", "/AlgoHR/CommonDropDown/GetDDLSectionListByDepartments", { deptID: departmentID }, 'SectionID', false);
+                $("#SectionID").trigger('change');
+            });
+            $("#DivisionID").change(function () {
+                let divisionID = getDDLMultiSelectedList("DivisionID");
+                HttpRequest.DropDown("POST", "/AlgoHR/CommonDropDown/GetDDLDeptListByDivisions", { divisionID: divisionID }, 'DepartmentID', false);
+                $("#DepartmentID").trigger('change');
+            });
+            $("#CompanyID").change(function () {
+ 
+                let companyID = getDDLMultiSelectedList("CompanyID");
+                HttpRequest.DropDownSelect2("POST", "/AlgoHR/CommonDropDown/GetDDLDivisionListByEmbroCompanys", { embroCompanyID: companyID, exceptDivision: []  }, 'DivisionID', false);
+                $("#DivisionID").trigger('change');
+            });
+
+            $("#DesignationID").change(function () {
+                getDDLEmployee();
+            })
+            $("#btnExcel").click(function () {
+                ReportPrint("@ReportExportFormat.ExcelFormat.ToString()");
+            });
+            $("#btnPdf").click(function () {
+                ReportPrint("@ReportExportFormat.PdfFormat.ToString()");
+            });
+        });
+    </script>
+}

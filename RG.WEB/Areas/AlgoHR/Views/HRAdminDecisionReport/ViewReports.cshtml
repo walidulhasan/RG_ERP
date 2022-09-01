@@ -1,0 +1,245 @@
+﻿@model RG.Application.ViewModel.AlgoHR.Business.HRAdminDecisionReport.ViewAdminReportsVM;
+
+@{
+    ViewData[PageInfo.PageTitle] = "Admin Reports";
+    ViewData[PageInfo.PageHeader] = "Admin Reports";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style type="text/css">
+    #tblEmp thead {
+        position: sticky;
+        top: 52px;
+        width: 100%;
+    }
+</style>
+
+<div class="row">
+    <div class="col-4">
+        <div class="form-group">
+            <label class="col-form-label-sm m-0" asp-for="ReportType"></label>
+            <select asp-for="ReportType" asp-items="Model.ReportTypeList" class="form-control form-control-sm"></select>
+            <span asp-validation-for="ReportType" class="span-form-validation"></span>
+        </div>
+    </div>
+</div>
+<div class="row d-none" id="divCompanyHierarchy">
+    <div class="col-4">
+        <div class="form-group">
+            <label class="col-form-label-sm m-0" asp-for="CompanyID"></label><br />
+            <select asp-for="CompanyID" asp-items="Model.DDLCompany" class="form-control form-control-sm" style="width: 100%" multiple="multiple"></select>
+            <span asp-validation-for="CompanyID" class="span-form-validation"></span>
+        </div>
+    </div>
+    <div class="col-4">
+        <div class="form-group">
+            <label class="col-form-label-sm m-0" asp-for="DivisionID"></label><br />
+            <select asp-for="DivisionID" asp-items="Model.DDLDivision" class="form-control form-control-sm" style="width: 100%" multiple="multiple"></select>
+            <span asp-validation-for="DivisionID" class="span-form-validation"></span>
+        </div>
+    </div>
+    <div class="col-4">
+        <div class="form-group">
+            <label class="col-form-label-sm m-0" asp-for="DepartmentID"></label><br />
+            <select asp-for="DepartmentID" asp-items="Model.DDLDepartment" class="form-control form-control-sm" style="width: 100%" multiple="multiple"></select>
+            <span asp-validation-for="DepartmentID" class="span-form-validation"></span>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-4 d-none" id="searchDateDiv">
+        <div class="form-group">
+            <label class="col-form-label-sm m-0" asp-for="SearchDate"></label>
+            <input type="text" class="form-control form-control-sm dateField" asp-for="SearchDate" placeholder="dd/mm/yyyy" value="@DateTime.Now.ToString("dd-MMM-yyyy")" readonly />
+            <span asp-validation-for="SearchDate" class="span-form-validation"></span>
+        </div>
+    </div>
+    <div class="col-4">
+        <div class="form-group">
+            <label class="col-form-label-sm m-0" asp-for="EmployeeCode"></label>
+            <select class="form-control form-control-sm" asp-for="EmployeeCode" asp-items="Model.EmployeeList"></select>
+            <span asp-validation-for="EmployeeCode" class="span-form-validation"></span>
+        </div>
+    </div>
+    <div class="col-3">
+        <label class="col-form-label-sm m-0">&nbsp;</label>
+        <div class="form-group">
+            <button type="button" id="btnSearch" class="btn btn-xs btn-success d-none">
+                <i hidden class="fas fa-spinner fa-pulse "></i> Search
+            </button>
+            <button type="button" id="btnPdf" class="btn btn-xs btn-danger"><i class="fas fa-file-pdf"></i> PDF</button>
+        </div>
+    </div>
+</div>
+<div class="row d-none" id="divTblEmp">
+    <table class="table table-sm table-bordered table-striped text-sm" id="tblEmp">
+        <thead class="bg-dark">
+            <tr class="text-center">
+                <td>SL #</td>
+                <td>Code</td>
+                <td>Algo Code</td>
+                <td>Name</td>
+                <td>Division</td>
+                <td>Department</td>
+                <td>Section</td>
+                <td>Designation</td>
+                <td>Action</td>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
+@*<div class="row text-center mt-0">
+        <div class="col-sm-12 col-md-12 col-lg-12">
+            <button type="button" id="btnPdf" class="btn btn-xs btn-primary"><i class="fas fa-file-pdf"></i> PDF</button>
+        </div>
+    </div>*@
+@section scripts{
+
+    <script type="text/javascript">
+
+        function getSelectedCompanies(controlId) {
+            let companyID = new Array();
+            let selectedCompanies = $(`#${controlId}`).val();
+            $.each(selectedCompanies, function (i, v) {
+                let companies = v.split(',');
+                $.each(companies, function (j, k) {
+                    companyID.push(k);
+                });
+            });
+            return companyID;
+        }
+        function getDDLEmployee() {
+
+            let companyID = getSelectedCompanies('CompanyID');
+            let divisionID = getSelectedCompanies("DivisionID");
+            let departmentID = getSelectedCompanies("DepartmentID");
+            HttpRequest.DropDownSelect2Group("POST", '/AlgoHR/CommonDropDown/GetDDLEmployeeListAdvanceFilter', { companys: companyID, officeDivisions: divisionID, departments: departmentID }, 'EmployeeCode', false);
+        }
+        function ReportPrint(reportFormat, employeeID, absentFromDate) {
+            debugger;
+
+            /*let employeeID = $("#EmployeeCode").val();*/
+            let reportType = $("#ReportType").val();
+            if (employeeID != "" && reportType != "") {
+                var reportName = $("#ReportType option:selected").text();
+                const url = `/AlgoHR/HRAdminDecisionReport/EmployeeAdminReportsPrint?EmployeeID=${employeeID}&AbsentFromDate=${absentFromDate}&ReportType=${reportType}&ReportFormat=${reportFormat}`;
+                newWindow(url, reportName);
+            } else {
+                $.alert.open('error', 'Please provide search dates');
+            }
+            return false;
+        }
+        $(function () {
+
+        $("#CompanyID").select2();
+        $("#DivisionID").select2();
+        $("#DepartmentID").select2();
+        $('#EmployeeCode').select2();
+
+        getDDLEmployee();
+
+        $("#btnPdf").click(function () {
+            let employeeID = $("#EmployeeCode").val();
+            ReportPrint("@ReportExportFormat.PdfFormat.ToString()", employeeID);
+        });
+        $("#ReportType").change(function () {
+            $("#divTblEmp").addClass('d-none');
+            let reportType = $("#ReportType").val();
+            if (reportType != "") {
+                if (reportType == "WorkerFirstLeftyLetter" || reportType == "WorkerSecondLeftyLetter" || reportType == "WorkerFinalLeftyLetter"
+                    || reportType == "StaffFirstLeftyLetter" || reportType == "StaffSecondLeftyLetter" || reportType == "StaffFinalLeftyLetter") {
+                    $("#divCompanyHierarchy").removeClass('d-none');
+                    $("#searchDateDiv").removeClass('d-none');
+                    $("#btnSearch").removeClass('d-none');
+                    $("#btnPdf").addClass('d-none');
+                } else {
+                    $("#divCompanyHierarchy").addClass('d-none');
+                    $("#searchDateDiv").addClass('d-none');
+                    $("#btnSearch").addClass('d-none');
+                    $("#btnPdf").removeClass('d-none');
+                }
+            }
+        });
+
+        $("#btnSearch").click(function () {
+                debugger
+                // showLoader();
+                // hideLoader();
+
+                $(this).prop('disabled', true);
+                $(this).find('i').prop('hidden', false);
+                setTimeout(function () {
+                    const reportType = $("#ReportType").val();
+                    const searchDate = $("#SearchDate").val();
+                    const companyID =$("#CompanyID").val();
+                    const divisionID =$("#DivisionID").val();
+                    const departmentID = $("#DepartmentID").val(); //getSelectedCompanies("DepartmentID");
+                    const _companyID = (companyID != null && companyID.length > 0) ? companyID.join():"";
+                    const _divisionID = (divisionID != null && divisionID.length > 0) ? divisionID.join() : "";
+                    const _departmentID = (departmentID != null && departmentID.length > 0) ? departmentID.join() : "";
+
+                    if (reportType != "" && companyID.length>0 && searchDate != "") {
+
+                        let data = HttpRequest.AjaxData("POST", "/AlgoHR/HRAdminDecisionReport/GetLeftyEmployeeList", { ReportType: reportType, DateTo: searchDate, CompanyID: _companyID, divisionID: _divisionID, DepartmentID: _departmentID }, true);
+
+                        let tr = '';
+                        $.each(data, function (i, v) {
+                            tr += `<tr class="text-center"><td>${(i + 1)}</td>
+                            <td>${v.EmployeeCode}</td>
+                            <td>${v.AlgoCode}</td>
+                            <td>${v.EmployeeName}</td>
+                            <td>${v.DivisionName}</td>
+                            <td>${v.DepartmentName}</td>
+                            <td>${v.SectionName}</td>
+                            <td>${v.DesignationName}</td>
+                            <td><button type="button" class="btn btn-xs btn-danger" onclick="ReportPrint('@ReportExportFormat.PdfFormat.ToString()', ${v.EmployeeID},'${v.AbsentFromDate}');"><i class="fas fa-file-pdf"></i> PDF</button></td></tr>`;
+                        });
+
+                        if (data.length > 0) {
+                            $("#tblEmp tbody").html(tr);
+                            $("#divTblEmp").removeClass('d-none');
+                            $("#btnSearch").prop('disabled', false);
+                            $("#btnSearch").find('i').prop('hidden', true);
+                        } else {
+                            $.alert.open('alert', "Data Can't Found!!!");
+                            $("#btnSearch").prop('disabled', false);
+                            $("#btnSearch").find('i').prop('hidden', true);
+                        }
+
+
+                    } else {
+                        $.alert.open('alert', 'Company And Date  Can\'t be Empty!!');
+                        $("#btnSearch").prop('disabled', false);
+                        $("#btnSearch").find('i').prop('hidden', true);
+                    }
+
+                }, 1000);
+
+
+        });
+        //$("#DepartmentID").change(function () {
+        //    let departmentID = $("#DepartmentID").val();
+        //    HttpRequest.DropDown("POST", "/AlgoHRM/EmpHistory/GetDDLDeptWiseSection", { deptID: departmentID }, 'SectionID', true);
+        //    $("#SectionID").trigger('change');
+        //});
+        $("#DivisionID").change(function () {
+            let divisionID = getSelectedCompanies("DivisionID");
+            HttpRequest.DropDownSelect2("POST", "/AlgoHR/CommonDropDown/GetDDLDeptListByDivisions", { divisionID: divisionID }, 'DepartmentID', false);
+            $("#DepartmentID").trigger('change');
+          /*  getDDLEmployee();*/
+        });
+        $("#CompanyID").change(function () {
+
+            let companyID = getSelectedCompanies("CompanyID");
+            HttpRequest.DropDownSelect2("POST", "/AlgoHR/CommonDropDown/GetDDLDivisionListByEmbroCompanys", { embroCompanyID: companyID, exceptDivision: [] }, 'DivisionID', false);
+            $("#DivisionID").trigger('change');
+            getDDLEmployee();
+        });
+
+        $("#DepartmentID").change(function () {
+                getDDLEmployee();
+            })
+    });
+    </script>
+}

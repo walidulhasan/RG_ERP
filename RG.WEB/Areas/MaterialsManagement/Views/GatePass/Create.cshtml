@@ -1,0 +1,61 @@
+﻿@using Microsoft.AspNetCore.Antiforgery
+@inject IAntiforgery antiForgeryToken
+@model RG.Application.ViewModel.MaterialsManagement.Business.GatePass.GatePassCreateVM
+@{
+    var token = antiForgeryToken.GetAndStoreTokens(Context);
+    ViewData[PageInfo.PageHeader] = "New Gate Pass";
+    ViewData[PageInfo.PageTitle] = "Gate Pass";
+    ViewData[PageInfo.btnText1] = "Back to List";
+    ViewData[PageInfo.PageLink1] = "/MaterialsManagement/GatePass/Index";
+    ViewData[PageInfo.btnClass1] = "btn-warning";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="card card-primary">
+    <div class="row m-0">
+
+        <div class="col-sm-3 col-md-3 col-lg-3">
+            <div class="form-group">
+                <label class="col-form-label-sm m-0 required" asp-for="CategoryID"></label>
+                <select asp-for="CategoryID" asp-items="Model.CategoryList" class="form-control form-control-sm"></select>
+                <span asp-validation-for="CategoryID" class="span-form-validation"></span>
+            </div>
+        </div>
+    </div>
+    <div id="divCategoryWiseView">
+
+    </div>
+</div>
+
+@section scripts{
+    <script type="text/javascript">
+        function RemoveRow(that, gatePassDetailID) {
+            debugger;
+            $.alert.open('confirm', 'Are you sure to remove this record', function (button) {
+                if (button == 'yes') {
+                    debugger;
+                    let tr = $(that).parent().parent();
+                    let currentTable = tr.parent();
+                    tr.remove();
+                    $('.trSerial').each(function (i, v) {
+                        let thatSerial = $(this);
+                        thatSerial.text(++i);
+                    });
+                }
+            });
+        }
+        $(function () {
+            $("#CategoryID").change(function () {
+                let categoryID = $("#CategoryID").val();
+                if (categoryID != "") {
+                    let categoryName = $("#CategoryID option:selected").text();
+                    $("#divCategoryWiseView").load("/MaterialsManagement/GatePass/CallViewComponents", { categoryName: categoryName });
+                } else {
+                    $("#divCategoryWiseView").html('');
+                }
+            });
+        });
+
+    </script>
+}
+
